@@ -2,6 +2,12 @@
 
 ## Queries & Aggregations
 <table>
+<thead>
+<tr>
+<th>GraphQL query</th><th>Response</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td colspan="2">Query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document).</td>
 </tr>
@@ -157,6 +163,7 @@
 </pre>
 </td>
 </tr>
+</tbody>
 </table>
 
 ## Filters
