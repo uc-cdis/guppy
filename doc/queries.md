@@ -70,13 +70,13 @@
       total
     }
     gender {
-      buckets {
+      histogram {
         key
         count
       }
     }
     age {
-      buckets(rangestep: 5) {
+      histogram(rangeStart: 0, rangeEnd: 40, rangeStep: 5) {
         _range
         min
         max
@@ -97,7 +97,7 @@
             "total": 3
         },
         "gender": {
-          "buckets": [
+          "histogram": [
             {
               "key": "F",
               "count": 10
@@ -109,7 +109,7 @@
           ]
         },
         "age": {
-            "buckets": [
+            "histogram": [
               {
                 "_range": [0, 5],
                 "min": 2
@@ -117,7 +117,8 @@
               {
                 "_range": [5, 10],
                 "min": 3
-              }
+              },
+              ...
             ]
         }
     }
@@ -170,10 +171,6 @@
 
 There is a discussion of two approaches:
 
-* `SQL`-like syntax
-  ```
-  {"filter": "Gender = "F" AND ((Age >= 27 OR Age = 15) AND _samples_count > 12)"}
-  ```
 * `JSON`-based syntax
   ```
   {
@@ -196,5 +193,12 @@ There is a discussion of two approaches:
     }
   }
   ```
+
+* `SQL`-like syntax
+  ```
+  {"filter": "Gender = "F" AND ((Age >= 27 OR Age = 15) AND _samples_count > 12)"}
+  ```
+The implementation is relatively more difficult (to parse SQL string to object). But in future we want to support having a SQL-like syntax query in UI, so it is very rewarding.
+
 
 ## Discussion
