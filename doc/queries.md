@@ -59,7 +59,17 @@
 </td>
 </tr>
 <tr>
-<td colspan="2">Three possible aggregations available: top-level aggregation - only total number; text aggregation - buckets for key and count for that key; numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the buckets specified by <code>rangestep</code>. Without <code>rangestep</code> it aggregates the whole dataset.</td>
+<td colspan="2">Three possible aggregations available: 
+  <li>
+  top-level aggregation - only total number; 
+  </li>
+  <li>
+  text aggregation - histogram for key and count for that key; 
+  </li>
+  <li>
+  numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the histogram specified by <code>rangeStep</code>, <code>rangeStart</code> (default to min), and <code>rangeEnd</code> (default to max). Without <code>rangeStep</code> it aggregates the whole dataset.
+  </li>
+</td>
 </tr>
 <tr>
 <td>
@@ -132,7 +142,7 @@
 {
   aggs(filter: $filter) {
     age {
-      buckets {
+      histogram {
         min
         max
         avg
@@ -149,7 +159,7 @@
 {
     "aggs": {
         "age": {
-            "buckets": [
+            "histogram": [
               {
                 "min": 2,
                 "max": 10,
