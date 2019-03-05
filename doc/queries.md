@@ -67,7 +67,12 @@
   text aggregation - histogram for key and count for that key; 
   </li>
   <li>
-  numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the histogram specified by <code>rangeStep</code>, <code>rangeStart</code> (default to min), and <code>rangeEnd</code> (default to max). Without <code>rangeStep</code> it aggregates the whole dataset.
+  numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the histogram specified by <code>rangeStart</code>, <code>rangeEnd</code>, <code>rangeStep</code>, and <code>binCount</code>. 
+  <ul>
+    <li><code>rangeStart</code> default to min, <code>rangeEnd</code> default to max. 
+    <li>Without <code>rangeStep</code> and <code>binCount</code> it aggregates the whole dataset.</li>
+    <li><code>binCount</code> and <code>rangeStep</code> are exclusive, user could only set one of them. </li>
+  </ul>
   </li>
 </td>
 </tr>
@@ -174,6 +179,46 @@
 </pre>
 </td>
 </tr>
+<tr>
+<td>
+<pre>
+{
+  aggs(filter: $filter) {
+    age {
+      histogram (binCount: 20) {
+        _range
+        avg
+        count
+      }
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<pre>
+{
+    "aggs": {
+        "age": {
+            "histogram": [
+              {
+                "_range": [0, 5]
+                "avg": 4.4,
+                "count": 4
+              },
+              {
+                "_range": [5, 10]
+                "avg": 7.6,
+                "count": 9
+              },
+              ...
+            ]
+        }
+    }
+}
+</pre>
+</td>
+</tr>
 </tbody>
 </table>
 
@@ -186,17 +231,25 @@ There is a discussion of two approaches:
   {
     "filter": 
     {
-      "and": [
-        {"Gender": "F"},
+      "AND": [
         {
-          "and": [
+          "=": ["gender", "F"]
+        },
+        {
+          "AND": [
             {
-              "or": [
-                {"Age": {"gte": 27}},
-                {"Age": 15}
+              "OR": [
+                {
+                  ">=": ["age": 27]
+                },
+                {
+                  "=": ["Age", 15]
+                }
               ]
             },
-            {"_samples_count": {"gt": 12}}
+            {
+              ">": ["_samples_count", 12]
+            }
           ]
         }
       ]
@@ -206,7 +259,7 @@ There is a discussion of two approaches:
 
 * `SQL`-like syntax
   ```
-  {"filter": "Gender = "F" AND ((Age >= 27 OR Age = 15) AND _samples_count > 12)"}
+  {"filter": "gender = 'F' AND ((age >= 27 OR age = 15) AND _samples_count > 12)"}
   ```
 The implementation is relatively more difficult (to parse SQL string to object). But in future we want to support having a SQL-like syntax query in UI, so it is very rewarding.
 
