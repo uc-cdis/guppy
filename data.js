@@ -10,7 +10,7 @@ const FieldTypeEnum = {
   ES_TEXT_TYPE: 2, 
 };
 
-const esFieldTypeMapping = {
+const esFieldNumericTextTypeMapping = {
   keyword: FieldTypeEnum.ES_TEXT_TYPE,
   integer: FieldTypeEnum.ES_NUMERIC_TYPE,
   long: FieldTypeEnum.ES_NUMERIC_TYPE,
@@ -23,7 +23,7 @@ const esFieldTypeMapping = {
 };
 
 class ESConnector {
-  constructor(esConfig) {
+  constructor(esConfig, callbackAfterInitialized) {
     this.config = esConfig;
     this.client = new elasticsearch.Client({
       host: esConfig.host,
@@ -40,10 +40,10 @@ class ESConnector {
     });
 
     // get fields type from elasticsearch
-    this._initializeESFieldsTypes();
+    this._initializeESFieldsTypes(callbackAfterInitialized);
   }
 
-  _initializeESFieldsTypes() {
+  _initializeESFieldsTypes(callbackAfterInitialized) {
     this.client.indices.getMapping({
       index: this.config.index,
       type: this.config.type,
@@ -52,10 +52,13 @@ class ESConnector {
       const mappingObj = resp[this.config.index].mappings[this.config.type].properties;
       this.fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
         const esType = mappingObj[field].type;
-        acc[field] = esFieldTypeMapping[esType];
+        acc[field] = esType;
         return acc;
       }, {});
       console.log('this.fieldTypes', JSON.stringify(this.fieldTypes, null, 5));
+      if (callbackAfterInitialized) {
+        callbackAfterInitialized();
+      }
     }).bind(this), function (err) {
       console.trace(err.message);
     });
@@ -74,8 +77,16 @@ class ESConnector {
     });
   }
 
-  _getESFieldType(field) {
-    return this.fieldTypes[field];
+  getESFieldTypeMapping() {
+    return this.fieldTypes;
+  }
+
+  getESFields() {
+    return Object.keys(this.fieldTypes);
+  }
+
+  _getNumericTextType(field) {
+    return esFieldNumericTextTypeMapping[this.fieldTypes[field]];
   }
 
   _getFilterItemForString(field, value) {
@@ -133,7 +144,7 @@ class ESConnector {
     else {
       const field = graphqlFilterObj[topLevelOp][0];
       const value = graphqlFilterObj[topLevelOp][1];
-      const fieldType = this._getESFieldType(field);
+      const fieldType = this._getNumericTextType(field);
       if (fieldType === FieldTypeEnum.ES_TEXT_TYPE) {
         resultFilterObj = this._getFilterItemForString(field, value);
       }
