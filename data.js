@@ -115,18 +115,13 @@ class ESConnector {
 
   async _filterData(filter, offset = 0, size) {
     const queryBody = {from: offset};
-    if (!!filter) {
+    if (typeof filter !== 'undefined') {
       queryBody.query = this._getFilterObj(filter);
     }
-    if (typeof size !== undefined) {
+    if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
     const result = await this._query(queryBody);
-    return result;
-  }
-
-  async filterData(filter, offset = 0, size) {
-    const result = await this._filterData(filter, offset, size);
     return result;
   }
 
@@ -135,18 +130,26 @@ class ESConnector {
     return result.hits.total;
   }
 
-  async getData(offset = 0, size) {
-    const queryBody = {
-      query : {
-        match_all : {}
-      },
+  async getData(fields, filter, sort, offset = 0, size) {
+    let queryBody = {
       from: offset,
     };
-    if (!!size) {
+    if (typeof filter !== 'undefined') {
+      queryBody.query = this._getFilterObj(filter);
+    }
+    if (typeof sort !== 'undefined' && sort.length > 0) {
+      queryBody.sort = sort;
+    }
+    if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
+    if (fields && fields.length > 0) {
+      queryBody._source = fields;
+    }
     const result = await this._query(queryBody);
-    return result;
+    const parsedResults = result.hits.hits.map(item => item._source);
+    console.log(JSON.stringify(parsedResults, null, 4));
+    return parsedResults;
   }
 
   async _numericHistogramWithFixedBinCount({

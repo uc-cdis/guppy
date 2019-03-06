@@ -23,6 +23,7 @@ const schema = gql`
       offset: Int, 
       size: Int,
       filter: JSON,
+      sort: JSON,
     ): [Subject]
     aggs(
       filter: JSON
@@ -84,9 +85,11 @@ const resolvers = {
   JSON: GraphQLJSON,
   Query: {
     subject: async (parent, args, context, info) => {
-      let { offset, size, filter } = args;
+      let { offset, size, filter, sort } = args;
       console.log('input filter: ', JSON.stringify(filter, null, 4));
-      const data = await ESConnectorInstance.filterData(filter, offset, size);
+      console.log('input sort: ', JSON.stringify(sort, null, 4));
+      const fields = []; // TODO 
+      const data = await ESConnectorInstance.getData(fields, filter, sort, offset, size);
       return data;
     },
     aggs: async (parent, args, context, info) => {
