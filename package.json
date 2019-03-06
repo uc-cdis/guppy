@@ -1,0 +1,39 @@
+{
+  "name": "@gen3/guppy",
+  "version": "0.0.1",
+  "description": "Repository for documenation and notes on replacing `arranger`.",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "nodemon --exec babel-node ./server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uc-cdis/guppy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uc-cdis/guppy/issues"
+  },
+  "homepage": "https://github.com/uc-cdis/guppy#readme",
+  "dependencies": {
+    "apollo-server": "^2.4.8",
+    "apollo-server-express": "^2.4.8",
+    "cors": "^2.8.5",
+    "elasticsearch": "^15.4.1",
+    "express": "^4.16.4",
+    "graphql": "^14.1.1",
+    "graphql-type-json": "^0.2.1",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.3.4",
+    "nodemon": "^1.18.10"
+  }
+}
