@@ -1,8 +1,26 @@
 import elasticsearch from 'elasticsearch';
+import { Field } from 'protobufjs';
 
 const AGGS_QUERY_NAME = 'numeric_aggs';
 const AGGS_GLOBAL_STATS_NAME = 'numeric_aggs_stats';
 const AGGS_ITEM_STATS_NAME = 'numeric_item_aggs_stats';
+
+const FieldTypeEnum = {
+  ES_NUMERIC_TYPE: 1, 
+  ES_TEXT_TYPE: 2, 
+};
+
+const esFieldTypeMapping = {
+  keyword: FieldTypeEnum.ES_TEXT_TYPE,
+  integer: FieldTypeEnum.ES_NUMERIC_TYPE,
+  long: FieldTypeEnum.ES_NUMERIC_TYPE,
+  short: FieldTypeEnum.ES_NUMERIC_TYPE,
+  byte: FieldTypeEnum.ES_NUMERIC_TYPE,
+  double: FieldTypeEnum.ES_NUMERIC_TYPE,
+  float: FieldTypeEnum.ES_NUMERIC_TYPE,
+  half_float: FieldTypeEnum.ES_NUMERIC_TYPE,
+  scaled_float: FieldTypeEnum.ES_NUMERIC_TYPE,
+};
 
 class ESConnector {
   constructor(esConfig) {
@@ -20,6 +38,27 @@ class ESConnector {
         console.log(`connected to elasticsearch at ${esConfig.host}.`);
       }
     });
+
+    // get fields type from elasticsearch
+    this._initializeESFieldsTypes();
+  }
+
+  _initializeESFieldsTypes() {
+    this.client.indices.getMapping({
+      index: this.config.index,
+      type: this.config.type,
+    }).then((function (resp) {
+      console.log('mapping: ', JSON.stringify(resp, null, 5));
+      const mappingObj = resp[this.config.index].mappings[this.config.type].properties;
+      this.fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
+        const esType = mappingObj[field].type;
+        acc[field] = esFieldTypeMapping[esType];
+        return acc;
+      }, {});
+      console.log('this.fieldTypes', JSON.stringify(this.fieldTypes, null, 5));
+    }).bind(this), function (err) {
+      console.trace(err.message);
+    });
   }
 
   async _query(queryBody) {
@@ -36,12 +75,7 @@ class ESConnector {
   }
 
   _getESFieldType(field) {
-    const mockESFieldType = {
-      gender: 'string',
-      file_count: 'number',
-      race: 'string',
-    };
-    return mockESFieldType[field];
+    return this.fieldTypes[field];
   }
 
   _getFilterItemForString(field, value) {
@@ -100,10 +134,10 @@ class ESConnector {
       const field = graphqlFilterObj[topLevelOp][0];
       const value = graphqlFilterObj[topLevelOp][1];
       const fieldType = this._getESFieldType(field);
-      if (fieldType === 'string') {
+      if (fieldType === FieldTypeEnum.ES_TEXT_TYPE) {
         resultFilterObj = this._getFilterItemForString(field, value);
       }
-      else if (fieldType === 'number') {
+      else if (fieldType === FieldTypeEnum.ES_NUMERIC_TYPE) {
         resultFilterObj = this._getFilterItemForNumbers(topLevelOp, field, value);
       }
       else {
