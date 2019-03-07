@@ -5,34 +5,27 @@ import { ApolloServer } from 'apollo-server-express';
 import ESConnector from './data';
 import getResolver from './resolvers';
 import getSchema from './schema';
+import config from './config';
 
 const app = express();
-const port = 3000;
 app.use(cors());
 
-const esConfig = {
-  host: 'localhost:9200',
-  index: 'gen3-dev-subject',
-  type: 'subject',
-};
-
 let schema, resolvers;
-const esConnector = new ESConnector(esConfig, () => {
+const esConnector = new ESConnector(config.esConfig, () => {
   startServer();
 });
 
 const startServer = () => {
-  schema = getSchema(esConfig, esConnector);
-  resolvers = getResolver(esConfig, esConnector);
+  schema = getSchema(config.esConfig, esConnector);
+  resolvers = getResolver(config.esConfig, esConnector);
   const server = new ApolloServer({
     typeDefs: schema,
     resolvers: resolvers,
   });
   
-  server.applyMiddleware({ app, path: '/graphql' });
-  
-  app.listen(port, () => {
-      console.log(`Example app listening on port ${port}!`);
-  });
+  server.applyMiddleware({ app, path: config.path });
+  app.listen(config.port, () => {
+      console.log(`Example app listening on port ${config.port}!`);
+  })
 }
 

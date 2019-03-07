@@ -26,18 +26,18 @@ class ESConnector {
   constructor(esConfig, callbackAfterInitialized) {
     this.config = esConfig;
     this.client = new elasticsearch.Client({
-      host: esConfig.host,
+      host: this.config.host,
       //log: 'trace'
     });
     this.client.ping({
       requestTimeout: 30000,
-    }, function (error) {
+    }, (function (error) {
       if (error) {
         console.error('elasticsearch cluster is down!');
       } else {
-        console.log(`connected to elasticsearch at ${esConfig.host}.`);
+        console.log(`connected to elasticsearch at ${this.config.host}.`);
       }
-    });
+    }).bind(this));
 
     // get fields type from elasticsearch
     this._initializeESFieldsTypes(callbackAfterInitialized);
