@@ -1,8 +1,6 @@
 import { gql } from 'apollo-server-express';
 
-const firstLetterUpperCase = str => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
+const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
 
 const esgqlTypeMapping = {
   text: 'String',
@@ -15,31 +13,25 @@ const esgqlTypeMapping = {
   float: 'Float',
   half_float: 'Float',
   scaled_float: 'Float',
-}
-const esType2GqlType = esType => {
-  if (!esgqlTypeMapping[esType]) {
-    throw new Error(`type ${esType} not supported`);
-  }
-  return esgqlTypeMapping[esType];
-}
+};
 
 const EnumAggsHistogramName = {
-  HISTOGRAM_FOR_STRING: 'HistogramForString', 
+  HISTOGRAM_FOR_STRING: 'HistogramForString',
   HISTOGRAM_FOR_NUMBER: 'HistogramForNumber',
-}
+};
 const gqlTypeToAggsHistogramName = {
   String: EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
   Int: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
   Float: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
 };
-const getAggsHistogramName = gqlType => {
+const getAggsHistogramName = (gqlType) => {
   if (!gqlTypeToAggsHistogramName[gqlType]) {
     throw new Error(`Invalid elasticsearch type ${gqlType}`);
   }
   return gqlTypeToAggsHistogramName[gqlType];
 };
 
-const getSchema = (esConfig, esConnector) => {
+const getSchema = (esConfig, esInstance) => {
   const esType = esConfig.type;
   const esTypeObjName = firstLetterUpperCase(esConfig.type);
   const querySchema = `
@@ -56,11 +48,11 @@ const getSchema = (esConfig, esConnector) => {
     }
   `;
 
-  const fieldESTypeMap = esConnector.getESFieldTypeMapping();
-  const fieldGQLTypeMap = Object.keys(fieldESTypeMap).map(field => {
-    const esType = fieldESTypeMap[field];
-    const gqlType = esgqlTypeMapping[esType];
-    return { field: field, type: gqlType };
+  const fieldESTypeMap = esInstance.getESFieldTypeMapping();
+  const fieldGQLTypeMap = Object.keys(fieldESTypeMap).map((field) => {
+    const esFieldType = fieldESTypeMap[field];
+    const gqlType = esgqlTypeMapping[esFieldType];
+    return { field, type: gqlType };
   });
   console.log('fieldGQLTypeMap', JSON.stringify(fieldGQLTypeMap, null, 4));
   const typeSchema = `
@@ -69,9 +61,10 @@ const getSchema = (esConfig, esConnector) => {
     }
   `;
 
-  const fieldAggsTypeMap = fieldGQLTypeMap.map(entry => {
-    return { field: entry.field, aggType: getAggsHistogramName(entry.type)};
-  })
+  const fieldAggsTypeMap = fieldGQLTypeMap.map(entry => ({
+    field: entry.field,
+    aggType: getAggsHistogramName(entry.type),
+  }));
   const aggregationSchema = `
     type Aggregates {
       ${esType}: TotalCount
@@ -132,6 +125,6 @@ const getSchema = (esConfig, esConnector) => {
     ${numberHistogramBucketSchema}
   `;
   return finalSchema;
-}
+};
 
 export default getSchema;

@@ -7,8 +7,9 @@
     "doc": "doc"
   },
   "scripts": {
-    "start": "nodemon --exec babel-node ./server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --exec babel-node ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "eslint": "./node_modules/.bin/eslint ./src --fix"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,9 @@
     "@babel/core": "^7.3.4",
     "@babel/node": "^7.2.2",
     "@babel/preset-env": "^7.3.4",
+    "eslint": "^5.15.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
     "nodemon": "^1.18.10"
   }
 }
