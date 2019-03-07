@@ -1,8 +1,8 @@
 {
   "name": "@gen3/guppy",
   "version": "0.0.1",
-  "description": "Repository for documenation and notes on replacing `arranger`.",
-  "main": "index.js",
+  "description": "Server that support GraphQL queries on data from elasticsearch",
+  "main": "src/server.js",
   "directories": {
     "doc": "doc"
   },

@@ -1,3 +1,5 @@
 # Guppy
 
-Repository for documenation and notes on replacing `arranger`.
+Server that support GraphQL queries on data from elasticsearch. 
+
+Run `npm start` to start server
