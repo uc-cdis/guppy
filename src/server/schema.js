@@ -94,17 +94,20 @@ const getSchema = (esConfig, esInstance) => {
   const numberHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
       histogram(
-      rangeStart: Int, 
-      rangeEnd: Int, 
-      rangeStep: Int,
-      binCount: Int,
+        rangeStart: Int, 
+        rangeEnd: Int, 
+        rangeStep: Int,
+        binCount: Int,
       ): [BucketsForNumber]
     }
   `;
 
   const numberHistogramBucketSchema = `
     type BucketsForNumber {
+      """Lower and higher bounds for this bucket"""
       _range: [Float]
+      """Same as "_range", Lower and higher bounds for this bucket"""
+      key: [Float]
       min: Int
       max: Int
       avg: Float

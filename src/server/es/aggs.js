@@ -61,11 +61,13 @@ const numericGlobalStats = async (
   queryBody.aggs = aggsObj;
   const result = await esContext.queryHandler(queryBody);
   let resultStats = result.aggregations[AGGS_GLOBAL_STATS_NAME];
+  const range = [
+    typeof rangeStart === 'undefined' ? resultStats.min : rangeStart,
+    typeof rangeEnd === 'undefined' ? resultStats.max : rangeEnd,
+  ];
   resultStats = {
-    _range: [
-      typeof rangeStart === 'undefined' ? resultStats.min : rangeStart,
-      typeof rangeEnd === 'undefined' ? resultStats.max : rangeEnd,
-    ],
+    _range: range,
+    key: range,
     ...resultStats,
   };
   return resultStats;
@@ -114,6 +116,7 @@ const numericHistogramWithFixedRangeStep = async (
   const result = await esContext.queryHandler(queryBody);
   const parsedAggsResult = result.aggregations[AGGS_QUERY_NAME].buckets.map(item => ({
     _range: [item.key, item.key + rangeStep],
+    key: [item.key, item.key + rangeStep],
     ...item[AGGS_ITEM_STATS_NAME],
   }));
   return parsedAggsResult;
