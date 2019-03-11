@@ -6,14 +6,22 @@ const histogramQueryStrForEachField = field => (`
     }
   }`);
 
-export const askGuppyAboutAllFieldsAndOptions = (url, fields) => {
-  const queryBody = {
-    query: `query {
-      aggs {
+const queryGuppyForAggs = (url, fields, gqlFilter) => {
+  const query = `query {
+    aggs {
+      ${fields.map(field => histogramQueryStrForEachField(field))}
+    }
+  }`;
+  const queryBody = { query };
+  if (gqlFilter) {
+    const queryWithFilter = `query ($filter: JSON) {
+      aggs (filter: $filter) {
         ${fields.map(field => histogramQueryStrForEachField(field))}
       }
-    }`,
-  };
+    }`;
+    queryBody.variables = { filter: gqlFilter };
+    queryBody.query = queryWithFilter;
+  }
   return fetch(url, {
     method: 'POST',
     headers: {
@@ -23,8 +31,39 @@ export const askGuppyAboutAllFieldsAndOptions = (url, fields) => {
   }).then(response => response.json());
 };
 
-export const getAllFields = (filterTabConfigs) => {
-  return filterTabConfigs.reduce((acc, cur) => {
-    return acc.concat(cur.filters.map(item => item.field));
-  }, []);
+export const askGuppyAboutAllFieldsAndOptions = (url, fields) => queryGuppyForAggs(url, fields);
+
+export const getAllFields = filterTabConfigs => filterTabConfigs
+  .reduce((acc, cur) => acc.concat(cur.filters.map(item => item.field)), []);
+
+const getGQLFilter = (filterResults) => {
+  const facetsList = [];
+  Object.keys(filterResults).forEach((field) => {
+    const filterValues = filterResults[field];
+    if (filterValues.selectedValues) {
+      facetsList.push({
+        OR: filterValues.selectedValues.map(v => ({
+          '=': [field, v],
+        })),
+      });
+    } else if (filterValues.lowerBound && filterValues.upperBound) {
+      facetsList.push({
+        AND: [
+          { '>=': [field, filterValues.lowerBound] },
+          { '<=': [field, filterValues.upperBound] },
+        ],
+      });
+    } else {
+      throw new Error(`Invalid filter object ${filterValues}`);
+    }
+  });
+  const gqlFilter = {
+    AND: facetsList,
+  };
+  return gqlFilter;
+};
+
+export const askGuppyForFilteredData = (url, fields, filterResults) => {
+  const filter = getGQLFilter(filterResults);
+  return queryGuppyForAggs(url, fields, filter);
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import ConnectedFilterGroup from '../src/components/filters/filters';
 
 const filterConfig = {
@@ -38,6 +39,7 @@ storiesOf('FilterGroup', module)
       <ConnectedFilterGroup
         filterConfig={filterConfig}
         guppyServerPath={guppyServerPath}
+        onFilterChange={action('filter change')}
       />
     );
   }

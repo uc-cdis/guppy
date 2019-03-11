@@ -2,13 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
 import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
-import { askGuppyAboutAllFieldsAndOptions, getAllFields } from './utils';
+import {
+  askGuppyAboutAllFieldsAndOptions,
+  askGuppyForFilteredData,
+  getAllFields,
+} from './utils';
 
 class ConnectedFilterGroup extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       tabs: [],
+      allFields: [],
     };
   }
 
@@ -17,6 +22,7 @@ class ConnectedFilterGroup extends React.Component {
     askGuppyAboutAllFieldsAndOptions(this.props.guppyServerPath, allFields)
       .then(res => {
         //console.log(res.data.aggs);
+        this.setState({allFields});
         this.initializeTabs(res.data.aggs);
       });
   }
@@ -39,7 +45,6 @@ class ConnectedFilterGroup extends React.Component {
         min: item.key[0],
         max: item.key[1],
         count: item.count, // TODO: add count
-        // TODO: onDrag
       }));
       //console.log('getSingleFilterOption: number options: ', rangeOptions);
       return rangeOptions;
@@ -49,7 +54,6 @@ class ConnectedFilterGroup extends React.Component {
         text: item.key,
         filterType: 'singleSelect',
         count: item.count, // TODO: add count
-        // TODO: onSelect
       }));
       //console.log('getSingleFilterOption: text options: ', textOptions);
       return textOptions;
@@ -90,6 +94,14 @@ class ConnectedFilterGroup extends React.Component {
     }
   }
 
+  handleFilterChange(filterResults) {
+    askGuppyForFilteredData(this.props.guppyServerPath, this.state.allFields, filterResults)
+
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange(filterResults);
+    }
+  }
+
   render() {
     if (!this.state.tabs || this.state.tabs.length === 0) {
       return null;
@@ -98,8 +110,7 @@ class ConnectedFilterGroup extends React.Component {
       <FilterGroup
         tabs={this.state.tabs} // read from guppy using graphql
         filterConfig={this.getFilterGroupConfig(this.props.filterConfig)}
-        onSelect={(e) => this.handleSelect(e)}
-        onDrag={(e) => this.handleDrag(e)}
+        onFilterChange={(e) => this.handleFilterChange(e)}
       />
     );
   }
@@ -116,6 +127,11 @@ ConnectedFilterGroup.propTypes = {
     })),
   }).isRequired,
   guppyServerPath: PropTypes.string,
+  onFilterChange: PropTypes.func,
+};
+
+ConnectedFilterGroup.defaultProps = {
+  onFilterChange: () => {},
 };
 
 export default ConnectedFilterGroup;
