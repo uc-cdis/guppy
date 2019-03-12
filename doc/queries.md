@@ -17,7 +17,7 @@
 {
   subject(offset: 5, size: 100, sort: [
     {
-      "_samples_count": desc
+      "file_count": desc
     },
     {
       "gender": asc
@@ -26,7 +26,7 @@
     id
     gender
     ethnicity
-    _samples_count
+    file_count
   }
 }
 </pre>
@@ -37,21 +37,21 @@
   "subject": [
     {
       "id": "1",
-      "gender": "F",
+      "gender": "female",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     },
     {
       "id": "2",
-      "gender": "M",
+      "gender": "male",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     },
     {
       "id": "3",
-      "gender": "F",
+      "gender": "female",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     }
   ]
 }
@@ -92,7 +92,7 @@
     }
     age {
       histogram(rangeStart: 0, rangeEnd: 40, rangeStep: 5) {
-        _range
+        key
         min
         max
         avg
@@ -126,11 +126,11 @@
         "age": {
             "histogram": [
               {
-                "_range": [0, 5],
+                "key": [0, 5],
                 "min": 2
               },
               {
-                "_range": [5, 10],
+                "key": [5, 10],
                 "min": 3
               },
               ...
@@ -186,7 +186,7 @@
   aggs(filter: $filter) {
     age {
       histogram (binCount: 20) {
-        _range
+        key
         avg
         count
       }
@@ -202,12 +202,12 @@
         "age": {
             "histogram": [
               {
-                "_range": [0, 5]
+                "key": [0, 5]
                 "avg": 4.4,
                 "count": 4
               },
               {
-                "_range": [5, 10]
+                "key": [5, 10]
                 "avg": 7.6,
                 "count": 9
               },

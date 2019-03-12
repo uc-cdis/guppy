@@ -23,16 +23,8 @@ class ConnectedFilterGroup extends React.Component {
       .then(res => {
         //console.log(res.data.aggs);
         this.setState({allFields});
-        this.initializeTabs(res.data.aggs);
+        this.updateTabs(res.data.aggs);
       });
-  }
-
-  handleSelect() {
-    console.log('select');
-  }
-
-  handleDrag() {
-    console.log('drag');
   }
 
   getSingleFilterOption(histogramResult) {
@@ -44,7 +36,7 @@ class ConnectedFilterGroup extends React.Component {
         filterType: 'range',
         min: item.key[0],
         max: item.key[1],
-        count: item.count, // TODO: add count
+        count: item.count,
       }));
       //console.log('getSingleFilterOption: number options: ', rangeOptions);
       return rangeOptions;
@@ -53,7 +45,7 @@ class ConnectedFilterGroup extends React.Component {
       const textOptions = histogramResult.histogram.map(item => ({
         text: item.key,
         filterType: 'singleSelect',
-        count: item.count, // TODO: add count
+        count: item.count,
       }));
       //console.log('getSingleFilterOption: text options: ', textOptions);
       return textOptions;
@@ -71,7 +63,8 @@ class ConnectedFilterGroup extends React.Component {
     return sections;
   }
 
-  initializeTabs(tabsOptions) {
+  updateTabs(tabsOptions) {
+    console.log(tabsOptions);
     const tabs = this.props.filterConfig.tabs.map(({filters}, index) => {
       return (
         <FilterList
@@ -96,6 +89,10 @@ class ConnectedFilterGroup extends React.Component {
 
   handleFilterChange(filterResults) {
     askGuppyForFilteredData(this.props.guppyServerPath, this.state.allFields, filterResults)
+      .then(res => {
+        //console.log(res.data.aggs);
+        this.updateTabs(res.data.aggs);
+      });
 
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filterResults);
@@ -108,9 +105,10 @@ class ConnectedFilterGroup extends React.Component {
     }
     return (
       <FilterGroup
-        tabs={this.state.tabs} // read from guppy using graphql
+        tabs={this.state.tabs}
         filterConfig={this.getFilterGroupConfig(this.props.filterConfig)}
         onFilterChange={(e) => this.handleFilterChange(e)}
+        hideZero={this.props.hideZero}
       />
     );
   }
@@ -128,10 +126,12 @@ ConnectedFilterGroup.propTypes = {
   }).isRequired,
   guppyServerPath: PropTypes.string,
   onFilterChange: PropTypes.func,
+  hideZero: PropTypes.bool,
 };
 
 ConnectedFilterGroup.defaultProps = {
   onFilterChange: () => {},
+  hideZero: true,
 };
 
 export default ConnectedFilterGroup;

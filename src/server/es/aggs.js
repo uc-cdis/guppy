@@ -228,6 +228,7 @@ export const textAggregation = async (
     [aggsName]: {
       terms: {
         field,
+        //min_doc_count: 0, TODO: do we need to enable this for front-end filter?
       },
     },
   };
