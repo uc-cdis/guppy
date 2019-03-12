@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
-    "@gen3/ui-component": "0.0.26",
+    "@gen3/ui-component": "git@github.com:uc-cdis/gen3-ui-component.git#feat/filters-charts",
     "apollo-server": "^2.4.8",
     "apollo-server-express": "^2.4.8",
     "cors": "^2.8.5",
