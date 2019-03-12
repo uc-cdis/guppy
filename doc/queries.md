@@ -229,27 +229,50 @@ There is a discussion of two approaches:
 * `JSON`-based syntax
   ```
   {
-    "filter": 
-    {
+    "filter": {
       "AND": [
         {
-          "=": ["gender", "F"]
+          "OR": [
+            {
+              "=": [
+                "race",
+                "hispanic"
+              ]
+            },
+            {
+              "=": [
+                "race",
+                "asian"
+              ]
+            }
+          ]
         },
         {
           "AND": [
             {
-              "OR": [
-                {
-                  ">=": ["age": 27]
-                },
-                {
-                  "=": ["Age", 15]
-                }
+              ">=": [
+                "file_count",
+                15
               ]
             },
             {
-              ">": ["_samples_count", 12]
+              "<=": [
+                "file_count",
+                75
+              ]
             }
+          ]
+        },
+        {
+          "=": [
+            "project",
+            "Proj-1"
+          ]
+        },
+        {
+          "=": [
+            "gender",
+            "female"
           ]
         }
       ]
@@ -259,7 +282,7 @@ There is a discussion of two approaches:
 
 * `SQL`-like syntax
   ```
-  {"filter": "gender = 'F' AND ((age >= 27 OR age = 15) AND _samples_count > 12)"}
+  {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
   ```
 The implementation is relatively more difficult (to parse SQL string to object). But in future we want to support having a SQL-like syntax query in UI, so it is very rewarding.
 
