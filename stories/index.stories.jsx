@@ -59,7 +59,7 @@ storiesOf('Components', module)
         onFilterChange={action('wrapper receive filter change')}
         onReceiveNewAggsData={handleReceiveNewAggsData}
       >
-        <ConnectedFilter />
+        <ConnectedFilter className='test'/>
       </GuppyWrapper>
     )
   });

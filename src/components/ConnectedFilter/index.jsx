@@ -67,6 +67,7 @@ class ConnectedFilter extends React.Component {
     }
     return (
       <FilterGroup
+        className={this.props.className}
         tabs={this.state.tabs}
         filterConfig={getFilterGroupConfig(this.props.filterConfig)}
         onFilterChange={(e) => this.handleFilterChange(e)}
@@ -90,12 +91,14 @@ ConnectedFilter.propTypes = {
   onFilterChange: PropTypes.func,
   onReceiveNewAggsData: PropTypes.func, 
   hideZero: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 ConnectedFilter.defaultProps = {
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   hideZero: true,
+  className: '',
 };
 
 export default ConnectedFilter;
