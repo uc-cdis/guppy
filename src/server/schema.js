@@ -43,7 +43,8 @@ const getSchema = (esConfig, esInstance) => {
       sort: JSON,
       ): [${esTypeObjName}]
       aggs(
-      filter: JSON
+      filter: JSON,
+      filterSelf: Boolean=true,
       ): Aggregates
     }
   `;

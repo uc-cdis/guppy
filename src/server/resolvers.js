@@ -12,11 +12,14 @@ const listQueryResolver = esInstance => async (parent, args) => {
 };
 
 const aggsQueryResolver = async (parent, args) => {
-  const { offset, size, filter } = args;
+  const {
+    offset, size, filter, filterSelf,
+  } = args;
   return {
     filter,
     offset,
     size,
+    filterSelf,
   };
 };
 
@@ -29,7 +32,7 @@ const aggsTotalQueryResolver = esInstance => async (parent) => {
 };
 
 const numericHistogramResolver = esInstance => async (parent, args) => {
-  const { filter, field } = parent;
+  const { filter, field, filterSelf } = parent;
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
@@ -40,22 +43,24 @@ const numericHistogramResolver = esInstance => async (parent, args) => {
     rangeEnd,
     rangeStep,
     binCount,
+    filterSelf,
   });
   return result;
 };
 
 const textHistogramResolver = esInstance => async (parent) => {
-  const { filter, field } = parent;
+  const { filter, field, filterSelf } = parent;
   const result = await esInstance.textAggregation({
     filter,
     field,
+    filterSelf,
   });
   return result;
 };
 
 const aggregateFieldResolver = field => (parent) => {
-  const { filter } = parent;
-  return { filter, field };
+  const { filter, filterSelf } = parent;
+  return { filter, field, filterSelf };
 };
 
 const getResolver = (esConfig, esInstance) => {

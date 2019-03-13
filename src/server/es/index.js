@@ -46,7 +46,6 @@ class ES {
   }
 
   async getCount(filter) {
-    console.log('getCount....');
     return esFilter.getCount(this._getESContext(), filter);
   }
 
@@ -61,6 +60,7 @@ class ES {
     rangeEnd,
     rangeStep,
     binCount,
+    filterSelf,
   }) {
     return esAggregator.numericAggregation(this._getESContext(), {
       filter,
@@ -69,16 +69,19 @@ class ES {
       rangeEnd,
       rangeStep,
       binCount,
+      filterSelf,
     });
   }
 
   async textAggregation({
     filter,
     field,
+    filterSelf,
   }) {
     return esAggregator.textAggregation(this._getESContext(), {
       filter,
       field,
+      filterSelf,
     });
   }
 }

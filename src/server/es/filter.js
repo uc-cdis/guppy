@@ -6,7 +6,7 @@ const getNumericTextType = (
 ) => esFieldNumericTextTypeMapping[esContext.fieldTypes[field]];
 
 // FIXME: "is not"
-const getFilterItemForString = (field, value) => ({
+const getFilterItemForString = (op, field, value) => ({
   term: {
     [field]: value,
   },
@@ -35,27 +35,37 @@ const getFilterItemForNumbers = (op, field, value) => {
   throw new Error(`Invalid numeric operation ${op}`);
 };
 
-export const getFilterObj = (esContext, graphqlFilterObj) => {
+export const getFilterObj = (esContext, graphqlFilterObj, aggsField, filterSelf = true) => {
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   let resultFilterObj = {};
-  if (topLevelOp === 'AND') {
-    resultFilterObj = {
-      bool: {
-        must: graphqlFilterObj[topLevelOp].map(filterItem => getFilterObj(esContext, filterItem)),
-      },
-    };
-  } else if (topLevelOp === 'OR') {
-    resultFilterObj = {
-      bool: {
-        should: graphqlFilterObj[topLevelOp].map(filterItem => getFilterObj(esContext, filterItem)),
-      },
-    };
+  if (topLevelOp === 'AND' || topLevelOp === 'OR') {
+    const boolConnectOp = topLevelOp === 'AND' ? 'must' : 'should';
+    const boolItemsList = [];
+    graphqlFilterObj[topLevelOp].forEach((filterItem) => {
+      const filterObj = getFilterObj(esContext, filterItem, aggsField, filterSelf);
+      if (filterObj) {
+        boolItemsList.push(filterObj);
+      }
+    });
+    if (boolItemsList.length === 0) {
+      resultFilterObj = null;
+    } else {
+      resultFilterObj = {
+        bool: {
+          [boolConnectOp]: boolItemsList,
+        },
+      };
+    }
   } else {
     const field = graphqlFilterObj[topLevelOp][0];
+    if (aggsField === field && !filterSelf) {
+      // if `filterSelf` flag is false, do not filter the target field itself
+      return null;
+    }
     const value = graphqlFilterObj[topLevelOp][1];
     const numericOrTextType = getNumericTextType(esContext, field);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
-      resultFilterObj = getFilterItemForString(field, value);
+      resultFilterObj = getFilterItemForString(topLevelOp, field, value);
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
       resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value);
     } else {
@@ -79,7 +89,6 @@ const filterData = async (esContext, filter, offset = 0, size) => {
 
 export const getCount = async (esContext, filter) => {
   const result = await filterData(esContext, filter, 0, 0);
-  console.log('======getCount========= ', result);
   return result.hits.total;
 };
 

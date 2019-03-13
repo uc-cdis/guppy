@@ -81,10 +81,11 @@ const numericHistogramWithFixedRangeStep = async (
     rangeStart,
     rangeEnd,
     rangeStep,
+    filterSelf,
   }) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter);
+    queryBody.query = getFilterObj(esContext, filter, field, filterSelf);
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
@@ -130,6 +131,7 @@ const numericHistogramWithFixedBinCount = async (
     rangeStart,
     rangeEnd,
     binCount,
+    filterSelf,
   }) => {
   const globalStats = await numericGlobalStats(esContext, {
     filter, field, rangeStart, rangeEnd,
@@ -146,6 +148,7 @@ const numericHistogramWithFixedBinCount = async (
       rangeStart: histogramStart,
       rangeEnd: histogramEnd,
       rangeStep,
+      filterSelf,
     },
   );
 };
@@ -159,6 +162,7 @@ export const numericAggregation = async (
     rangeEnd,
     rangeStep,
     binCount,
+    filterSelf,
   },
 ) => {
   let result;
@@ -183,6 +187,7 @@ export const numericAggregation = async (
         rangeStart,
         rangeEnd,
         rangeStep,
+        filterSelf,
       },
     );
     return result;
@@ -196,6 +201,7 @@ export const numericAggregation = async (
         rangeStart,
         rangeEnd,
         binCount,
+        filterSelf,
       },
     );
     return result;
@@ -217,18 +223,19 @@ export const textAggregation = async (
   {
     filter,
     field,
+    filterSelf,
   },
 ) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter);
+    queryBody.query = getFilterObj(esContext, filter, field, filterSelf);
   }
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {
     [aggsName]: {
       terms: {
         field,
-        //min_doc_count: 0, TODO: do we need to enable this for front-end filter?
+        // min_doc_count: 0, TODO: do we need to enable this for front-end filter?
       },
     },
   };

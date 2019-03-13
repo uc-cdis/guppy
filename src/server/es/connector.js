@@ -16,11 +16,17 @@ export const getESFieldsTypes = async (esClient, esConfig) => esClient.indices.g
 });
 
 export const query = (esClient, esConfig) => async (queryBody) => {
-  console.log('_query: ', JSON.stringify(queryBody, null, 4));
+  const validatedQueryBody = {};
+  Object.keys(queryBody).forEach((key) => {
+    if (queryBody[key]) {
+      validatedQueryBody[key] = queryBody[key];
+    }
+  });
+  console.log('_query: ', JSON.stringify(validatedQueryBody, null, 4));
   return esClient.search({
     index: esConfig.index,
     type: esConfig.type,
-    body: queryBody,
+    body: validatedQueryBody,
   }).then(resp => resp, (err) => {
     console.trace(err.message);
   });

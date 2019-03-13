@@ -15,7 +15,7 @@ const queryGuppyForAggs = (url, fields, gqlFilter) => {
   const queryBody = { query };
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
-      aggs (filter: $filter) {
+      aggs (filter: $filter,  filterSelf: false) {
         ${fields.map(field => histogramQueryStrForEachField(field))}
       }
     }`;
