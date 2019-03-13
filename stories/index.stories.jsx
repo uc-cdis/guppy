@@ -1,8 +1,9 @@
 import React from 'react';
-
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import ConnectedFilterGroup from '../src/components/filters/filters';
+import ConnectedFilter from '../src/components/ConnectedFilter';
+import GuppyWrapper from '../src/components/GuppyWrapper';
+import SummaryPieChart from '@gen3/ui-component/dist/components/charts/SummaryPieChart';
 
 const filterConfig = {
   tabs: [{
@@ -33,14 +34,32 @@ const filterConfig = {
 
 const guppyServerPath = 'http://localhost:3000/graphql';
 
-storiesOf('FilterGroup', module)
-  .add('filter group', () => {
+storiesOf('Components', module)
+  .add('ConnectedFilter', () => {
     return (
-      <ConnectedFilterGroup
+      <ConnectedFilter
         filterConfig={filterConfig}
         guppyServerPath={guppyServerPath}
         onFilterChange={action('filter change')}
       />
     );
-  }
-  );
+  })
+  .add('GuppyWrapper', () => {
+    let chartData = [];
+    const testField = 'race';
+    const handleReceiveNewAggsData = (newAggsData, filter) => {
+      chartData = newAggsData[testField].histogram.map(i => ({name: i.key, value: i.count}));
+      console.log('chartData: ', chartData);
+    };
+    const getData = () => chartData;
+    return (
+      <GuppyWrapper
+        filterConfig={filterConfig}
+        guppyServerPath={guppyServerPath}
+        onFilterChange={action('wrapper receive filter change')}
+        onReceiveNewAggsData={handleReceiveNewAggsData}
+      >
+        <ConnectedFilter />
+      </GuppyWrapper>
+    )
+  });

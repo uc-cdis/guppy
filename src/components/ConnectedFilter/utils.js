@@ -67,3 +67,43 @@ export const askGuppyForFilteredData = (url, fields, filterResults) => {
   const filter = getGQLFilter(filterResults);
   return queryGuppyForAggs(url, fields, filter);
 };
+
+export const getFilterGroupConfig = filterConfig => ({
+  tabs: filterConfig.tabs.map(t => ({
+    title: t.title,
+    fields: t.filters.map(f => f.field),
+  })),
+});
+
+const getSingleFilterOption = (histogramResult) => {
+  if (!histogramResult || !histogramResult.histogram || histogramResult.histogram.length === 0) {
+    throw new Error('Error parsing field options');
+  }
+  if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
+    const rangeOptions = histogramResult.histogram.map(item => ({
+      filterType: 'range',
+      min: item.key[0],
+      max: item.key[1],
+      count: item.count,
+    }));
+    // console.log('getSingleFilterOption: number options: ', rangeOptions);
+    return rangeOptions;
+  }
+
+  const textOptions = histogramResult.histogram.map(item => ({
+    text: item.key,
+    filterType: 'singleSelect',
+    count: item.count,
+  }));
+    // console.log('getSingleFilterOption: text options: ', textOptions);
+  return textOptions;
+};
+
+export const getFilterSections = (filters, tabsOptions) => {
+  const sections = filters.map(({ field, label }) => ({
+    title: label,
+    options: getSingleFilterOption(tabsOptions[field]),
+  }));
+  // console.log('getFilterSections: ', sections);
+  return sections;
+};

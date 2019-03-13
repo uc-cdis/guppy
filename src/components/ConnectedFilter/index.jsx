@@ -6,9 +6,11 @@ import {
   askGuppyAboutAllFieldsAndOptions,
   askGuppyForFilteredData,
   getAllFields,
+  getFilterGroupConfig,
+  getFilterSections,
 } from './utils';
 
-class ConnectedFilterGroup extends React.Component {
+class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,75 +25,35 @@ class ConnectedFilterGroup extends React.Component {
       .then(res => {
         //console.log(res.data.aggs);
         this.setState({allFields});
-        this.updateTabs(res.data.aggs);
+        this.handleReceiveNewAggsData(res.data.aggs);
       });
   }
 
-  getSingleFilterOption(histogramResult) {
-    if (!histogramResult || !histogramResult.histogram || histogramResult.histogram.length === 0) {
-      throw new Error('Error parsing field options');
+  handleReceiveNewAggsData(aggsData) {
+    this.updateTabs(aggsData);
+    if (this.props.onReceiveNewAggsData) {
+      this.props.onReceiveNewAggsData(aggsData);
     }
-    if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
-      const rangeOptions = histogramResult.histogram.map(item => ({
-        filterType: 'range',
-        min: item.key[0],
-        max: item.key[1],
-        count: item.count,
-      }));
-      //console.log('getSingleFilterOption: number options: ', rangeOptions);
-      return rangeOptions;
-    }
-    else {
-      const textOptions = histogramResult.histogram.map(item => ({
-        text: item.key,
-        filterType: 'singleSelect',
-        count: item.count,
-      }));
-      //console.log('getSingleFilterOption: text options: ', textOptions);
-      return textOptions;
-    }
-  }
-
-  getFilterSections(filters, tabsOptions) {
-    const sections = filters.map(({field, label}) => {
-      return {
-        title: label,
-        options: this.getSingleFilterOption(tabsOptions[field]),
-      };
-    });
-    //console.log('getFilterSections: ', sections);
-    return sections;
   }
 
   updateTabs(tabsOptions) {
-    console.log(tabsOptions);
+    // console.log(tabsOptions);
     const tabs = this.props.filterConfig.tabs.map(({filters}, index) => {
       return (
         <FilterList
           key={index}
-          sections={this.getFilterSections(filters, tabsOptions)}
+          sections={getFilterSections(filters, tabsOptions)}
         />
       )
     });
     this.setState({tabs: tabs});
   }
 
-  getFilterGroupConfig(filterConfig) {
-    return {
-      tabs: filterConfig.tabs.map(t => {
-        return {
-          title: t.title,
-          fields: t.filters.map(f => f.field),
-        };
-      }),
-    }
-  }
-
   handleFilterChange(filterResults) {
     askGuppyForFilteredData(this.props.guppyServerPath, this.state.allFields, filterResults)
       .then(res => {
-        //console.log(res.data.aggs);
-        this.updateTabs(res.data.aggs);
+        // console.log(res.data.aggs);
+        this.handleReceiveNewAggsData(res.data.aggs);
       });
 
     if (this.props.onFilterChange) {
@@ -106,7 +68,7 @@ class ConnectedFilterGroup extends React.Component {
     return (
       <FilterGroup
         tabs={this.state.tabs}
-        filterConfig={this.getFilterGroupConfig(this.props.filterConfig)}
+        filterConfig={getFilterGroupConfig(this.props.filterConfig)}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
@@ -114,7 +76,7 @@ class ConnectedFilterGroup extends React.Component {
   }
 }
 
-ConnectedFilterGroup.propTypes = {
+ConnectedFilter.propTypes = {
   filterConfig: PropTypes.shape({
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
@@ -126,12 +88,14 @@ ConnectedFilterGroup.propTypes = {
   }).isRequired,
   guppyServerPath: PropTypes.string,
   onFilterChange: PropTypes.func,
+  onReceiveNewAggsData: PropTypes.func, 
   hideZero: PropTypes.bool,
 };
 
-ConnectedFilterGroup.defaultProps = {
+ConnectedFilter.defaultProps = {
   onFilterChange: () => {},
+  onReceiveNewAggsData: () => {},
   hideZero: true,
 };
 
-export default ConnectedFilterGroup;
+export default ConnectedFilter;
