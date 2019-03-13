@@ -12,7 +12,7 @@
     "eslint": "./node_modules/.bin/eslint ./src --fix",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "postinstall": "npx gulp"
+    "postinstall": " ./node_modules/.bin/gulp"
   },
   "repository": {
     "type": "git",
