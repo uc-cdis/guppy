@@ -1,0 +1,45 @@
+version: "3.3"
+
+services:
+  # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - es
+    volumes:
+      - "esdata:/usr/share/elasticsearch/data"
+      - "/home:/mnt/Users"
+    env_file:
+      - ./esearch.env
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.2.1
+    ports:
+      - "5601:5601"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    networks:
+      - es
+    depends_on:
+      - elasticsearch
+    environment:
+      LOGGING_QUIET: "true"
+
+volumes:
+  esdata:
+  
+networks:
+  es:
