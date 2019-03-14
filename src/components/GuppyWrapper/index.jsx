@@ -5,6 +5,10 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.filter = {};
+    this.state = {
+      aggsData: {},
+      filter: {},
+    }
   }
 
   handleReceiveNewAggsData(aggsData) {
@@ -12,6 +16,7 @@ class GuppyWrapper extends React.Component {
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
+    this.setState({ aggsData });
   }
 
   handleFilterChange(filter) {
@@ -20,6 +25,7 @@ class GuppyWrapper extends React.Component {
       this.props.onFilterChange(filter);
     }
     this.filter = filter;
+    this.setState({ filter });
   }
 
   render() {
@@ -27,10 +33,12 @@ class GuppyWrapper extends React.Component {
       <React.Fragment> 
         {
           React.Children.map(this.props.children, child => React.cloneElement(child, {
-            // TODO: filteredData, filteredOptions, etc.
             ...this.props,
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
+            aggsData: this.state.aggsData,
+            filter: this.state.filter,
+            filterConfig: this.props.filterConfig,
           }))
         }
       </React.Fragment>
