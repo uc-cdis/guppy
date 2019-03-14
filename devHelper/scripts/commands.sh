@@ -50,7 +50,8 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "file_type": { "type": "keyword" },
           "file_format": { "type": "keyword" },
           "gen3_resource_path": { "type": "keyword" },
-          "file_count": { "type": "integer" }
+          "file_count": { "type": "integer" },
+          "whatever_lab_result_value": { "type": "float" }
         }
       }
     }
@@ -111,6 +112,7 @@ while [[ $COUNT -lt $endIndex ]]; do
   fileType="${fileTypeList[$(( $RANDOM % ${#fileTypeList[@]} + 1))]}"
   fileFormat="${fileFormatList[$(( $RANDOM % ${#fileFormatList[@]} + 1))]}"
   fileCounts=$(( $RANDOM % 100 ))
+  randomFloatNumber="$(( $RANDOM % 100 )).$(( $RANDOM % 100 ))"
 
   cat - > "$tmpName" <<EOM
 {
@@ -124,7 +126,8 @@ while [[ $COUNT -lt $endIndex ]]; do
   "file_type": "${fileType}",
   "file_format": "${fileFormat}",
   "gen3_resource_path": "/projects/$projectName",
-  "file_count": $fileCounts
+  "file_count": $fileCounts,
+  "whatever_lab_result_value": $randomFloatNumber
 }
 EOM
   cat - $tmpName <<EOM

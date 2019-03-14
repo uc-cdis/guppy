@@ -38,7 +38,7 @@ const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
 /**
  * get global stats for a field
  * @param {*} param0
- * @returns {min, max, sum, count, avg, _range}
+ * @returns {min, max, sum, count, avg, key}
  */
 const numericGlobalStats = async (
   esContext,
@@ -66,7 +66,6 @@ const numericGlobalStats = async (
     typeof rangeEnd === 'undefined' ? resultStats.max : rangeEnd,
   ];
   resultStats = {
-    _range: range,
     key: range,
     ...resultStats,
   };
@@ -116,7 +115,6 @@ const numericHistogramWithFixedRangeStep = async (
   queryBody.aggs = aggsObj;
   const result = await esContext.queryHandler(queryBody);
   const parsedAggsResult = result.aggregations[AGGS_QUERY_NAME].buckets.map(item => ({
-    _range: [item.key, item.key + rangeStep],
     key: [item.key, item.key + rangeStep],
     ...item[AGGS_ITEM_STATS_NAME],
   }));

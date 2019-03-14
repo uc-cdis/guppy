@@ -106,13 +106,11 @@ const getSchema = (esConfig, esInstance) => {
   const numberHistogramBucketSchema = `
     type BucketsForNumber {
       """Lower and higher bounds for this bucket"""
-      _range: [Float]
-      """Same as "_range", Lower and higher bounds for this bucket"""
       key: [Float]
-      min: Int
-      max: Int
+      min: Float
+      max: Float
       avg: Float
-      sum: Int
+      sum: Float
       count: Int
     }
   `;
