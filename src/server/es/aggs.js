@@ -218,6 +218,7 @@ export const numericAggregation = async (
   return [result];
 };
 
+const PAGE_SIZE = 1024;
 export const textAggregation = async (
   esContext,
   {
@@ -233,16 +234,37 @@ export const textAggregation = async (
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {
     [aggsName]: {
-      terms: {
-        field,
-        // min_doc_count: 0, TODO: do we need to enable this for front-end filter?
+      composite: {
+        sources: [
+          {
+            [field]: {
+              terms: {
+                field,
+              },
+            },
+          },
+        ],
+        size: PAGE_SIZE,
       },
     },
   };
-  const result = await esContext.queryHandler(queryBody);
-  const parsedResults = result.aggregations[aggsName].buckets.map(item => ({
-    key: item.key,
-    count: item.doc_count,
-  }));
-  return parsedResults;
+  let resultSize;
+  const finalResults = [];
+  /* eslint-disable */
+  do {
+    console.log('textAggregation, queryBody = ', JSON.stringify(queryBody, null, 4));
+    const result = await esContext.queryHandler(queryBody); /* eslint-disable no-await-in-loop */
+    resultSize = 0;
+
+    result.aggregations[aggsName].buckets.forEach((item) => {
+      finalResults.push({
+        key: item.key[field],
+        count: item.doc_count,
+      });
+      resultSize += 1;
+    });
+    queryBody.aggs[aggsName].composite.after = result.aggregations[aggsName].after_key;
+  } while (resultSize === PAGE_SIZE);
+  /* eslint-enable */
+  return finalResults;
 };

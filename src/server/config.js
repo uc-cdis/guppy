@@ -6,7 +6,7 @@ const config = {
     type: 'subject',
   },
 
-  port: 3000,
+  port: 3001,
   path: '/graphql',
 };
 

@@ -18,7 +18,7 @@ export const getESFieldsTypes = async (esClient, esConfig) => esClient.indices.g
 export const query = (esClient, esConfig) => async (queryBody) => {
   const validatedQueryBody = {};
   Object.keys(queryBody).forEach((key) => {
-    if (queryBody[key]) {
+    if (typeof queryBody[key] !== 'undefined' && queryBody[key] !== null) {
       validatedQueryBody[key] = queryBody[key];
     }
   });

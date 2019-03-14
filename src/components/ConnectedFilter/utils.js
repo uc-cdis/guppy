@@ -77,7 +77,7 @@ export const getFilterGroupConfig = filterConfig => ({
 
 const getSingleFilterOption = (histogramResult) => {
   if (!histogramResult || !histogramResult.histogram || histogramResult.histogram.length === 0) {
-    throw new Error('Error parsing field options');
+    throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
     const rangeOptions = histogramResult.histogram.map(item => ({
@@ -100,6 +100,7 @@ const getSingleFilterOption = (histogramResult) => {
 };
 
 export const getFilterSections = (filters, tabsOptions) => {
+  console.log('getFilterSections tabsOptions: ', tabsOptions);
   const sections = filters.map(({ field, label }) => ({
     title: label,
     options: getSingleFilterOption(tabsOptions[field]),
