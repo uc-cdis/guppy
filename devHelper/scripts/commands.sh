@@ -105,12 +105,12 @@ while [[ $COUNT -lt $endIndex ]]; do
     projectName="test"
   fi
   studyIndex=$(( $RANDOM % 10 ))
-  gender="${genderList[$(( $RANDOM % ${#genderList[@]} + 1))]}"
-  ethnicity="${ethnicityList[$(( $RANDOM % ${#ethnicityList[@]} + 1))]}"
-  race="${raceList[$(( $RANDOM % ${#raceList[@]} + 1))]}"
-  vital="${vitalList[$(( $RANDOM % ${#vitalList[@]} + 1))]}"
-  fileType="${fileTypeList[$(( $RANDOM % ${#fileTypeList[@]} + 1))]}"
-  fileFormat="${fileFormatList[$(( $RANDOM % ${#fileFormatList[@]} + 1))]}"
+  gender="${genderList[$(( $RANDOM % ${#genderList[@]} ))]}"
+  ethnicity="${ethnicityList[$(( $RANDOM % ${#ethnicityList[@]} ))]}"
+  race="${raceList[$(( $RANDOM % ${#raceList[@]} ))]}"
+  vital="${vitalList[$(( $RANDOM % ${#vitalList[@]} ))]}"
+  fileType="${fileTypeList[$(( $RANDOM % ${#fileTypeList[@]} ))]}"
+  fileFormat="${fileFormatList[$(( $RANDOM % ${#fileFormatList[@]} ))]}"
   fileCounts=$(( $RANDOM % 100 ))
   randomFloatNumber="$(( $RANDOM % 100 )).$(( $RANDOM % 100 ))"
 

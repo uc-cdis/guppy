@@ -45,19 +45,12 @@ storiesOf('Components', module)
     );
   })
   .add('GuppyWrapper', () => {
-    let chartData = [];
-    const testField = 'race';
-    const handleReceiveNewAggsData = (newAggsData, filter) => {
-      chartData = newAggsData[testField].histogram.map(i => ({name: i.key, value: i.count}));
-      console.log('chartData: ', chartData);
-    };
-    const getData = () => chartData;
     return (
       <GuppyWrapper
         filterConfig={filterConfig}
         guppyServerPath={guppyServerPath}
         onFilterChange={action('wrapper receive filter change')}
-        onReceiveNewAggsData={handleReceiveNewAggsData}
+        onReceiveNewAggsData={action('wraooer receive aggs data')}
       >
         <ConnectedFilter className='test'/>
       </GuppyWrapper>

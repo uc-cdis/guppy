@@ -117,3 +117,24 @@ export const getFilterSections = (filters, tabsOptions, initialTabsOptions) => {
   // console.log('getFilterSections: ', sections);
   return sections;
 };
+
+export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) => {
+  console.log(receivedAggsData);
+  if (!filterResults) return receivedAggsData;
+  const resultAggsData = {};
+  Object.keys(receivedAggsData).forEach((field) => {
+    const { histogram } = receivedAggsData[field];
+    if (!histogram) return;
+    if (field in filterResults) {
+      let resultHistogram = [];
+      if (typeof filterResults[field].selectedValues !== 'undefined') {
+        const { selectedValues } = filterResults[field];
+        resultHistogram = histogram.filter(bucket => selectedValues.includes(bucket.key));
+      }
+      resultAggsData[field] = { histogram: resultHistogram };
+    } else {
+      resultAggsData[field] = receivedAggsData[field];
+    }
+  });
+  return resultAggsData;
+};

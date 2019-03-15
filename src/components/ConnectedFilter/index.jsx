@@ -8,6 +8,7 @@ import {
   getAllFields,
   getFilterGroupConfig,
   getFilterSections,
+  excludeSelfFilterFromAggsData,
 } from './utils';
 
 class ConnectedFilter extends React.Component {
@@ -40,10 +41,11 @@ class ConnectedFilter extends React.Component {
     this.setState({ initialAggsData: aggsData });
   }
 
-  handleReceiveNewAggsData(aggsData) {
-    this.updateTabs(aggsData);
+  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+    this.updateTabs(receivedAggsData);
     if (this.props.onReceiveNewAggsData) {
-      this.props.onReceiveNewAggsData(aggsData);
+      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
+      this.props.onReceiveNewAggsData(resultAggsData);
     }
   }
 
@@ -64,7 +66,7 @@ class ConnectedFilter extends React.Component {
     askGuppyForFilteredData(this.props.guppyServerPath, this.state.allFields, filterResults)
       .then(res => {
         // console.log(res.data.aggs);
-        this.handleReceiveNewAggsData(res.data.aggs);
+        this.handleReceiveNewAggsData(res.data.aggs, filterResults);
       });
 
     if (this.props.onFilterChange) {
