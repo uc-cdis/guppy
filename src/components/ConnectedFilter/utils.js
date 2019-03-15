@@ -75,17 +75,23 @@ export const getFilterGroupConfig = filterConfig => ({
   })),
 });
 
-const getSingleFilterOption = (histogramResult) => {
+const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   if (!histogramResult || !histogramResult.histogram || histogramResult.histogram.length === 0) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
-    const rangeOptions = histogramResult.histogram.map(item => ({
-      filterType: 'range',
-      min: item.key[0],
-      max: item.key[1],
-      count: item.count,
-    }));
+    const rangeOptions = histogramResult.histogram.map((item) => {
+      const minValue = initHistogramRes ? initHistogramRes.histogram[0].key[0] : item.key[0];
+      const maxValue = initHistogramRes ? initHistogramRes.histogram[0].key[1] : item.key[1];
+      return {
+        filterType: 'range',
+        min: minValue,
+        max: maxValue,
+        lowerBound: item.key[0],
+        upperBound: item.key[1],
+        count: item.count,
+      };
+    });
     // console.log('getSingleFilterOption: number options: ', rangeOptions);
     return rangeOptions;
   }
@@ -99,11 +105,14 @@ const getSingleFilterOption = (histogramResult) => {
   return textOptions;
 };
 
-export const getFilterSections = (filters, tabsOptions) => {
+export const getFilterSections = (filters, tabsOptions, initialTabsOptions) => {
   console.log('getFilterSections tabsOptions: ', tabsOptions);
   const sections = filters.map(({ field, label }) => ({
     title: label,
-    options: getSingleFilterOption(tabsOptions[field]),
+    options: getSingleFilterOption(
+      tabsOptions[field],
+      initialTabsOptions ? initialTabsOptions[field] : undefined,
+    ),
   }));
   // console.log('getFilterSections: ', sections);
   return sections;

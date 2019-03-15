@@ -16,6 +16,7 @@ class ConnectedFilter extends React.Component {
     this.state = {
       tabs: [],
       allFields: [],
+      initialAggsData: {},
     };
   }
 
@@ -26,7 +27,17 @@ class ConnectedFilter extends React.Component {
         //console.log(res.data.aggs);
         this.setState({allFields});
         this.handleReceiveNewAggsData(res.data.aggs);
+        this.saveInitialAggsData(res.data.aggs);
       });
+  }
+
+  /**
+   * Save initial aggregation data, especially for range slider 
+   * so that we still have min/max values for range slider
+   * @param {object} aggsData 
+   */
+  saveInitialAggsData(aggsData) {
+    this.setState({ initialAggsData: aggsData });
   }
 
   handleReceiveNewAggsData(aggsData) {
@@ -42,7 +53,7 @@ class ConnectedFilter extends React.Component {
       return (
         <FilterList
           key={index}
-          sections={getFilterSections(filters, tabsOptions)}
+          sections={getFilterSections(filters, tabsOptions, this.state.initialAggsData)}
         />
       )
     });
