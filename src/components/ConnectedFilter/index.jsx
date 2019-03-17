@@ -3,30 +3,29 @@ import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
 import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
-  askGuppyAboutAllFieldsAndOptions,
-  askGuppyForFilteredData,
-  getAllFields,
   getFilterGroupConfig,
   getFilterSections,
   excludeSelfFilterFromAggsData,
 } from './utils';
+import {
+  askGuppyAboutAllFieldsAndOptions,
+  askGuppyForAggregationData,
+  getAllFields,
+} from '../Utils/queries';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       tabs: [],
-      allFields: [],
+      allFields: getAllFields(this.props.filterConfig.tabs),
       initialAggsData: {},
     };
   }
 
   componentDidMount() {
-    const allFields = getAllFields(this.props.filterConfig.tabs);
-    askGuppyAboutAllFieldsAndOptions(this.props.guppyServerPath, allFields)
+    askGuppyAboutAllFieldsAndOptions(this.props.guppyServerPath, this.state.allFields)
       .then(res => {
-        //console.log(res.data.aggs);
-        this.setState({allFields});
         this.handleReceiveNewAggsData(res.data.aggs);
         this.saveInitialAggsData(res.data.aggs);
       });
@@ -63,7 +62,7 @@ class ConnectedFilter extends React.Component {
   }
 
   handleFilterChange(filterResults) {
-    askGuppyForFilteredData(this.props.guppyServerPath, this.state.allFields, filterResults)
+    askGuppyForAggregationData(this.props.guppyServerPath, this.state.allFields, filterResults)
       .then(res => {
         // console.log(res.data.aggs);
         this.handleReceiveNewAggsData(res.data.aggs, filterResults);

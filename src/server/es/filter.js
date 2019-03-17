@@ -109,6 +109,7 @@ export const getData = async (esContext, fields, filter, sort, offset = 0, size)
     queryBody._source = fields;
   }
   const result = await esContext.queryHandler(queryBody);
+  console.log(result);
   const parsedResults = result.hits.hits.map(item => item._source);
   console.log(JSON.stringify(parsedResults, null, 4));
   return parsedResults;
