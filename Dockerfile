@@ -9,7 +9,6 @@ RUN apt-get update \
         git \
         sudo \
         vim \
-        ssh-client \
     && curl -sL https://deb.nodesource.com/setup_10.x | bash - \ 
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -21,7 +20,8 @@ RUN COMMIT=`git rev-parse HEAD` && echo "export const guppyCommit = \"${COMMIT}\
 RUN VERSION=`git describe --always --tags` && echo "export const guppyVersion =\"${VERSION}\";" >>versions.js
 RUN /bin/rm -rf .git
 RUN /bin/rm -rf node_modules
-RUN npm ci
+
+RUN npm ci --unsafe-perm
 
 EXPOSE 3000
 
