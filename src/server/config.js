@@ -10,8 +10,8 @@ const config = {
   path: '/graphql',
 };
 
-if (process.env['GEN3_ES_ENDPOINT']) {
-  config.esConfig.host = process.env['GEN3_ES_ENDPOINT'];
+if (process.env.GEN3_ES_ENDPOINT) {
+  config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
 }
 
 export default config;
