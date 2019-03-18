@@ -7,20 +7,21 @@ import * as esAggregator from './aggs';
 class ES {
   constructor(esConfig = config.esConfig) {
     this.config = esConfig;
+    console.log(`connecting elasticsearch cluster at ${this.config.host}.`);
     this.client = new elasticsearch.Client({
       host: this.config.host,
       // log: 'trace'
     });
-    this.client.ping({
-      requestTimeout: 30000,
-    }, (error) => {
-      if (error) {
-        console.error('elasticsearch cluster is down!');
-      } else {
-        console.log(`connected to elasticsearch at ${esConfig.host}.`);
-        this.connected = true;
-      }
-    });
+    // this.client.ping({
+    //   requestTimeout: 30000,
+    // }, (error) => {
+    //   if (error) {
+    //     console.error(`elasticsearch cluster at ${this.config.host} is down!`);
+    //   } else {
+    //     console.log(`connected to elasticsearch at ${esConfig.host}.`);
+    //     this.connected = true;
+    //   }
+    // });
     this._query = query(this.client, esConfig);
   }
 
