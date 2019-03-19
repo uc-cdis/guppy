@@ -18,6 +18,11 @@ const startServer = () => {
   });
 
   server.applyMiddleware({ app, path: config.path });
+  
+  app.get('/_status', (req, res) => {
+    res.send('hello guppy');
+  });
+
   app.listen(config.port, () => {
     console.log(`Example app listening on port ${config.port}!`);
   });
