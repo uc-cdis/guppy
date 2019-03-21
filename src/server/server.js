@@ -18,7 +18,7 @@ const startServer = () => {
   });
 
   server.applyMiddleware({ app, path: config.path });
-  
+
   app.get('/_status', (req, res) => {
     res.send('hello guppy');
   });

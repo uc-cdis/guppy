@@ -13,5 +13,11 @@ const config = {
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
 }
+if (process.env.GEN3_ES_INDEX) {
+  config.esConfig.index = process.env.GEN3_ES_INDEX;
+}
+if (process.env.GEN3_ES_TYPE) {
+  config.esConfig.type = process.env.GEN3_ES_TYPE;
+}
 
 export default config;
