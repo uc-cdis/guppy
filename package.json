@@ -1,0 +1,57 @@
+{
+  "name": "@gen3/guppy",
+  "version": "0.0.1",
+  "description": "Server that support GraphQL queries on data from elasticsearch",
+  "main": "src/server/server.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "start": "nodemon --exec babel-node ./src/server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "eslint": "./node_modules/.bin/eslint ./src --fix",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "prepare": "rm -rf dist && mkdir dist && babel src --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uc-cdis/guppy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uc-cdis/guppy/issues"
+  },
+  "homepage": "https://github.com/uc-cdis/guppy#readme",
+  "dependencies": {
+    "@gen3/ui-component": "https://github.com/uc-cdis/gen3-ui-component.git#feat/filters-charts",
+    "apollo-server": "^2.4.8",
+    "apollo-server-express": "^2.4.8",
+    "cors": "^2.8.5",
+    "elasticsearch": "^15.4.1",
+    "express": "^4.16.4",
+    "graphql": "^14.1.1",
+    "graphql-type-json": "^0.2.1",
+    "lodash": "^4.17.11",
+    "prop-types": "^15.7.2",
+    "react": "^16.8.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/preset-react": "^7.0.0",
+    "@storybook/addon-actions": "^5.0.1",
+    "@storybook/addon-links": "^5.0.1",
+    "@storybook/addons": "^5.0.1",
+    "@storybook/react": "^5.0.1",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.15.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "nodemon": "^1.18.10",
+    "react-table": "^6.9.2"
+  }
+}

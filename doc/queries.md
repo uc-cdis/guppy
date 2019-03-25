@@ -17,7 +17,7 @@
 {
   subject(offset: 5, size: 100, sort: [
     {
-      "_samples_count": desc
+      "file_count": desc
     },
     {
       "gender": asc
@@ -26,7 +26,7 @@
     id
     gender
     ethnicity
-    _samples_count
+    file_count
   }
 }
 </pre>
@@ -37,21 +37,21 @@
   "subject": [
     {
       "id": "1",
-      "gender": "F",
+      "gender": "female",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     },
     {
       "id": "2",
-      "gender": "M",
+      "gender": "male",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     },
     {
       "id": "3",
-      "gender": "F",
+      "gender": "female",
       "ethnicity": "",
-      "_samples_count": 0
+      "file_count": 0
     }
   ]
 }
@@ -59,7 +59,22 @@
 </td>
 </tr>
 <tr>
-<td colspan="2">Three possible aggregations available: top-level aggregation - only total number; text aggregation - buckets for key and count for that key; numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the buckets specified by <code>rangestep</code>. Without <code>rangestep</code> it aggregates the whole dataset.</td>
+<td colspan="2">Three possible aggregations available: 
+  <li>
+  top-level aggregation - only total number; 
+  </li>
+  <li>
+  text aggregation - histogram for key and count for that key; 
+  </li>
+  <li>
+  numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the histogram specified by <code>rangeStart</code>, <code>rangeEnd</code>, <code>rangeStep</code>, and <code>binCount</code>. 
+  <ul>
+    <li><code>rangeStart</code> default to min, <code>rangeEnd</code> default to max. 
+    <li>Without <code>rangeStep</code> and <code>binCount</code> it aggregates the whole dataset.</li>
+    <li><code>binCount</code> and <code>rangeStep</code> are exclusive, user could only set one of them. </li>
+  </ul>
+  </li>
+</td>
 </tr>
 <tr>
 <td>
@@ -70,14 +85,14 @@
       total
     }
     gender {
-      buckets {
+      histogram {
         key
         count
       }
     }
     age {
-      buckets(rangestep: 5) {
-        _range
+      histogram(rangeStart: 0, rangeEnd: 40, rangeStep: 5) {
+        key
         min
         max
         avg
@@ -97,7 +112,7 @@
             "total": 3
         },
         "gender": {
-          "buckets": [
+          "histogram": [
             {
               "key": "F",
               "count": 10
@@ -109,15 +124,16 @@
           ]
         },
         "age": {
-            "buckets": [
+            "histogram": [
               {
-                "_range": [0, 5],
+                "key": [0, 5],
                 "min": 2
               },
               {
-                "_range": [5, 10],
+                "key": [5, 10],
                 "min": 3
-              }
+              },
+              ...
             ]
         }
     }
@@ -131,7 +147,7 @@
 {
   aggs(filter: $filter) {
     age {
-      buckets {
+      histogram {
         min
         max
         avg
@@ -148,7 +164,7 @@
 {
     "aggs": {
         "age": {
-            "buckets": [
+            "histogram": [
               {
                 "min": 2,
                 "max": 10,
@@ -163,6 +179,46 @@
 </pre>
 </td>
 </tr>
+<tr>
+<td>
+<pre>
+{
+  aggs(filter: $filter) {
+    age {
+      histogram (binCount: 20) {
+        key
+        avg
+        count
+      }
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<pre>
+{
+    "aggs": {
+        "age": {
+            "histogram": [
+              {
+                "key": [0, 5]
+                "avg": 4.4,
+                "count": 4
+              },
+              {
+                "key": [5, 10]
+                "avg": 7.6,
+                "count": 9
+              },
+              ...
+            ]
+        }
+    }
+}
+</pre>
+</td>
+</tr>
 </tbody>
 </table>
 
@@ -170,31 +226,65 @@
 
 There is a discussion of two approaches:
 
-* `SQL`-like syntax
-  ```
-  {"filter": "Gender = "F" AND ((Age >= 27 OR Age = 15) AND _samples_count > 12)"}
-  ```
 * `JSON`-based syntax
   ```
   {
-    "filter": 
-    {
-      "and": [
-        {"Gender": "F"},
+    "filter": {
+      "AND": [
         {
-          "and": [
+          "OR": [
             {
-              "or": [
-                {"Age": {"gte": 27}},
-                {"Age": 15}
+              "=": [
+                "race",
+                "hispanic"
               ]
             },
-            {"_samples_count": {"gt": 12}}
+            {
+              "=": [
+                "race",
+                "asian"
+              ]
+            }
+          ]
+        },
+        {
+          "AND": [
+            {
+              ">=": [
+                "file_count",
+                15
+              ]
+            },
+            {
+              "<=": [
+                "file_count",
+                75
+              ]
+            }
+          ]
+        },
+        {
+          "=": [
+            "project",
+            "Proj-1"
+          ]
+        },
+        {
+          "=": [
+            "gender",
+            "female"
           ]
         }
       ]
     }
   }
   ```
+
+* `SQL`-like syntax
+  ```
+  {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
+  ```
+The implementation is relatively more difficult (to parse SQL string to object). But in future we want to support having a SQL-like syntax query in UI, so it is very rewarding.
+
 
 ## Discussion
