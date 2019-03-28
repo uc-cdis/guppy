@@ -1,8 +1,16 @@
+import { readFileSync } from 'fs';
+import log from './logger';
+
+let inputConfig = {};
+if (process.env.GUPPY_CONFIG_FILEPATH) {
+  const configFilepath = process.env.GUPPY_CONFIG_FILEPATH;
+  inputConfig = JSON.parse(readFileSync(configFilepath).toString());
+}
 
 const config = {
   esConfig: {
     host: 'localhost:9200',
-    indices: [
+    indices: inputConfig.indices || [
       {
         index: 'gen3-dev-subject',
         type: 'subject',
@@ -17,15 +25,10 @@ const config = {
   port: 3000,
   path: '/graphql',
 };
+log.info('[config] starting server using config', JSON.stringify(config, null, 4));
 
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
-}
-if (process.env.GEN3_ES_INDEX) {
-  config.esConfig.index = process.env.GEN3_ES_INDEX;
-}
-if (process.env.GEN3_ES_TYPE) {
-  config.esConfig.type = process.env.GEN3_ES_TYPE;
 }
 
 export default config;
