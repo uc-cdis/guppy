@@ -2,8 +2,16 @@
 const config = {
   esConfig: {
     host: 'localhost:9200',
-    index: 'gen3-dev-subject',
-    type: 'subject',
+    indices: [
+      {
+        index: 'gen3-dev-subject',
+        type: 'subject',
+      },
+      {
+        index: 'gen3-dev-file',
+        type: 'file',
+      },
+    ],
   },
 
   port: 3000,

@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server-express';
+import log from './logger';
 
 const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -31,53 +32,68 @@ const getAggsHistogramName = (gqlType) => {
   return gqlTypeToAggsHistogramName[gqlType];
 };
 
-const getSchema = (esConfig, esInstance) => {
-  const esType = esConfig.type;
-  const esTypeObjName = firstLetterUpperCase(esConfig.type);
-  const querySchema = `
-    type Query {
-      ${esType} (
-      offset: Int, 
-      size: Int,
-      filter: JSON,
-      sort: JSON,
-      ): [${esTypeObjName}]
-      aggs(
-      filter: JSON,
-      filterSelf: Boolean=true,
-      ): Aggregates
-    }
-  `;
+const getQuerySchemaForType = (esType) => {
+  const esTypeObjName = firstLetterUpperCase(esType);
+  return `${esType} (
+    offset: Int, 
+    size: Int,
+    filter: JSON,
+    sort: JSON,
+    ): [${esTypeObjName}]`;
+};
 
-  const fieldESTypeMap = esInstance.getESFieldTypeMapping();
+const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
+  const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
   const fieldGQLTypeMap = Object.keys(fieldESTypeMap).map((field) => {
     const esFieldType = fieldESTypeMap[field];
     const gqlType = esgqlTypeMapping[esFieldType];
     return { field, type: gqlType };
   });
-  console.log('fieldGQLTypeMap', JSON.stringify(fieldGQLTypeMap, null, 4));
+  return fieldGQLTypeMap;
+};
+
+const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
+  const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
+  const esTypeObjName = firstLetterUpperCase(esType);
   const typeSchema = `
     type ${esTypeObjName} {
       ${fieldGQLTypeMap.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
     }
-  `;
+  `; // TODO: `filterSelf` change to `aggSelf`
+  return typeSchema;
+};
 
+const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
+  const esTypeObjName = firstLetterUpperCase(esType);
+  const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsTypeMap = fieldGQLTypeMap.map(entry => ({
     field: entry.field,
     aggType: getAggsHistogramName(entry.type),
   }));
-  const aggregationSchema = `
-    type Aggregates {
-      ${esType}: TotalCount
-      ${fieldAggsTypeMap.map(entry => `${entry.field}: ${entry.aggType},`).join('\n')}
+  const aggsSchema = `type ${esTypeObjName}Aggregation {
+    _totalCount: Int
+    ${fieldAggsTypeMap.map(entry => `${entry.field}: ${entry.aggType},`).join('\n')}
+  }`;
+  return aggsSchema;
+};
+
+const getSchema = (esConfig, esInstance) => {
+  const querySchema = `
+    type Query {
+      ${esConfig.indices.map(cfg => getQuerySchemaForType(cfg.type)).join('\n')}
+      _aggregation: Aggregation
     }
   `;
 
-  const totalCountSchema = `
-    type TotalCount {
-      total: Int
+  const typesSchemas = esConfig.indices.map(cfg => getTypeSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+
+  const aggregationSchema = `
+    type Aggregation {
+      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
     }
   `;
+
+  const aggregationSchemasForEachType = esConfig.indices.map(cfg => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
 
   const textHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
@@ -115,17 +131,21 @@ const getSchema = (esConfig, esInstance) => {
     }
   `;
 
-  const finalSchema = gql`
-    scalar JSON
-    ${querySchema}
-    ${typeSchema}
-    ${aggregationSchema}
-    ${totalCountSchema}
-    ${textHistogramSchema}
-    ${numberHistogramSchema}
-    ${textHistogramBucketSchema}
-    ${numberHistogramBucketSchema}
-  `;
+  const schemaStr = `
+  scalar JSON
+  ${querySchema}
+  ${typesSchemas}
+  ${aggregationSchema}
+  ${aggregationSchemasForEachType}
+  ${textHistogramSchema}
+  ${numberHistogramSchema}
+  ${textHistogramBucketSchema}
+  ${numberHistogramBucketSchema}
+`;
+  log.info('[schema] graphql schema generated.');
+  log.debug('[schema] graphql schema', schemaStr);
+
+  const finalSchema = gql`${schemaStr}`;
   return finalSchema;
 };
 
