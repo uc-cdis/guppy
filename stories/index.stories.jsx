@@ -23,7 +23,7 @@ const filterConfig = {
       { field: 'ethnicity', label: 'Ethnicity' },
       { field: 'gender', label: 'Gender' },
       { field: 'vital_status', label: 'Vital_status' },
-      { field: 'whatever_lab_result_value', label: 'Lab Result Value' },
+      //{ field: 'whatever_lab_result_value', label: 'Lab Result Value' },
     ],
   },
   {
@@ -127,6 +127,7 @@ storiesOf('Components', module)
         <GuppyWrapper
           filterConfig={filterConfig}
           guppyConfig={guppyConfig}
+          tableConfig={tableConfig}
           onFilterChange={action('wrapper receive filter change')}
           onReceiveNewAggsData={action('wrapper receive aggs data')}
         >

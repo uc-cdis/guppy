@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   askGuppyForRawData,
-  getAllFields,
 } from '../Utils/queries';
 
 /**
@@ -41,7 +40,7 @@ class GuppyWrapper extends React.Component {
     this.state = {
       aggsData: {},
       filter: {},
-      allFields: getAllFields(this.props.filterConfig.tabs),
+      allFields: props.tableConfig.map(entry => entry.field),
       rawData: [],
       totalCount: 0,
     }
@@ -154,6 +153,10 @@ GuppyWrapper.propTypes = {
       })),
     })),
   }).isRequired,
+  tableConfig: PropTypes.arrayOf(PropTypes.shape({
+    field: PropTypes.string,
+    name: PropTypes.string,
+  })).isRequired,
   onReceiveNewAggsData: PropTypes.func, 
   onFilterChange: PropTypes.func, 
 };

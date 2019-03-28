@@ -10,7 +10,7 @@ import {
 import {
   askGuppyAboutAllFieldsAndOptions,
   askGuppyForAggregationData,
-  getAllFields,
+  getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
 
 class ConnectedFilter extends React.Component {
@@ -18,7 +18,7 @@ class ConnectedFilter extends React.Component {
     super(props);
     this.state = {
       tabs: [],
-      allFields: getAllFields(this.props.filterConfig.tabs),
+      allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
       initialAggsData: {},
     };
   }

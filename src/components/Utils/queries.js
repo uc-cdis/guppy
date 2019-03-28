@@ -128,5 +128,5 @@ export const askGuppyForRawData = (
   return queryGuppyForRawDataAndTotalCounts(path, type, fields, filter, sort, offset, size);
 };
 
-export const getAllFields = filterTabConfigs => filterTabConfigs
+export const getAllFieldsFromFilterConfigs = filterTabConfigs => filterTabConfigs
   .reduce((acc, cur) => acc.concat(cur.filters.map(item => item.field)), []);
