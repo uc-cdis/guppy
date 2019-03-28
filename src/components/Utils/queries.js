@@ -6,17 +6,21 @@ const histogramQueryStrForEachField = field => (`
     }
   }`);
 
-const queryGuppyForAggs = (path, fields, gqlFilter) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter) => {
   const query = `query {
-    aggs {
-      ${fields.map(field => histogramQueryStrForEachField(field))}
+    _aggregation {
+      ${type} {
+        ${fields.map(field => histogramQueryStrForEachField(field))}
+      }
     }
   }`;
   const queryBody = { query };
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
-      aggs (filter: $filter,  filterSelf: false) {
-        ${fields.map(field => histogramQueryStrForEachField(field))}
+      _aggregation {
+        ${type} (filter: $filter,  filterSelf: false) {
+          ${fields.map(field => histogramQueryStrForEachField(field))}
+        }
       }
     }`;
     queryBody.variables = { filter: gqlFilter };
@@ -48,17 +52,17 @@ const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter || sort) {
     dataTypeLine = `${type} (offset: ${offset}, size: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
   }
-  let aggsLine = 'aggs {';
+  let typeAggsLine = `${type} {`;
   if (gqlFilter) {
-    aggsLine = 'aggs (filter: $filter) {';
+    typeAggsLine = `${type} (filter: $filter) {`;
   }
   const query = `${queryLine}
     ${dataTypeLine} 
       ${fields.join('\n')}
     }
-    ${aggsLine}
-      ${type} {
-        total
+    _aggregation {
+      ${typeAggsLine}
+        _totalCount
       }
     }
   }`;
@@ -66,7 +70,6 @@ const queryGuppyForRawDataAndTotalCounts = (
   queryBody.variables = {};
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
   if (sort) queryBody.variables.sort = sort;
-  console.log(queryBody);
   return fetch(path, {
     method: 'POST',
     headers: {
@@ -76,7 +79,9 @@ const queryGuppyForRawDataAndTotalCounts = (
   }).then(response => response.json());
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (path, fields) => queryGuppyForAggs(path, fields);
+export const askGuppyAboutAllFieldsAndOptions = (
+  path, type, fields,
+) => queryGuppyForAggs(path, type, fields);
 
 const getGQLFilter = (filterResults) => {
   const facetsList = [];
@@ -105,9 +110,9 @@ const getGQLFilter = (filterResults) => {
   return gqlFilter;
 };
 
-export const askGuppyForAggregationData = (path, fields, filterResults) => {
+export const askGuppyForAggregationData = (path, type, fields, filterResults) => {
   const filter = getGQLFilter(filterResults);
-  return queryGuppyForAggs(path, fields, filter);
+  return queryGuppyForAggs(path, type, fields, filter);
 };
 
 export const askGuppyForRawData = (

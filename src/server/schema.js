@@ -59,7 +59,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     type ${esTypeObjName} {
       ${fieldGQLTypeMap.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
     }
-  `; // TODO: `filterSelf` change to `aggSelf`
+  `;
   return typeSchema;
 };
 
@@ -89,7 +89,7 @@ const getSchema = (esConfig, esInstance) => {
 
   const aggregationSchema = `
     type Aggregation {
-      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
+      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON, filterSelf: Boolean=true): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
     }
   `;
 

@@ -24,10 +24,10 @@ class ConnectedFilter extends React.Component {
   }
 
   componentDidMount() {
-    askGuppyAboutAllFieldsAndOptions(this.props.guppyServerPath, this.state.allFields)
+    askGuppyAboutAllFieldsAndOptions(this.props.guppyConfig.path, this.props.guppyConfig.type, this.state.allFields)
       .then(res => {
-        this.handleReceiveNewAggsData(res.data.aggs);
-        this.saveInitialAggsData(res.data.aggs);
+        this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
+        this.saveInitialAggsData(res.data._aggregation);
       });
   }
 
@@ -49,7 +49,6 @@ class ConnectedFilter extends React.Component {
   }
 
   updateTabs(tabsOptions) {
-    // console.log(tabsOptions);
     const tabs = this.props.filterConfig.tabs.map(({filters}, index) => {
       return (
         <FilterList
@@ -62,10 +61,9 @@ class ConnectedFilter extends React.Component {
   }
 
   handleFilterChange(filterResults) {
-    askGuppyForAggregationData(this.props.guppyServerPath, this.state.allFields, filterResults)
+    askGuppyForAggregationData(this.props.guppyConfig.path, this.props.guppyConfig.type, this.state.allFields, filterResults)
       .then(res => {
-        // console.log(res.data.aggs);
-        this.handleReceiveNewAggsData(res.data.aggs, filterResults);
+        this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type], filterResults);
       });
 
     if (this.props.onFilterChange) {
@@ -99,7 +97,10 @@ ConnectedFilter.propTypes = {
       })),
     })),
   }).isRequired,
-  guppyServerPath: PropTypes.string,
+  guppyConfig: PropTypes.shape({
+    path: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+  }).isRequired,
   onFilterChange: PropTypes.func,
   onReceiveNewAggsData: PropTypes.func, 
   hideZero: PropTypes.bool,

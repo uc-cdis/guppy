@@ -52,7 +52,6 @@ class GuppyWrapper extends React.Component {
   }
 
   handleReceiveNewAggsData(aggsData) {
-    console.log('handleReceiveNewAggsData', aggsData);
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
@@ -60,7 +59,6 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(filter) {
-    console.log('handleFilterChange', filter);
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
     }
@@ -83,14 +81,13 @@ class GuppyWrapper extends React.Component {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
       const parsedData = res.data[this.props.guppyConfig.type];
-      const totalCount = res.data.aggs[this.props.guppyConfig.type].total;
+      const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
       if (updateDataWhenReceive) {
         this.setState({
           rawData: parsedData,
           totalCount,
         });
       }
-      console.log(parsedData, totalCount);
       return {
         data: parsedData,
         totalCount,
@@ -131,7 +128,7 @@ class GuppyWrapper extends React.Component {
             // below are just for ConnectedFilter component
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
-            guppyServerPath: this.props.guppyConfig.path,
+            guppyConfig: this.props.guppyConfig,
           }))
         }
       </React.Fragment>

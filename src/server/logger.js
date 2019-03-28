@@ -25,7 +25,7 @@ const numLevels = {
   4: 'ERROR',
   5: 'SILENT',
 };
-log.setLevel(log.levels.INFO);
+log.setLevel(log.levels.DEBUG);
 log.info('log level set to', numLevels[log.getLevel()]);
 
 export default log;
