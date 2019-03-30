@@ -1,9 +1,17 @@
 import GraphQLJSON from 'graphql-type-json';
+import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 
 const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
 
-const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
+const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
+  const parsedInfo = parseResolveInfo(resolveInfo);
+  const typeName = firstLetterUpperCase(parsedInfo.name);
+  const fields = Object.keys(parsedInfo.fieldsByTypeName[typeName]);
+  return fields;
+};
+
+const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, context, resolveInfo) => {
   const {
     offset, size, filter, sort,
   } = args;
@@ -11,7 +19,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   log.debug('[resolver.typeQueryResolver] filter', JSON.stringify(filter, null, 4));
   log.debug('[resolver.typeQueryResolver] sort', JSON.stringify(sort, null, 4));
   log.debug('[resolver.typeQueryResolver] args', JSON.stringify(args, null, 4));
-  const fields = []; // TODO
+  const fields = parseFieldsFromTypeResolveInfo(resolveInfo);
   const dataPromise = esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size,
   });
