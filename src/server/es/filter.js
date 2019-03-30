@@ -81,11 +81,12 @@ export const getFilterObj = (
   return resultFilterObj;
 };
 
-const filterData = async (
+const filterData = (
   { esInstance, esIndex, esType },
   {
     filter, fields = [], sort, offset = 0, size,
-  }) => {
+  },
+) => {
   const queryBody = { from: offset };
   if (typeof filter !== 'undefined') {
     queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
@@ -103,8 +104,8 @@ const filterData = async (
   if (fields && fields.length > 0) {
     queryBody._source = fields;
   }
-  const result = await esInstance.query(esIndex, esType, queryBody);
-  return result;
+  const resultPromise = esInstance.query(esIndex, esType, queryBody);
+  return resultPromise;
 };
 
 export const getCount = async (esInstance, esIndex, esType, filter) => {

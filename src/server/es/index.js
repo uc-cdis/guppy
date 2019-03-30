@@ -92,11 +92,11 @@ class ES {
     return res[esIndex];
   }
 
-  async getCount(esIndex, esType, filter) {
+  getCount(esIndex, esType, filter) {
     return esFilter.getCount(this, esIndex, esType, filter);
   }
 
-  async getData({
+  getData({
     esIndex, esType, fields, filter, sort, offset = 0, size,
   }) {
     return esFilter.getData(
@@ -111,7 +111,7 @@ class ES {
     );
   }
 
-  async numericAggregation({
+  numericAggregation({
     esIndex,
     esType,
     filter,
@@ -142,7 +142,7 @@ class ES {
     );
   }
 
-  async textAggregation({
+  textAggregation({
     esIndex,
     esType,
     filter,

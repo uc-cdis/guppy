@@ -3,26 +3,27 @@ import log from './logger';
 
 const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
 
-const typeQueryResolver = (esInstance, esIndex, esType) => async (parent, args) => {
+const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   const {
     offset, size, filter, sort,
   } = args;
+  log.debug('[resolver.typeQueryResolver] es type', esType);
   log.debug('[resolver.typeQueryResolver] filter', JSON.stringify(filter, null, 4));
   log.debug('[resolver.typeQueryResolver] sort', JSON.stringify(sort, null, 4));
-  log.debug('[resolver.typeQueryResolver] args', JSON.strinargs);
+  log.debug('[resolver.typeQueryResolver] args', JSON.stringify(args, null, 4));
   const fields = []; // TODO
-  const data = await esInstance.getData({
+  const dataPromise = esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size,
   });
-  return data;
+  return dataPromise;
 };
 
-const aggsQueryResolver = async (parent, args) => {
+const aggsQueryResolver = (parent, args) => {
   log.debug('[resolver.aggsQueryResolver] args', args);
   return { ...parent };
 };
 
-const typeAggsQueryResolver = (esInstance, esIndex, esType) => async (parent, args) => {
+const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   const {
     filter, offset, size, filterSelf,
@@ -38,14 +39,14 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => async (parent, ar
   };
 };
 
-const aggsTotalQueryResolver = async (parent, args) => {
+const aggsTotalQueryResolver = (parent, args) => {
   log.debug('[resolver.aggsTotalQueryResolver] args', args);
   const {
     filter, esInstance, esIndex, esType,
   } = parent;
   log.debug('[resolver.aggsTotalQueryResolver] filter', filter);
-  const count = await esInstance.getCount(esIndex, esType, filter);
-  return count;
+  const countPromise = esInstance.getCount(esIndex, esType, filter);
+  return countPromise;
 };
 
 const aggregateFieldResolver = field => (parent, args) => {
@@ -63,7 +64,7 @@ const aggregateFieldResolver = field => (parent, args) => {
   };
 };
 
-const numericHistogramResolver = async (parent, args) => {
+const numericHistogramResolver = (parent, args) => {
   log.debug('[resolver.numericHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType, filter, field, filterSelf,
@@ -71,7 +72,7 @@ const numericHistogramResolver = async (parent, args) => {
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
-  const result = await esInstance.numericAggregation({
+  const resultPromise = esInstance.numericAggregation({
     esIndex,
     esType,
     filter,
@@ -82,23 +83,23 @@ const numericHistogramResolver = async (parent, args) => {
     binCount,
     filterSelf,
   });
-  return result;
+  return resultPromise;
 };
 
-const textHistogramResolver = async (parent, args) => {
+const textHistogramResolver = (parent, args) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
     filter, field, filterSelf,
   } = parent;
-  const result = await esInstance.textAggregation({
+  const resultPromise = esInstance.textAggregation({
     esIndex,
     esType,
     filter,
     field,
     filterSelf,
   });
-  return result;
+  return resultPromise;
 };
 
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {

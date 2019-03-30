@@ -193,7 +193,6 @@ export const numericAggregation = async (
     filterSelf,
   },
 ) => {
-  let result;
   if (rangeStep <= 0) {
     throw new Error(`Invalid rangeStep ${rangeStep}`);
   }
@@ -207,7 +206,7 @@ export const numericAggregation = async (
     throw new Error('Cannot set "rangeStep" and "binCount" at same time.');
   }
   if (typeof rangeStep !== 'undefined') {
-    result = await numericHistogramWithFixedRangeStep(
+    return numericHistogramWithFixedRangeStep(
       {
         esInstance,
         esIndex,
@@ -224,10 +223,9 @@ export const numericAggregation = async (
         filterSelf,
       },
     );
-    return result;
   }
   if (typeof binCount !== 'undefined') {
-    result = await numericHistogramWithFixedBinCount(
+    return numericHistogramWithFixedBinCount(
       {
         esInstance,
         esIndex,
@@ -242,9 +240,8 @@ export const numericAggregation = async (
         filterSelf,
       },
     );
-    return result;
   }
-  result = await numericGlobalStats(
+  const result = await numericGlobalStats(
     {
       esInstance,
       esIndex,
