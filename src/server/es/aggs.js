@@ -295,7 +295,7 @@ export const textAggregation = async (
   const finalResults = [];
   /* eslint-disable */
   do {
-    const result = await esInstance.query(esIndex, esType, queryBody); /* eslint-disable no-await-in-loop */
+    const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
 
     result.aggregations[aggsName].buckets.forEach((item) => {

@@ -32,10 +32,13 @@
     "elasticsearch": "^15.4.1",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
+    "graphql-middleware": "^3.0.2",
     "graphql-parse-resolve-info": "^4.1.0",
+    "graphql-tools": "^4.0.4",
     "graphql-type-json": "^0.2.1",
     "lodash": "^4.17.11",
     "loglevel": "^1.6.1",
+    "node-fetch": "^2.3.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.4"
   },
