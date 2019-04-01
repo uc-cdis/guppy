@@ -1,22 +1,49 @@
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 
 const getNumericTextType = (
-  esContext,
+  esInstance,
+  esIndex,
+  esType,
   field,
-) => esFieldNumericTextTypeMapping[esContext.fieldTypes[field]];
+) => esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
 
 // FIXME: "is not"
-const getFilterItemForString = (op, field, value) => ({
-  term: {
-    [field]: value,
-  },
-});
+const getFilterItemForString = (op, field, value) => {
+  switch (op) {
+    case '=':
+    case 'eq':
+    case 'EQ':
+      return {
+        term: {
+          [field]: value,
+        },
+      };
+    case 'in':
+    case 'IN':
+      return {
+        terms: {
+          [field]: value,
+        },
+      };
+    default:
+      throw new Error(`Invalid text filter operation ${op}`);
+  }
+};
+
 const getFilterItemForNumbers = (op, field, value) => {
   const rangeOperator = {
     '>': 'gt',
+    gt: 'gt',
+    GT: 'gt',
     '>=': 'gte',
+    gte: 'gte',
+    GTE: 'gte',
     '<': 'lt',
+    lt: 'lt',
+    LT: 'lt',
     '<=': 'lte',
+    lte: 'lte',
+    LTE: 'lte',
   };
   if (op in rangeOperator) {
     return {
@@ -35,14 +62,18 @@ const getFilterItemForNumbers = (op, field, value) => {
   throw new Error(`Invalid numeric operation ${op}`);
 };
 
-export const getFilterObj = (esContext, graphqlFilterObj, aggsField, filterSelf = true) => {
+export const getFilterObj = (
+  esInstance, esIndex, esType, graphqlFilterObj, aggsField, filterSelf = true,
+) => {
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   let resultFilterObj = {};
   if (topLevelOp === 'AND' || topLevelOp === 'OR') {
     const boolConnectOp = topLevelOp === 'AND' ? 'must' : 'should';
     const boolItemsList = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
-      const filterObj = getFilterObj(esContext, filterItem, aggsField, filterSelf);
+      const filterObj = getFilterObj(
+        esInstance, esIndex, esType, filterItem, aggsField, filterSelf,
+      );
       if (filterObj) {
         boolItemsList.push(filterObj);
       }
@@ -63,7 +94,7 @@ export const getFilterObj = (esContext, graphqlFilterObj, aggsField, filterSelf 
       return null;
     }
     const value = graphqlFilterObj[topLevelOp][1];
-    const numericOrTextType = getNumericTextType(esContext, field);
+    const numericOrTextType = getNumericTextType(esInstance, esIndex, esType, field);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value);
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -75,32 +106,22 @@ export const getFilterObj = (esContext, graphqlFilterObj, aggsField, filterSelf 
   return resultFilterObj;
 };
 
-const filterData = async (esContext, filter, offset = 0, size) => {
+const filterData = (
+  { esInstance, esIndex, esType },
+  {
+    filter, fields = [], sort, offset = 0, size,
+  },
+) => {
   const queryBody = { from: offset };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter);
+    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
   }
-  if (typeof size !== 'undefined') {
-    queryBody.size = size;
-  }
-  const result = await esContext.queryHandler(queryBody);
-  return result;
-};
-
-export const getCount = async (esContext, filter) => {
-  const result = await filterData(esContext, filter, 0, 0);
-  return result.hits.total;
-};
-
-export const getData = async (esContext, fields, filter, sort, offset = 0, size) => {
-  const queryBody = {
-    from: offset,
-  };
-  if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter);
-  }
-  if (typeof sort !== 'undefined' && sort.length > 0) {
-    queryBody.sort = sort;
+  if (typeof sort !== 'undefined') {
+    if (sort.length > 0) {
+      queryBody.sort = sort;
+    } else {
+      queryBody.sort = Object.keys(sort).map(field => ({ [field]: sort[field] }));
+    }
   }
   if (typeof size !== 'undefined') {
     queryBody.size = size;
@@ -108,9 +129,32 @@ export const getData = async (esContext, fields, filter, sort, offset = 0, size)
   if (fields && fields.length > 0) {
     queryBody._source = fields;
   }
-  const result = await esContext.queryHandler(queryBody);
-  console.log(result);
-  const parsedResults = result.hits.hits.map(item => item._source);
-  console.log(JSON.stringify(parsedResults, null, 4));
-  return parsedResults;
+  const resultPromise = esInstance.query(esIndex, esType, queryBody);
+  return resultPromise;
+};
+
+export const getCount = async (esInstance, esIndex, esType, filter) => {
+  const result = await filterData({ esInstance, esIndex, esType }, { filter, fields: [] });
+  return result.hits.total;
+};
+
+export const getData = async (
+  {
+    esInstance,
+    esIndex,
+    esType,
+  }, {
+    fields,
+    filter,
+    sort,
+    offset = 0,
+    size,
+  }) => {
+  const result = await filterData(
+    { esInstance, esIndex, esType },
+    {
+      filter, fields, sort, offset, size,
+    },
+  );
+  return result.hits.hits.map(item => item._source);
 };

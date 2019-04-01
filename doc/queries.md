@@ -23,9 +23,10 @@
       "gender": asc
     }
   ], filter: $filter) {
-    id
+    subject_id
     gender
     ethnicity
+    vital_status
     file_count
   }
 }
@@ -35,24 +36,28 @@
 <pre>
 {
   "subject": [
-    {
-      "id": "1",
-      "gender": "female",
-      "ethnicity": "",
-      "file_count": 0
-    },
-    {
-      "id": "2",
-      "gender": "male",
-      "ethnicity": "",
-      "file_count": 0
-    },
-    {
-      "id": "3",
-      "gender": "female",
-      "ethnicity": "",
-      "file_count": 0
-    }
+      {
+        "subject_id": "52",
+        "gender": "female",
+        "ethnicity": "Black",
+        "vital_status": "Alive",
+        "file_count": 0
+      },
+      {
+        "subject_id": "54",
+        "gender": "female",
+        "ethnicity": "American Indian",
+        "vital_status": "Alive",
+        "file_count": 78
+      },
+      {
+        "subject_id": "55",
+        "gender": "female",
+        "ethnicity": "Pacific Islander",
+        "vital_status": "Alive",
+        "file_count": 53
+      },
+      ...
   ]
 }
 </pre>
@@ -79,25 +84,38 @@
 <tr>
 <td>
 <pre>
+query ($filter: JSON) {
+  _aggregation  {
+    subject(filter: $filter) {
+      _totalCount
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<pre>
 {
-  aggs(filter: $filter) {
+  "_aggregation": {
+    "subject": {
+      "_totalCount": 46
+    }
+  }
+}
+</pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre>
+query {
+  _aggregation {
     subject {
-      total
-    }
-    gender {
-      histogram {
-        key
-        count
-      }
-    }
-    age {
-      histogram(rangeStart: 0, rangeEnd: 40, rangeStep: 5) {
-        key
-        min
-        max
-        avg
-        sum
-        count
+      gender {
+        histogram {
+          key
+          count
+        }
       }
     }
   }
@@ -107,35 +125,21 @@
 <td>
 <pre>
 {
-    "aggs": {
-        "subject": {
-            "total": 3
-        },
+    "_aggregation": {
+      "subject": {
         "gender": {
           "histogram": [
             {
-              "key": "F",
-              "count": 10
+              "key": "female",
+              "count": 46
             },
             {
-              "key": "M",
-              "count": 10
+              "key": "male",
+              "count": 54
             }
           ]
-        },
-        "age": {
-            "histogram": [
-              {
-                "key": [0, 5],
-                "min": 2
-              },
-              {
-                "key": [5, 10],
-                "min": 3
-              },
-              ...
-            ]
         }
+      }
     }
 }
 </pre>
@@ -144,36 +148,46 @@
 <tr>
 <td>
 <pre>
-{
-  aggs(filter: $filter) {
-    age {
-      histogram {
-        min
-        max
-        avg
-        sum
-        count
+query($filter: JSON) {
+  _aggregation {
+    subject(filter: $filter) {
+      file_count {
+        histogram{
+          key
+          min
+          max
+          avg
+          sum
+          count
+        }
       }
     }
   }
 }
+
 </pre>
 </td>
 <td>
 <pre>
 {
-    "aggs": {
-        "age": {
-            "histogram": [
-              {
-                "min": 2,
-                "max": 10,
-                "avg": 24.4,
-                "sum": 25,
-                "count": 3
-              }
-            ]
+    "_aggregation": {
+      "subject": {
+        "file_count": {
+          "histogram": [
+            {
+              "key": [
+                0,
+                93
+              ],
+              "min": 0,
+              "max": 93,
+              "avg": 43,
+              "sum": 1978,
+              "count": 46
+            }
+          ]
         }
+      }
     }
 }
 </pre>
@@ -182,15 +196,81 @@
 <tr>
 <td>
 <pre>
-{
-  aggs(filter: $filter) {
-    age {
-      histogram (binCount: 20) {
-        key
-        avg
-        count
+query($filter: JSON) {
+  _aggregation {
+    subject(filter: $filter) {
+      file_count {
+        histogram(rangeStart: 0, rangeEnd: 40, rangeStep: 5) {
+          key
+          min
+          max
+          avg
+          sum
+          count
+        }
       }
     }
+  }
+}
+
+</pre>
+</td>
+<td>
+<pre>
+{
+    "_aggregation": {
+      "subject": {
+        "file_count": {
+          "histogram": [
+            {
+              "key": [
+                0,
+                5
+              ],
+              "min": 0,
+              "max": 3,
+              "avg": 1.5,
+              "sum": 6,
+              "count": 4
+            },
+            {
+              "key": [
+                5,
+                10
+              ],
+              "min": 6,
+              "max": 7,
+              "avg": 6.666666666666667,
+              "sum": 20,
+              "count": 3
+            },
+            ...
+          ]
+        }
+      }
+    }
+}
+</pre>
+</td>
+</tr>
+<tr>
+<td colspan="2">Query raw data or aggregation for different types
+</td>
+</tr>
+<tr>
+<td>
+<pre>
+{
+  subject(offset: 5, size: 100, sort: $sort1, filter: $filter1) {
+    subject_id
+    gender
+    ethnicity
+    vital_status
+    file_count
+  }
+  file (sort: $sort2, filter: $filter2){
+    file_id
+    subject_id
   }
 }
 </pre>
@@ -198,22 +278,112 @@
 <td>
 <pre>
 {
-    "aggs": {
-        "age": {
-            "histogram": [
-              {
-                "key": [0, 5]
-                "avg": 4.4,
-                "count": 4
-              },
-              {
-                "key": [5, 10]
-                "avg": 7.6,
-                "count": 9
-              },
-              ...
-            ]
+  "subject": [
+      {
+        "subject_id": "52",
+        "gender": "female",
+        "ethnicity": "Black",
+        "vital_status": "Alive",
+        "file_count": 0
+      },
+      {
+        "subject_id": "54",
+        "gender": "female",
+        "ethnicity": "American Indian",
+        "vital_status": "Alive",
+        "file_count": 78
+      },
+      {
+        "subject_id": "55",
+        "gender": "female",
+        "ethnicity": "Pacific Islander",
+        "vital_status": "Alive",
+        "file_count": 53
+      },
+      ...
+  ],
+  "file": [
+      {
+        "file_id": "file_id_201",
+        "subject_id": "42"
+      },
+      {
+        "file_id": "file_id_25",
+        "subject_id": "43"
+      },
+      {
+        "file_id": "file_id_894",
+        "subject_id": "44"
+      },
+      ...
+  ]
+}
+</pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre>
+{
+  _aggregation {
+    subject {
+      gender {
+        histogram {
+          key
+          count
         }
+      }
+    }
+    file {
+      file_id {
+        histogram {
+          key
+          count
+        }
+      }
+    }
+  }
+}
+
+</pre>
+</td>
+<td>
+<pre>
+{
+    "_aggregation": {
+      "subject": {
+        "gender": {
+          "histogram": [
+            {
+              "key": "female",
+              "count": 46
+            },
+            {
+              "key": "male",
+              "count": 54
+            }
+          ]
+        }
+      },
+      "file": {
+        "file_id": {
+          "histogram": [
+            {
+              "key": "file_id_105",
+              "count": 1
+            },
+            {
+              "key": "file_id_113",
+              "count": 1
+            },
+            {
+              "key": "file_id_135",
+              "count": 1
+            },
+            ...
+          ]
+        }
+      }
     }
 }
 </pre>

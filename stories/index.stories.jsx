@@ -23,7 +23,7 @@ const filterConfig = {
       { field: 'ethnicity', label: 'Ethnicity' },
       { field: 'gender', label: 'Gender' },
       { field: 'vital_status', label: 'Vital_status' },
-      { field: 'whatever_lab_result_value', label: 'Lab Result Value' },
+      //{ field: 'whatever_lab_result_value', label: 'Lab Result Value' },
     ],
   },
   {
@@ -49,7 +49,6 @@ const tableConfig = [
   { field: 'file_format', name: 'File Format' },
 ];
 
-const guppyServerPath = 'http://localhost:3000/graphql';
 const defaultPageSize = 20;
 class ConnectedTableExample extends React.Component {
   constructor(props) {
@@ -63,7 +62,6 @@ class ConnectedTableExample extends React.Component {
   fetchData(state, instance) {
     this.setState({ loading: true });
     const offset = state.page * state.pageSize;
-    console.log('sort: ', state.sorted);
     const sort = state.sorted.map(i => {
       return {
         [i.id]: i.desc ? 'desc' : 'asc',
@@ -83,12 +81,10 @@ class ConnectedTableExample extends React.Component {
   }
 
   render() {
-    console.log(this.props.rawData);
     const columnsConfig = tableConfig.map(c => ({Header: c.name, accessor: c.field}));
     const totalCount = this.props.totalCount;
     const pageSize = this.state.pageSize;
     const totalPages = Math.floor(totalCount / pageSize) + ((totalCount % pageSize === 0) ? 0 : 1);
-    console.log('totalPages', totalCount, pageSize, totalPages);
     return (
       <ReactTable
         columns={columnsConfig}
@@ -105,18 +101,22 @@ class ConnectedTableExample extends React.Component {
 }
 
 ConnectedTableExample.propTypes = {
-  rawData: PropTypes.array.isRequired,
+  rawData: PropTypes.array,
   className: PropTypes.string,
-  fetchAndUpdateRawData: PropTypes.func.isRequired,
-  totalCount: PropTypes.number.isRequired,
+  fetchAndUpdateRawData: PropTypes.func,
+  totalCount: PropTypes.number,
 };
 
+const guppyConfig = {
+  path: 'http://localhost:3000/graphql',
+  type: 'subject',
+};
 storiesOf('Components', module)
   .add('ConnectedFilter', () => {
     return (
       <ConnectedFilter
         filterConfig={filterConfig}
-        guppyServerPath={guppyServerPath}
+        guppyConfig={guppyConfig}
         onFilterChange={action('filter change')}
       />
     );
@@ -126,11 +126,16 @@ storiesOf('Components', module)
       <div className='guppy-wrapper'>
         <GuppyWrapper
           filterConfig={filterConfig}
-          guppyConfig={{path: guppyServerPath, type: 'subject'}}
+          guppyConfig={guppyConfig}
+          tableConfig={tableConfig}
           onFilterChange={action('wrapper receive filter change')}
           onReceiveNewAggsData={action('wrapper receive aggs data')}
         >
-          <ConnectedFilter className='test' className='guppy-wrapper__filter' />
+          <ConnectedFilter
+            className='guppy-wrapper__filter'
+            filterConfig={filterConfig}
+            guppyConfig={guppyConfig}
+          />
           <ConnectedTableExample className='guppy-wrapper__table' />
         </GuppyWrapper>
       </div>

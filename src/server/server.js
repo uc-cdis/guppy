@@ -5,6 +5,7 @@ import esInstance from './es/index';
 import getResolver from './resolvers';
 import getSchema from './schema';
 import config from './config';
+import log from './logger';
 
 const app = express();
 app.use(cors());
@@ -24,7 +25,7 @@ const startServer = () => {
   });
 
   app.listen(config.port, () => {
-    console.log(`Example app listening on port ${config.port}!`);
+    log.info(`[Server] guppy listening on port ${config.port}!`);
   });
 };
 

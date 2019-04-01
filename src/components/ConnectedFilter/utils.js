@@ -23,7 +23,6 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
         count: item.count,
       };
     });
-    // console.log('getSingleFilterOption: number options: ', rangeOptions);
     return rangeOptions;
   }
 
@@ -32,12 +31,10 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     filterType: 'singleSelect',
     count: item.count,
   }));
-    // console.log('getSingleFilterOption: text options: ', textOptions);
   return textOptions;
 };
 
 export const getFilterSections = (filters, tabsOptions, initialTabsOptions) => {
-  console.log('getFilterSections tabsOptions: ', tabsOptions);
   const sections = filters.map(({ field, label }) => ({
     title: label,
     options: getSingleFilterOption(
@@ -45,7 +42,6 @@ export const getFilterSections = (filters, tabsOptions, initialTabsOptions) => {
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     ),
   }));
-  // console.log('getFilterSections: ', sections);
   return sections;
 };
 

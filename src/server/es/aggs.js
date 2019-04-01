@@ -41,7 +41,11 @@ const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
  * @returns {min, max, sum, count, avg, key}
  */
 const numericGlobalStats = async (
-  esContext,
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
   {
     filter,
     field,
@@ -50,7 +54,7 @@ const numericGlobalStats = async (
   }) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter);
+    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
@@ -59,7 +63,7 @@ const numericGlobalStats = async (
     },
   };
   queryBody.aggs = aggsObj;
-  const result = await esContext.queryHandler(queryBody);
+  const result = await esInstance.query(esIndex, esType, queryBody);
   let resultStats = result.aggregations[AGGS_GLOBAL_STATS_NAME];
   const range = [
     typeof rangeStart === 'undefined' ? resultStats.min : rangeStart,
@@ -73,7 +77,11 @@ const numericGlobalStats = async (
 };
 
 const numericHistogramWithFixedRangeStep = async (
-  esContext,
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
   {
     filter,
     field,
@@ -84,7 +92,7 @@ const numericHistogramWithFixedRangeStep = async (
   }) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter, field, filterSelf);
+    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter, field, filterSelf);
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
@@ -113,7 +121,7 @@ const numericHistogramWithFixedRangeStep = async (
     aggsObj[AGGS_QUERY_NAME].histogram.offset = offset;
   }
   queryBody.aggs = aggsObj;
-  const result = await esContext.queryHandler(queryBody);
+  const result = await esInstance.query(esIndex, esType, queryBody);
   const parsedAggsResult = result.aggregations[AGGS_QUERY_NAME].buckets.map(item => ({
     key: [item.key, item.key + rangeStep],
     ...item[AGGS_ITEM_STATS_NAME],
@@ -122,7 +130,11 @@ const numericHistogramWithFixedRangeStep = async (
 };
 
 const numericHistogramWithFixedBinCount = async (
-  esContext,
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
   {
     filter,
     field,
@@ -131,15 +143,29 @@ const numericHistogramWithFixedBinCount = async (
     binCount,
     filterSelf,
   }) => {
-  const globalStats = await numericGlobalStats(esContext, {
-    filter, field, rangeStart, rangeEnd,
-  });
+  const globalStats = await numericGlobalStats(
+    {
+      esInstance,
+      esIndex,
+      esType,
+    },
+    {
+      filter,
+      field,
+      rangeStart,
+      rangeEnd,
+    },
+  );
   const { min, max } = globalStats;
   const histogramStart = typeof rangeStart === 'undefined' ? min : rangeStart;
   const histogramEnd = typeof rangeEnd === 'undefined' ? (max + 1) : rangeEnd;
   const rangeStep = (histogramEnd - histogramStart) / binCount;
   return numericHistogramWithFixedRangeStep(
-    esContext,
+    {
+      esInstance,
+      esIndex,
+      esType,
+    },
     {
       filter,
       field,
@@ -152,7 +178,11 @@ const numericHistogramWithFixedBinCount = async (
 };
 
 export const numericAggregation = async (
-  esContext,
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
   {
     filter,
     field,
@@ -163,7 +193,6 @@ export const numericAggregation = async (
     filterSelf,
   },
 ) => {
-  let result;
   if (rangeStep <= 0) {
     throw new Error(`Invalid rangeStep ${rangeStep}`);
   }
@@ -177,9 +206,15 @@ export const numericAggregation = async (
     throw new Error('Cannot set "rangeStep" and "binCount" at same time.');
   }
   if (typeof rangeStep !== 'undefined') {
-    result = await numericHistogramWithFixedRangeStep(
-      esContext,
+    return numericHistogramWithFixedRangeStep(
       {
+        esInstance,
+        esIndex,
+        esType,
+      },
+      {
+        esIndex,
+        esType,
         filter,
         field,
         rangeStart,
@@ -188,11 +223,14 @@ export const numericAggregation = async (
         filterSelf,
       },
     );
-    return result;
   }
   if (typeof binCount !== 'undefined') {
-    result = await numericHistogramWithFixedBinCount(
-      esContext,
+    return numericHistogramWithFixedBinCount(
+      {
+        esInstance,
+        esIndex,
+        esType,
+      },
       {
         filter,
         field,
@@ -202,10 +240,13 @@ export const numericAggregation = async (
         filterSelf,
       },
     );
-    return result;
   }
-  result = await numericGlobalStats(
-    esContext,
+  const result = await numericGlobalStats(
+    {
+      esInstance,
+      esIndex,
+      esType,
+    },
     {
       filter,
       field,
@@ -218,7 +259,11 @@ export const numericAggregation = async (
 
 const PAGE_SIZE = 1024;
 export const textAggregation = async (
-  esContext,
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
   {
     filter,
     field,
@@ -227,7 +272,7 @@ export const textAggregation = async (
 ) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esContext, filter, field, filterSelf);
+    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter, field, filterSelf);
   }
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {
@@ -250,8 +295,7 @@ export const textAggregation = async (
   const finalResults = [];
   /* eslint-disable */
   do {
-    console.log('textAggregation, queryBody = ', JSON.stringify(queryBody, null, 4));
-    const result = await esContext.queryHandler(queryBody); /* eslint-disable no-await-in-loop */
+    const result = await esInstance.query(esIndex, esType, queryBody); /* eslint-disable no-await-in-loop */
     resultSize = 0;
 
     result.aggregations[aggsName].buckets.forEach((item) => {

@@ -28,6 +28,7 @@ function es_delete_all() {
 function es_setup_index() {
   local indexName
   indexName="${1:-gen3-dev-subject}"
+  fileIndexName="${2:-gen3-dev-file}"
 curl -iv -X PUT "${ESHOST}/${indexName}" \
 -H 'Content-Type: application/json' -d'
 {
@@ -40,6 +41,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
     "mappings": {
       "subject": {
         "properties": {
+          "subject_id": { "type": "keyword" },
           "name": { "type": "text" },
           "project": { "type": "keyword" },
           "study": { "type": "keyword" },
@@ -52,6 +54,25 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "gen3_resource_path": { "type": "keyword" },
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" }
+        }
+      }
+    }
+}
+'
+curl -iv -X PUT "${ESHOST}/${fileIndexName}" \
+-H 'Content-Type: application/json' -d'
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 1,
+            "number_of_replicas" : 0
+        }
+    },
+    "mappings": {
+      "file": {
+        "properties": {
+          "file_id": { "type": "keyword" },
+          "subject_id": { "type": "keyword" }
         }
       }
     }
@@ -79,6 +100,7 @@ function es_gen_data() {
   startIndex="${1:-0}"
   endIndex="${2:-0}"
   indexName="${3:-gen3-dev-subject}"
+  fileIndexName="${4:-gen3-dev-file}"
 
 declare -a genderList
 declare -a ethnicityList
@@ -116,6 +138,7 @@ while [[ $COUNT -lt $endIndex ]]; do
 
   cat - > "$tmpName" <<EOM
 {
+  "subject_id": "$COUNT",
   "name": "Subject-$COUNT",
   "project": "${projectName}",
   "study": "Study-${projectIndex}${studyIndex}",
@@ -136,6 +159,18 @@ EOM
   curl -X PUT "${ESHOST}/${indexName}/subject/${COUNT}?pretty" \
        -H 'Content-Type: application/json' "-d@$tmpName"
 
+
+  cat - > "$tmpName" <<EOM
+{
+  "subject_id": "$COUNT",
+  "file_id": "file_id_$(( $RANDOM % 1000 ))"
+}
+EOM
+  cat - $tmpName <<EOM
+Loading record:
+EOM
+  curl -X PUT "${ESHOST}/${fileIndexName}/file/${COUNT}?pretty" \
+       -H 'Content-Type: application/json' "-d@$tmpName"
   let COUNT+=1
 done
 }
