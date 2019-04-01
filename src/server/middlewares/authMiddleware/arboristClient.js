@@ -10,7 +10,7 @@ class ArboristClient {
   listAuthorizedResources(jwt) {
     if (!jwt) {
       log.error('no JWT in the context; returning no resources');
-      return Promise.resolve({});
+      return Promise.resolve([]);
     }
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/resources`;
@@ -27,7 +27,7 @@ class ArboristClient {
       response => response.json(),
       (err) => {
         log.error(err);
-        return {};
+        return [];
       },
     );
   }
