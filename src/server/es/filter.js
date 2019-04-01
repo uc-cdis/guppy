@@ -8,17 +8,42 @@ const getNumericTextType = (
 ) => esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
 
 // FIXME: "is not"
-const getFilterItemForString = (op, field, value) => ({
-  term: {
-    [field]: value,
-  },
-});
+const getFilterItemForString = (op, field, value) => {
+  switch (op) {
+    case '=':
+    case 'eq':
+    case 'EQ':
+      return {
+        term: {
+          [field]: value,
+        },
+      };
+    case 'in':
+    case 'IN':
+      return {
+        terms: {
+          [field]: value,
+        },
+      };
+    default:
+      throw new Error(`Invalid text filter operation ${op}`);
+  }
+};
+
 const getFilterItemForNumbers = (op, field, value) => {
   const rangeOperator = {
     '>': 'gt',
+    gt: 'gt',
+    GT: 'gt',
     '>=': 'gte',
+    gte: 'gte',
+    GTE: 'gte',
     '<': 'lt',
+    lt: 'lt',
+    LT: 'lt',
     '<=': 'lte',
+    lte: 'lte',
+    LTE: 'lte',
   };
   if (op in rangeOperator) {
     return {
