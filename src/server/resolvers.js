@@ -1,8 +1,7 @@
 import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
-
-const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
+import { firstLetterUpperCase } from './utils';
 
 const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
   const parsedInfo = parseResolveInfo(resolveInfo);
@@ -157,7 +156,7 @@ const getResolver = (esConfig, esInstance) => {
     },
   };
   log.info('[resolver] graphql resolver generated.');
-  log.debug('[resolver] graphql resolver', resolver);
+  log.rawOutput(resolver);
   return resolver;
 };
 

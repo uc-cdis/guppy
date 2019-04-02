@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-express';
 import log from './logger';
-
-const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
+import { firstLetterUpperCase } from './utils';
 
 const esgqlTypeMapping = {
   text: 'String',

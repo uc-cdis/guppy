@@ -66,6 +66,7 @@ export const getFilterObj = (
   esInstance, esIndex, esType, graphqlFilterObj, aggsField, filterSelf = true,
 ) => {
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
+  if (typeof topLevelOp === 'undefined') return null;
   let resultFilterObj = {};
   if (topLevelOp === 'AND' || topLevelOp === 'OR') {
     const boolConnectOp = topLevelOp === 'AND' ? 'must' : 'should';
