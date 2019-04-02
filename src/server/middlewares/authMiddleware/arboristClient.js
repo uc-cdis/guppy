@@ -14,6 +14,7 @@ class ArboristClient {
     }
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/resources`;
+    log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
     return fetch(
       resourcesEndpoint,
       {
