@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export ESHOST=${ESHOST:-"localhost:9200"}
+export ESHOST=${GEN3_ES_ENDPOINT:-"localhost:9200"}
 
 #
 # Delete all the indexes out of ES that grep-match a given string
@@ -116,17 +116,17 @@ raceList=( white black hispanic asian mixed )
 vitalList=( Alive Dead )
 fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes")
 fileFormatList=( BEM BAM BED CSV FASTQ RAW TAR TSV TXT IDAT )
+resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" )
+projectList=( "jenkins" "test ")
+
 
 COUNT=$startIndex
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 tmpName="$(mktemp $XDG_RUNTIME_DIR/es.json.XXXXXX)"
 while [[ $COUNT -lt $endIndex ]]; do
-  projectIndex=$(( $RANDOM % 5 ))
-  projectName="Proj-${projectIndex}"
-  if [[ $projectIndex == 0 ]]; then
-    # dev environments have a test project
-    projectName="test"
-  fi
+  projectIndex=$(( $RANDOM % 2 ))
+  projectName="${projectList[$projectIndex]}"
+  resourceName="${resourceList[$projectIndex]}"
   studyIndex=$(( $RANDOM % 10 ))
   gender="${genderList[$(( $RANDOM % ${#genderList[@]} ))]}"
   ethnicity="${ethnicityList[$(( $RANDOM % ${#ethnicityList[@]} ))]}"
@@ -142,14 +142,14 @@ while [[ $COUNT -lt $endIndex ]]; do
   "subject_id": "$COUNT",
   "name": "Subject-$COUNT",
   "project": "${projectName}",
-  "study": "Study-${projectIndex}${studyIndex}",
+  "study": "${projectName}-Study-${studyIndex}",
   "gender": "${gender}",
   "ethnicity": "${ethnicity}",
   "race": "${race}",
   "vital_status": "${vital}",
   "file_type": "${fileType}",
   "file_format": "${fileFormat}",
-  "gen3_resource_path": "/projects/$projectName",
+  "gen3_resource_path": "${resourceName}",
   "file_count": $fileCounts,
   "whatever_lab_result_value": $randomFloatNumber
 }
@@ -164,7 +164,7 @@ EOM
   cat - > "$tmpName" <<EOM
 {
   "subject_id": "$COUNT",
-  "gen3_resource_path": "/projects/$projectName",
+  "gen3_resource_path": "${resourceName}",
   "file_id": "file_id_$(( $RANDOM % 1000 ))"
 }
 EOM
