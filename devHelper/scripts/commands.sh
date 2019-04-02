@@ -116,15 +116,15 @@ raceList=( white black hispanic asian mixed )
 vitalList=( Alive Dead )
 fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes")
 fileFormatList=( BEM BAM BED CSV FASTQ RAW TAR TSV TXT IDAT )
-resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" )
-projectList=( "jenkins" "test ")
+resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test")
+projectList=( "jenkins" "test" )
 
 
 COUNT=$startIndex
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 tmpName="$(mktemp $XDG_RUNTIME_DIR/es.json.XXXXXX)"
 while [[ $COUNT -lt $endIndex ]]; do
-  projectIndex=$(( $RANDOM % 2 ))
+  projectIndex=$(( $RANDOM % ${#projectList[@]} ))
   projectName="${projectList[$projectIndex]}"
   resourceName="${resourceList[$projectIndex]}"
   studyIndex=$(( $RANDOM % 10 ))
