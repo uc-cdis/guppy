@@ -21,7 +21,7 @@ const config = {
         type: 'file',
       },
     ],
-    authFilterField: inputConfig.authFilterField || 'gen3_resource_path',
+    authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
   },
 
   port: 3000,
