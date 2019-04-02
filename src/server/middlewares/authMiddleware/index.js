@@ -12,7 +12,8 @@ const authMWResolver = async (resolve, root, args, context, info) => {
   }
 
   // asking arborist for auth resource list, and add to filter args
-  const resources = await arboristClient.listAuthorizedResources(jwt);
+  const data = await arboristClient.listAuthorizedResources(jwt);
+  const resources = data.resources || [];
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
   const parsedFilter = args.filter || {};
   const newArgs = {
