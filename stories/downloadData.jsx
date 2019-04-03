@@ -25,8 +25,7 @@ storiesOf('Guppy Wrapper', module)
             guppyConfig={guppyConfig}
           />
           <TableExample className='guppy-wrapper__table' />
-          <DownloadButtonExample
-          />
+          <DownloadButtonExample />
         </GuppyWrapper>
       </div>
     )
