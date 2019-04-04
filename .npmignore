@@ -2,3 +2,5 @@ src
 .babelrc
 devHelper
 .eslintrc.json
+doc/TODO
+guppy_config.json
