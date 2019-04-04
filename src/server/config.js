@@ -10,7 +10,7 @@ if (process.env.GUPPY_CONFIG_FILEPATH) {
 
 const config = {
   esConfig: {
-    host: 'localhost:9200',
+    host: 'http://localhost:9200',
     indices: inputConfig.indices || [
       {
         index: 'gen3-dev-subject',

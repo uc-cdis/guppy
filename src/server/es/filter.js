@@ -1,4 +1,4 @@
-import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
+import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum, SCROLL_PAGE_SIZE } from './const';
 
 const getNumericTextType = (
   esInstance,
@@ -107,6 +107,18 @@ export const getFilterObj = (
   return resultFilterObj;
 };
 
+const getESSortBody = (graphqlSort) => {
+  let sortBody;
+  if (typeof graphqlSort !== 'undefined') {
+    if (graphqlSort.length > 0) {
+      sortBody = graphqlSort;
+    } else {
+      sortBody = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
+    }
+  }
+  return sortBody;
+};
+
 const filterData = (
   { esInstance, esIndex, esType },
   {
@@ -117,13 +129,7 @@ const filterData = (
   if (typeof filter !== 'undefined') {
     queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
   }
-  if (typeof sort !== 'undefined') {
-    if (sort.length > 0) {
-      queryBody.sort = sort;
-    } else {
-      queryBody.sort = Object.keys(sort).map(field => ({ [field]: sort[field] }));
-    }
-  }
+  queryBody.sort = getESSortBody(sort);
   if (typeof size !== 'undefined') {
     queryBody.size = size;
   }
@@ -132,6 +138,18 @@ const filterData = (
   }
   const resultPromise = esInstance.query(esIndex, esType, queryBody);
   return resultPromise;
+};
+
+export const getDataUsingScroll = (
+  { esInstance, esIndex, esType },
+  { filter, fields, sort },
+) => {
+  const esFilterObj = filter ? getFilterObj(esInstance, esIndex, esType, filter) : undefined;
+  return esInstance.scrollQuery(esIndex, esType, {
+    filter: esFilterObj,
+    fields,
+    sort: getESSortBody(sort),
+  });
 };
 
 export const getCount = async (esInstance, esIndex, esType, filter) => {
@@ -151,6 +169,9 @@ export const getData = async (
     offset = 0,
     size,
   }) => {
+  if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
+    throw new Error(`Invalid large query for offset + size > 10000, offset = ${offset} and size = ${size}`);
+  }
   const result = await filterData(
     { esInstance, esIndex, esType },
     {

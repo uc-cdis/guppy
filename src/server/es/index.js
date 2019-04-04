@@ -1,8 +1,10 @@
 import elasticsearch from 'elasticsearch';
+import request from 'request';
 import config from '../config';
 import * as esFilter from './filter';
 import * as esAggregator from './aggs';
 import log from '../logger';
+import { SCROLL_PAGE_SIZE } from './const';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -58,6 +60,61 @@ class ES {
     });
   }
 
+  async scrollQuery(esIndex, esType, {
+    filter,
+    fields,
+    sort,
+  }) {
+    if (!esIndex || !esType) {
+      throw new Error('Invalid es index or es type name');
+    }
+    const validatedQueryBody = filter ? { query: filter } : {};
+    log.debug('[ES.scrollQuery] scroll query body: ', JSON.stringify(validatedQueryBody, null, 4));
+
+    let currentBatch;
+    let scrollID;
+    let totalData = [];
+    let batchSize = 0;
+
+    while (!currentBatch || batchSize > 0) {
+      if (typeof scrollID === 'undefined') { // first batch
+        currentBatch = await this.client.search({ // eslint-disable-line no-await-in-loop
+          index: esIndex,
+          type: esType,
+          body: validatedQueryBody,
+          scroll: '2m',
+          size: SCROLL_PAGE_SIZE,
+          _source: fields,
+          sort,
+        }).then(resp => resp, (err) => {
+          log.error('[ES.query] error when query');
+          console.trace(err.message);
+        });
+        log.debug('[ES scrollQuery] created scroll ', scrollID);
+      } else { // following batches
+        currentBatch = await this.client.scroll({ // eslint-disable-line no-await-in-loop
+          scroll_id: scrollID,
+          scroll: '2m',
+        });
+      }
+
+      // merge fetched batches
+      log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
+      scrollID = currentBatch._scroll_id;
+      batchSize = currentBatch.hits.hits.length;
+
+      // TODO: change it to streaming
+      totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
+    }
+
+    log.debug('[ES scrollQuery] end scrolling, cleaning', scrollID);
+    request.delete(
+      this.config.host,
+      { scroll_id: scrollID },
+    );
+    return totalData;
+  }
+
   async initialize() {
     this.fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
@@ -97,7 +154,7 @@ class ES {
   }
 
   getData({
-    esIndex, esType, fields, filter, sort, offset = 0, size,
+    esIndex, esType, fields, filter, sort, offset, size,
   }) {
     return esFilter.getData(
       {
@@ -107,6 +164,21 @@ class ES {
       },
       {
         fields, filter, sort, offset, size,
+      },
+    );
+  }
+
+  downloadData({
+    esIndex, esType, fields, filter, sort,
+  }) {
+    return esFilter.getDataUsingScroll(
+      {
+        esInstance: this,
+        esIndex,
+        esType,
+      },
+      {
+        fields, filter, sort,
       },
     );
   }

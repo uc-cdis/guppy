@@ -2,6 +2,34 @@ import log from '../../logger';
 import config from '../../config';
 import arboristClient from './arboristClient';
 
+export const applyAuthFilter = async (jwt, parsedFilter) => {
+  // if mock arborist endpoint, just skip auth middleware
+  if (config.arboristEndpoint === 'mock') {
+    log.debug('[authMiddleware] using mock arborist endpoint, skip auth middleware');
+    return parsedFilter;
+  }
+
+  // asking arborist for auth resource list, and add to filter args
+  const data = await arboristClient.listAuthorizedResources(jwt);
+  log.debug('[authMiddleware] arborist client returns');
+  log.rawOutput(data);
+  const resources = data.resources || [];
+  log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
+  const authPart = {
+    IN: [
+      config.esConfig.authFilterField,
+      [...resources],
+    ],
+  };
+  const appliedFilter = parsedFilter ? {
+    AND: [
+      parsedFilter,
+      ...authPart,
+    ],
+  } : authPart;
+  return appliedFilter;
+};
+
 const authMWResolver = async (resolve, root, args, context, info) => {
   const { jwt } = context;
 
@@ -12,26 +40,15 @@ const authMWResolver = async (resolve, root, args, context, info) => {
   }
 
   // asking arborist for auth resource list, and add to filter args
-  const data = await arboristClient.listAuthorizedResources(jwt);
-  log.debug('[authMiddleware] arborist client returns');
-  log.rawOutput(data);
-  const resources = data.resources || [];
-  log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
-  const parsedFilter = args.filter || {};
+  const parsedFilter = args.filter;
+  const appliedFilter = await applyAuthFilter(jwt, parsedFilter);
   const newArgs = {
     ...args,
-    filter: {
-      AND: [
-        parsedFilter,
-        {
-          IN: [
-            config.esConfig.authFilterField,
-            [...resources],
-          ],
-        },
-      ],
-    },
+    filter: appliedFilter,
   };
+  if (typeof newArgs.filter === 'undefined') {
+    delete newArgs.filter;
+  }
   return resolve(root, newArgs, context, info);
 };
 
