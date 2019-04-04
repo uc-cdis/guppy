@@ -27,7 +27,8 @@ class ES {
       index: esIndex,
       type: esType,
     }).then((resp) => {
-      const mappingObj = resp.body[esIndex].mappings[esType].properties;
+      const esIndexAlias = Object.keys(resp.body)[0];
+      const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
       const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
         const esFieldType = mappingObj[field].type;
         acc[field] = esFieldType;
