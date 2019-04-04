@@ -38,7 +38,7 @@ class ES {
       }, {});
       return fieldTypes;
     }, (err) => {
-      console.trace(err.message);
+      console.trace(err.message); // eslint-disable-line no-console
     });
   }
 
@@ -56,7 +56,7 @@ class ES {
       body: validatedQueryBody,
     }).then(resp => resp, (err) => {
       log.error('[ES.query] error when query');
-      console.trace(err.message);
+      console.trace(err.message); // eslint-disable-line no-console
     });
   }
 
@@ -88,7 +88,7 @@ class ES {
           sort,
         }).then(resp => resp, (err) => {
           log.error('[ES.query] error when query');
-          console.trace(err.message);
+          console.trace(err.message); // eslint-disable-line no-console
         });
         log.debug('[ES scrollQuery] created scroll ', scrollID);
       } else { // following batches

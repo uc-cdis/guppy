@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import log from '../../logger';
 import config from '../../config';
 import arboristClient from './arboristClient';
@@ -11,9 +12,8 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
 
   // asking arborist for auth resource list, and add to filter args
   const data = await arboristClient.listAuthorizedResources(jwt);
-  log.debug('[authMiddleware] arborist client returns');
   log.rawOutput(data);
-  const resources = data.resources || [];
+  const resources = data.resources ? _.uniq(data.resources) : [];
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
   const authPart = {
     IN: [
