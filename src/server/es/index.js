@@ -1,4 +1,4 @@
-import elasticsearch from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import request from 'request';
 import config from '../config';
 import * as esFilter from './filter';
@@ -9,13 +9,12 @@ import { SCROLL_PAGE_SIZE } from './const';
 class ES {
   constructor(esConfig = config.esConfig) {
     this.config = esConfig;
-    this.client = new elasticsearch.Client({
-      host: this.config.host,
+    this.client = new Client({
+      node: this.config.host,
       // log: 'trace'
     });
-    this.client.ping({
-      requestTimeout: 30000,
-    }, (error) => {
+    this.client.ping({}, (error) => {
+      console.log(error);
       if (error) {
         log.error(`[ES] elasticsearch cluster at ${this.config.host} is down!`);
       } else {
@@ -30,7 +29,8 @@ class ES {
       index: esIndex,
       type: esType,
     }).then((resp) => {
-      const mappingObj = resp[esIndex].mappings[esType].properties;
+      console.log(resp);
+      const mappingObj = resp.body[esIndex].mappings[esType].properties;
       const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
         const esFieldType = mappingObj[field].type;
         acc[field] = esFieldType;
@@ -54,7 +54,7 @@ class ES {
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
-    }).then(resp => resp, (err) => {
+    }).then(resp => resp.body, (err) => {
       log.error('[ES.query] error when query');
       console.trace(err.message); // eslint-disable-line no-console
     });
@@ -78,7 +78,7 @@ class ES {
 
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
-        currentBatch = await this.client.search({ // eslint-disable-line no-await-in-loop
+        const res = await this.client.search({ // eslint-disable-line no-await-in-loop
           index: esIndex,
           type: esType,
           body: validatedQueryBody,
@@ -90,14 +90,17 @@ class ES {
           log.error('[ES.query] error when query');
           console.trace(err.message); // eslint-disable-line no-console
         });
+        currentBatch = res.body;
         log.debug('[ES scrollQuery] created scroll ', scrollID);
       } else { // following batches
-        currentBatch = await this.client.scroll({ // eslint-disable-line no-await-in-loop
+        const res = await this.client.scroll({ // eslint-disable-line no-await-in-loop
           scroll_id: scrollID,
           scroll: '2m',
         });
+        currentBatch = res.body;
       }
 
+      console.log(currentBatch);
       // merge fetched batches
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
       scrollID = currentBatch._scroll_id;
@@ -108,10 +111,9 @@ class ES {
     }
 
     log.debug('[ES scrollQuery] end scrolling, cleaning', scrollID);
-    request.delete(
-      this.config.host,
-      { scroll_id: scrollID },
-    );
+    await this.client.clearScroll({
+      scroll_id: scrollID,
+    });
     return totalData;
   }
 

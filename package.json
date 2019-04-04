@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
+    "@elastic/elasticsearch": "^7.0.0-rc.1",
     "@gen3/ui-component": "https://github.com/uc-cdis/gen3-ui-component.git#feat/filters-charts",
     "apollo-server": "^2.4.8",
     "apollo-server-express": "^2.4.8",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
-    "elasticsearch": "^15.4.1",
     "express": "^4.16.4",
     "graphql": "^14.1.1",
     "graphql-middleware": "^3.0.2",
