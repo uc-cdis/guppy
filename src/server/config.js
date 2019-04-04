@@ -10,7 +10,7 @@ if (process.env.GUPPY_CONFIG_FILEPATH) {
 
 const config = {
   esConfig: {
-    host: 'http://localhost:9200',
+    host: 'localhost:9200',
     indices: inputConfig.indices || [
       {
         index: 'gen3-dev-subject',
@@ -31,6 +31,9 @@ const config = {
 
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
+}
+if (!config.esConfig.host.startsWith('http')) {
+  config.esConfig.host = `http://${config.esConfig.host}`;
 }
 
 if (process.env.GEN3_ARBORIST_ENDPOINT) {
