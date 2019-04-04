@@ -1,5 +1,4 @@
 import { Client } from '@elastic/elasticsearch';
-import request from 'request';
 import config from '../config';
 import * as esFilter from './filter';
 import * as esAggregator from './aggs';
@@ -14,7 +13,6 @@ class ES {
       // log: 'trace'
     });
     this.client.ping({}, (error) => {
-      console.log(error);
       if (error) {
         log.error(`[ES] elasticsearch cluster at ${this.config.host} is down!`);
       } else {
@@ -29,7 +27,6 @@ class ES {
       index: esIndex,
       type: esType,
     }).then((resp) => {
-      console.log(resp);
       const mappingObj = resp.body[esIndex].mappings[esType].properties;
       const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
         const esFieldType = mappingObj[field].type;
@@ -100,7 +97,6 @@ class ES {
         currentBatch = res.body;
       }
 
-      console.log(currentBatch);
       // merge fetched batches
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
       scrollID = currentBatch._scroll_id;

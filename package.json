@@ -41,8 +41,7 @@
     "loglevel": "^1.6.1",
     "node-fetch": "^2.3.0",
     "prop-types": "^15.7.2",
-    "react": "^16.8.4",
-    "request": "^2.88.0"
+    "react": "^16.8.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
