@@ -12,7 +12,11 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
 
   // asking arborist for auth resource list, and add to filter args
   const data = await arboristClient.listAuthorizedResources(jwt);
+  log.debug('[authMiddleware] list resources: ');
   log.rawOutput(data);
+  if (data && data.error) {
+    throw new Error(`Arborist return code ${data.error.code}: ${data.error.message}`);
+  }
   const resources = data.resources ? _.uniq(data.resources) : [];
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
   const authPart = {
@@ -24,7 +28,7 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
   const appliedFilter = parsedFilter ? {
     AND: [
       parsedFilter,
-      ...authPart,
+      authPart,
     ],
   } : authPart;
   return appliedFilter;

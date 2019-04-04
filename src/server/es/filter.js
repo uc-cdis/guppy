@@ -5,7 +5,12 @@ const getNumericTextType = (
   esIndex,
   esType,
   field,
-) => esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+) => {
+  if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
+    throw new Error('Invalid index or field name');
+  }
+  return esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+};
 
 // FIXME: "is not"
 const getFilterItemForString = (op, field, value) => {
