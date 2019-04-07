@@ -47,7 +47,7 @@ class GuppyWrapper extends React.Component {
   }
 
   componentDidMount() {
-    this.getDataFromGuppy(undefined, true);
+    this.getDataFromGuppy(this.state.allFields, undefined, true);
   }
 
   handleReceiveNewAggsData(aggsData) {
@@ -63,14 +63,14 @@ class GuppyWrapper extends React.Component {
     }
     this.filter = filter;
     this.setState({ filter });
-    this.getDataFromGuppy(undefined, true);
+    this.getDataFromGuppy(this.state.allFields, undefined, true);
   }
 
-  getDataFromGuppy(sort, updateDataWhenReceive, offset, size) {
+  getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
     return askGuppyForRawData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields,
+      fields,
       this.filter,
       sort,
       offset, 
@@ -99,7 +99,7 @@ class GuppyWrapper extends React.Component {
    * This function will update this.state.rawData and this.state.totalCount
    */
   handleFetchAndUpdateRawData({offset=0, size=20, sort=[]}) {
-    return this.getDataFromGuppy(sort, true, offset, size);
+    return this.getDataFromGuppy(this.state.allFields, sort, true, offset, size);
   }
 
   /**
@@ -107,7 +107,19 @@ class GuppyWrapper extends React.Component {
    * This funciton will not update this.state.rawData and this.state.totalCount
    */
   handleFetchRawData({offset=0, size=20, sort=[]}) {
-    return this.getDataFromGuppy(sort, false, offset, size);
+    return this.getDataFromGuppy(this.state.allFields, sort, false, offset, size);
+  }
+
+  /**
+   * Fetch data from Guppy server and return raw data, for only given fields
+   * This funciton will not update this.state.rawData and this.state.totalCount
+   */
+  handleFetchRawDataByFields({fields, offset=0, size=20, sort=[]}) {
+    let targetFields = fields;
+    if (typeof fields === 'undefined') {
+      targetFields = this.state.allFields;
+    }
+    return this.getDataFromGuppy(targetFields, sort, false, offset, size);
   }
 
   render() {
@@ -123,6 +135,7 @@ class GuppyWrapper extends React.Component {
             totalCount: this.state.totalCount, // total count of raw data
             fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
             fetchRawData: this.handleFetchRawData.bind(this),
+            fetchRawDataByFields: this.handleFetchRawDataByFields.bind(this),
 
             // below are just for ConnectedFilter component
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),

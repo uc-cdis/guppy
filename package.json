@@ -32,6 +32,7 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "file-saver": "^2.0.1",
     "graphql": "^14.1.1",
     "graphql-middleware": "^3.0.2",
     "graphql-parse-resolve-info": "^4.1.0",
