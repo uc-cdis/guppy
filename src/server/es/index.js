@@ -1,9 +1,11 @@
 import { Client } from '@elastic/elasticsearch';
+import _ from 'lodash';
 import config from '../config';
 import * as esFilter from './filter';
 import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
+import CodedError from '../utils/error';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -40,6 +42,13 @@ class ES {
     });
   }
 
+  /**
+   * Query ES data (search API) by index, type, and queryBody
+   * See https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
+   * @param {string} esIndex
+   * @param {string} esType
+   * @param {object} queryBody
+   */
   async query(esIndex, esType, queryBody) {
     const validatedQueryBody = {};
     Object.keys(queryBody).forEach((key) => {
@@ -58,13 +67,30 @@ class ES {
     });
   }
 
+  /**
+   * Fetch elastic search data using scroll API
+   * See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
+   * @param {string} esIndex
+   * @param {string} esType
+   * @param {Object} argument - arg object for filter, fields, and sort
+   */
   async scrollQuery(esIndex, esType, {
     filter,
     fields,
     sort,
   }) {
     if (!esIndex || !esType) {
-      throw new Error('Invalid es index or es type name');
+      throw new CodedError(
+        400,
+        'Invalid es index or es type name',
+      );
+    }
+    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields);
+    if (fieldsNotBelong.length > 0) {
+      throw new CodedError(
+        400,
+        `Invalid fields: "${fieldsNotBelong.join('", "')}"`,
+      );
     }
     const validatedQueryBody = filter ? { query: filter } : {};
     log.debug('[ES.scrollQuery] scroll query body: ', JSON.stringify(validatedQueryBody, null, 4));
@@ -89,7 +115,7 @@ class ES {
           console.trace(err.message); // eslint-disable-line no-console
         });
         currentBatch = res.body;
-        log.debug('[ES scrollQuery] created scroll ', scrollID);
+        log.debug('[ES scrollQuery] created scroll');
       } else { // following batches
         const res = await this.client.scroll({ // eslint-disable-line no-await-in-loop
           scroll_id: scrollID,
@@ -107,10 +133,11 @@ class ES {
       totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
     }
 
-    log.debug('[ES scrollQuery] end scrolling, cleaning', scrollID);
+    log.debug('[ES scrollQuery] end scrolling');
     await this.client.clearScroll({
       scroll_id: scrollID,
     });
+    log.debug('[ES scrollQuery] scroll cleaned');
     return totalData;
   }
 
@@ -129,10 +156,20 @@ class ES {
     return this.fieldTypes;
   }
 
+  /**
+   * Get ES fields' mapping type by es index name
+   * Returns an object of field=>type mapping
+   * @param {string} esIndex
+   */
   getESFieldTypeMappingByIndex(esIndex) {
     return this.fieldTypes[esIndex];
   }
 
+  /**
+   * Get fields by esIndex
+   * If esIndex is not set, return all fields grouped by index and types.
+   * @param {string} esIndex
+   */
   getESFields(esIndex) {
     const res = {};
     this.config.indices.forEach((cfg) => {
@@ -146,6 +183,20 @@ class ES {
       return res;
     }
     return res[esIndex];
+  }
+
+  /**
+   * Get es index by es type
+   * Throw 400 error if there's no existing es type
+   * @param {string} esType
+   */
+  getESIndexByType(esType) {
+    const index = this.config.indices.find(i => i.type === esType);
+    if (index) return index.index;
+    throw new CodedError(
+      400,
+      `Invalid es type: "${esType}"`,
+    );
   }
 
   getCount(esIndex, esType, filter) {

@@ -1,7 +1,7 @@
 import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
-import { firstLetterUpperCase } from './utils';
+import { firstLetterUpperCase } from './utils/utils';
 
 const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
   const parsedInfo = parseResolveInfo(resolveInfo);

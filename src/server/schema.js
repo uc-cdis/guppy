@@ -1,6 +1,6 @@
 import { gql } from 'apollo-server-express';
 import log from './logger';
-import { firstLetterUpperCase } from './utils';
+import { firstLetterUpperCase } from './utils/utils';
 
 const esgqlTypeMapping = {
   text: 'String',
@@ -13,6 +13,7 @@ const esgqlTypeMapping = {
   float: 'Float',
   half_float: 'Float',
   scaled_float: 'Float',
+  array: 'Object',
 };
 
 const EnumAggsHistogramName = {

@@ -10,7 +10,7 @@ import getSchema from './schema';
 import config from './config';
 import log from './logger';
 import middlewares from './middlewares';
-import headerParser from './middlewares/headerParser';
+import headerParser from './utils/headerParser';
 import downloadRouter from './download';
 
 const app = express();
@@ -41,7 +41,10 @@ const startServer = () => {
     res.send('hello guppy');
   });
 
-  app.post('/download', bodyParser.json(), downloadRouter);
+  app.post('/download', bodyParser.json(),
+    downloadRouter, (err, req, res, next) => { // eslint-disable-line no-unused-vars
+      res.status(err.code).send(err.msg);
+    });
 
   app.listen(config.port, () => {
     log.info(`[Server] guppy listening on port ${config.port}!`);

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import log from '../../logger';
 import config from '../../config';
 import arboristClient from './arboristClient';
+import CodedError from '../../utils/error';
 
 export const applyAuthFilter = async (jwt, parsedFilter) => {
   // if mock arborist endpoint, just skip auth middleware
@@ -15,7 +16,7 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
   log.debug('[authMiddleware] list resources: ');
   log.rawOutput(data);
   if (data && data.error) {
-    throw new Error(`Arborist return code ${data.error.code}: ${data.error.message}`);
+    throw new CodedError(data.error.code, data.error.message);
   }
   const resources = data.resources ? _.uniq(data.resources) : [];
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);

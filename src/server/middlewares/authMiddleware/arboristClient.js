@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import config from '../../config';
 import log from '../../logger';
+import CodedError from '../../utils/error';
 
 class ArboristClient {
   constructor(arboristEndpoint) {
@@ -9,8 +10,8 @@ class ArboristClient {
 
   listAuthorizedResources(jwt) {
     if (!jwt) {
-      log.error('no JWT in the context; returning no resources');
-      return Promise.resolve([]);
+      log.error('[ArboristClient] jwt token undefined');
+      throw new CodedError(401, 'not authorized');
     }
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/resources`;
@@ -28,7 +29,7 @@ class ArboristClient {
       response => response.json(),
       (err) => {
         log.error(err);
-        return [];
+        throw new CodedError(500, err);
       },
     );
   }
