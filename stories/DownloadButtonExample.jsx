@@ -9,9 +9,9 @@ class DownloadButtonExample extends React.Component {
   }
 
   downloadData() {
-    this.props.fetchRawData({offset: 0, size: this.props.totalCount}).then((res) => {
-      if (res && res.data) {
-        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'text/json' });
+    this.props.downloadRawData({offset: 0, size: this.props.totalCount}).then((res) => {
+      if (res) {
+        const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'text/json' });
         const fileName = 'download.json';
         FileSaver.saveAs(blob, fileName);
       }
@@ -32,7 +32,7 @@ class DownloadButtonExample extends React.Component {
 }
 
 DownloadButtonExample.propTypes = {
-  fetchRawData: PropTypes.func,
+  downloadRawData: PropTypes.func,
   totalCount: PropTypes.number,
 };
 

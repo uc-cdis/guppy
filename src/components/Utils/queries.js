@@ -1,3 +1,6 @@
+const graphqlEndpoint = '/graphql';
+const downloadEndpoint = '/download';
+
 const histogramQueryStrForEachField = field => (`
   ${field} {
     histogram {
@@ -26,7 +29,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter) => {
     queryBody.variables = { filter: gqlFilter };
     queryBody.query = queryWithFilter;
   }
-  return fetch(path, {
+  return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -70,7 +73,7 @@ const queryGuppyForRawDataAndTotalCounts = (
   queryBody.variables = {};
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
   if (sort) queryBody.variables.sort = sort;
-  return fetch(path, {
+  return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -83,10 +86,10 @@ export const askGuppyAboutAllFieldsAndOptions = (
   path, type, fields,
 ) => queryGuppyForAggs(path, type, fields);
 
-const getGQLFilter = (filterResults) => {
+const getGQLFilter = (filterObj) => {
   const facetsList = [];
-  Object.keys(filterResults).forEach((field) => {
-    const filterValues = filterResults[field];
+  Object.keys(filterObj).forEach((field) => {
+    const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
       facetsList.push({
         OR: filterValues.selectedValues.map(v => ({
@@ -110,23 +113,60 @@ const getGQLFilter = (filterResults) => {
   return gqlFilter;
 };
 
-export const askGuppyForAggregationData = (path, type, fields, filterResults) => {
-  const filter = getGQLFilter(filterResults);
-  return queryGuppyForAggs(path, type, fields, filter);
+export const askGuppyForAggregationData = (path, type, fields, filter) => {
+  const gqlFilter = getGQLFilter(filter);
+  return queryGuppyForAggs(path, type, fields, gqlFilter);
 };
 
 export const askGuppyForRawData = (
   path,
   type,
   fields,
-  filterResults,
+  filter,
   sort,
   offset = 0,
   size = 20,
 ) => {
-  const filter = getGQLFilter(filterResults);
-  return queryGuppyForRawDataAndTotalCounts(path, type, fields, filter, sort, offset, size);
+  const gqlFilter = getGQLFilter(filter);
+  return queryGuppyForRawDataAndTotalCounts(path, type, fields, gqlFilter, sort, offset, size);
 };
 
 export const getAllFieldsFromFilterConfigs = filterTabConfigs => filterTabConfigs
   .reduce((acc, cur) => acc.concat(cur.filters.map(item => item.field)), []);
+
+/**
+ * Download all data from guppy using fields, filter, and sort args.
+ * If total count is less than 10000 this will use normal graphql endpoint
+ * If greater than 10000, use /download endpoint
+ */
+export const downloadDataFromGuppy = (
+  path,
+  type,
+  totalCount,
+  {
+    fields,
+    filter,
+    sort,
+  },
+) => {
+  if (totalCount > 10) {
+    const queryBody = { type };
+    if (fields) queryBody.fields = fields;
+    if (filter) queryBody.filter = filter;
+    if (sort) queryBody.sort = sort;
+    return fetch(`${path}${downloadEndpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(queryBody),
+    }).then(response => response.json());
+  }
+  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount)
+    .then((res) => {
+      if (res && res.data && res.data[type]) {
+        return res.data[type];
+      }
+      throw Error('Error downloading data from Guppy');
+    });
+};

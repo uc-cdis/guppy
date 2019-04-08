@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   askGuppyForRawData,
+  downloadDataFromGuppy,
 } from '../Utils/queries';
 
 /**
@@ -103,23 +104,42 @@ class GuppyWrapper extends React.Component {
   }
 
   /**
-   * Fetch data from Guppy server and return raw data
-   * This funciton will not update this.state.rawData and this.state.totalCount
+   * Download all data from Guppy server and return raw data
+   * This function uses current filter argument
    */
-  handleFetchRawData({offset=0, size=20, sort=[]}) {
-    return this.getDataFromGuppy(this.state.allFields, sort, false, offset, size);
+  handleDownloadRawData({sort=[]}) {
+    return downloadDataFromGuppy(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.totalCount,
+      {
+        fields: this.state.allFields, 
+        sort,
+        filter: this.state.filter,
+      },
+    );
   }
 
   /**
-   * Fetch data from Guppy server and return raw data, for only given fields
-   * This funciton will not update this.state.rawData and this.state.totalCount
+   * Download all data from Guppy server and return raw data
+   * For only given fields
+   * This function uses current filter argument
    */
-  handleFetchRawDataByFields({fields, offset=0, size=20, sort=[]}) {
+  handleDownloadRawDataByFields({fields, sort=[]}) {
     let targetFields = fields;
     if (typeof fields === 'undefined') {
       targetFields = this.state.allFields;
     }
-    return this.getDataFromGuppy(targetFields, sort, false, offset, size);
+    return downloadDataFromGuppy(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.totalCount,
+      {
+        fields: targetFields, 
+        sort,
+        filter: this.state.filter,
+      },
+    );
   }
 
   render() {
@@ -134,8 +154,8 @@ class GuppyWrapper extends React.Component {
             rawData: this.state.rawData, // raw data (with filter applied)
             totalCount: this.state.totalCount, // total count of raw data
             fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
-            fetchRawData: this.handleFetchRawData.bind(this),
-            fetchRawDataByFields: this.handleFetchRawDataByFields.bind(this),
+            downloadRawData: this.handleDownloadRawData.bind(this),
+            downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
 
             // below are just for ConnectedFilter component
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
