@@ -9,7 +9,7 @@ class DownloadButtonExample extends React.Component {
   }
 
   downloadData() {
-    this.props.downloadRawData({offset: 0, size: this.props.totalCount}).then((res) => {
+    this.props.downloadRawData().then((res) => {
       if (res) {
         const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'text/json' });
         const fileName = 'download.json';

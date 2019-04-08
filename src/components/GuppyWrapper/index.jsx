@@ -107,14 +107,14 @@ class GuppyWrapper extends React.Component {
    * Download all data from Guppy server and return raw data
    * This function uses current filter argument
    */
-  handleDownloadRawData({sort=[]}) {
+  handleDownloadRawData(sort) {
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.totalCount,
       {
         fields: this.state.allFields, 
-        sort,
+        sort: sort || [],
         filter: this.state.filter,
       },
     );
