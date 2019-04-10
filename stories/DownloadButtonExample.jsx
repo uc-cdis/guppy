@@ -20,11 +20,11 @@ class DownloadButtonExample extends React.Component {
 
   async updateManifestCount() {
     const nodeID = 'subject_id';
-    const caseType = 'file';
+    const fileType = 'file';
     const nodeIDResult = await this.props.downloadRawDataByFields({fields: [nodeID]});
     if (nodeIDResult) {
       const nodeIDList = nodeIDResult.map(i => i[nodeID]);
-      const countResult = await this.props.getTotalCountsByTypeAndFilter(caseType, {
+      const countResult = await this.props.getTotalCountsByTypeAndFilter(fileType, {
         [nodeID]: {
           selectedValues: nodeIDList,
         },
@@ -49,11 +49,11 @@ class DownloadButtonExample extends React.Component {
   }
 
   async downloadManifest() {
-    const caseType = 'file';
+    const fileType = 'file';
     const nodeID = 'subject_id';
     const nodeIDList = await this.props.downloadRawDataByFields({fields: [nodeID]}).then(res => res.map(i => i[nodeID]));
     const resultManifest = await this.props.downloadRawDataByTypeAndFilter(
-      caseType, {
+      fileType, {
         [nodeID]: {
           selectedValues: nodeIDList,
         },
