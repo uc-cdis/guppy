@@ -42,4 +42,5 @@ export const filterConfig = {
   export const guppyConfig = {
     path: 'http://localhost:3000',
     type: 'subject',
+    fileType: 'file',
   };

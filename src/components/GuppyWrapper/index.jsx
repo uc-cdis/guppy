@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   askGuppyForRawData,
   downloadDataFromGuppy,
+  askGuppyForTotalCounts,
 } from '../Utils/queries';
 
 /**
@@ -142,6 +143,36 @@ class GuppyWrapper extends React.Component {
     );
   }
 
+  /**
+   * Get total count from other es type, with filter
+   * @param {string} type 
+   * @param {object} filter 
+   */
+  handleAskGuppyForTotalCounts(type, filter) {
+    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
+  }
+
+  /**
+   * Get raw data from other es type, with filter
+   * @param {string} type 
+   * @param {object} filter 
+   * @param {string[]} fields 
+   */
+  handleDownloadRawDataByTypeAndFilter(type, filter, fields) {
+    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter)
+      .then(count => {
+        return downloadDataFromGuppy(
+          this.props.guppyConfig.path,
+          type,
+          count,
+          {
+            fields,
+            filter,
+          },
+        );
+      });
+  }
+
   render() {
     return (
       <React.Fragment> 
@@ -151,11 +182,15 @@ class GuppyWrapper extends React.Component {
             aggsData: this.state.aggsData,
             filter: this.state.filter,
             filterConfig: this.props.filterConfig,
-            rawData: this.state.rawData, // raw data (with filter applied)
-            totalCount: this.state.totalCount, // total count of raw data
-            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
+            rawData: this.state.rawData, // raw data (with current filter applied)
+            totalCount: this.state.totalCount, // total count of raw data (with current filter applied)
+            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this), 
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
+
+            // a callback function which return total counts for any type, with any filter
+            getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this), 
+            downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
 
             // below are just for ConnectedFilter component
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),

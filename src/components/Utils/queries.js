@@ -92,9 +92,10 @@ const getGQLFilter = (filterObj) => {
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
       facetsList.push({
-        OR: filterValues.selectedValues.map(v => ({
-          '=': [field, v],
-        })),
+        IN: [
+          field,
+          filterValues.selectedValues,
+        ],
       });
     } else if (filterValues.lowerBound && filterValues.upperBound) {
       facetsList.push({
@@ -149,10 +150,11 @@ export const downloadDataFromGuppy = (
     sort,
   },
 ) => {
-  if (totalCount > 10) {
+  const SCROLL_SIZE = 10000;
+  if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };
     if (fields) queryBody.fields = fields;
-    if (filter) queryBody.filter = filter;
+    if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
     return fetch(`${path}${downloadEndpoint}`, {
       method: 'POST',
@@ -168,5 +170,37 @@ export const downloadDataFromGuppy = (
         return res.data[type];
       }
       throw Error('Error downloading data from Guppy');
+    });
+};
+
+
+export const askGuppyForTotalCounts = (
+  path,
+  type,
+  filter,
+) => {
+  const gqlFilter = getGQLFilter(filter);
+  const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
+  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter)' : ''}{`;
+  const query = `${queryLine}
+    _aggregation {
+      ${typeAggsLine}
+        _totalCount
+      }
+    }
+  }`;
+  const queryBody = { query };
+  queryBody.variables = {};
+  if (gqlFilter) queryBody.variables.filter = gqlFilter;
+  return fetch(`${path}${graphqlEndpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(queryBody),
+  }).then(response => response.json())
+    .then(response => response.data._aggregation[type]._totalCount)
+    .catch((err) => {
+      throw new Error(`Error during download ${err}`);
     });
 };
