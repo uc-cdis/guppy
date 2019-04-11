@@ -55,9 +55,9 @@
     "@storybook/addons": "^5.0.1",
     "@storybook/react": "^5.0.1",
     "babel-loader": "^8.0.5",
-    "eslint": "^5.15.1",
+    "eslint": "^4.10.2",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-import": "^2.7.0",
     "nodemon": "^1.18.10",
     "react-table": "^6.9.2"
   }
