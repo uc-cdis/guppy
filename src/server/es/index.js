@@ -106,7 +106,7 @@ class ES {
           index: esIndex,
           type: esType,
           body: validatedQueryBody,
-          scroll: '2m',
+          scroll: '1m',
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort,
@@ -119,17 +119,18 @@ class ES {
       } else { // following batches
         const res = await this.client.scroll({ // eslint-disable-line no-await-in-loop
           scroll_id: scrollID,
-          scroll: '2m',
+          scroll: '1m',
         });
         currentBatch = res.body;
       }
 
       // merge fetched batches
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
-      scrollID = currentBatch._scroll_id;
+      scrollID = currentBatch._scroll_id; // eslint-disable-line no-underscore-dangle
       batchSize = currentBatch.hits.hits.length;
 
       // TODO: change it to streaming
+      // eslint-disable-next-line no-underscore-dangle
       totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
     }
 
@@ -145,7 +146,7 @@ class ES {
     this.fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type)
+        .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type) // eslint-disable-line
         .then(res => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
