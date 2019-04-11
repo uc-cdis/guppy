@@ -24,7 +24,7 @@ const config = {
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
   },
 
-  port: 3000,
+  port: 80,
   path: '/graphql',
   arboristEndpoint: 'mock',
 };
@@ -38,6 +38,10 @@ if (!config.esConfig.host.startsWith('http')) {
 
 if (process.env.GEN3_ARBORIST_ENDPOINT) {
   config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT;
+}
+
+if (process.env.GUPPY_PORT) {
+  config.port = process.env.GUPPY_PORT;
 }
 
 log.info('[config] starting server using config', JSON.stringify(config, null, 4));
