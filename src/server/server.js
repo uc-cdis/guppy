@@ -16,6 +16,7 @@ import CodedError from './utils/error';
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 const startServer = () => {
   // build schema and resolvers by parsing elastic search fields and types,
@@ -46,7 +47,7 @@ const startServer = () => {
   });
 
   // download endpoint for fetching data directly from es
-  app.post('/download', bodyParser.json(),
+  app.post('/download',
     downloadRouter, (err, req, res, next) => { // eslint-disable-line no-unused-vars
       if (err instanceof CodedError) {
         res.status(err.code).send(err.msg);
