@@ -26,7 +26,7 @@ const startServer = () => {
     schema,
     ...middlewares,
   );
-  // create graphql server instance
+    // create graphql server instance
   const server = new ApolloServer({
     mocks: false,
     schema: schemaWithMiddleware,
@@ -34,7 +34,7 @@ const startServer = () => {
       jwt: headerParser.parseJWT(req),
     }),
   });
-  // bind graphql server to express app at config.path
+    // bind graphql server to express app at config.path
   server.applyMiddleware({
     app,
     path: config.path,
