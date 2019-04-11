@@ -15,23 +15,23 @@ const getNumericTextType = (
 // FIXME: "is not"
 const getFilterItemForString = (op, field, value) => {
   switch (op) {
-  case '=':
-  case 'eq':
-  case 'EQ':
-    return {
-      term: {
-        [field]: value,
-      },
-    };
-  case 'in':
-  case 'IN':
-    return {
-      terms: {
-        [field]: value,
-      },
-    };
-  default:
-    throw new Error(`Invalid text filter operation ${op}`);
+    case '=':
+    case 'eq':
+    case 'EQ':
+      return {
+        term: {
+          [field]: value,
+        },
+      };
+    case 'in':
+    case 'IN':
+      return {
+        terms: {
+          [field]: value,
+        },
+      };
+    default:
+      throw new Error(`Invalid text filter operation ${op}`);
   }
 };
 
