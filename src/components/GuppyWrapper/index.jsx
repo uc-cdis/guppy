@@ -42,14 +42,13 @@ class GuppyWrapper extends React.Component {
     this.state = {
       aggsData: {},
       filter: {},
-      allFields: props.tableConfig.map(entry => entry.field),
       rawData: [],
       totalCount: 0,
     }
   }
 
   componentDidMount() {
-    this.getDataFromGuppy(this.state.allFields, undefined, true);
+    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
   }
 
   handleReceiveNewAggsData(aggsData) {
@@ -65,7 +64,7 @@ class GuppyWrapper extends React.Component {
     }
     this.filter = filter;
     this.setState({ filter });
-    this.getDataFromGuppy(this.state.allFields, undefined, true);
+    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
   }
 
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
@@ -101,7 +100,7 @@ class GuppyWrapper extends React.Component {
    * This function will update this.state.rawData and this.state.totalCount
    */
   handleFetchAndUpdateRawData({offset=0, size=20, sort=[]}) {
-    return this.getDataFromGuppy(this.state.allFields, sort, true, offset, size);
+    return this.getDataFromGuppy(this.props.rawDataFields, sort, true, offset, size);
   }
 
   /**
@@ -114,7 +113,7 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.type,
       this.state.totalCount,
       {
-        fields: this.state.allFields, 
+        fields: this.props.rawDataFields, 
         sort: sort || [],
         filter: this.state.filter,
       },
@@ -129,7 +128,7 @@ class GuppyWrapper extends React.Component {
   handleDownloadRawDataByFields({fields, sort=[]}) {
     let targetFields = fields;
     if (typeof fields === 'undefined') {
-      targetFields = this.state.allFields;
+      targetFields = this.props.rawDataFields;
     }
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
@@ -221,12 +220,9 @@ GuppyWrapper.propTypes = {
       })),
     })),
   }).isRequired,
-  tableConfig: PropTypes.arrayOf(PropTypes.shape({
-    field: PropTypes.string,
-    name: PropTypes.string,
-  })).isRequired,
-  onReceiveNewAggsData: PropTypes.func, 
-  onFilterChange: PropTypes.func, 
+  rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onReceiveNewAggsData: PropTypes.func,
+  onFilterChange: PropTypes.func,
 };
 
 GuppyWrapper.defaultProps = {
