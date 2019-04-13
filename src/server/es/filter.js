@@ -175,7 +175,7 @@ export const getData = async (
     size,
   }) => {
   if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-    throw new Error(`Invalid large query for offset + size > 10000, offset = ${offset} and size = ${size}`);
+    throw new Error(`Invalid large query for offset + size > ${SCROLL_PAGE_SIZE}, offset = ${offset} and size = ${size}`);
   }
   const result = await filterData(
     { esInstance, esIndex, esType },
