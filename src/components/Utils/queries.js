@@ -201,7 +201,7 @@ export const askGuppyForTotalCounts = (
     },
     body: JSON.stringify(queryBody),
   }).then(response => response.json())
-    .then(response => response.data._aggregation[type]._totalCount) // eslint-disable-line
+    .then(response => response.data._aggregation[type]._totalCount)
     .catch((err) => {
       throw new Error(`Error during download ${err}`);
     });

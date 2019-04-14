@@ -1,3 +1,29 @@
 module.exports = {
-    "extends": "airbnb"
+  env: {
+    browser: true,
+    es6: true,
+    node: true,
+  },
+  extends: 'airbnb',
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
+  },
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 2018,
+    sourceType: 'module',
+  },
+  plugins: [
+    'react',
+  ],
+  rules: {
+    'no-underscore-dangle': 'off',
+    'react/destructuring-assignment': 'off',
+    'react/no-array-index-key': 'off',
+  },
+  overrides: [
+  ],
 };

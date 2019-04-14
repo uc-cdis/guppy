@@ -126,11 +126,10 @@ class ES {
 
       // merge fetched batches
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
-      scrollID = currentBatch._scroll_id; // eslint-disable-line no-underscore-dangle
+      scrollID = currentBatch._scroll_id;
       batchSize = currentBatch.hits.hits.length;
 
       // TODO: change it to streaming
-      // eslint-disable-next-line no-underscore-dangle
       totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
     }
 
@@ -146,7 +145,7 @@ class ES {
     this.fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-        .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type) // eslint-disable-line
+      .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type)
         .then(res => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');

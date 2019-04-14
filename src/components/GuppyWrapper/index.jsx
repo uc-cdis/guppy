@@ -7,25 +7,27 @@ import {
 } from '../Utils/queries';
 
 /**
- * Wrapper that connects to Guppy server, 
+ * Wrapper that connects to Guppy server,
  * and pass filter, aggs, and data to children components
  * Input props:
  *   - filterConfig: configuration for ConnectedFilter component
  *   - guppyConfig: Guppy server config
- *   - onFilterChange: callback that takes filter as argument, will be 
+ *   - onFilterChange: callback that takes filter as argument, will be
  * called everytime filter changes
- *   - onReceiveNewAggsData: callback that takes aggregation results 
+ *   - onReceiveNewAggsData: callback that takes aggregation results
  * as argument, will be called everytime aggregation results updated
- * 
- * This wrapper will pass following data (filters, aggs, configs) to children components via prop: 
+ *
+ * This wrapper will pass following data (filters, aggs, configs) to children components via prop:
  *   - aggsData: the aggregation results, format:
  *         {
- *            [field]: { histogram: [{key: 'v1', count: 42}, {key: 'v2', count: 19}, ...] }, // for text aggregation
- *            [field]: { histogram: [{key: [1, 83], count: 100}] }, // for numeric aggregation 
+ *             // for text aggregation
+ *            [field]: { histogram: [{key: 'v1', count: 42}, {key: 'v2', count: 19}, ...] },
+ *             // for numeric aggregation
+ *            [field]: { histogram: [{key: [1, 83], count: 100}] },
  *            ...
  *         }
- *   - filter: the filters, format: 
- *         { 
+ *   - filter: the filters, format:
+ *         {
  *            [field]: { selectedValues: ['v1', 'v2', ...] },  // for text filter
  *            [field]: { upperBound: 1, lowerBound: 83 },  // for range filter
  *            ...
@@ -33,7 +35,7 @@ import {
  *   - filterConfig: configuration for ConnectedFilter component
  *   - rawData: raw data records filtered (with offset, size, and sort applied)
  *   - totalCount: total count of raw data records
- * 
+ *
  */
 class GuppyWrapper extends React.Component {
   constructor(props) {
@@ -51,22 +53,6 @@ class GuppyWrapper extends React.Component {
     this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
   }
 
-  handleReceiveNewAggsData(aggsData) {
-    if (this.props.onReceiveNewAggsData) {
-      this.props.onReceiveNewAggsData(aggsData, this.filter);
-    }
-    this.setState({ aggsData });
-  }
-
-  handleFilterChange(filter) {
-    if (this.props.onFilterChange) {
-      this.props.onFilterChange(filter);
-    }
-    this.filter = filter;
-    this.setState({ filter });
-    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
-  }
-
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
     return askGuppyForRawData(
       this.props.guppyConfig.path,
@@ -74,9 +60,9 @@ class GuppyWrapper extends React.Component {
       fields,
       this.filter,
       sort,
-      offset, 
-      size, 
-    ).then(res => {
+      offset,
+      size,
+    ).then((res) => {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
@@ -95,11 +81,27 @@ class GuppyWrapper extends React.Component {
     });
   }
 
+  handleReceiveNewAggsData(aggsData) {
+    if (this.props.onReceiveNewAggsData) {
+      this.props.onReceiveNewAggsData(aggsData, this.filter);
+    }
+    this.setState({ aggsData });
+  }
+
+  handleFilterChange(filter) {
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange(filter);
+    }
+    this.filter = filter;
+    this.setState({ filter });
+    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
+  }
+
   /**
    * Fetch data from Guppy server.
    * This function will update this.state.rawData and this.state.totalCount
    */
-  handleFetchAndUpdateRawData({offset=0, size=20, sort=[]}) {
+  handleFetchAndUpdateRawData({ offset = 0, size = 20, sort = [] }) {
     return this.getDataFromGuppy(this.props.rawDataFields, sort, true, offset, size);
   }
 
@@ -113,7 +115,7 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.type,
       this.state.totalCount,
       {
-        fields: this.props.rawDataFields, 
+        fields: this.props.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
       },
@@ -125,7 +127,7 @@ class GuppyWrapper extends React.Component {
    * For only given fields
    * This function uses current filter argument
    */
-  handleDownloadRawDataByFields({fields, sort=[]}) {
+  handleDownloadRawDataByFields({ fields, sort = [] }) {
     let targetFields = fields;
     if (typeof fields === 'undefined') {
       targetFields = this.props.rawDataFields;
@@ -135,7 +137,7 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.type,
       this.state.totalCount,
       {
-        fields: targetFields, 
+        fields: targetFields,
         sort,
         filter: this.state.filter,
       },
@@ -144,8 +146,8 @@ class GuppyWrapper extends React.Component {
 
   /**
    * Get total count from other es type, with filter
-   * @param {string} type 
-   * @param {object} filter 
+   * @param {string} type
+   * @param {object} filter
    */
   handleAskGuppyForTotalCounts(type, filter) {
     return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
@@ -153,28 +155,26 @@ class GuppyWrapper extends React.Component {
 
   /**
    * Get raw data from other es type, with filter
-   * @param {string} type 
-   * @param {object} filter 
-   * @param {string[]} fields 
+   * @param {string} type
+   * @param {object} filter
+   * @param {string[]} fields
    */
   handleDownloadRawDataByTypeAndFilter(type, filter, fields) {
     return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter)
-      .then(count => {
-        return downloadDataFromGuppy(
-          this.props.guppyConfig.path,
-          type,
-          count,
-          {
-            fields,
-            filter,
-          },
-        );
-      });
+      .then(count => downloadDataFromGuppy(
+        this.props.guppyConfig.path,
+        type,
+        count,
+        {
+          fields,
+          filter,
+        },
+      ));
   }
 
   render() {
     return (
-      <React.Fragment> 
+      <React.Fragment>
         {
           React.Children.map(this.props.children, child => React.cloneElement(child, {
             // pass data to children
@@ -182,13 +182,13 @@ class GuppyWrapper extends React.Component {
             filter: this.state.filter,
             filterConfig: this.props.filterConfig,
             rawData: this.state.rawData, // raw data (with current filter applied)
-            totalCount: this.state.totalCount, // total count of raw data (with current filter applied)
-            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this), 
+            totalCount: this.state.totalCount, // total count of raw data (current filter applied)
+            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
 
             // a callback function which return total counts for any type, with any filter
-            getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this), 
+            getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
             downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
 
             // below are just for ConnectedFilter component

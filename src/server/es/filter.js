@@ -143,7 +143,7 @@ const filterData = (
     queryBody.size = size;
   }
   if (fields && fields.length > 0) {
-    queryBody._source = fields; // eslint-disable-line no-underscore-dangle
+    queryBody._source = fields;
   }
   const resultPromise = esInstance.query(esIndex, esType, queryBody);
   return resultPromise;
@@ -187,5 +187,5 @@ export const getData = async (
       filter, fields, sort, offset, size,
     },
   );
-  return result.hits.hits.map(item => item._source); // eslint-disable-line no-underscore-dangle
+  return result.hits.hits.map(item => item._source);
 };
