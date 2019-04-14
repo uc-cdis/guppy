@@ -9,10 +9,14 @@ const getNumericTextType = (
   if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
     throw new Error('Invalid index or field name');
   }
-  return esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+  const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+  if (typeof numericTextType === 'undefined') {
+    throw new Error(`ES type ${esInstance.fieldTypes[esIndex][field]} not supported yet`);
+  }
+  return numericTextType;
 };
 
-// FIXME: "is not"
+// FIXME: support "is not"
 const getFilterItemForString = (op, field, value) => {
   switch (op) {
     case '=':

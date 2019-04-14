@@ -9,7 +9,7 @@ import {
 /**
  * Wrapper that connects to Guppy server, 
  * and pass filter, aggs, and data to children components
- * Input props: 
+ * Input props:
  *   - filterConfig: configuration for ConnectedFilter component
  *   - guppyConfig: Guppy server config
  *   - onFilterChange: callback that takes filter as argument, will be 
@@ -44,7 +44,7 @@ class GuppyWrapper extends React.Component {
       filter: {},
       rawData: [],
       totalCount: 0,
-    }
+    };
   }
 
   componentDidMount() {
