@@ -32,6 +32,9 @@ const config = {
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
 }
+if (!config.esConfig.host.startsWith('http')) {
+  config.esConfig.host = `http://${config.esConfig.host}`;
+}
 
 if (process.env.GEN3_ARBORIST_ENDPOINT) {
   config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT;

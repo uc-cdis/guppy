@@ -29,7 +29,7 @@ log.setLevel(log.levels.DEBUG);
 log.info('log level set to', numLevels[log.getLevel()]);
 
 log.rawOutput = (msg) => {
-  console.log(msg);
+  console.log(msg); // eslint-disable-line no-console
 };
 
 export default log;

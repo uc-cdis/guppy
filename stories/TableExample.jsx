@@ -50,6 +50,7 @@ class ConnectedTableExample extends React.Component {
         onFetchData={this.fetchData.bind(this)} // Request new data when things change
         defaultPageSize={defaultPageSize}
         className={`-striped -highlight ${this.props.className}`}
+        minRows={0}
       />
     );
   }

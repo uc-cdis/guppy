@@ -6,7 +6,7 @@ import GuppyWrapper from '../src/components/GuppyWrapper';
 import TableExample from './TableExample';
 import DownloadButtonExample from './DownloadButtonExample';
 import './guppyWrapper.css';
-import {filterConfig, guppyConfig, tableConfig} from './conf';
+import {filterConfig, guppyConfig, tableConfig } from './conf';
 
 storiesOf('Guppy Wrapper', module)
   .add('Download Data', () => {
@@ -15,7 +15,7 @@ storiesOf('Guppy Wrapper', module)
         <GuppyWrapper
           filterConfig={filterConfig}
           guppyConfig={guppyConfig}
-          tableConfig={tableConfig}
+          rawDataFields={tableConfig.map(e => e.field)}
           onFilterChange={action('wrapper receive filter change')}
           onReceiveNewAggsData={action('wrapper receive aggs data')}
         >

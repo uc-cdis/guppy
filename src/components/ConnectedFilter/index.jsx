@@ -24,17 +24,21 @@ class ConnectedFilter extends React.Component {
   }
 
   componentDidMount() {
-    askGuppyAboutAllFieldsAndOptions(this.props.guppyConfig.path, this.props.guppyConfig.type, this.state.allFields)
-      .then(res => {
+    askGuppyAboutAllFieldsAndOptions(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.allFields,
+    )
+      .then((res) => {
         this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
         this.saveInitialAggsData(res.data._aggregation);
       });
   }
 
   /**
-   * Save initial aggregation data, especially for range slider 
+   * Save initial aggregation data, especially for range slider
    * so that we still have min/max values for range slider
-   * @param {object} aggsData 
+   * @param {object} aggsData
    */
   saveInitialAggsData(aggsData) {
     this.setState({ initialAggsData: aggsData });
@@ -49,21 +53,26 @@ class ConnectedFilter extends React.Component {
   }
 
   updateTabs(tabsOptions) {
-    const tabs = this.props.filterConfig.tabs.map(({filters}, index) => {
-      return (
-        <FilterList
-          key={index}
-          sections={getFilterSections(filters, tabsOptions, this.state.initialAggsData)}
-        />
-      )
-    });
-    this.setState({tabs: tabs});
+    const tabs = this.props.filterConfig.tabs.map(({ filters }, index) => (
+      <FilterList
+        key={index}
+        sections={getFilterSections(filters, tabsOptions, this.state.initialAggsData)}
+      />
+    ));
+    this.setState({ tabs });
   }
 
   handleFilterChange(filterResults) {
-    askGuppyForAggregationData(this.props.guppyConfig.path, this.props.guppyConfig.type, this.state.allFields, filterResults)
-      .then(res => {
-        this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type], filterResults);
+    askGuppyForAggregationData(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.allFields, filterResults,
+    )
+      .then((res) => {
+        this.handleReceiveNewAggsData(
+          res.data._aggregation[this.props.guppyConfig.type],
+          filterResults,
+        );
       });
 
     if (this.props.onFilterChange) {
@@ -80,7 +89,7 @@ class ConnectedFilter extends React.Component {
         className={this.props.className}
         tabs={this.state.tabs}
         filterConfig={getFilterGroupConfig(this.props.filterConfig)}
-        onFilterChange={(e) => this.handleFilterChange(e)}
+        onFilterChange={e => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
     );
@@ -102,7 +111,7 @@ ConnectedFilter.propTypes = {
     type: PropTypes.string.isRequired,
   }).isRequired,
   onFilterChange: PropTypes.func,
-  onReceiveNewAggsData: PropTypes.func, 
+  onReceiveNewAggsData: PropTypes.func,
   hideZero: PropTypes.bool,
   className: PropTypes.string,
 };

@@ -7,7 +7,7 @@ export const getFilterGroupConfig = filterConfig => ({
 });
 
 const getSingleFilterOption = (histogramResult, initHistogramRes) => {
-  if (!histogramResult || !histogramResult.histogram || histogramResult.histogram.length === 0) {
+  if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
