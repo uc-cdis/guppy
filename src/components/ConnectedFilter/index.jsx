@@ -10,7 +10,6 @@ import {
 import {
   askGuppyAboutAllFieldsAndOptions,
   askGuppyForAggregationData,
-  getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
 
 class ConnectedFilter extends React.Component {
@@ -18,7 +17,7 @@ class ConnectedFilter extends React.Component {
     super(props);
     this.state = {
       tabs: [],
-      allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
+      allFields: this.props.rawDataFields,
       initialAggsData: {},
     };
   }
@@ -114,6 +113,7 @@ ConnectedFilter.propTypes = {
   onReceiveNewAggsData: PropTypes.func,
   hideZero: PropTypes.bool,
   className: PropTypes.string,
+  rawDataFields: PropTypes.arrayOf(PropTypes.string),
 };
 
 ConnectedFilter.defaultProps = {
@@ -121,6 +121,7 @@ ConnectedFilter.defaultProps = {
   onReceiveNewAggsData: () => {},
   hideZero: true,
   className: '',
+  rawDataFields: [],
 };
 
 export default ConnectedFilter;

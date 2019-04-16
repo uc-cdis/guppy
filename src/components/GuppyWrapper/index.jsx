@@ -191,10 +191,11 @@ class GuppyWrapper extends React.Component {
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
             downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
 
-            // below are just for ConnectedFilter component
+            // below are for ConnectedFilter component
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
+            rawDataFields: this.props.rawDataFields,
           }))
         }
       </React.Fragment>

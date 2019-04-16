@@ -25,6 +25,19 @@ export const filterConfig = {
       ],
     }],
   };
+
+  export const rawDataFields = [
+    'project',
+    'study',
+    'race',
+    'ethnicity',
+    'gender',
+    'vital_status',
+    'whatever_lab_result_value',
+    'file_count',
+    'file_type',
+    'file_format',
+  ];
   
   export const tableConfig = [
     { field: 'project', name: 'Project' },
