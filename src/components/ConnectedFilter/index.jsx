@@ -10,6 +10,7 @@ import {
 import {
   askGuppyAboutAllFieldsAndOptions,
   askGuppyForAggregationData,
+  getAllFieldsFromGuppy,
 } from '../Utils/queries';
 
 class ConnectedFilter extends React.Component {
@@ -23,6 +24,19 @@ class ConnectedFilter extends React.Component {
   }
 
   componentDidMount() {
+    if (!this.state.allFields || this.state.allFields.length === 0) {
+      getAllFieldsFromGuppy(this.props.guppyConfig.path, this.props.guppyConfig.type)
+        .then((fields) => {
+          this.setState({ allFields: fields }, () => {
+            this.initializedFilter();
+          });
+        });
+    } else {
+      this.initializedFilter();
+    }
+  }
+
+  initializedFilter() {
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,

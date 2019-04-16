@@ -12,7 +12,6 @@ storiesOf('ConnectedFilter', module)
         filterConfig={filterConfig}
         guppyConfig={guppyConfig}
         onFilterChange={action('filter change')}
-        rawDataFields={rawDataFields}
       />
     );
   });

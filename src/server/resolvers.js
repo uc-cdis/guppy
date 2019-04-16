@@ -30,6 +30,11 @@ const aggsQueryResolver = (parent, args) => {
   return { ...parent };
 };
 
+const mappingQUeryResolver = (parent, args) => {
+  log.debug('[resolver.mappingQUeryResolver] args', args);
+  return { ...parent };
+};
+
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   const {
@@ -138,11 +143,17 @@ const getResolver = (esConfig, esInstance) => {
     return acc;
   }, {});
 
+  const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
+    acc[cfg.type] = () => (esInstance.getESFields(cfg.index).fields);
+    return acc;
+  }, {});
+
   const resolver = {
     JSON: GraphQLJSON,
     Query: {
       ...typeResolverMappings,
       _aggregation: aggsQueryResolver,
+      _mapping: mappingQUeryResolver,
     },
     Aggregation: {
       ...typeAggregationResolverMappings,
@@ -153,6 +164,9 @@ const getResolver = (esConfig, esInstance) => {
     },
     HistogramForString: {
       histogram: textHistogramResolver,
+    },
+    Mapping: {
+      ...mappingResolvers,
     },
   };
   log.info('[resolver] graphql resolver generated.');
