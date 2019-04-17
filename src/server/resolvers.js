@@ -12,7 +12,7 @@ const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
 
 const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, context, resolveInfo) => {
   const {
-    offset, size, filter, sort,
+    offset, first, filter, sort,
   } = args;
   log.debug('[resolver.typeQueryResolver] es type', esType);
   log.debug('[resolver.typeQueryResolver] filter', JSON.stringify(filter, null, 4));
@@ -20,7 +20,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
   log.debug('[resolver.typeQueryResolver] args', JSON.stringify(args, null, 4));
   const fields = parseFieldsFromTypeResolveInfo(resolveInfo);
   const dataPromise = esInstance.getData({
-    esIndex, esType, fields, filter, sort, offset, size,
+    esIndex, esType, fields, filter, sort, offset, size: first,
   });
   return dataPromise;
 };
@@ -33,12 +33,12 @@ const aggsQueryResolver = (parent, args) => {
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   const {
-    filter, offset, size, filterSelf,
+    filter, offset, first, filterSelf,
   } = args;
   return {
     filter,
     offset,
-    size,
+    first,
     filterSelf,
     esInstance,
     esIndex,
