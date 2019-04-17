@@ -29,6 +29,7 @@ function es_setup_index() {
   local indexName
   indexName="${1:-gen3-dev-subject}"
   fileIndexName="${2:-gen3-dev-file}"
+  configIndexName="${3:-gen3-dev-config}"
 curl -iv -X PUT "${ESHOST}/${indexName}" \
 -H 'Content-Type: application/json' -d'
 {
@@ -53,12 +54,15 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "file_format": { "type": "keyword" },
           "gen3_resource_path": { "type": "keyword" },
           "file_count": { "type": "integer" },
-          "whatever_lab_result_value": { "type": "float" }
+          "whatever_lab_result_value": { "type": "float" },
+          "some_string_field": { "type": "keyword" },
+          "some_integer_field": { "type": "integer" }
         }
       }
     }
 }
 '
+
 curl -iv -X PUT "${ESHOST}/${fileIndexName}" \
 -H 'Content-Type: application/json' -d'
 {
@@ -79,6 +83,20 @@ curl -iv -X PUT "${ESHOST}/${fileIndexName}" \
     }
 }
 '
+
+curl -iv -X PUT "${ESHOST}/${configIndexName}" \
+-H 'Content-Type: application/json' -d'
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 1,
+            "number_of_replicas" : 0
+        }
+    }
+    }
+}
+'
+
 }
 
 
@@ -102,6 +120,7 @@ function es_gen_data() {
   endIndex="${2:-0}"
   indexName="${3:-gen3-dev-subject}"
   fileIndexName="${4:-gen3-dev-file}"
+  configIndexName="${5:-gen3-dev-config}"
 
 declare -a genderList
 declare -a ethnicityList
@@ -136,6 +155,8 @@ while [[ $COUNT -lt $endIndex ]]; do
   fileFormat="${fileFormatList[$(( $RANDOM % ${#fileFormatList[@]} ))]}"
   fileCounts=$(( $RANDOM % 100 ))
   randomFloatNumber="$(( $RANDOM % 100 )).$(( $RANDOM % 100 ))"
+  stringArray='["1", "2"]'
+  intArray='[1, 2]'
 
   cat - > "$tmpName" <<EOM
 {
@@ -151,7 +172,9 @@ while [[ $COUNT -lt $endIndex ]]; do
   "file_format": "${fileFormat}",
   "gen3_resource_path": "${resourceName}",
   "file_count": $fileCounts,
-  "whatever_lab_result_value": $randomFloatNumber
+  "whatever_lab_result_value": $randomFloatNumber,
+  "some_string_field": $stringArray,
+  "some_integer_field": $intArray
 }
 EOM
   cat - $tmpName <<EOM
@@ -175,4 +198,13 @@ EOM
        -H 'Content-Type: application/json' "-d@$tmpName"
   let COUNT+=1
 done
+
+curl -X PUT "${ESHOST}/${configIndexName}/_doc/0?pretty" \
+  -H 'Content-Type: application/json' -d '
+  {
+    "timestamp": "1990-01-01T10:10:10",
+    "gen3-dev-subject.some_string_field": "array",
+    "gen3-dev-subject.some_integer_field": "array"
+  }
+  '
 }
