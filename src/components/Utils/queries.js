@@ -206,3 +206,26 @@ export const askGuppyForTotalCounts = (
       throw new Error(`Error during download ${err}`);
     });
 };
+
+export const getAllFieldsFromGuppy = (
+  path,
+  type,
+) => {
+  const query = `{
+    _mapping {
+      ${type}
+    }
+  }`;
+  const queryBody = { query };
+  return fetch(`${path}${graphqlEndpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(queryBody),
+  }).then(response => response.json())
+    .then(response => response.data._mapping[type])
+    .catch((err) => {
+      throw new Error(`Error when getting fields from guppy: ${err}`);
+    });
+};
