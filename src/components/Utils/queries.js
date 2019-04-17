@@ -94,16 +94,15 @@ const getGQLFilter = (filterObj) => {
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
       facetsList.push({
-        IN: [
-          field,
-          filterValues.selectedValues,
-        ],
+        IN: {
+          [field]: filterValues.selectedValues,
+        },
       });
     } else if (filterValues.lowerBound && filterValues.upperBound) {
       facetsList.push({
         AND: [
-          { '>=': [field, filterValues.lowerBound] },
-          { '<=': [field, filterValues.upperBound] },
+          { '>=': { [field]: filterValues.lowerBound } },
+          { '<=': { [field]: filterValues.upperBound } },
         ],
       });
     } else {
