@@ -36,7 +36,7 @@ const getFilterItemForString = (op, field, value) => {
         },
       };
     default:
-      throw new Error(`Invalid text filter operation ${op}`);
+      throw new Error(`Invalid text filter operation "${op}"`);
   }
 };
 
@@ -69,9 +69,29 @@ const getFilterItemForNumbers = (op, field, value) => {
       },
     };
   }
-  throw new Error(`Invalid numeric operation ${op}`);
+  if (op === 'IN' || op === 'in') {
+    return {
+      terms: {
+        [field]: value,
+      },
+    };
+  }
+  throw new Error(`Invalid numeric operation "${op}" for field "${field}"`);
 };
 
+/**
+ * This function transfer graphql filter arg to ES filter object
+ * It first parse graphql filter object recursively from top to down,
+ * until reach the bottom level, it translate gql filter unit to ES filter unit.
+ * And finally combines all filter units from down to top.
+ * @param {string} esInstance
+ * @param {string} esIndex
+ * @param {string} esType
+ * @param {object} graphqlFilterObj
+ * @param {string[]} aggsField - target agg field, only need for agg queries
+ * @param {boolean} filterSelf - whether we want to filter this field or not,
+ *                               only need for agg queries
+ */
 export const getFilterObj = (
   esInstance, esIndex, esType, graphqlFilterObj, aggsField, filterSelf = true,
 ) => {
@@ -99,12 +119,12 @@ export const getFilterObj = (
       };
     }
   } else {
-    const field = graphqlFilterObj[topLevelOp][0];
+    const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
       // if `filterSelf` flag is false, do not filter the target field itself
       return null;
     }
-    const value = graphqlFilterObj[topLevelOp][1];
+    const value = graphqlFilterObj[topLevelOp][field];
     const numericOrTextType = getNumericTextType(esInstance, esIndex, esType, field);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value);

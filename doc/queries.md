@@ -404,46 +404,40 @@ There is a discussion of two approaches:
         {
           "OR": [
             {
-              "=": [
-                "race",
-                "hispanic"
-              ]
+              "=": {
+                "race": "hispanic"
+              }
             },
             {
-              "=": [
-                "race",
-                "asian"
-              ]
+              "=": {
+                "race": "asian"
+              }
             }
           ]
         },
         {
           "AND": [
             {
-              ">=": [
-                "file_count",
-                15
-              ]
+              ">=": {
+                "file_count": 15
+              }
             },
             {
-              "<=": [
-                "file_count",
-                75
-              ]
+              "<=": {
+                "file_count": 75
+              }
             }
           ]
         },
         {
-          "=": [
-            "project",
-            "Proj-1"
-          ]
+          "=": {
+            "project": "Proj-1"
+          }
         },
         {
-          "=": [
-            "gender",
-            "female"
-          ]
+          "=": {
+            "gender": "female"
+          }
         }
       ]
     }
