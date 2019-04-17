@@ -24,24 +24,6 @@ class ES {
     });
   }
 
-  async _getESFieldsTypes(esIndex, esType) {
-    return this.client.indices.getMapping({
-      index: esIndex,
-      type: esType,
-    }).then((resp) => {
-      const esIndexAlias = Object.keys(resp.body)[0];
-      const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
-      const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
-        const esFieldType = mappingObj[field].type;
-        acc[field] = esFieldType;
-        return acc;
-      }, {});
-      return fieldTypes;
-    }, (err) => {
-      console.trace(err.message); // eslint-disable-line no-console
-    });
-  }
-
   /**
    * Query ES data (search API) by index, type, and queryBody
    * See https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
@@ -141,8 +123,33 @@ class ES {
     return totalData;
   }
 
-  async initialize() {
-    this.fieldTypes = {};
+  /**
+   * Get mapping from ES with given index and type.
+   * Return a Promise of an Object: { <field>: <type> }
+   * If error, print error stack
+   * @param {string} esIndex
+   * @param {string} esType
+   */
+  async _getESFieldsTypes(esIndex, esType) {
+    return this.client.indices.getMapping({
+      index: esIndex,
+      type: esType,
+    }).then((resp) => {
+      const esIndexAlias = Object.keys(resp.body)[0];
+      const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
+      const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
+        const esFieldType = mappingObj[field].type;
+        acc[field] = esFieldType;
+        return acc;
+      }, {});
+      return fieldTypes;
+    }, (err) => {
+      console.trace(err.message); // eslint-disable-line no-console
+    });
+  }
+
+  async _getMappingsForAllIndices() {
+    const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
       .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type)
@@ -150,10 +157,62 @@ class ES {
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
-      this.fieldTypes[res.index] = res.fieldTypes;
+      fieldTypes[res.index] = res.fieldTypes;
     });
-    log.debug('[ES.initialize]', JSON.stringify(this.fieldTypes, null, 4));
-    return this.fieldTypes;
+    log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
+    return fieldTypes;
+  }
+
+  async _getArrayFieldsFromConfigIndex() {
+    const arrayFields = {};
+    log.info('[ES.initialize] getting array fields from es config index...');
+    return this.client.search({
+      index: this.config.configIndex,
+      body: { query: { match_all: {} } },
+    }).then((resp) => {
+      try {
+        const fieldsObj = resp.body.hits.hits[0]._source;
+        Object.keys(fieldsObj).forEach((indexFieldName) => {
+          if (fieldsObj[indexFieldName] === 'array') {
+            const twoParts = indexFieldName.split('.');
+            if (twoParts.length !== 2) return;
+            const index = twoParts[0];
+            const field = twoParts[1];
+            if (!arrayFields[index]) arrayFields[index] = [];
+            arrayFields[index].push(field);
+          }
+        });
+        log.info('[ES.initialize] got array fields from es config index:');
+        log.rawOutput(JSON.stringify(arrayFields, null, 4));
+      } catch (err) {
+        log.error('[ES.initialize] Error while getting array fields from config index');
+      }
+      return arrayFields;
+    }, (err) => {
+      console.trace(err.message); // eslint-disable-line no-console
+    });
+  }
+
+  /**
+   * We do following things when initializing:
+   * 1. get mappings from all indices, and save to "this.fieldTypes":
+   * {
+   *    <index1>: {
+   *      <field1>: <type1>
+   *      <field2>: <type2>
+   *    }
+   *    ...
+   * }
+   * 2. get configs from config index for array fields, save to "this.arrayFields":
+   * {
+   *    <index1>: [<field1>, <field2>],
+   *    <index2>: [<field1>, <field2>],
+   *    ...
+   * }
+   */
+  async initialize() {
+    this.fieldTypes = await this._getMappingsForAllIndices();
+    this.arrayFields = await this._getArrayFieldsFromConfigIndex();
   }
 
   /**
@@ -197,6 +256,13 @@ class ES {
       400,
       `Invalid es type: "${esType}"`,
     );
+  }
+
+  /**
+   * Check if the field is array
+   */
+  isArrayField(esIndex, field) {
+    return (this.arrayFields[esIndex] && this.arrayFields[esIndex].includes(field));
   }
 
   getCount(esIndex, esType, filter) {

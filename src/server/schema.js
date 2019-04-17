@@ -15,6 +15,17 @@ const esgqlTypeMapping = {
   scaled_float: 'Float',
   array: 'Object',
 };
+const getGQLType = (esInstance, esIndex, field, esFieldType) => {
+  const gqlType = esgqlTypeMapping[esFieldType];
+  if (!gqlType) {
+    throw new Error(`Invalid type ${esFieldType} for field ${field} in index ${esIndex}`);
+  }
+  const isArrayField = esInstance.isArrayField(esIndex, field);
+  if (isArrayField) {
+    return `[${gqlType}]`;
+  }
+  return gqlType;
+};
 
 const EnumAggsHistogramName = {
   HISTOGRAM_FOR_STRING: 'HistogramForString',
@@ -24,7 +35,11 @@ const gqlTypeToAggsHistogramName = {
   String: EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
   Int: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
   Float: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
+  '[String]': EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
+  '[Int]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
+  '[Float]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
 };
+
 const getAggsHistogramName = (gqlType) => {
   if (!gqlTypeToAggsHistogramName[gqlType]) {
     throw new Error(`Invalid elasticsearch type ${gqlType}`);
@@ -46,7 +61,7 @@ const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
   const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
   const fieldGQLTypeMap = Object.keys(fieldESTypeMap).map((field) => {
     const esFieldType = fieldESTypeMap[field];
-    const gqlType = esgqlTypeMapping[esFieldType];
+    const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
     return { field, type: gqlType };
   });
   return fieldGQLTypeMap;

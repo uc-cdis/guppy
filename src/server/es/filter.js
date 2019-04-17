@@ -7,7 +7,8 @@ const getNumericTextType = (
   field,
 ) => {
   if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
-    throw new Error('Invalid index or field name');
+    throw new Error(`Invalid index (${esIndex}) or field name ${field}, 
+    please check your query is valid, or typo in manifest file`);
   }
   const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
   if (typeof numericTextType === 'undefined') {
