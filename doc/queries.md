@@ -15,7 +15,7 @@
 <td>
 <pre>
 {
-  subject(offset: 5, size: 100, sort: [
+  subject(offset: 5, first: 100, sort: [
     {
       "file_count": desc
     },
@@ -261,7 +261,7 @@ query($filter: JSON) {
 <td>
 <pre>
 {
-  subject(offset: 5, size: 100, sort: $sort1, filter: $filter1) {
+  subject(offset: 5, first: 100, sort: $sort1, filter: $filter1) {
     subject_id
     gender
     ethnicity
