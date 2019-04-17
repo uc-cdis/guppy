@@ -51,7 +51,7 @@ const getQuerySchemaForType = (esType) => {
   const esTypeObjName = firstLetterUpperCase(esType);
   return `${esType} (
     offset: Int, 
-    size: Int,
+    first: Int,
     filter: JSON,
     sort: JSON,
     ): [${esTypeObjName}]`;

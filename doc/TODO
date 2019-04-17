@@ -1,0 +1,186 @@
+TODO: 
+  - link to es: 
+    - separate mock data (done)
+    - lint to es (done)
+    - transfer filter to es query language (done)
+    - transfer aggregation to es query language (done)
+      - for number (done)
+        - fixed range step (done)
+        - fixed bin count (done)
+        - global stats (done)
+      - for text (done)  
+  - sorting arguments for query (done)
+  - separate graphql->es transfer as another file
+    - filter transfer (done)
+    - aggregation transfer (done)
+    - es result to graphql result transfer (?)
+
+  - customization (done)
+    - move the schema part out from server.js (done)
+    - mock configuration for fields and types (done)
+
+  - configuration part (need discussion )
+    - REST endpoint (done)
+    - test 
+    - lint (done)
+    - travis
+    
+  - connect locally 
+    - local connects to storybook's filter 
+      - move filter to ui-component (done)
+      - import filter to guppy (done)
+      - build tabs when filer component start render
+        - text filter (done)
+        - range filter (done)
+      - filter improve 
+        - remember toggling status (done)
+        - remember selecting status (done)
+        - remember range status (done)
+        - add counts for filters (done)
+        - add search inbox for filters
+        - add "X more" and "X less" for filters (done)
+        - range filter: min max problem (done)
+        - filter checkbox need more bugfix (done)
+      - look into the actions and write gralhql queries for each actions
+        - get filters from top level (done)
+        - translate filters into graphql language (done)
+        - filterSelf option (done)
+
+      - connect charts 
+        - add wrapper <AggsWrapper> and connect to subscribers (done)
+        - summary card (done)
+        - summary pie chart (done)
+        - stacked bar charts (done) 
+      - add pagination for text aggregation (done)
+
+    - make tables 
+      - basic component (done)
+      - pagination (done)
+      - connect to guppy (done)
+      - add table to data portal (done)
+      - checkbox 
+
+    - add explorer page to data portal (done)
+    - connect query page to guppy (done)
+    - deploy data portal to dev env (done)
+
+    - deploy new guppy, and create branch for query page in data portal (done)
+    - let guppy support multiple es indices (done)
+    - check total (done)
+    - check aggregation (done)
+    - check filter variable has bug?  (done)
+    - check sort variable has bug?  (done)
+    - change all console.log into logger (done)
+    - merge and create branch (done)
+    - change server config to support multi index (done)
+    - change component to support multi index (done)
+    - change to yoga, and add graphql middleware test(high, done)
+    - change query schema examples (done)
+    - remove "data" from aggregation results (cancel)
+    - only get wanted fields when get all data (done)
+    - auth control into middleware (done) 
+    - change scripts to generate resource field (done)
+    - check pagination limits (done)
+    - download endpoint 
+      - Remove index from download endpoint (done)
+      - `/download` endpoint omit wrong fields, should return error (done)
+      - `/download` endpoint should return 401 if no authorization header (done)
+    - add table buttons for download clinical (done)
+    - add manifest button for download manifest (done)
+    - table button refines (done)
+    - explorer style refines (done)
+    - manifest related configs (done)
+    - portal config refine (done)
+      - seperate field name and labels (done)
+      - table columns (done)
+      - filter configs (done)
+    - feature flag (done)
+      - compatibility: safe to merge? (done)
+    - fix eslints (done)
+    - check dropdown works (done)
+    - export to terra (done)
+    - export to workspace (done)
+    - Explorer page: if empty, show empty filter and charts (done)
+    - If goto 500+ pages, the page got empty → max page set to 10000/pageSize (done)
+    - If 50 lines in 100 row table, hide the empty lines (done)
+    - Table column should not be draggable (done)
+    - support array type (done)
+      - put dummy array data into es (done)
+      - change schema (cancelled)
+      - read from config index (done)
+    - graphql schema
+      - args "size" → "first" (done)
+      - Support arrary type (done) 
+
+=====================================================================================================================
+    - schema name customizable in config files (* high)
+    - graphql schema
+      - Better filter schema (* high) 
+        {
+          “AND”: [
+            {
+              “=”: {
+                “gender”: “female”,
+              },
+            },
+            {
+              “or” : {
+                “IN”: {
+                  “race”: [“asia”, “hispanic”]
+                },
+                {
+                  “=”: {
+                    "study": "Study-01"
+                  }
+                }
+              }
+            }
+          ]
+        }
+
+
+    - unit test for guppy explorer
+    
+    - and throw error, give error code and msg
+    
+    
+    - Unit test 
+    - add descriptions for schema (low, but important) 
+
+
+
+    - support SQL 
+    - Change "JSON" format to customized schema. JSON format has error underline warning, but the syntax is actually correct. 
+    - check performance? (low, but important)
+      - how to do concurrency test? performance test?
+      - is it using streaming? 
+        - get raw data might need streaming
+      - could handle parallel queries? (of course)
+      - should remove all await?  (done)
+    - support boolean (low, not necessary)
+      - schema
+      - server side
+      - filter
+      - Description: current prototype only support numeric (int and float), and keyword data type.There's boolean type facets in gtex (e.g., "Hypertension Meds"), we should make Guppy support boolean type:1. improve graphql schema2. let server support boolean filter3. let server support boolean type aggregation4. improve filter component for boolean type filtering
+    
+  - enhancement: 
+    - endpoint to change debug level
+    - endpoint to regenerate schema, resolvers, and typefields
+    - remove some empty bool from front-end queries (done)
+    - support float type for numeric aggregation (done)
+    - support '!=' and 'NOT' operation
+    - support 'IN' operation (done)
+    - unit test script for server, generating schema 
+    - logs
+      - add 2 debug flag ( and support change flag in runtime ?
+      - if flag=true, output graphql queries, and es queries 
+
+  - tiered access
+    - control raw data queries by type
+    - control aggregation by results
+
+
+  - sliding window query? 
+
+
+  

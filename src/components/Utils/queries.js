@@ -53,9 +53,9 @@ const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter || sort) {
     queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON' : ''}) {`;
   }
-  let dataTypeLine = `${type} (offset: ${offset}, size: ${size}) {`;
+  let dataTypeLine = `${type} (offset: ${offset}, first: ${size}) {`;
   if (gqlFilter || sort) {
-    dataTypeLine = `${type} (offset: ${offset}, size: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
+    dataTypeLine = `${type} (offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
   }
   let typeAggsLine = `${type} {`;
   if (gqlFilter) {
