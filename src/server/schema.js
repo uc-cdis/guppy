@@ -97,6 +97,7 @@ const getSchema = (esConfig, esInstance) => {
     type Query {
       ${esConfig.indices.map(cfg => getQuerySchemaForType(cfg.type)).join('\n')}
       _aggregation: Aggregation
+      _mapping: Mapping
     }
   `;
 
@@ -146,6 +147,12 @@ const getSchema = (esConfig, esInstance) => {
     }
   `;
 
+  const mappingSchema = `
+    type Mapping {
+      ${esConfig.indices.map(cfg => `${cfg.type}: [String]`).join('\n')}
+    }
+  `;
+
   const schemaStr = `
   scalar JSON
   ${querySchema}
@@ -156,6 +163,7 @@ const getSchema = (esConfig, esInstance) => {
   ${numberHistogramSchema}
   ${textHistogramBucketSchema}
   ${numberHistogramBucketSchema}
+  ${mappingSchema}
 `;
   log.info('[schema] graphql schema generated.');
   log.debug('[schema] graphql schema', schemaStr);
