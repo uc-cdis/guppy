@@ -44,8 +44,8 @@ class ES {
       type: esType,
       body: validatedQueryBody,
     }).then(resp => resp.body, (err) => {
-      log.error('[ES.query] error when query');
-      console.trace(err.message); // eslint-disable-line no-console
+      log.error('[ES.query] error during querying');
+      throw new Error(err.message);
     });
   }
 
@@ -94,7 +94,7 @@ class ES {
           sort,
         }).then(resp => resp, (err) => {
           log.error('[ES.query] error when query');
-          console.trace(err.message); // eslint-disable-line no-console
+          throw new Error(err.message);
         });
         currentBatch = res.body;
         log.debug('[ES scrollQuery] created scroll');
@@ -131,24 +131,33 @@ class ES {
    * @param {string} esType
    */
   async _getESFieldsTypes(esIndex, esType) {
+    const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
       type: esType,
     }).then((resp) => {
-      const esIndexAlias = Object.keys(resp.body)[0];
-      const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
-      const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
-        const esFieldType = mappingObj[field].type;
-        acc[field] = esFieldType;
-        return acc;
-      }, {});
-      return fieldTypes;
+      try {
+        const esIndexAlias = Object.keys(resp.body)[0];
+        const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
+        const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
+          const esFieldType = mappingObj[field].type;
+          acc[field] = esFieldType;
+          return acc;
+        }, {});
+        return fieldTypes;
+      } catch (err) {
+        throw new Error(`${errMsg}: ${err}`);
+      }
     }, (err) => {
-      console.trace(err.message); // eslint-disable-line no-console
+      throw new Error(`${errMsg}: ${err.message}`);
     });
   }
 
   async _getMappingsForAllIndices() {
+    if (!this.config.indices || this.config.indices === 0) {
+      const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
+      throw new Error(errMsg);
+    }
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
@@ -169,7 +178,7 @@ class ES {
       return Promise.resolve({});
     }
     const arrayFields = {};
-    log.info('[ES.initialize] getting array fields from es config index...');
+    log.info(`[ES.initialize] getting array fields from es config index "${this.config.configIndex}"...`);
     return this.client.search({
       index: this.config.configIndex,
       body: { query: { match_all: {} } },
@@ -182,8 +191,11 @@ class ES {
             if (twoParts.length !== 2) return;
             const index = twoParts[0];
             const field = twoParts[1];
-            if (!this.fieldTypes || !this.fieldTypes[index] || !this.fieldTypes[index][field]) {
-              const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" or field "${field}" not found.`;
+            if (!this.fieldTypes[index]) {
+              const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found. `;
+              throw new Error(errMsg);
+            } else if (!this.fieldTypes[index][field]) {
+              const errMsg = `[ES.initialize] wrong array entry from config index: field "${field}" not found. `;
               throw new Error(errMsg);
             }
             if (!arrayFields[index]) arrayFields[index] = [];
@@ -197,7 +209,7 @@ class ES {
       }
       return arrayFields;
     }, (err) => {
-      console.trace(err.message); // eslint-disable-line no-console
+      throw new Error(err.message);
     });
   }
 
