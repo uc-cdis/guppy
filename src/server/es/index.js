@@ -182,6 +182,10 @@ class ES {
             if (twoParts.length !== 2) return;
             const index = twoParts[0];
             const field = twoParts[1];
+            if (!this.fieldTypes || !this.fieldTypes[index] || !this.fieldTypes[index][field]) {
+              const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" or field "${field}" not found.`;
+              throw new Error(errMsg);
+            }
             if (!arrayFields[index]) arrayFields[index] = [];
             arrayFields[index].push(field);
           }
@@ -189,7 +193,7 @@ class ES {
         log.info('[ES.initialize] got array fields from es config index:');
         log.rawOutput(JSON.stringify(arrayFields, null, 4));
       } catch (err) {
-        log.error('[ES.initialize] Error while getting array fields from config index');
+        throw new Error(err);
       }
       return arrayFields;
     }, (err) => {
