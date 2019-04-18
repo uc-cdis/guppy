@@ -21,10 +21,9 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
   const resources = data.resources ? _.uniq(data.resources) : [];
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
   const authPart = {
-    IN: [
-      config.esConfig.authFilterField,
-      [...resources],
-    ],
+    IN: {
+      [config.esConfig.authFilterField]: [...resources],
+    },
   };
   const appliedFilter = parsedFilter ? {
     AND: [
