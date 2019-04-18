@@ -10,6 +10,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
+  // if this is for range slider
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
     const rangeOptions = histogramResult.histogram.map((item) => {
       const minValue = initHistogramRes ? initHistogramRes.histogram[0].key[0] : item.key[0];
