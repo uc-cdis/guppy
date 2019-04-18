@@ -164,6 +164,10 @@ class ES {
   }
 
   async _getArrayFieldsFromConfigIndex() {
+    if (typeof this.config.configIndex === 'undefined') {
+      log.info('[ES.initialize] no array fields from es config index.');
+      return Promise.resolve({});
+    }
     const arrayFields = {};
     log.info('[ES.initialize] getting array fields from es config index...');
     return this.client.search({
