@@ -48,16 +48,23 @@ class GuppyWrapper extends React.Component {
       rawData: [],
       totalCount: 0,
       allFields: [],
+      rawDataFields: [],
     };
   }
 
   componentDidMount() {
-    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
     getAllFieldsFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
     ).then((fields) => {
-      this.setState({ allFields: fields });
+      const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
+        ? this.props.rawDataFields : fields;
+      this.setState({
+        allFields: fields,
+        rawDataFields,
+      }, () => {
+        this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+      });
     });
   }
 
@@ -71,6 +78,9 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
+    if (!fields || fields.length === 0) {
+      return Promise.resolve({ data: [], totalCount: 0 });
+    }
     return askGuppyForRawData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -111,7 +121,7 @@ class GuppyWrapper extends React.Component {
     }
     this.filter = filter;
     this.setState({ filter });
-    this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
+    this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
   }
 
   /**
@@ -119,7 +129,7 @@ class GuppyWrapper extends React.Component {
    * This function will update this.state.rawData and this.state.totalCount
    */
   handleFetchAndUpdateRawData({ offset = 0, size = 20, sort = [] }) {
-    return this.getDataFromGuppy(this.props.rawDataFields, sort, true, offset, size);
+    return this.getDataFromGuppy(this.state.rawDataFields, sort, true, offset, size);
   }
 
   /**
@@ -132,7 +142,7 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.type,
       this.state.totalCount,
       {
-        fields: this.props.rawDataFields,
+        fields: this.state.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
       },
@@ -147,7 +157,7 @@ class GuppyWrapper extends React.Component {
   handleDownloadRawDataByFields({ fields, sort = [] }) {
     let targetFields = fields;
     if (typeof fields === 'undefined') {
-      targetFields = this.props.rawDataFields;
+      targetFields = this.state.rawDataFields;
     }
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
@@ -232,10 +242,7 @@ GuppyWrapper.propTypes = {
   filterConfig: PropTypes.shape({
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
-      filters: PropTypes.arrayOf(PropTypes.shape({
-        field: PropTypes.string,
-        label: PropTypes.string,
-      })),
+      fields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
   rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
