@@ -4,6 +4,7 @@ import {
   askGuppyForRawData,
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
+  getAllFieldsFromGuppy,
 } from '../Utils/queries';
 
 /**
@@ -46,13 +47,29 @@ class GuppyWrapper extends React.Component {
       filter: {},
       rawData: [],
       totalCount: 0,
+      allFields: [],
     };
   }
 
   componentDidMount() {
     this.getDataFromGuppy(this.props.rawDataFields, undefined, true);
+    getAllFieldsFromGuppy(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+    ).then((fields) => {
+      this.setState({ allFields: fields });
+    });
   }
 
+  /**
+   * This function get data with current filter (if any),
+   * and update this.state.rawData and this.state.totalCount
+   * @param {string[]} fields
+   * @param {object} sort
+   * @param {bool} updateDataWhenReceive
+   * @param {number} offset
+   * @param {number} size
+   */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
     return askGuppyForRawData(
       this.props.guppyConfig.path,
@@ -186,6 +203,7 @@ class GuppyWrapper extends React.Component {
             fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
+            allFields: this.state.allFields,
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),

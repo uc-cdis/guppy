@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
 import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
-  getFilterGroupConfig,
   getFilterSections,
   excludeSelfFilterFromAggsData,
 } from './utils';
@@ -53,10 +52,11 @@ class ConnectedFilter extends React.Component {
   }
 
   updateTabs(tabsOptions) {
-    const tabs = this.props.filterConfig.tabs.map(({ filters }, index) => (
+    const { fieldMapping } = this.props;
+    const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
       <FilterList
         key={index}
-        sections={getFilterSections(filters, tabsOptions, this.state.initialAggsData)}
+        sections={getFilterSections(fields, fieldMapping, tabsOptions, this.state.initialAggsData)}
       />
     ));
     this.setState({ tabs });
@@ -88,7 +88,7 @@ class ConnectedFilter extends React.Component {
       <FilterGroup
         className={this.props.className}
         tabs={this.state.tabs}
-        filterConfig={getFilterGroupConfig(this.props.filterConfig)}
+        filterConfig={this.props.filterConfig}
         onFilterChange={e => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
@@ -100,10 +100,7 @@ ConnectedFilter.propTypes = {
   filterConfig: PropTypes.shape({
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
-      filters: PropTypes.arrayOf(PropTypes.shape({
-        field: PropTypes.string,
-        label: PropTypes.string,
-      })),
+      fields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
   guppyConfig: PropTypes.shape({
@@ -114,6 +111,10 @@ ConnectedFilter.propTypes = {
   onReceiveNewAggsData: PropTypes.func,
   hideZero: PropTypes.bool,
   className: PropTypes.string,
+  fieldMapping: PropTypes.arrayOf(PropTypes.shape({
+    field: PropTypes.string,
+    name: PropTypes.string,
+  })),
 };
 
 ConnectedFilter.defaultProps = {
@@ -121,6 +122,7 @@ ConnectedFilter.defaultProps = {
   onReceiveNewAggsData: () => {},
   hideZero: true,
   className: '',
+  fieldMapping: [],
 };
 
 export default ConnectedFilter;
