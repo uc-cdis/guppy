@@ -134,7 +134,7 @@ export const askGuppyForRawData = (
 };
 
 export const getAllFieldsFromFilterConfigs = filterTabConfigs => filterTabConfigs
-  .reduce((acc, cur) => acc.concat(cur.filters.map(item => item.field)), []);
+  .reduce((acc, cur) => acc.concat(cur.fields), []);
 
 /**
  * Download all data from guppy using fields, filter, and sort args.

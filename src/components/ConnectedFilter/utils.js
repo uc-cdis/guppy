@@ -35,14 +35,23 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   return textOptions;
 };
 
-export const getFilterSections = (filters, tabsOptions, initialTabsOptions) => {
-  const sections = filters.map(({ field, label }) => ({
-    title: label,
-    options: getSingleFilterOption(
-      tabsOptions[field],
-      initialTabsOptions ? initialTabsOptions[field] : undefined,
-    ),
-  }));
+const capitalizeFirstLetter = (str) => {
+  const res = str.replace(/_/gi, ' ');
+  return res.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
+export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabsOptions) => {
+  const sections = fields.map((field) => {
+    const overrideName = fieldMapping.find(entry => (entry.field === field));
+    const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
+    return {
+      title: label,
+      options: getSingleFilterOption(
+        tabsOptions[field],
+        initialTabsOptions ? initialTabsOptions[field] : undefined,
+      ),
+    };
+  });
   return sections;
 };
 

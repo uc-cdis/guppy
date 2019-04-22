@@ -257,7 +257,7 @@ export const numericAggregation = async (
   return [result];
 };
 
-const PAGE_SIZE = 1024;
+const PAGE_SIZE = 3;
 export const textAggregation = async (
   {
     esInstance,
@@ -305,7 +305,9 @@ export const textAggregation = async (
       });
       resultSize += 1;
     });
-    queryBody.aggs[aggsName].composite.after = result.aggregations[aggsName].after_key;
+    const afterKey = result.aggregations[aggsName].after_key;
+    if (typeof afterKey === 'undefined') break;
+    queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);
   /* eslint-enable */
   return finalResults;
