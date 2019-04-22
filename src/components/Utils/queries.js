@@ -88,7 +88,7 @@ export const askGuppyAboutAllFieldsAndOptions = (
   path, type, fields,
 ) => queryGuppyForAggs(path, type, fields);
 
-const getGQLFilter = (filterObj) => {
+export const getGQLFilter = (filterObj) => {
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     const filterValues = filterObj[field];
