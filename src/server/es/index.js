@@ -107,9 +107,9 @@ class ES {
       }
 
       // merge fetched batches
-      log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
       scrollID = currentBatch._scroll_id;
       batchSize = currentBatch.hits.hits.length;
+      log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
 
       // TODO: change it to streaming
       totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
