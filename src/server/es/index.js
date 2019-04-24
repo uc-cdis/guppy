@@ -38,7 +38,7 @@ class ES {
         validatedQueryBody[key] = queryBody[key];
       }
     });
-    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody, null, 4));
+    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
       type: esType,
@@ -203,7 +203,7 @@ class ES {
           }
         });
         log.info('[ES.initialize] got array fields from es config index:');
-        log.rawOutput(JSON.stringify(arrayFields, null, 4));
+        log.rawOutput(log.levelEnums.INFO, JSON.stringify(arrayFields, null, 4));
       } catch (err) {
         throw new Error(err);
       }

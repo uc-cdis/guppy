@@ -257,7 +257,7 @@ export const numericAggregation = async (
   return [result];
 };
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 10000;
 export const textAggregation = async (
   {
     esInstance,

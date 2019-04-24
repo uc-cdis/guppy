@@ -25,11 +25,21 @@ const numLevels = {
   4: 'ERROR',
   5: 'SILENT',
 };
+log.levelEnums = {
+  TRACE: 0,
+  DEBUG: 1,
+  INFO: 2,
+  WARN: 3,
+  ERROR: 4,
+  SILENT: 5,
+};
 log.setLevel(log.levels.DEBUG);
 log.info('log level set to', numLevels[log.getLevel()]);
 
-log.rawOutput = (msg) => {
-  console.log(msg); // eslint-disable-line no-console
+log.rawOutput = (level, msg) => {
+  if (log.getLevel() > level) {
+    console.log(msg); // eslint-disable-line no-console
+  }
 };
 
 export default log;

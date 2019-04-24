@@ -3,6 +3,11 @@ import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
 
+/**
+ * This function parses all requesting fields from a request
+ * @param {object} resolveInfo - info argument from resolver function
+ * @returns {string[]} parsed fields
+ */
 const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
   const parsedInfo = parseResolveInfo(resolveInfo);
   const typeName = firstLetterUpperCase(parsedInfo.name);
@@ -10,14 +15,18 @@ const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
   return fields;
 };
 
+/**
+ * This is for getting raw data, by specific es index and es type
+ * @param {object} esInstance
+ * @param {string} esIndex
+ * @param {string} esType
+ */
 const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, context, resolveInfo) => {
   const {
     offset, first, filter, sort,
   } = args;
   log.debug('[resolver.typeQueryResolver] es type', esType);
-  log.debug('[resolver.typeQueryResolver] filter', JSON.stringify(filter, null, 4));
-  log.debug('[resolver.typeQueryResolver] sort', JSON.stringify(sort, null, 4));
-  log.debug('[resolver.typeQueryResolver] args', JSON.stringify(args, null, 4));
+  log.debug('[resolver.typeQueryResolver] args', args);
   const fields = parseFieldsFromTypeResolveInfo(resolveInfo);
   const dataPromise = esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size: first,
@@ -25,25 +34,20 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
   return dataPromise;
 };
 
-const aggsQueryResolver = (parent, args) => {
-  log.debug('[resolver.aggsQueryResolver] args', args);
-  return { ...parent };
-};
-
-const mappingQUeryResolver = (parent, args) => {
-  log.debug('[resolver.mappingQUeryResolver] args', args);
-  return { ...parent };
-};
-
+/**
+ * This resolver passes down `filter` and `filterSelf` element to children resolvers.
+ * It is a parent resolver for aggregation data
+ * @param {object} esInstance
+ * @param {string} esIndex
+ * @param {string} esType
+ */
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
-  log.debug('[resolver.typeAggsQueryResolver] args', args);
   const {
-    filter, offset, first, filterSelf,
+    filter, filterSelf,
   } = args;
+  log.debug('[resolver.typeAggsQueryResolver] args', args);
   return {
     filter,
-    offset,
-    first,
     filterSelf,
     esInstance,
     esIndex,
@@ -51,39 +55,35 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
   };
 };
 
-const aggsTotalQueryResolver = (parent, args) => {
-  log.debug('[resolver.aggsTotalQueryResolver] args', args);
+/**
+ * This resolver is for getting _totalCount
+ * @param {object} parent
+ */
+// TODO: add limitation here
+const aggsTotalQueryResolver = (parent) => {
   const {
     filter, esInstance, esIndex, esType,
   } = parent;
-  log.debug('[resolver.aggsTotalQueryResolver] filter', filter);
   const countPromise = esInstance.getCount(esIndex, esType, filter);
   return countPromise;
 };
 
-const aggregateFieldResolver = field => (parent, args) => {
-  log.debug('[resolver.aggregateFieldResolver] args', args);
-  const {
-    filter, filterSelf, esInstance, esIndex, esType,
-  } = parent;
-  return {
-    filter,
-    field,
-    filterSelf,
-    esInstance,
-    esIndex,
-    esType,
-  };
-};
-
+/**
+ * This resolver is for numeric aggregation.
+ * It inherits some arguments from its parent, also parses its arguments,
+ * and then calls numeric aggregation function, and finally returns response
+ * @param {object} parent
+ * @param {object} args
+ */
+// TODO: add limitation here
 const numericHistogramResolver = (parent, args) => {
-  log.debug('[resolver.numericHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType, filter, field, filterSelf,
   } = parent;
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
+  log.debug('[resolver.numericHistogramResolver] args', args);
   const resultPromise = esInstance.numericAggregation({
     esIndex,
     esType,
@@ -98,6 +98,14 @@ const numericHistogramResolver = (parent, args) => {
   return resultPromise;
 };
 
+/**
+ * This resolver is for text aggregation.
+ * It inherits arguments from its parent,
+ * and then calls text aggregation function, and finally returns response
+ * @param {object} parent
+ * @param {object} args
+ */
+// TODO: add limitation here
 const textHistogramResolver = (parent, args) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
@@ -118,11 +126,50 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const fieldAggregationResolverMappings = {};
   const { fields } = esInstance.getESFields(esIndex);
   fields.forEach((field) => {
-    fieldAggregationResolverMappings[`${field}`] = aggregateFieldResolver(field);
+    fieldAggregationResolverMappings[`${field}`] = (parent => ({ ...parent, field }));
   });
   return fieldAggregationResolverMappings;
 };
 
+/**
+ * Tree-structured resolvers pass down arguments.
+ * For better understanding, following is an example query, and related resolvers for each level:
+ *
+ * query {
+ *   subject (filter: xx, offset: xx, first: xx, sort: xx) {  ---> `typeQueryResolver`
+ *     gender
+ *     race
+ *   }
+ *   _aggregation {
+ *     subject (filter: xx, filterSelf: xx} { ---> `typeAggsQueryResolver`
+ *       _totalCount  ---> `aggsTotalQueryResolver`
+ *       gender {
+ *         histogram {  ---> `textHistogramResolver`
+ *           key
+ *           count
+ *         }
+ *       }
+ *       file_count {
+ *         histogram (rangeStart: xx, rangeEnd: xx, rangeStep: xx, binCount: xx)
+ *         {  ---> `numericHistogramResolver`
+ *           key
+ *           count
+ *         }
+ *       }
+ *     }
+ *   }
+ *   _mapping {
+ *     subject ---> see `mappingResolvers`
+ *   }
+ * }
+ */
+
+/**
+ * Create resolvers for the whole graphql schema tree
+ * See comments above for more detailed example.
+ * @param {object} esConfig
+ * @param {object} esInstance
+ */
 const getResolver = (esConfig, esInstance) => {
   const typeResolverMappings = esConfig.indices.reduce((acc, cfg) => {
     acc[cfg.type] = typeQueryResolver(esInstance, cfg.index, cfg.type);
@@ -152,8 +199,8 @@ const getResolver = (esConfig, esInstance) => {
     JSON: GraphQLJSON,
     Query: {
       ...typeResolverMappings,
-      _aggregation: aggsQueryResolver,
-      _mapping: mappingQUeryResolver,
+      _aggregation: parent => ({ ...parent }),
+      _mapping: parent => ({ ...parent }),
     },
     Aggregation: {
       ...typeAggregationResolverMappings,
@@ -170,7 +217,7 @@ const getResolver = (esConfig, esInstance) => {
     },
   };
   log.info('[resolver] graphql resolver generated.');
-  log.rawOutput(resolver);
+  log.rawOutput(log.levelEnums.DEBUG, resolver);
   return resolver;
 };
 
