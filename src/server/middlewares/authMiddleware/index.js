@@ -1,9 +1,11 @@
 import _ from 'lodash';
+import assert from 'assert';
 import log from '../../logger';
 import config from '../../config';
 import arboristClient from './arboristClient';
 import CodedError from '../../utils/error';
 import { transferSlashStyleToDashStyle } from '../../utils/utils';
+
 
 const localTestFlag = false; // a flag for local testing
 
@@ -20,8 +22,8 @@ const getAccessableResourcesFromArborist = async (jwt) => {
         '/programs/jnkns',
         '/programs/jnkns/projects',
         '/programs/DEV/projects/test',
-        '/programs/QA/projects/test',
-        '/programs/jnkns/projects/jenkins',
+        // '/programs/QA/projects/test',
+        // '/programs/jnkns/projects/jenkins',
       ],
     };
   } else {
@@ -48,9 +50,11 @@ export const getAccessableResources = async (jwt) => {
 
 export const applyAuthFilter = async (jwt, parsedFilter) => {
   // if mock arborist endpoint, just skip auth middleware
-  if (config.arboristEndpoint === 'mock') {
-    log.debug('[authMiddleware] using mock arborist endpoint, skip auth middleware');
-    return parsedFilter;
+  if (!localTestFlag) {
+    if (config.arboristEndpoint === 'mock') {
+      log.debug('[authMiddleware] using mock arborist endpoint, skip auth middleware');
+      return parsedFilter;
+    }
   }
 
   // asking arborist for auth resource list, and add to filter args
@@ -71,12 +75,16 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
 };
 
 const authMWResolver = async (resolve, root, args, context, info) => {
+  assert(config.tierAccessLevel === 'private', 'Auth middleware layer only for "private" tier access level');
+
   const { jwt } = context;
 
   // if mock arborist endpoint, just skip auth middleware
-  if (config.arboristEndpoint === 'mock') {
-    log.debug('[authMiddleware] using mock arborist endpoint, skip auth middleware');
-    return resolve(root, args, context, info);
+  if (!localTestFlag) {
+    if (config.arboristEndpoint === 'mock') {
+      log.debug('[authMiddleware] using mock arborist endpoint, skip auth middleware');
+      return resolve(root, args, context, info);
+    }
   }
 
   // asking arborist for auth resource list, and add to filter args

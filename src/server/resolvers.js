@@ -59,7 +59,6 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
  * This resolver is for getting _totalCount
  * @param {object} parent
  */
-// TODO: add limitation here
 const aggsTotalQueryResolver = (parent) => {
   const {
     filter, esInstance, esIndex, esType,
@@ -75,7 +74,6 @@ const aggsTotalQueryResolver = (parent) => {
  * @param {object} parent
  * @param {object} args
  */
-// TODO: add limitation here
 const numericHistogramResolver = (parent, args) => {
   const {
     esInstance, esIndex, esType, filter, field, filterSelf,
@@ -105,7 +103,6 @@ const numericHistogramResolver = (parent, args) => {
  * @param {object} parent
  * @param {object} args
  */
-// TODO: add limitation here
 const textHistogramResolver = (parent, args) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {

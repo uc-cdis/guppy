@@ -1,3 +1,4 @@
+import { ApolloError, UserInputError } from 'apollo-server';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum, SCROLL_PAGE_SIZE } from './const';
 
 const getNumericTextType = (
@@ -7,12 +8,11 @@ const getNumericTextType = (
   field,
 ) => {
   if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
-    throw new Error(`Invalid index (${esIndex}) or field name ${field}, 
-    please check your query is valid, or typo in manifest file`);
+    throw new UserInputError('Please check your syntax for input "filter" argument');
   }
   const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
   if (typeof numericTextType === 'undefined') {
-    throw new Error(`ES type ${esInstance.fieldTypes[esIndex][field]} not supported yet`);
+    throw new ApolloError(`ES type ${esInstance.fieldTypes[esIndex][field]} not supported.`, 500);
   }
   return numericTextType;
 };
@@ -36,7 +36,7 @@ const getFilterItemForString = (op, field, value) => {
         },
       };
     default:
-      throw new Error(`Invalid text filter operation "${op}"`);
+      throw new UserInputError(`Invalid operation "${op}" in filter argument.`);
   }
 };
 
@@ -76,7 +76,7 @@ const getFilterItemForNumbers = (op, field, value) => {
       },
     };
   }
-  throw new Error(`Invalid numeric operation "${op}" for field "${field}"`);
+  throw new UserInputError(`Invalid numeric operation "${op}" for field "${field}" in filter argument`);
 };
 
 /**
@@ -132,7 +132,7 @@ export const getFilterObj = (
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
       resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value);
     } else {
-      throw new Error(`Invalid es field type ${numericOrTextType}`);
+      throw new ApolloError(`Invalid es field type ${numericOrTextType}`, 500);
     }
   }
   return resultFilterObj;
@@ -201,7 +201,9 @@ export const getData = async (
     size,
   }) => {
   if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-    throw new Error(`Invalid large query for offset + size > ${SCROLL_PAGE_SIZE}, offset = ${offset} and size = ${size}`);
+    throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE}, 
+    offset = ${offset} and size = ${size},
+    please use download endpoint for large data queries instead.`);
   }
   const result = await filterData(
     { esInstance, esIndex, esType },

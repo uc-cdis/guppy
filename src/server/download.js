@@ -1,24 +1,11 @@
 import _ from 'lodash';
 import { applyAuthFilter, getAccessableResources } from './middlewares/authMiddleware';
+import { getRequestResourceListFromFilter } from './middlewares/tierAccessMiddleware';
 import headerParser from './utils/headerParser';
 import esInstance from './es/index';
 import log from './logger';
 import config from './config';
 import CodedError from './utils/error';
-import { parseValuesFromFilter } from './es/filter';
-import { textAggregation } from './es/aggs';
-
-const getRequestResourceListFromFilter = async (esIndex, esType, filter) => {
-  let resourceList;
-  if (filter) {
-    resourceList = parseValuesFromFilter(filter, config.esConfig.resourceField);
-    return Promise.resolve(resourceList);
-  }
-  return textAggregation(
-    { esInstance, esIndex, esType },
-    { field: config.esConfig.resourceField },
-  ).then(res => (res.map(item => item.key)));
-};
 
 const downloadRouter = async (req, res, next) => {
   const {
