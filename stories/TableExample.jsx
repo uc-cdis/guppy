@@ -44,7 +44,7 @@ class ConnectedTableExample extends React.Component {
       <ReactTable
         columns={columnsConfig}
         manual // Forces table not to paginate or sort automatically, so we can handle it server-side
-        data={this.props.rawData}
+        data={this.props.rawData || []}
         pages={totalPages} // Display the total number of pages
         loading={this.state.loading} // Display the loading overlay when we need it
         onFetchData={this.fetchData.bind(this)} // Request new data when things change

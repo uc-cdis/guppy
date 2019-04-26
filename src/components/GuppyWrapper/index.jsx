@@ -5,6 +5,7 @@ import {
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
+  getAccessableResourcesProjects,
 } from '../Utils/queries';
 
 /**
@@ -49,6 +50,7 @@ class GuppyWrapper extends React.Component {
       totalCount: 0,
       allFields: [],
       rawDataFields: [],
+      accessableProjectList: undefined,
     };
   }
 
@@ -64,6 +66,15 @@ class GuppyWrapper extends React.Component {
         rawDataFields,
       }, () => {
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+      });
+    });
+    getAccessableResourcesProjects(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.props.projectField,
+    ).then((list) => {
+      this.setState({
+        accessableProjectList: list,
       });
     });
   }
@@ -214,6 +225,7 @@ class GuppyWrapper extends React.Component {
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
             allFields: this.state.allFields,
+            accessableProjectList: this.state.accessableProjectList,
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
@@ -248,11 +260,13 @@ GuppyWrapper.propTypes = {
   rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
+  projectField: PropTypes.string,
 };
 
 GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
+  projectField: 'project',
 };
 
 export default GuppyWrapper;
