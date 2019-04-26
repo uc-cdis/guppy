@@ -40,7 +40,7 @@ const downloadRouter = async (req, res, next) => {
         const outOfScopeResourceList = _.difference(requestResourceList, accessableResourcesList);
         // if requesting resources > allowed resources, return 401,
         if (outOfScopeResourceList.length > 0) {
-          throw new CodedError(401, `You don't have access to following ${config.esConfig.resourceField}s: [${outOfScopeResourceList.join(', ')}]`);
+          throw new CodedError(401, `You don't have access to following ${config.esConfig.projectField}s: [${outOfScopeResourceList.join(', ')}]`);
         } else { // else, go ahead download
           appliedFilter = filter;
         }

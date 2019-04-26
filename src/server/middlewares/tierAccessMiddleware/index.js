@@ -13,14 +13,14 @@ import { firstLetterUpperCase } from '../../utils/utils';
 export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => {
   let resourceList;
   if (filter) {
-    resourceList = parseValuesFromFilter(filter, config.esConfig.resourceField);
+    resourceList = parseValuesFromFilter(filter, config.esConfig.projectField);
     if (resourceList && resourceList.length > 0) {
       return Promise.resolve(resourceList);
     }
   }
   return textAggregation(
     { esInstance, esIndex, esType },
-    { field: config.esConfig.resourceField },
+    { field: config.esConfig.projectField },
   ).then(res => (res.map(item => item.key)));
 };
 
@@ -58,7 +58,7 @@ const tierAccessResolver = (
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
       log.debug('[tierAccessResolver] requesting out-of-scope resources, return 401');
-      throw new ApolloError(`You don't have access to following ${config.esConfig.resourceField}s: \
+      throw new ApolloError(`You don't have access to following ${config.esConfig.projectField}s: \
         [${outOfScopeResourceList.join(', ')}]`, 401);
     }
     if (useTierAccessLevel) {

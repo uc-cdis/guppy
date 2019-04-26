@@ -7,7 +7,7 @@ import CodedError from '../../utils/error';
 import { transferSlashStyleToDashStyle } from '../../utils/utils';
 
 
-const localTestFlag = true; // a flag for local testing
+const localTestFlag = false; // a flag for local testing
 
 const getAccessableResourcesFromArborist = async (jwt) => {
   let data;

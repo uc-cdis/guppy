@@ -23,7 +23,7 @@ const config = {
     ],
     configIndex: inputConfig.configIndex,
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
-    resourceField: inputConfig.resource_field || 'project',
+    projectField: inputConfig.resource_field || 'project',
   },
 
   port: 80,
