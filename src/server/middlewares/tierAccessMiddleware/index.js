@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
-import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from '../../logger';
 import config from '../../config';
 import { parseValuesFromFilter } from '../../es/filter';
@@ -10,19 +9,6 @@ import esInstance from '../../es/index';
 import { getAccessableResources, applyAuthFilter } from '../authMiddleware';
 import CodedError from '../../utils/error';
 import { firstLetterUpperCase } from '../../utils/utils';
-
-/**
- * This function parses all requesting keys under aggregation query,
- * and check if keys contains '_totalCount'
- * @param {object} resolveInfo - info argument from resolver function
- * @returns {bool} is querying _totalCount
- */
-const isQueryingTotalCount = (resolveInfo) => {
-  const parsedInfo = parseResolveInfo(resolveInfo);
-  const aggTypeName = `${firstLetterUpperCase(parsedInfo.name)}Aggregation`;
-  const queryKeysUnderAggs = Object.keys(parsedInfo.fieldsByTypeName[aggTypeName]);
-  return queryKeysUnderAggs.includes('_totalCount');
-};
 
 export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => {
   let resourceList;
@@ -90,23 +76,7 @@ const tierAccessResolver = (
       }
       return resolve(root, newArgs, context, info);
     }
-
-    const result = await resolve(root, args, context, info);
-    // for aggregations, hide all counts that are greater than limited number
-    const isGettingTotalCount = isQueryingTotalCount(info);
-    if (isGettingTotalCount) { // TODO
-      return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
-    }
-    const encryptedResult = result.map((item) => {
-      if (item.count < config.tierAccessLimit) {
-        return {
-          key: item.key,
-          count: ENCRYPT_COUNT,
-        };
-      }
-      return item;
-    });
-    return encryptedResult;
+    return resolve(root, args, context, info);
   } catch (err) {
     if (err instanceof ApolloError) {
       if (err.extensions.code >= 500) {
@@ -123,15 +93,43 @@ const tierAccessResolver = (
   }
 };
 
+/**
+ * This resolver middleware is appended after aggreagtion resolvers,
+ * it hide number that is less than allowed visible number for regular tier access
+ * @param {bool} isGettingTotalCount
+ */
+const hideNumberResolver = isGettingTotalCount => async (resolve, root, args, context, info) => {
+  // for aggregations, hide all counts that are greater than limited number
+  const result = await resolve(root, args, context, info);
+  if (isGettingTotalCount) {
+    return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+  }
+  const encryptedResult = result.map((item) => {
+    if (item.count < config.tierAccessLimit) {
+      return {
+        key: item.key,
+        count: ENCRYPT_COUNT,
+      };
+    }
+    return item;
+  });
+  return encryptedResult;
+};
+
 // apply this middleware to all es types' data/aggregation resolvers
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
+const totalCountTypeMapping = {};
 config.esConfig.indices.forEach((item) => {
   queryTypeMapping[item.type] = tierAccessResolver({
     isRawDataQuery: true,
     esType: item.type,
   });
   aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type });
+  const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
+  totalCountTypeMapping[aggregationName] = {
+    _totalCount: hideNumberResolver(true),
+  };
 });
 const tierAccessMiddleware = {
   Query: {
@@ -139,6 +137,13 @@ const tierAccessMiddleware = {
   },
   Aggregation: {
     ...aggsTypeMapping,
+  },
+  ...totalCountTypeMapping,
+  HistogramForNumber: {
+    histogram: hideNumberResolver(false),
+  },
+  HistogramForString: {
+    histogram: hideNumberResolver(false),
   },
 };
 

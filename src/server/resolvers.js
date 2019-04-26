@@ -109,7 +109,6 @@ const textHistogramResolver = (parent, args) => {
     esInstance, esIndex, esType,
     filter, field, filterSelf,
   } = parent;
-  log.debug('[resolver.textHistogramResolver] parent', parent);
   const resultPromise = esInstance.textAggregation({
     esIndex,
     esType,
