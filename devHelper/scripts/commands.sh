@@ -135,9 +135,8 @@ raceList=( white black hispanic asian mixed )
 vitalList=( Alive Dead )
 fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes")
 fileFormatList=( BEM BAM BED CSV FASTQ RAW TAR TSV TXT IDAT )
-resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test")
-projectList=( "jenkins" "test" )
-
+resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" "/programs/external/projects/test")
+projectList=( "jnkns-jenkins" "DEV-test" "external-test" )
 
 COUNT=$startIndex
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"

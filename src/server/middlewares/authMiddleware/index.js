@@ -14,16 +14,8 @@ const getAccessableResourcesFromArborist = async (jwt) => {
   if (localTestFlag) {
     data = {
       resources: [ // these are just for testing
-        '/data_file',
-        '/workspace',
-        '/prometheus',
-        '/programs/DEV',
-        '/programs/DEV/projects',
-        '/programs/jnkns',
-        '/programs/jnkns/projects',
         '/programs/DEV/projects/test',
-        // '/programs/QA/projects/test',
-        // '/programs/jnkns/projects/jenkins',
+        '/programs/jnkns/projects/jenkins',
       ],
     };
   } else {
