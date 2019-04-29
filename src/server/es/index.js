@@ -38,7 +38,7 @@ class ES {
         validatedQueryBody[key] = queryBody[key];
       }
     });
-    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody, null, 4));
+    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
       type: esType,
@@ -107,9 +107,9 @@ class ES {
       }
 
       // merge fetched batches
-      log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
       scrollID = currentBatch._scroll_id;
       batchSize = currentBatch.hits.hits.length;
+      log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
 
       // TODO: change it to streaming
       totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
@@ -203,7 +203,7 @@ class ES {
           }
         });
         log.info('[ES.initialize] got array fields from es config index:');
-        log.rawOutput(JSON.stringify(arrayFields, null, 4));
+        log.rawOutput(log.levelEnums.INFO, JSON.stringify(arrayFields, null, 4));
       } catch (err) {
         throw new Error(err);
       }

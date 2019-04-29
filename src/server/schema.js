@@ -105,7 +105,7 @@ const getSchema = (esConfig, esInstance) => {
 
   const aggregationSchema = `
     type Aggregation {
-      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON, filterSelf: Boolean=true): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
+      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON, filterSelf: Boolean=true, useTierAccessLevel: String): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
     }
   `;
 

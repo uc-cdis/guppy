@@ -25,5 +25,13 @@ module.exports = {
     'react/no-array-index-key': 'off',
   },
   overrides: [
+    {
+      "files": [
+        "src/**/*.test.js",
+      ],
+      "rules": {
+        "no-undef": "off" 
+      }
+    },
   ],
 };
