@@ -31,7 +31,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     text: item.key,
     filterType: 'singleSelect',
     count: item.count,
-    accessible: checkForAccess(accessibilityCheckFlag, item.key, accessibleFieldList),
+    accessible: item.accessible,
   }));
   return textOptions;
 };
