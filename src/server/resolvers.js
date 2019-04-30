@@ -43,7 +43,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
  */
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   const {
-    filter, filterSelf,
+    filter, filterSelf, needEncryptAgg,
   } = args;
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   return {
@@ -52,6 +52,7 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
     esInstance,
     esIndex,
     esType,
+    needEncryptAgg,
   };
 };
 

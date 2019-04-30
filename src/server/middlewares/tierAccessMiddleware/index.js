@@ -3,26 +3,16 @@ import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
 import log from '../../logger';
 import config from '../../config';
-import { parseValuesFromFilter } from '../../es/filter';
 import { textAggregation } from '../../es/aggs';
 import esInstance from '../../es/index';
 import { getAccessableResources, applyAuthFilter } from '../authMiddleware';
 import CodedError from '../../utils/error';
 import { firstLetterUpperCase } from '../../utils/utils';
 
-export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => {
-  let resourceList;
-  if (filter) {
-    resourceList = parseValuesFromFilter(filter, config.esConfig.projectField);
-    if (resourceList && resourceList.length > 0) {
-      return Promise.resolve(resourceList);
-    }
-  }
-  return textAggregation(
-    { esInstance, esIndex, esType },
-    { field: config.esConfig.projectField },
-  ).then(res => (res.map(item => item.key)));
-};
+export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => textAggregation(
+  { esInstance, esIndex, esType },
+  { field: config.esConfig.projectField, filter },
+).then(res => (res.map(item => item.key)));
 
 const getOutOfScopeResourceList = async (jwt, esIndex, esType, filter) => {
   log.debug('[tierAccessResolver] filter: ', JSON.stringify(filter, null, 4));
@@ -53,7 +43,7 @@ const tierAccessResolver = (
     const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
-      return resolve(root, args, context, info);
+      return resolve(root, { ...args, needEncryptAgg: false }, context, info);
     }
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
@@ -70,13 +60,14 @@ const tierAccessResolver = (
       const newArgs = {
         ...args,
         filter: appliedFilter,
+        needEncryptAgg: false,
       };
       if (typeof newArgs.filter === 'undefined') {
         delete newArgs.filter;
       }
       return resolve(root, newArgs, context, info);
     }
-    return resolve(root, args, context, info);
+    return resolve(root, { ...args, needEncryptAgg: true }, context, info);
   } catch (err) {
     if (err instanceof ApolloError) {
       if (err.extensions.code >= 500) {
@@ -100,7 +91,9 @@ const tierAccessResolver = (
  */
 const hideNumberResolver = isGettingTotalCount => async (resolve, root, args, context, info) => {
   // for aggregations, hide all counts that are greater than limited number
+  const { needEncryptAgg } = root;
   const result = await resolve(root, args, context, info);
+  if (!needEncryptAgg) return result;
   if (isGettingTotalCount) {
     return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
   }
