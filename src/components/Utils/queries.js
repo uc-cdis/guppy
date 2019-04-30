@@ -229,12 +229,13 @@ export const getAllFieldsFromGuppy = (
     });
 };
 
-export const getAccessibleResources = (
+export const getAccessibleResources = async (
   path,
   type,
   accessibleFieldCheckList,
 ) => {
   const accessibleFieldObject = {};
+  const promiseList = [];
   accessibleFieldCheckList.forEach((accessibleField) => {
     const query = `query {
       _aggregation {
@@ -250,18 +251,31 @@ export const getAccessibleResources = (
     }`;
     const queryBody = { query };
 
-    return fetch(`${path}${graphqlEndpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(queryBody),
-    }).then(response => response.json())
-      .then(
-        (response) => { accessibleFieldObject[accessibleField] = response.data._aggregation[type][accessibleField].histogram.map(item => item.key); },
-      )
-      .catch((err) => {
-        throw new Error(`Error when getting fields from guppy: ${err}`);
-      });
+    promiseList.push(
+      fetch(`${path}${graphqlEndpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(queryBody),
+      })
+        .then(response => response.json())
+        .then(
+          response => ({
+            field: accessibleField,
+            list: (response.data._aggregation[type][accessibleField]
+              .histogram.map(item => item.key)),
+          }),
+        )
+        .catch((err) => {
+          throw new Error(`Error when getting fields from guppy: ${err}`);
+        }),
+    );
   });
+
+  const resultList = await Promise.all(promiseList);
+  resultList.forEach((res) => {
+    accessibleFieldObject[res.field] = res.list;
+  });
+  return accessibleFieldObject;
 };
