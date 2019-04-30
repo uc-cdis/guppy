@@ -16,9 +16,9 @@ class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tabs: [],
       allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
       initialAggsData: {},
+      receivedAggsData: {},
     };
   }
 
@@ -34,25 +34,9 @@ class ConnectedFilter extends React.Component {
       });
   }
 
-  /**
-   * Save initial aggregation data, especially for range slider
-   * so that we still have min/max values for range slider
-   * @param {object} aggsData
-   */
-  saveInitialAggsData(aggsData) {
-    this.setState({ initialAggsData: aggsData });
-  }
-
-  handleReceiveNewAggsData(receivedAggsData, filterResults) {
-    this.updateTabs(receivedAggsData);
-    if (this.props.onReceiveNewAggsData) {
-      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData);
-    }
-  }
-
-  updateTabs(tabsOptions) {
-    const processedTabsOptions = this.props.onProcessFilterAggsData(tabsOptions);
+  getFilterTabs() {
+    const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+    if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
       <FilterList
@@ -63,7 +47,15 @@ class ConnectedFilter extends React.Component {
         tierAccessLimit={this.props.tierAccessLimit}
       />
     ));
-    this.setState({ tabs });
+    return tabs;
+  }
+
+  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+    this.setState({ receivedAggsData });
+    if (this.props.onReceiveNewAggsData) {
+      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
+      this.props.onReceiveNewAggsData(resultAggsData);
+    }
   }
 
   handleFilterChange(filterResults) {
@@ -84,14 +76,24 @@ class ConnectedFilter extends React.Component {
     }
   }
 
+  /**
+   * Save initial aggregation data, especially for range slider
+   * so that we still have min/max values for range slider
+   * @param {object} aggsData
+   */
+  saveInitialAggsData(aggsData) {
+    this.setState({ initialAggsData: aggsData });
+  }
+
   render() {
-    if (!this.state.tabs || this.state.tabs.length === 0) {
+    const filterTabs = this.getFilterTabs();
+    if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
     return (
       <FilterGroup
         className={this.props.className}
-        tabs={this.state.tabs}
+        tabs={filterTabs}
         filterConfig={this.props.filterConfig}
         onFilterChange={e => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
