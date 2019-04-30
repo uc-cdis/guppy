@@ -229,35 +229,39 @@ export const getAllFieldsFromGuppy = (
     });
 };
 
-export const getAccessableResourcesProjects = (
+export const getAccessableResources = (
   path,
   type,
-  projectField,
+  accessibleFieldCheckList,
 ) => {
-  const query = `query {
-    _aggregation {
-      ${type}(useTierAccessLevel: "private") {
-        ${projectField} {
-          histogram {
-            key
-            count
+  const accessibleFieldObject = {};
+  accessibleFieldCheckList.forEach((accessibleField) => {
+    const query = `query {
+      _aggregation {
+        ${type}(useTierAccessLevel: "private") {
+          ${accessibleField} {
+            histogram {
+              key
+              count
+            }
           }
         }
       }
-    }
-  }`;
-  const queryBody = { query };
-  return fetch(`${path}${graphqlEndpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(queryBody),
-  }).then(response => response.json())
-    .then(
-      response => response.data._aggregation[type][projectField].histogram.map(item => item.key),
-    )
-    .catch((err) => {
-      throw new Error(`Error when getting fields from guppy: ${err}`);
-    });
+    }`;
+    const queryBody = { query };
+
+    fetch(`${path}${graphqlEndpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(queryBody),
+    }).then(response => response.json())
+      .then(
+        accessibleFieldObject[accessibleField] = response => response.data._aggregation[type][accessibleField].histogram.map(item => item.key),
+      )
+      .catch((err) => {
+        throw new Error(`Error when getting fields from guppy: ${err}`);
+      });
+  });
 };
