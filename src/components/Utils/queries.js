@@ -250,7 +250,7 @@ export const getAccessibleResources = (
     }`;
     const queryBody = { query };
 
-    fetch(`${path}${graphqlEndpoint}`, {
+    return fetch(`${path}${graphqlEndpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -258,7 +258,7 @@ export const getAccessibleResources = (
       body: JSON.stringify(queryBody),
     }).then(response => response.json())
       .then(
-        accessibleFieldObject[accessibleField] = response => response.data._aggregation[type][accessibleField].histogram.map(item => item.key),
+        (response) => { accessibleFieldObject[accessibleField] = response.data._aggregation[type][accessibleField].histogram.map(item => item.key); },
       )
       .catch((err) => {
         throw new Error(`Error when getting fields from guppy: ${err}`);

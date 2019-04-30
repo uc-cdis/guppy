@@ -52,11 +52,13 @@ class ConnectedFilter extends React.Component {
   }
 
   updateTabs(tabsOptions) {
+    const processedTabsOptions = this.props.onProcessFilterAggsData(tabsOptions);
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
       <FilterList
         key={index}
-        sections={getFilterSections(fields, fieldMapping, tabsOptions, this.state.initialAggsData)}
+        sections={getFilterSections(fields, fieldMapping, processedTabsOptions, this.state.initialAggsData)}
+        tierAccessLimit={this.props.tierAccessLimit}
       />
     ));
     this.setState({ tabs });
@@ -115,6 +117,8 @@ ConnectedFilter.propTypes = {
     field: PropTypes.string,
     name: PropTypes.string,
   })),
+  tierAccessLimit: PropTypes.number,
+  onProcessFilterAggsData: PropTypes.func.isRequired,
 };
 
 ConnectedFilter.defaultProps = {
@@ -123,6 +127,7 @@ ConnectedFilter.defaultProps = {
   hideZero: true,
   className: '',
   fieldMapping: [],
+  tierAccessLimit: undefined,
 };
 
 export default ConnectedFilter;
