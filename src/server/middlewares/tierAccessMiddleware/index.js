@@ -6,7 +6,7 @@ import config from '../../config';
 import { parseValuesFromFilter } from '../../es/filter';
 import { textAggregation } from '../../es/aggs';
 import esInstance from '../../es/index';
-import { getAccessableResources, applyAuthFilter } from '../authMiddleware';
+import { getAccessibleResources, applyAuthFilter } from '../authMiddleware';
 import CodedError from '../../utils/error';
 import { firstLetterUpperCase } from '../../utils/utils';
 
@@ -28,10 +28,10 @@ const getOutOfScopeResourceList = async (jwt, esIndex, esType, filter) => {
   log.debug('[tierAccessResolver] filter: ', JSON.stringify(filter, null, 4));
   const requestResourceList = await getRequestResourceListFromFilter(esIndex, esType, filter);
   log.debug(`[tierAccessResolver] request resource list: [${requestResourceList.join(', ')}]`);
-  const accessableResourcesList = await getAccessableResources(jwt);
-  log.debug(`[tierAccessResolver] accessable resource list: [${accessableResourcesList.join(', ')}]`);
+  const accessibleResourcesList = await getAccessibleResources(jwt);
+  log.debug(`[tierAccessResolver] accessible resource list: [${accessibleResourcesList.join(', ')}]`);
   // compare resources with JWT
-  const outOfScopeResourceList = _.difference(requestResourceList, accessableResourcesList);
+  const outOfScopeResourceList = _.difference(requestResourceList, accessibleResourcesList);
   log.debug(`[tierAccessResolver] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
   return outOfScopeResourceList;
 };

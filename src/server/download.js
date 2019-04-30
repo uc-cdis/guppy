@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { applyAuthFilter, getAccessableResources } from './middlewares/authMiddleware';
+import { applyAuthFilter, getAccessibleResources } from './middlewares/authMiddleware';
 import { getRequestResourceListFromFilter } from './middlewares/tierAccessMiddleware';
 import headerParser from './utils/headerParser';
 import esInstance from './es/index';
@@ -22,7 +22,7 @@ const downloadRouter = async (req, res, next) => {
      * 1. if data commons is secure, add auth filter layer onto filter
      * 2. if data commons is regular:
      *   a. if request contains out-of-access resource, return 401
-     *   b. if request contains only accessable resouces, return response
+     *   b. if request contains only accessible resouces, return response
      * 3. if data commons is private, always return reponse without any auth check
      */
     switch (config.tierAccessLevel) {
@@ -34,10 +34,10 @@ const downloadRouter = async (req, res, next) => {
         log.debug('[download] regular commons');
         const requestResourceList = await getRequestResourceListFromFilter(esIndex, type, filter);
         log.debug(`[download] request resource list: [${requestResourceList.join(', ')}]`);
-        const accessableResourcesList = await getAccessableResources(jwt);
-        log.debug(`[download] accessable resource list: [${accessableResourcesList.join(', ')}]`);
+        const accessibleResourcesList = await getAccessibleResources(jwt);
+        log.debug(`[download] accessible resource list: [${accessibleResourcesList.join(', ')}]`);
         // compare resources with JWT
-        const outOfScopeResourceList = _.difference(requestResourceList, accessableResourcesList);
+        const outOfScopeResourceList = _.difference(requestResourceList, accessibleResourcesList);
         // if requesting resources > allowed resources, return 401,
         if (outOfScopeResourceList.length > 0) {
           throw new CodedError(401, `You don't have access to following ${config.esConfig.projectField}s: [${outOfScopeResourceList.join(', ')}]`);

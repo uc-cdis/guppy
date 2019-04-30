@@ -5,7 +5,7 @@ import {
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
-  getAccessableResources,
+  getAccessibleResources,
 } from '../Utils/queries';
 
 /**
@@ -68,7 +68,7 @@ class GuppyWrapper extends React.Component {
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
       });
     });
-    getAccessableResources(
+    getAccessibleResources(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.props.accessibleFieldCheckList,

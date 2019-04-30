@@ -229,7 +229,7 @@ export const getAllFieldsFromGuppy = (
     });
 };
 
-export const getAccessableResources = (
+export const getAccessibleResources = (
   path,
   type,
   accessibleFieldCheckList,

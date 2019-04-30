@@ -9,7 +9,7 @@ import { transferSlashStyleToDashStyle } from '../../utils/utils';
 
 const localTestFlag = false; // a flag for local testing
 
-const getAccessableResourcesFromArborist = async (jwt) => {
+const getAccessibleResourcesFromArborist = async (jwt) => {
   let data;
   if (localTestFlag) {
     data = {
@@ -30,8 +30,8 @@ const getAccessableResourcesFromArborist = async (jwt) => {
   return resources;
 };
 
-export const getAccessableResources = async (jwt) => {
-  const resourceList = await getAccessableResourcesFromArborist(jwt);
+export const getAccessibleResources = async (jwt) => {
+  const resourceList = await getAccessibleResourcesFromArborist(jwt);
   const result = [];
   resourceList.forEach((resourceItem) => {
     const dashStyleResourceItem = transferSlashStyleToDashStyle(resourceItem);
@@ -50,7 +50,7 @@ export const applyAuthFilter = async (jwt, parsedFilter) => {
   }
 
   // asking arborist for auth resource list, and add to filter args
-  const resources = await getAccessableResourcesFromArborist(jwt);
+  const resources = await getAccessibleResourcesFromArborist(jwt);
   log.debug('[authMiddleware] add limitation for field ', config.esConfig.authFilterField, ' within resources: ', resources);
   const authPart = {
     IN: {
