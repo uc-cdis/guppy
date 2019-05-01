@@ -34,6 +34,13 @@ class ConnectedFilter extends React.Component {
       });
   }
 
+  /**
+   * This function contains partial rendering logic for filter components.
+   * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
+   * But before that, the function first calls `this.props.onProcessFilterAggsData`, which is
+   * a callback function passed by `ConnectedFilter`'s parent component, so that the parent
+   * component could do some pre-processing modification about filter.
+   */
   getFilterTabs() {
     const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
@@ -58,21 +65,33 @@ class ConnectedFilter extends React.Component {
     }
   }
 
+  /**
+   * Handler function that is called everytime filter changes
+   * What this function does:
+   * 0. Before start, if exists, call `onProcessFilter` callback function
+   *    so that the parent component could preprocess filter if needed
+   * 1. Ask guppy for aggregation data using (processed) filter
+   * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
+   *    to process new received agg data
+   * 3. If there's `onFilterChange` callback function from parent, call it
+   * @param {object} filterResults
+   */
   handleFilterChange(filterResults) {
+    const processedFilterResults = this.props.onProcessFilter(filterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields, filterResults,
+      this.state.allFields, processedFilterResults,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          filterResults,
+          processedFilterResults,
         );
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(filterResults);
+      this.props.onFilterChange(processedFilterResults);
     }
   }
 
@@ -123,6 +142,7 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
+  onProcessFilter: PropTypes.func,
 };
 
 ConnectedFilter.defaultProps = {
@@ -133,6 +153,7 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: data => (data),
+  onProcessFilter: filter => (filter),
 };
 
 export default ConnectedFilter;
