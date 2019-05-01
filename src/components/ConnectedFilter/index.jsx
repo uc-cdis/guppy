@@ -20,6 +20,7 @@ class ConnectedFilter extends React.Component {
       initialAggsData: {},
       receivedAggsData: {},
     };
+    this.filterGroupRef = React.createRef();
   }
 
   componentDidMount() {
@@ -57,6 +58,11 @@ class ConnectedFilter extends React.Component {
     return tabs;
   }
 
+  setFilter(filter) {
+    this.filterGroupRef.current.resetFilter();
+    this.handleFilterChange(filter);
+  }
+
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
@@ -68,8 +74,6 @@ class ConnectedFilter extends React.Component {
   /**
    * Handler function that is called everytime filter changes
    * What this function does:
-   * 0. Before start, if exists, call `onProcessFilter` callback function
-   *    so that the parent component could preprocess filter if needed
    * 1. Ask guppy for aggregation data using (processed) filter
    * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
    *    to process new received agg data
@@ -77,21 +81,20 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    const processedFilterResults = this.props.onProcessFilter(filterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields, processedFilterResults,
+      this.state.allFields, filterResults,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          processedFilterResults,
+          filterResults,
         );
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(processedFilterResults);
+      this.props.onFilterChange(filterResults);
     }
   }
 
@@ -111,6 +114,7 @@ class ConnectedFilter extends React.Component {
     }
     return (
       <FilterGroup
+        ref={this.filterGroupRef}
         className={this.props.className}
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
@@ -142,7 +146,6 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
-  onProcessFilter: PropTypes.func,
 };
 
 ConnectedFilter.defaultProps = {
@@ -153,7 +156,6 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: data => (data),
-  onProcessFilter: filter => (filter),
 };
 
 export default ConnectedFilter;

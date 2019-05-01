@@ -234,25 +234,25 @@ export const getAccessibleResources = async (
   type,
   accessibleFieldCheckList,
 ) => {
-  const accessibleFieldObject = {};
-  const promiseList = [];
+  const accessiblePromiseList = [];
+  const withOrWithoutAccessPromiseList = [];
   accessibleFieldCheckList.forEach((accessibleField) => {
-    const query = `query {
-      _aggregation {
-        ${type}(useTierAccessLevel: "private") {
-          ${accessibleField} {
-            histogram {
-              key
-              count
+    const fetchRequestPromise = (accessible) => {
+      const query = `query {
+        _aggregation {
+          ${type}${accessible ? '(useTierAccessLevel: "private")' : ''} {
+            ${accessibleField} {
+              histogram {
+                key
+                count
+              }
             }
           }
         }
-      }
-    }`;
-    const queryBody = { query };
+      }`;
+      const queryBody = { query };
 
-    promiseList.push(
-      fetch(`${path}${graphqlEndpoint}`, {
+      return fetch(`${path}${graphqlEndpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -269,13 +269,21 @@ export const getAccessibleResources = async (
         )
         .catch((err) => {
           throw new Error(`Error when getting fields from guppy: ${err}`);
-        }),
-    );
+        });
+    };
+    accessiblePromiseList.push(fetchRequestPromise(true));
+    withOrWithoutAccessPromiseList.push(fetchRequestPromise(false));
   });
 
-  const resultList = await Promise.all(promiseList);
-  resultList.forEach((res) => {
+  const accessibleFieldObject = {};
+  const accessibleFieldResult = await Promise.all(accessiblePromiseList);
+  accessibleFieldResult.forEach((res) => {
     accessibleFieldObject[res.field] = res.list;
   });
-  return accessibleFieldObject;
+  const allFieldObject = {};
+  const allFieldResult = await Promise.all(withOrWithoutAccessPromiseList);
+  allFieldResult.forEach((res) => {
+    allFieldObject[res.field] = res.list;
+  });
+  return { accessibleFieldObject, allFieldObject };
 };

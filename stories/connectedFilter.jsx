@@ -7,9 +7,6 @@ import { filterConfig, guppyConfig, fieldMapping } from './conf';
 
 storiesOf('ConnectedFilter', module)
   .add('Filter', () => {
-    const processFilterFunc = (filter) => {
-      return filter;
-    };
     const processFilterAggsData = (aggsData) => {
       return aggsData;
     };
@@ -19,7 +16,6 @@ storiesOf('ConnectedFilter', module)
         guppyConfig={guppyConfig}
         onFilterChange={action('filter change')}
         fieldMapping={fieldMapping}
-        onProcessFilter={processFilterFunc}
         onProcessFilterAggsData={processFilterAggsData}
       />
     );
