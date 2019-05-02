@@ -89,10 +89,19 @@ const numericHistogramWithFixedRangeStep = async (
     rangeEnd,
     rangeStep,
     filterSelf,
+    defaultAuthFilter,
   }) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter, field, filterSelf);
+    queryBody.query = getFilterObj(
+      esInstance,
+      esIndex,
+      esType,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+    );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
@@ -142,6 +151,7 @@ const numericHistogramWithFixedBinCount = async (
     rangeEnd,
     binCount,
     filterSelf,
+    defaultAuthFilter,
   }) => {
   const globalStats = await numericGlobalStats(
     {
@@ -173,6 +183,7 @@ const numericHistogramWithFixedBinCount = async (
       rangeEnd: histogramEnd,
       rangeStep,
       filterSelf,
+      defaultAuthFilter,
     },
   );
 };
@@ -191,6 +202,7 @@ export const numericAggregation = async (
     rangeStep,
     binCount,
     filterSelf,
+    defaultAuthFilter,
   },
 ) => {
   if (rangeStep <= 0) {
@@ -221,6 +233,7 @@ export const numericAggregation = async (
         rangeEnd,
         rangeStep,
         filterSelf,
+        defaultAuthFilter,
       },
     );
   }
@@ -238,6 +251,7 @@ export const numericAggregation = async (
         rangeEnd,
         binCount,
         filterSelf,
+        defaultAuthFilter,
       },
     );
   }
@@ -268,11 +282,20 @@ export const textAggregation = async (
     filter,
     field,
     filterSelf,
+    defaultAuthFilter,
   },
 ) => {
   const queryBody = { size: 0 };
   if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter, field, filterSelf);
+    queryBody.query = getFilterObj(
+      esInstance,
+      esIndex,
+      esType,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+    );
   }
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {

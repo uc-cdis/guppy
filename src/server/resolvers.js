@@ -2,6 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
+import { getDefaultAuthFilter } from './utils/accessibilities';
 
 /**
  * This function parses all requesting fields from a request
@@ -75,13 +76,15 @@ const aggsTotalQueryResolver = (parent) => {
  * @param {object} parent
  * @param {object} args
  */
-const numericHistogramResolver = (parent, args) => {
+const numericHistogramResolver = async (parent, args, context) => {
   const {
     esInstance, esIndex, esType, filter, field, filterSelf,
   } = parent;
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
+  const { jwt } = context;
+  const defaultAuthFilter = await getDefaultAuthFilter(jwt);
   log.debug('[resolver.numericHistogramResolver] args', args);
   const resultPromise = esInstance.numericAggregation({
     esIndex,
@@ -93,6 +96,7 @@ const numericHistogramResolver = (parent, args) => {
     rangeStep,
     binCount,
     filterSelf,
+    defaultAuthFilter,
   });
   return resultPromise;
 };
@@ -104,18 +108,21 @@ const numericHistogramResolver = (parent, args) => {
  * @param {object} parent
  * @param {object} args
  */
-const textHistogramResolver = (parent, args) => {
+const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
     filter, field, filterSelf,
   } = parent;
+  const { jwt } = context;
+  const defaultAuthFilter = await getDefaultAuthFilter(jwt);
   const resultPromise = esInstance.textAggregation({
     esIndex,
     esType,
     filter,
     field,
     filterSelf,
+    defaultAuthFilter,
   });
   return resultPromise;
 };
