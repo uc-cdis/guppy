@@ -33,8 +33,7 @@ const getRequestResourceListFromFilter = async (esIndex, esType, filter) => text
   { field: config.esConfig.authFilterField, filter },
 ).then(res => (res.map(item => item.key)));
 
-const buildFilterWithResourceList = (resourceList) => {
-  if (!resourceList || resourceList.length === 0) return {};
+const buildFilterWithResourceList = (resourceList = []) => {
   const filter = {
     IN: {
       [config.esConfig.authFilterField]: [...resourceList],
