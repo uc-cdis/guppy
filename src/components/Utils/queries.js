@@ -200,10 +200,10 @@ export const askGuppyForTotalCounts = (
 ) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
-  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter)' : ''}{`;
+  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: ${accessibility}) {`;
   const query = `${queryLine}
     _aggregation {
-      ${typeAggsLine} accessibility: ${accessibility}
+      ${typeAggsLine}
         _totalCount
       }
     }
