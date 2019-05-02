@@ -26,6 +26,12 @@ class ConnectedFilter extends React.Component {
   }
 
   componentDidMount() {
+    if (this.props.onUpdateAccessLevel) {
+      this.props.onUpdateAccessLevel(this.state.accessibility);
+    }
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange({}, this.state.accessibility);
+    }
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -36,12 +42,6 @@ class ConnectedFilter extends React.Component {
         this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
-    if (this.props.onFilterChange) {
-      this.props.onFilterChange({});
-    }
-    if (this.props.onUpdateAccessLevel) {
-      this.props.onUpdateAccessLevel(this.state.accessibility);
-    }
   }
 
   /**
@@ -105,7 +105,7 @@ class ConnectedFilter extends React.Component {
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(filterResults);
+      this.props.onFilterChange(filterResults, this.state.accessibility);
     }
   }
 

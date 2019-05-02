@@ -131,13 +131,17 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(filter) {
+  handleFilterChange(filter, accessibility) {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
     }
     this.filter = filter;
-    this.setState({ filter });
-    this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+    this.setState({
+      filter,
+      accessibility,
+    }, () => {
+      this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+    });
   }
 
   /**
