@@ -75,3 +75,9 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
   });
   return resultAggsData;
 };
+
+export const ENUM_ACCESSIBILITY = {
+  ACCESSIBLE: 'accessible',
+  UNACCESSIBLE: 'unaccessible',
+  ALL: 'all',
+};

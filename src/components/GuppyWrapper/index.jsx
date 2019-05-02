@@ -51,7 +51,7 @@ class GuppyWrapper extends React.Component {
       allFields: [],
       rawDataFields: [],
       accessibleFieldObject: undefined,
-      allFieldObject: undefined,
+      unaccessibleFieldObject: undefined,
     };
   }
 
@@ -73,10 +73,10 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.props.accessibleFieldCheckList,
-    ).then(({ accessibleFieldObject, allFieldObject }) => {
+    ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
       this.setState({
         accessibleFieldObject,
-        allFieldObject,
+        unaccessibleFieldObject,
       });
     });
   }
@@ -228,7 +228,7 @@ class GuppyWrapper extends React.Component {
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
             allFields: this.state.allFields,
             accessibleFieldObject: this.state.accessibleFieldObject,
-            allFieldObject: this.state.allFieldObject,
+            unaccessibleFieldObject: this.state.unaccessibleFieldObject,
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),

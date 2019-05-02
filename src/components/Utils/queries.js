@@ -11,10 +11,15 @@ const histogramQueryStrForEachField = field => (`
     }
   }`);
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+  let accessibility = acc;
+  if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
+    accessibility = 'all';
+  }
+
   const query = `query {
     _aggregation {
-      ${type} {
+      ${type} (accessibility: ${accessibility}) {
         ${fields.map(field => histogramQueryStrForEachField(field))}
       }
     }
@@ -23,7 +28,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter) => {
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
-        ${type} (filter: $filter,  filterSelf: false) {
+        ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
           ${fields.map(field => histogramQueryStrForEachField(field))}
         }
       }
@@ -85,8 +90,8 @@ const queryGuppyForRawDataAndTotalCounts = (
 };
 
 export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields,
-) => queryGuppyForAggs(path, type, fields);
+  path, type, fields, accessibility,
+) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
 
 export const getGQLFilter = (filterObj) => {
   const facetsList = [];
@@ -115,9 +120,9 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyForAggregationData = (path, type, fields, filter) => {
+export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
 export const askGuppyForRawData = (
@@ -235,12 +240,12 @@ export const getAccessibleResources = async (
   accessibleFieldCheckList,
 ) => {
   const accessiblePromiseList = [];
-  const withOrWithoutAccessPromiseList = [];
+  const unaccessPromiseList = [];
   accessibleFieldCheckList.forEach((accessibleField) => {
     const fetchRequestPromise = (accessible) => {
       const query = `query {
         _aggregation {
-          ${type}${accessible ? '(useTierAccessLevel: "private")' : ''} {
+          ${type} (accessibility: ${accessible ? 'accessible' : 'unaccessible'}) {
             ${accessibleField} {
               histogram {
                 key
@@ -272,7 +277,7 @@ export const getAccessibleResources = async (
         });
     };
     accessiblePromiseList.push(fetchRequestPromise(true));
-    withOrWithoutAccessPromiseList.push(fetchRequestPromise(false));
+    unaccessPromiseList.push(fetchRequestPromise(false));
   });
 
   const accessibleFieldObject = {};
@@ -280,10 +285,10 @@ export const getAccessibleResources = async (
   accessibleFieldResult.forEach((res) => {
     accessibleFieldObject[res.field] = res.list;
   });
-  const allFieldObject = {};
-  const allFieldResult = await Promise.all(withOrWithoutAccessPromiseList);
-  allFieldResult.forEach((res) => {
-    allFieldObject[res.field] = res.list;
+  const unaccessibleFieldObject = {};
+  const unaccessibleFieldResult = await Promise.all(unaccessPromiseList);
+  unaccessibleFieldResult.forEach((res) => {
+    unaccessibleFieldObject[res.field] = res.list;
   });
-  return { accessibleFieldObject, allFieldObject };
+  return { accessibleFieldObject, unaccessibleFieldObject };
 };

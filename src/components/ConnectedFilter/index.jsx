@@ -5,6 +5,7 @@ import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
+  ENUM_ACCESSIBILITY,
 } from './utils';
 import {
   askGuppyAboutAllFieldsAndOptions,
@@ -19,6 +20,7 @@ class ConnectedFilter extends React.Component {
       allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
       initialAggsData: {},
       receivedAggsData: {},
+      accessibility: ENUM_ACCESSIBILITY.ALL,
     };
     this.filterGroupRef = React.createRef();
   }
@@ -28,6 +30,7 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
+      this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
@@ -84,7 +87,9 @@ class ConnectedFilter extends React.Component {
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields, filterResults,
+      this.state.allFields,
+      filterResults,
+      this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
