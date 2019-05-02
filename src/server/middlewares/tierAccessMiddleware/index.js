@@ -52,7 +52,7 @@ const tierAccessResolver = (
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { jwt } = context;
     const esIndex = esInstance.getESIndexByType(esType);
-    const { filter, useTierAccessLevel, accessibility } = args;
+    const { filter, accessibility } = args;
 
     const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
     // if requesting resources is within allowed resources, return result
@@ -64,16 +64,6 @@ const tierAccessResolver = (
       log.debug('[tierAccessResolver] requesting out-of-scope resources, return 401');
       throw new ApolloError(`You don't have access to following ${config.esConfig.projectField}s: \
         [${outOfScopeResourceList.join(', ')}]`, 401);
-    }
-
-    /**
-     * Here we have a bypass if front-end want aggregation using private level access.
-     * for regular commons, only allow more secured level queries, i.e. "private"
-     */
-    if (useTierAccessLevel) {
-      assert(useTierAccessLevel === 'private');
-      log.debug('[tierAccessResolver] using private level access');
-      return resolverWithAccessibleFilterApplied(resolve, root, args, context, info, jwt, filter);
     }
 
     /**
