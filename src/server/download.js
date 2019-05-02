@@ -1,6 +1,4 @@
-import _ from 'lodash';
-import { applyAuthFilter, getAccessableResources } from './middlewares/authMiddleware';
-import { getRequestResourceListFromFilter } from './middlewares/tierAccessMiddleware';
+import { applyAccessibleFilter, getOutOfScopeResourceList } from './utils/accessibilities';
 import headerParser from './utils/headerParser';
 import esInstance from './es/index';
 import log from './logger';
@@ -27,17 +25,13 @@ const downloadRouter = async (req, res, next) => {
      */
     switch (config.tierAccessLevel) {
       case 'private': {
-        appliedFilter = await applyAuthFilter(jwt, filter);
+        appliedFilter = await applyAccessibleFilter(jwt, filter);
         break;
       }
       case 'regular': {
         log.debug('[download] regular commons');
-        const requestResourceList = await getRequestResourceListFromFilter(esIndex, type, filter);
-        log.debug(`[download] request resource list: [${requestResourceList.join(', ')}]`);
-        const accessableResourcesList = await getAccessableResources(jwt);
-        log.debug(`[download] accessable resource list: [${accessableResourcesList.join(', ')}]`);
         // compare resources with JWT
-        const outOfScopeResourceList = _.difference(requestResourceList, accessableResourcesList);
+        const outOfScopeResourceList = getOutOfScopeResourceList(jwt, esIndex, type, filter);
         // if requesting resources > allowed resources, return 401,
         if (outOfScopeResourceList.length > 0) {
           throw new CodedError(401, `You don't have access to following ${config.esConfig.projectField}s: [${outOfScopeResourceList.join(', ')}]`);

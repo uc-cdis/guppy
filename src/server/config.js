@@ -52,6 +52,10 @@ if (process.env.TIER_ACCESS_LIMIT) {
   config.tierAccessLimit = process.env.TIER_ACCESS_LIMIT;
 }
 
+if (process.env.INTERNAL_LOCAL_TEST) {
+  config.internalLocalTest = process.env.INTERNAL_LOCAL_TEST;
+}
+
 // only three options for tier access level: 'private' (default), 'regular', and 'libre'
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'

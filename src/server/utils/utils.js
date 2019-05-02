@@ -14,3 +14,16 @@ export const transferSlashStyleToDashStyle = (str) => {
   const projectName = matchResult[2];
   return `${programName}-${projectName}`;
 };
+
+export const addTwoFilters = (filter1, filter2) => {
+  if (!filter1 && !filter2) return {};
+  if (!filter1) return filter2;
+  if (!filter2) return filter1;
+  const appliedFilter = {
+    AND: [
+      filter1,
+      filter2,
+    ],
+  };
+  return appliedFilter;
+};

@@ -1,32 +1,46 @@
-import _ from 'lodash';
 import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
 import log from '../../logger';
 import config from '../../config';
-import { textAggregation } from '../../es/aggs';
 import esInstance from '../../es/index';
-import { getAccessableResources, applyAuthFilter } from '../authMiddleware';
 import CodedError from '../../utils/error';
-import { firstLetterUpperCase } from '../../utils/utils';
-
-export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => textAggregation(
-  { esInstance, esIndex, esType },
-  { field: config.esConfig.projectField, filter },
-).then(res => (res.map(item => item.key)));
-
-const getOutOfScopeResourceList = async (jwt, esIndex, esType, filter) => {
-  log.debug('[tierAccessResolver] filter: ', JSON.stringify(filter, null, 4));
-  const requestResourceList = await getRequestResourceListFromFilter(esIndex, esType, filter);
-  log.debug(`[tierAccessResolver] request resource list: [${requestResourceList.join(', ')}]`);
-  const accessableResourcesList = await getAccessableResources(jwt);
-  log.debug(`[tierAccessResolver] accessable resource list: [${accessableResourcesList.join(', ')}]`);
-  // compare resources with JWT
-  const outOfScopeResourceList = _.difference(requestResourceList, accessableResourcesList);
-  log.debug(`[tierAccessResolver] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
-  return outOfScopeResourceList;
-};
+import { firstLetterUpperCase, addTwoFilters } from '../../utils/utils';
+import { getOutOfScopeResourceList, applyAccessibleFilter } from '../../utils/accessibilities';
 
 const ENCRYPT_COUNT = -1;
+
+const resolverWithAccessibleFilterApplied = async (
+  resolve, root, args, context, info, jwt, filter,
+) => {
+  const appliedFilter = await applyAccessibleFilter(jwt, filter);
+  const newArgs = {
+    ...args,
+    filter: appliedFilter,
+    needEncryptAgg: false,
+  };
+  if (typeof newArgs.filter === 'undefined') {
+    delete newArgs.filter;
+  }
+  return resolve(root, newArgs, context, info);
+};
+
+const resolverWithUnaccessibleFilterApplied = async (
+  resolve, root, args, context, info, jwt, esIndex, esType, filter,
+) => {
+  const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
+  const outOfScopeFilter = {
+    IN: {
+      [config.esConfig.authFilterField]: [...outOfScopeResourceList],
+    },
+  };
+  const appliedFilter = addTwoFilters(outOfScopeFilter, filter);
+  const newArgs = {
+    ...args,
+    filter: appliedFilter,
+    needEncryptAgg: true,
+  };
+  return resolve(root, newArgs, context, info);
+};
 
 const tierAccessResolver = (
   {
@@ -38,7 +52,7 @@ const tierAccessResolver = (
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { jwt } = context;
     const esIndex = esInstance.getESIndexByType(esType);
-    const { filter, useTierAccessLevel } = args;
+    const { filter, useTierAccessLevel, accessibility } = args;
 
     const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
     // if requesting resources is within allowed resources, return result
@@ -51,23 +65,36 @@ const tierAccessResolver = (
       throw new ApolloError(`You don't have access to following ${config.esConfig.projectField}s: \
         [${outOfScopeResourceList.join(', ')}]`, 401);
     }
+
+    /**
+     * Here we have a bypass if front-end want aggregation using private level access.
+     * for regular commons, only allow more secured level queries, i.e. "private"
+     */
     if (useTierAccessLevel) {
-      // here we have a bypass if front-end want aggregation using private level access.
-      // for regular commons, only allow more secured level queries, i.e. "private"
       assert(useTierAccessLevel === 'private');
       log.debug('[tierAccessResolver] using private level access');
-      const appliedFilter = await applyAuthFilter(jwt, filter);
-      const newArgs = {
-        ...args,
-        filter: appliedFilter,
-        needEncryptAgg: false,
-      };
-      if (typeof newArgs.filter === 'undefined') {
-        delete newArgs.filter;
-      }
-      return resolve(root, newArgs, context, info);
+      return resolverWithAccessibleFilterApplied(resolve, root, args, context, info, jwt, filter);
     }
-    return resolve(root, { ...args, needEncryptAgg: true }, context, info);
+
+    /**
+     * Here we have a bypass for `regular`-tier-access-leveled commons:
+     * `accessibility` has 3 options: `all`, `accessible`, and `unaccessible`.
+     * For `all`, behavior is the same as usual
+     * For `accessible`, we will apply auth filter on top of filter argument
+     * For `unaccessible`, we apply unaccessible filters on top of filter argument
+     */
+    if (accessibility === 'all') {
+      return resolve(root, { ...args, needEncryptAgg: true }, context, info);
+    }
+    if (accessibility === 'accessible') {
+      log.debug('[tierAccessResolver] applying "accessible" to resolver');
+      return resolverWithAccessibleFilterApplied(
+        resolve, root, args, context, info, jwt, filter,
+      );
+    }
+    return resolverWithUnaccessibleFilterApplied(
+      resolve, root, args, context, info, jwt, esIndex, esType, filter,
+    );
   } catch (err) {
     if (err instanceof ApolloError) {
       if (err.extensions.code >= 500) {
