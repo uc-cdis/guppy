@@ -240,7 +240,7 @@ export const getAccessibleResources = async (
   accessibleFieldCheckList,
 ) => {
   const accessiblePromiseList = [];
-  const unaccessPromiseList = [];
+  const unaccessiblePromiseList = [];
   accessibleFieldCheckList.forEach((accessibleField) => {
     const fetchRequestPromise = (accessible) => {
       const query = `query {
@@ -277,7 +277,7 @@ export const getAccessibleResources = async (
         });
     };
     accessiblePromiseList.push(fetchRequestPromise(true));
-    unaccessPromiseList.push(fetchRequestPromise(false));
+    unaccessiblePromiseList.push(fetchRequestPromise(false));
   });
 
   const accessibleFieldObject = {};
@@ -286,7 +286,7 @@ export const getAccessibleResources = async (
     accessibleFieldObject[res.field] = res.list;
   });
   const unaccessibleFieldObject = {};
-  const unaccessibleFieldResult = await Promise.all(unaccessPromiseList);
+  const unaccessibleFieldResult = await Promise.all(unaccessiblePromiseList);
   unaccessibleFieldResult.forEach((res) => {
     unaccessibleFieldObject[res.field] = res.list;
   });
