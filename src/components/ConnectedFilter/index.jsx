@@ -36,6 +36,9 @@ class ConnectedFilter extends React.Component {
         this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange({});
+    }
   }
 
   /**
