@@ -236,7 +236,7 @@ export const getAccessableResourcesProjects = (
 ) => {
   const query = `query {
     _aggregation {
-      ${type}(useTierAccessLevel: "private") {
+      ${type}(accessibility: accessible) {
         ${projectField} {
           histogram {
             key

@@ -93,7 +93,13 @@ const getFilterItemForNumbers = (op, field, value) => {
  *                               only need for agg queries
  */
 export const getFilterObj = (
-  esInstance, esIndex, esType, graphqlFilterObj, aggsField, filterSelf = true,
+  esInstance,
+  esIndex,
+  esType,
+  graphqlFilterObj,
+  aggsField,
+  filterSelf = true,
+  defaultAuthFilter = {},
 ) => {
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   if (typeof topLevelOp === 'undefined') return null;
@@ -104,7 +110,7 @@ export const getFilterObj = (
     const boolItemsList = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
-        esInstance, esIndex, esType, filterItem, aggsField, filterSelf,
+        esInstance, esIndex, esType, filterItem, aggsField, filterSelf, defaultAuthFilter,
       );
       if (filterObj) {
         boolItemsList.push(filterObj);
@@ -122,8 +128,9 @@ export const getFilterObj = (
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
-      // if `filterSelf` flag is false, do not filter the target field itself
-      return null;
+      // if `filterSelf` flag is false, should not filter the target field itself,
+      // instead, only apply an auth filter if exists
+      return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
     const numericOrTextType = getNumericTextType(esInstance, esIndex, esType, field);

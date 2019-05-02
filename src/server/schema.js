@@ -103,9 +103,22 @@ const getSchema = (esConfig, esInstance) => {
 
   const typesSchemas = esConfig.indices.map(cfg => getTypeSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
 
+  const accessibilityEnum = `
+    enum Accessibility {
+      all
+      accessible
+      unaccessible
+    }
+  `;
+
   const aggregationSchema = `
     type Aggregation {
-      ${esConfig.indices.map(cfg => `${cfg.type} (filter: JSON, filterSelf: Boolean=true, useTierAccessLevel: String): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
+      ${esConfig.indices.map(cfg => `${cfg.type} (
+        filter: JSON, 
+        filterSelf: Boolean=true, 
+        """Only used when it's regular level data commons, if set, returns aggregation data within given accessibility"""
+        accessibility: Accessibility=all
+      ): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
     }
   `;
 
@@ -156,6 +169,7 @@ const getSchema = (esConfig, esInstance) => {
   const schemaStr = `
   scalar JSON
   ${querySchema}
+  ${accessibilityEnum}
   ${typesSchemas}
   ${aggregationSchema}
   ${aggregationSchemasForEachType}

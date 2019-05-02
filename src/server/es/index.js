@@ -329,6 +329,7 @@ class ES {
     rangeStep,
     binCount,
     filterSelf,
+    defaultAuthFilter,
   }) {
     return esAggregator.numericAggregation(
       {
@@ -346,6 +347,7 @@ class ES {
         rangeStep,
         binCount,
         filterSelf,
+        defaultAuthFilter,
       },
     );
   }
@@ -356,6 +358,7 @@ class ES {
     filter,
     field,
     filterSelf,
+    defaultAuthFilter,
   }) {
     return esAggregator.textAggregation(
       {
@@ -367,6 +370,7 @@ class ES {
         filter,
         field,
         filterSelf,
+        defaultAuthFilter,
       },
     );
   }
