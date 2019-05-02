@@ -5,8 +5,8 @@ import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
-  ENUM_ACCESSIBILITY,
 } from './utils';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
   askGuppyAboutAllFieldsAndOptions,
   askGuppyForAggregationData,
@@ -38,6 +38,9 @@ class ConnectedFilter extends React.Component {
       });
     if (this.props.onFilterChange) {
       this.props.onFilterChange({});
+    }
+    if (this.props.onUpdateAccessLevel) {
+      this.props.onUpdateAccessLevel(this.state.accessibility);
     }
   }
 
@@ -154,6 +157,7 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
+  onUpdateAccessLevel: PropTypes.func,
 };
 
 ConnectedFilter.defaultProps = {
@@ -164,6 +168,7 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: data => (data),
+  onUpdateAccessLevel: () => {},
 };
 
 export default ConnectedFilter;

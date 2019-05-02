@@ -8,7 +8,7 @@ class DownloadButtonExample extends React.Component {
     super(props);
     this.state = {
       manifestCount: 0,
-    }
+    };
     this.updateManifestCount = this.updateManifestCount.bind(this);
   }
 
@@ -21,7 +21,7 @@ class DownloadButtonExample extends React.Component {
   async updateManifestCount() {
     const nodeID = 'subject_id';
     const fileType = 'file';
-    const nodeIDResult = await this.props.downloadRawDataByFields({fields: [nodeID]});
+    const nodeIDResult = await this.props.downloadRawDataByFields({ fields: [nodeID] });
     if (nodeIDResult) {
       const nodeIDList = nodeIDResult.map(i => i[nodeID]);
       const countResult = await this.props.getTotalCountsByTypeAndFilter(fileType, {
@@ -29,9 +29,8 @@ class DownloadButtonExample extends React.Component {
           selectedValues: nodeIDList,
         },
       });
-      this.setState({manifestCount: countResult});
-    }
-    else {
+      this.setState({ manifestCount: countResult });
+    } else {
       throw Error('Error when downloading data');
     }
   }
@@ -42,8 +41,7 @@ class DownloadButtonExample extends React.Component {
       const blob = new Blob([JSON.stringify(res, null, 2)], { type: 'text/json' });
       const fileName = 'download.json';
       FileSaver.saveAs(blob, fileName);
-    }
-    else {
+    } else {
       throw Error('Error when downloading data');
     }
   }
@@ -51,7 +49,7 @@ class DownloadButtonExample extends React.Component {
   async downloadManifest() {
     const fileType = 'file';
     const nodeID = 'subject_id';
-    const nodeIDList = await this.props.downloadRawDataByFields({fields: [nodeID]}).then(res => res.map(i => i[nodeID]));
+    const nodeIDList = await this.props.downloadRawDataByFields({ fields: [nodeID] }).then(res => res.map(i => i[nodeID]));
     const resultManifest = await this.props.downloadRawDataByTypeAndFilter(
       fileType, {
         [nodeID]: {
@@ -64,8 +62,7 @@ class DownloadButtonExample extends React.Component {
       const blob = new Blob([JSON.stringify(resultManifest, null, 2)], { type: 'text/json' });
       const fileName = 'manifest.json';
       FileSaver.saveAs(blob, fileName);
-    }
-    else {
+    } else {
       throw Error('Error when downloading manifest');
     }
   }
@@ -89,8 +86,8 @@ class DownloadButtonExample extends React.Component {
 DownloadButtonExample.propTypes = {
   downloadRawData: PropTypes.func,
   downloadRawDataByFields: PropTypes.func,
-  getTotalCountsByTypeAndFilter: PropTypes.func, 
-  downloadRawDataByTypeAndFilter: PropTypes.func, 
+  getTotalCountsByTypeAndFilter: PropTypes.func,
+  downloadRawDataByTypeAndFilter: PropTypes.func,
   totalCount: PropTypes.number,
   filter: PropTypes.object,
 };

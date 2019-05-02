@@ -7,6 +7,7 @@ import {
   getAllFieldsFromGuppy,
   getAccessibleResources,
 } from '../Utils/queries';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 
 /**
  * Wrapper that connects to Guppy server,
@@ -52,6 +53,7 @@ class GuppyWrapper extends React.Component {
       rawDataFields: [],
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
+      accessibility: ENUM_ACCESSIBILITY.ALL,
     };
   }
 
@@ -102,6 +104,7 @@ class GuppyWrapper extends React.Component {
       sort,
       offset,
       size,
+      this.state.accessibility,
     ).then((res) => {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -190,7 +193,11 @@ class GuppyWrapper extends React.Component {
    * @param {object} filter
    */
   handleAskGuppyForTotalCounts(type, filter) {
-    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
+    return askGuppyForTotalCounts(
+      this.props.guppyConfig.path,
+      type, filter,
+      this.state.accessibility,
+    );
   }
 
   /**
@@ -200,7 +207,12 @@ class GuppyWrapper extends React.Component {
    * @param {string[]} fields
    */
   handleDownloadRawDataByTypeAndFilter(type, filter, fields) {
-    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter)
+    return askGuppyForTotalCounts(
+      this.props.guppyConfig.path,
+      type,
+      filter,
+      this.state.accessibility,
+    )
       .then(count => downloadDataFromGuppy(
         this.props.guppyConfig.path,
         type,
@@ -210,6 +222,10 @@ class GuppyWrapper extends React.Component {
           filter,
         },
       ));
+  }
+
+  handleAccessLevelUpdate(accessLevel) {
+    this.setState({ accessibility: accessLevel });
   }
 
   render() {
@@ -238,6 +254,7 @@ class GuppyWrapper extends React.Component {
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
+            onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
           }))
         }
       </React.Fragment>

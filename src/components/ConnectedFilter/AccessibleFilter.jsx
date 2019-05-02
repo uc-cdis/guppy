@@ -1,5 +1,5 @@
 import ConnectedFilter from '.';
-import { ENUM_ACCESSIBILITY } from './utils';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 
 class AccessibleFilter extends ConnectedFilter {
   constructor(props) {

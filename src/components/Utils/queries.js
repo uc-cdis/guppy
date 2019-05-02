@@ -53,6 +53,7 @@ const queryGuppyForRawDataAndTotalCounts = (
   sort,
   offset = 0,
   size = 20,
+  accessibility = 'all',
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort) {
@@ -62,16 +63,16 @@ const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter || sort) {
     dataTypeLine = `${type} (offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
   }
-  let typeAggsLine = `${type} {`;
+  let typeAggsLine = `${type} accessibility: ${accessibility} {`;
   if (gqlFilter) {
-    typeAggsLine = `${type} (filter: $filter) {`;
+    typeAggsLine = `${type} (filter: $filter, accessibility: ${accessibility}) {`;
   }
   const query = `${queryLine}
     ${dataTypeLine} 
       ${fields.join('\n')}
     }
     _aggregation {
-      ${typeAggsLine}
+      ${typeAggsLine} 
         _totalCount
       }
     }
@@ -133,9 +134,19 @@ export const askGuppyForRawData = (
   sort,
   offset = 0,
   size = 20,
+  accessibility = 'all',
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForRawDataAndTotalCounts(path, type, fields, gqlFilter, sort, offset, size);
+  return queryGuppyForRawDataAndTotalCounts(
+    path,
+    type,
+    fields,
+    gqlFilter,
+    sort,
+    offset,
+    size,
+    accessibility,
+  );
 };
 
 export const getAllFieldsFromFilterConfigs = filterTabConfigs => filterTabConfigs
@@ -154,6 +165,7 @@ export const downloadDataFromGuppy = (
     fields,
     filter,
     sort,
+    accessibility,
   },
 ) => {
   const SCROLL_SIZE = 10000;
@@ -170,7 +182,7 @@ export const downloadDataFromGuppy = (
       body: JSON.stringify(queryBody),
     }).then(response => response.json());
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount)
+  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility)
     .then((res) => {
       if (res && res.data && res.data[type]) {
         return res.data[type];
@@ -184,13 +196,14 @@ export const askGuppyForTotalCounts = (
   path,
   type,
   filter,
+  accessibility = 'all',
 ) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
   const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter)' : ''}{`;
   const query = `${queryLine}
     _aggregation {
-      ${typeAggsLine}
+      ${typeAggsLine} accessibility: ${accessibility}
         _totalCount
       }
     }
