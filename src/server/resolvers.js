@@ -2,7 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
-import { getDefaultAuthFilter } from './utils/accessibilities';
+import { getDefaultFilter } from './utils/accessibilities';
 
 /**
  * This function parses all requesting fields from a request
@@ -44,7 +44,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
  */
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   const {
-    filter, filterSelf, needEncryptAgg,
+    filter, filterSelf, needEncryptAgg, accessibility,
   } = args;
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   return {
@@ -54,6 +54,7 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
     esIndex,
     esType,
     needEncryptAgg,
+    accessibility,
   };
 };
 
@@ -78,13 +79,14 @@ const aggsTotalQueryResolver = (parent) => {
  */
 const numericHistogramResolver = async (parent, args, context) => {
   const {
-    esInstance, esIndex, esType, filter, field, filterSelf,
+    esInstance, esIndex, esType,
+    filter, field, filterSelf, accessibility,
   } = parent;
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
   const { jwt } = context;
-  const defaultAuthFilter = await getDefaultAuthFilter(jwt);
+  const defaultAuthFilter = await getDefaultFilter(jwt, accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
   const resultPromise = esInstance.numericAggregation({
     esIndex,
@@ -112,10 +114,10 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, filterSelf,
+    filter, field, filterSelf, accessibility,
   } = parent;
   const { jwt } = context;
-  const defaultAuthFilter = await getDefaultAuthFilter(jwt);
+  const defaultAuthFilter = await getDefaultFilter(jwt, accessibility);
   const resultPromise = esInstance.textAggregation({
     esIndex,
     esType,

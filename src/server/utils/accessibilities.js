@@ -33,14 +33,14 @@ const getRequestResourceListFromFilter = async (esIndex, esType, filter) => text
   { field: config.esConfig.authFilterField, filter },
 ).then(res => (res.map(item => item.key)));
 
-export const getDefaultAuthFilter = async (jwt) => {
-  const resources = await getAccessibleResourcesFromArborist(jwt);
-  const authPart = {
+const buildFilterWithResourceList = (resourceList) => {
+  if (!resourceList || resourceList.length === 0) return {};
+  const filter = {
     IN: {
-      [config.esConfig.authFilterField]: [...resources],
+      [config.esConfig.authFilterField]: [...resourceList],
     },
   };
-  return authPart;
+  return filter;
 };
 
 export const applyAccessibleFilter = async (jwt, parsedFilter) => {
@@ -53,7 +53,8 @@ export const applyAccessibleFilter = async (jwt, parsedFilter) => {
   }
 
   // asking arborist for auth resource list, and add to filter args
-  const authPart = await getDefaultAuthFilter(jwt);
+  const resources = await getAccessibleResourcesFromArborist(jwt);
+  const authPart = buildFilterWithResourceList(resources);
   const appliedFilter = addTwoFilters(parsedFilter, authPart);
   return appliedFilter;
 };
@@ -68,4 +69,19 @@ export const getOutOfScopeResourceList = async (jwt, esIndex, esType, filter) =>
   const outOfScopeResourceList = _.difference(requestResourceList, accessibleResourcesList);
   log.debug(`[tierAccessResolver] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
   return outOfScopeResourceList;
+};
+
+export const getDefaultFilter = async (jwt, accessibility = 'all') => {
+  if (accessibility === 'all') {
+    return {};
+  }
+  if (accessibility === 'accessible') {
+    const resources = await getAccessibleResourcesFromArborist(jwt);
+    return buildFilterWithResourceList(resources);
+  }
+  if (accessibility === 'unaccessible') {
+    const resources = await getOutOfScopeResourceList(jwt);
+    return buildFilterWithResourceList(resources);
+  }
+  throw new Error(`Invalid accessibility argument: ${accessibility}`);
 };
