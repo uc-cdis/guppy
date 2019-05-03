@@ -34,17 +34,17 @@ export GUPPY_CONFIG_FILEPATH=./example_config.json
 npm start
 ```
 
-#### Auth & Auz
-Guppy connects Arborist for auth&auz. 
-The `auth_filter_field` item in your config file is the field used for authentication. 
+#### Authorization
+Guppy connects Arborist for authorization. 
+The `auth_filter_field` item in your config file is the field used for authorization. 
 You could set the endpoint by: 
 
 ```
 export GEN3_ARBORIST_ENDPOINT=${arborist_service}
 ```
 
-If not set, Guppy will skip all auth&auz steps as default. 
-But if you just want to mock your own auth&auz behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. 
+If not set, Guppy will skip all authorization steps as default. 
+But if you just want to mock your own authorization behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. 
 Please look into `/src/server/utils/accessibilities.js` for more details. 
 
 #### Tier access
