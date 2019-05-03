@@ -21,7 +21,7 @@ const config = {
         type: 'file',
       },
     ],
-    configIndex: inputConfig.configIndex,
+    configIndex: inputConfig.config_index,
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
   },
 

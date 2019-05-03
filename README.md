@@ -21,7 +21,7 @@ You could put following as your config files:
     },
     ...
   ],
-  "configIndex": "${ES_ARRAY_CONFIG}", // optional, if there's array field, Guppy read the configs from this index.
+  "config_index": "${ES_ARRAY_CONFIG}", // optional, if there's array field, Guppy read the configs from this index.
   "auth_filter_field": "${AUTH_FILTER_FIELD}",
 }
 ```
