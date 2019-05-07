@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
-import config from '../../config';
-import log from '../../logger';
-import CodedError from '../../utils/error';
+import config from '../config';
+import log from '../logger';
+import CodedError from '../utils/error';
 
 class ArboristClient {
   constructor(arboristEndpoint) {

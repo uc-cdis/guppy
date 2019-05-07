@@ -2,7 +2,6 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
-import { getDefaultFilter } from './utils/accessibilities';
 
 /**
  * This function parses all requesting fields from a request
@@ -85,8 +84,8 @@ const numericHistogramResolver = async (parent, args, context) => {
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
-  const { jwt } = context;
-  const defaultAuthFilter = await getDefaultFilter(jwt, accessibility);
+  const { authHelper } = context;
+  const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
   const resultPromise = esInstance.numericAggregation({
     esIndex,
@@ -116,8 +115,8 @@ const textHistogramResolver = async (parent, args, context) => {
     esInstance, esIndex, esType,
     filter, field, filterSelf, accessibility,
   } = parent;
-  const { jwt } = context;
-  const defaultAuthFilter = await getDefaultFilter(jwt, accessibility);
+  const { authHelper } = context;
+  const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   const resultPromise = esInstance.textAggregation({
     esIndex,
     esType,

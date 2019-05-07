@@ -4,36 +4,26 @@ import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
 import CodedError from '../../utils/error';
-import { firstLetterUpperCase, addTwoFilters } from '../../utils/utils';
-import { getOutOfScopeResourceList, applyAccessibleFilter } from '../../utils/accessibilities';
+import { firstLetterUpperCase } from '../../utils/utils';
 
 const ENCRYPT_COUNT = -1;
 
-const resolverWithAccessibleFilterApplied = async (
-  resolve, root, args, context, info, jwt, filter,
+const resolverWithAccessibleFilterApplied = (
+  resolve, root, args, context, info, authHelper, filter,
 ) => {
-  const appliedFilter = await applyAccessibleFilter(jwt, filter);
+  const appliedFilter = authHelper.applyAccessibleFilter(filter);
   const newArgs = {
     ...args,
     filter: appliedFilter,
     needEncryptAgg: false,
   };
-  if (typeof newArgs.filter === 'undefined') {
-    delete newArgs.filter;
-  }
   return resolve(root, newArgs, context, info);
 };
 
-const resolverWithUnaccessibleFilterApplied = async (
-  resolve, root, args, context, info, jwt, esIndex, esType, filter,
+const resolverWithUnaccessibleFilterApplied = (
+  resolve, root, args, context, info, authHelper, filter,
 ) => {
-  const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
-  const outOfScopeFilter = {
-    IN: {
-      [config.esConfig.authFilterField]: [...outOfScopeResourceList],
-    },
-  };
-  const appliedFilter = addTwoFilters(outOfScopeFilter, filter);
+  const appliedFilter = authHelper.applyUnaccessibleFilter(filter);
   const newArgs = {
     ...args,
     filter: appliedFilter,
@@ -50,11 +40,13 @@ const tierAccessResolver = (
 ) => async (resolve, root, args, context, info) => {
   try {
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
-    const { jwt } = context;
+    const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
     const { filter, accessibility } = args;
 
-    const outOfScopeResourceList = await getOutOfScopeResourceList(jwt, esIndex, esType, filter);
+    const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
+      esIndex, esType, filter,
+    );
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
       // unless it's requesting for `unaccessible` data, just resolve this
@@ -62,7 +54,7 @@ const tierAccessResolver = (
         return resolve(root, { ...args, needEncryptAgg: false }, context, info);
       }
       return resolverWithUnaccessibleFilterApplied(
-        resolve, root, args, context, info, jwt, esIndex, esType, filter,
+        resolve, root, args, context, info, authHelper, filter,
       );
     }
     // else, check if it's raw data query or aggs query
@@ -85,11 +77,11 @@ const tierAccessResolver = (
     if (accessibility === 'accessible') {
       log.debug('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
-        resolve, root, args, context, info, jwt, filter,
+        resolve, root, args, context, info, authHelper, filter,
       );
     }
     return resolverWithUnaccessibleFilterApplied(
-      resolve, root, args, context, info, jwt, esIndex, esType, filter,
+      resolve, root, args, context, info, authHelper, filter,
     );
   } catch (err) {
     if (err instanceof ApolloError) {
