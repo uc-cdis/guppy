@@ -59,6 +59,11 @@ const tierAccessResolver = (
     }
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
+      if (accessibility === 'accessible') {
+        return resolverWithAccessibleFilterApplied(
+          resolve, root, args, context, info, authHelper, filter,
+        );
+      }
       log.debug('[tierAccessResolver] requesting out-of-scope resources, return 401');
       throw new ApolloError(`You don't have access to following resources: \
         [${outOfScopeResourceList.join(', ')}]`, 401);

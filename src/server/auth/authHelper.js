@@ -8,7 +8,7 @@ import {
 } from './utils';
 import config from '../config';
 
-class AuthHelper {
+export class AuthHelper {
   constructor(jwt) {
     this._jwt = jwt;
   }
@@ -29,7 +29,7 @@ class AuthHelper {
       log.debug('[AuthHelper] accessible resources: ', this._accessibleResourceList);
       log.debug('[AuthHelper] unaccessible resources: ', this._unaccessibleResourceList);
     } catch (err) {
-      log.error('[Auth] error when initializing');
+      log.error('[AuthHelper] error when initializing');
     }
   }
 
@@ -45,9 +45,9 @@ class AuthHelper {
     const requestResourceList = await getRequestResourceListFromFilter(
       esIndex, esType, filter,
     );
-    log.debug(`[tierAccessResolver] request resource list: [${requestResourceList.join(', ')}]`);
+    log.debug(`[AuthHelper] request resource list: [${requestResourceList.join(', ')}]`);
     const outOfScopeResourceList = _.difference(requestResourceList, this._accessibleResourceList);
-    log.debug(`[tierAccessResolver] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
+    log.debug(`[AuthHelper] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
     return outOfScopeResourceList;
   }
 
