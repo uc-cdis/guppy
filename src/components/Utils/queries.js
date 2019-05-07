@@ -174,6 +174,7 @@ export const downloadDataFromGuppy = (
     if (fields) queryBody.fields = fields;
     if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
+    if (typeof accessibility !== 'undefined') queryBody.accessibility = accessibility;
     return fetch(`${path}${downloadEndpoint}`, {
       method: 'POST',
       headers: {
