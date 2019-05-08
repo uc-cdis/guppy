@@ -1,12 +1,10 @@
 import assert from 'assert';
 import log from '../../logger';
 import config from '../../config';
-import { applyAccessibleFilter } from '../../utils/accessibilities';
 
 const authMWResolver = async (resolve, root, args, context, info) => {
   assert(config.tierAccessLevel === 'private', 'Auth middleware layer only for "private" tier access level');
-
-  const { jwt } = context;
+  const { authHelper } = context;
 
   // if mock arborist endpoint, just skip auth middleware
   if (!config.internalLocalTest) {
@@ -18,7 +16,7 @@ const authMWResolver = async (resolve, root, args, context, info) => {
 
   // asking arborist for auth resource list, and add to filter args
   const parsedFilter = args.filter;
-  const appliedFilter = await applyAccessibleFilter(jwt, parsedFilter);
+  const appliedFilter = await authHelper.applyAccessibleFilter(parsedFilter);
   const newArgs = {
     ...args,
     filter: appliedFilter,

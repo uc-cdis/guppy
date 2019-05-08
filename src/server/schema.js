@@ -54,6 +54,7 @@ const getQuerySchemaForType = (esType) => {
     first: Int,
     filter: JSON,
     sort: JSON,
+    accessibility: Accessibility=all,
     ): [${esTypeObjName}]`;
 };
 

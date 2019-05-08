@@ -1,4 +1,4 @@
-import { applyAccessibleFilter, getOutOfScopeResourceList } from './utils/accessibilities';
+import getAuthHelperInstance from './auth/authHelper';
 import headerParser from './utils/headerParser';
 import esInstance from './es/index';
 import log from './logger';
@@ -7,11 +7,13 @@ import CodedError from './utils/error';
 
 const downloadRouter = async (req, res, next) => {
   const {
-    type, filter, sort, fields,
+    type, filter, sort, fields, accessibility,
   } = req.body;
+
   log.debug('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexByType(type);
   const jwt = headerParser.parseJWT(req);
+  const authHelper = await getAuthHelperInstance(jwt);
 
   try {
     let appliedFilter;
@@ -25,18 +27,23 @@ const downloadRouter = async (req, res, next) => {
      */
     switch (config.tierAccessLevel) {
       case 'private': {
-        appliedFilter = await applyAccessibleFilter(jwt, filter);
+        appliedFilter = authHelper.applyAccessibleFilter(filter);
         break;
       }
       case 'regular': {
         log.debug('[download] regular commons');
-        // compare resources with JWT
-        const outOfScopeResourceList = getOutOfScopeResourceList(jwt, esIndex, type, filter);
-        // if requesting resources > allowed resources, return 401,
-        if (outOfScopeResourceList.length > 0) {
-          throw new CodedError(401, `You don't have access to following resources: [${outOfScopeResourceList.join(', ')}]`);
-        } else { // else, go ahead download
-          appliedFilter = filter;
+        if (accessibility === 'accessible') {
+          appliedFilter = authHelper.applyAccessibleFilter(filter);
+        } else {
+          const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
+            esIndex, type, filter,
+          );
+          // if requesting resources > allowed resources, return 401,
+          if (outOfScopeResourceList.length > 0) {
+            throw new CodedError(401, `You don't have access to following resources: [${outOfScopeResourceList.join(', ')}]`);
+          } else { // else, go ahead download
+            appliedFilter = filter;
+          }
         }
         break;
       }
