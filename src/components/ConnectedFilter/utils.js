@@ -17,8 +17,8 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
       const maxValue = initHistogramRes ? initHistogramRes.histogram[0].key[1] : item.key[1];
       return {
         filterType: 'range',
-        min: minValue,
-        max: maxValue,
+        min: Math.floor(minValue),
+        max: Math.ceil(maxValue),
         lowerBound: item.key[0],
         upperBound: item.key[1],
         count: item.count,
