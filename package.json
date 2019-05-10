@@ -1,6 +1,6 @@
 {
   "name": "@gen3/guppy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Server that support GraphQL queries on data from elasticsearch",
   "main": "src/server/server.js",
   "directories": {
@@ -27,7 +27,7 @@
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
     "@elastic/elasticsearch": "^7.0.0-rc.1",
-    "@gen3/ui-component": "https://github.com/uc-cdis/gen3-ui-component#feat/lockable-filter",
+    "@gen3/ui-component": "0.3.0",
     "apollo-server": "^2.4.8",
     "apollo-server-express": "^2.4.8",
     "body-parser": "^1.18.3",
