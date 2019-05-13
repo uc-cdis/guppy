@@ -30,6 +30,7 @@ const config = {
   arboristEndpoint: 'mock',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
+  logLevel: 'INFO',
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -55,6 +56,10 @@ if (process.env.INTERNAL_LOCAL_TEST) {
   config.internalLocalTest = process.env.INTERNAL_LOCAL_TEST;
 }
 
+if (process.env.LOG_LEVEL) {
+  config.logLevel = process.env.LOG_LEVEL;
+}
+
 // only three options for tier access level: 'private' (default), 'regular', and 'libre'
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
@@ -65,6 +70,7 @@ if (process.env.TIER_ACCESS_LEVEL) {
   config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
 }
 
+log.setLogLevel(config.logLevel);
 log.info('[config] starting server using config', JSON.stringify(config, null, 4));
 
 export default config;
