@@ -76,7 +76,7 @@ For example `regular` leveled commons with config looks like this will skip encr
 }
 ```
 
-By default the whitelist contains missing values: ['\__missing\__', 'unknown', 'not reported', 'no data']. 
+By default the whitelist contains missing values: ['\__missing__', 'unknown', 'not reported', 'no data']. 
 If you would like to disable whitelist, simply put `encrypt_whitelist: "disabled"` in your config.
 
 For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100: 
