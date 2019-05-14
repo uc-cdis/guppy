@@ -4,7 +4,7 @@ import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
 import CodedError from '../../utils/error';
-import { firstLetterUpperCase } from '../../utils/utils';
+import { firstLetterUpperCase, isWhitelisted } from '../../utils/utils';
 
 const ENCRYPT_COUNT = -1;
 
@@ -117,7 +117,11 @@ const hideNumberResolver = isGettingTotalCount => async (resolve, root, args, co
   if (isGettingTotalCount) {
     return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
   }
+
   const encryptedResult = result.map((item) => {
+    if (isWhitelisted(item.key)) { // we don't excrypt whitelisted results
+      return item;
+    }
     if (item.count < config.tierAccessLimit) {
       return {
         key: item.key,

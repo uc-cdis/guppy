@@ -34,6 +34,7 @@ log.levelEnums = {
   SILENT: 5,
 };
 
+log.setLevel('INFO');
 log.setLogLevel = (level) => {
   if (!Object.keys(numLevels).includes(level) && !Object.keys(log.levelEnums).includes(level)) {
     throw new Error(`Invalid log level ${level}`);

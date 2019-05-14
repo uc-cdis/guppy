@@ -33,6 +33,8 @@ const config = {
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   logLevel: 'INFO',
+  enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? true : inputConfig.enable_encrypt_whitelist,
+  encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -70,6 +72,15 @@ if (process.env.TIER_ACCESS_LEVEL) {
     throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
   }
   config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
+}
+
+// check whitelist is enabled
+if (config.enableEncryptWhiteList) {
+  if (typeof config.encryptWhitelist !== 'object') {
+    config.encryptWhitelist = [config.encryptWhitelist];
+  }
+} else {
+  config.encryptWhitelist = [];
 }
 
 log.setLogLevel(config.logLevel);
