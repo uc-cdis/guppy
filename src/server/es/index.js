@@ -184,26 +184,23 @@ class ES {
       body: { query: { match_all: {} } },
     }).then((resp) => {
       try {
-        const fieldsObj = resp.body.hits.hits[0]._source;
-        Object.keys(fieldsObj).forEach((indexFieldName) => {
-          if (fieldsObj[indexFieldName] === 'array') {
-            const twoParts = indexFieldName.split('.');
-            if (twoParts.length !== 2) return;
-            const index = twoParts[0];
-            const field = twoParts[1];
-            if (!this.fieldTypes[index]) {
-              const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found. `;
-              throw new Error(errMsg);
-            } else if (!this.fieldTypes[index][field]) {
-              const errMsg = `[ES.initialize] wrong array entry from config index: field "${field}" not found. `;
-              throw new Error(errMsg);
-            }
-            if (!arrayFields[index]) arrayFields[index] = [];
-            arrayFields[index].push(field);
+        const results = resp.body.hits.hits[0]._source.array;
+        results.forEach((res) => {
+          const twoParts = res.split('.');
+          if (twoParts.length !== 2) return;
+          const index = twoParts[0];
+          const field = twoParts[1];
+          if (!this.fieldTypes[index]) {
+            const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found. `;
+            throw new Error(errMsg);
+          } else if (!this.fieldTypes[index][field]) {
+            const errMsg = `[ES.initialize] wrong array entry from config index: field "${field}" not found. `;
+            throw new Error(errMsg);
           }
+          if (!arrayFields[index]) arrayFields[index] = [];
+          arrayFields[index].push(field);
         });
-        log.info('[ES.initialize] got array fields from es config index:');
-        log.rawOutput(log.levelEnums.INFO, JSON.stringify(arrayFields, null, 4));
+        log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
       } catch (err) {
         throw new Error(err);
       }
