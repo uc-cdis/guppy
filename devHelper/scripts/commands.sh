@@ -129,12 +129,12 @@ declare -a vitalList
 declare -a fileTypeList
 declare -a fileFormat
 
-genderList=( male female )
-ethnicityList=( 'American Indian' 'Pacific Islander' 'Black' 'Multi-racial' 'White' 'Haspanic' )
-raceList=( white black hispanic asian mixed )
-vitalList=( Alive Dead )
-fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes")
-fileFormatList=( BEM BAM BED CSV FASTQ RAW TAR TSV TXT IDAT )
+genderList=( "male" "female" "unknown")
+ethnicityList=( "American Indian" "Pacific Islander" "Black" "Multi-racial" "White" "Haspanic" "__missing__" )
+raceList=( "white" "black" "hispanic" "asian" "mixed" "not reported" )
+vitalList=( "Alive" "Dead" "no data" )
+fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes" "Unknown" )
+fileFormatList=( "BEM" "BAM" "BED" "CSV" "FASTQ" "RAW" "TAR" "TSV" "TXT" "IDAT" "__missing__" )
 resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" "/programs/external/projects/test")
 projectList=( "jnkns-jenkins" "DEV-test" "external-test" )
 

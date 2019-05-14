@@ -1,6 +1,6 @@
-export const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
+import config from '../config';
 
-export const test = 1;
+export const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
 
 /**
  * transfer '/programs/DEV/projects/test' to 'DEV-test'
@@ -26,4 +26,15 @@ export const addTwoFilters = (filter1, filter2) => {
     ],
   };
   return appliedFilter;
+};
+
+export const isWhitelisted = (key) => {
+  const lowerCasedWhitelist = config.encryptWhitelist.map((w) => {
+    if (typeof w === 'string') {
+      return w.toLowerCase();
+    }
+    return w;
+  });
+  const lowerCasedKey = (typeof key === 'string') ? key.toLowerCase() : key;
+  return lowerCasedWhitelist.includes(lowerCasedKey);
 };
