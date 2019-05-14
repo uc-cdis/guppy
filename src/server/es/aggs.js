@@ -4,6 +4,7 @@ import {
   AGGS_ITEM_STATS_NAME,
   AGGS_QUERY_NAME,
 } from './const';
+import config from '../config';
 
 const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
   const appendFilter = [];
@@ -297,6 +298,10 @@ export const textAggregation = async (
       defaultAuthFilter,
     );
   }
+  let missingAlias = {};
+  if (config.esConfig.aggregationIncludeMissingData) {
+    missingAlias = { missing: config.esConfig.missingDataAlias };
+  }
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {
     [aggsName]: {
@@ -306,6 +311,7 @@ export const textAggregation = async (
             [field]: {
               terms: {
                 field,
+                ...missingAlias,
               },
             },
           },
