@@ -24,7 +24,7 @@ You could put following as your config files:
   "config_index": "${ES_ARRAY_CONFIG}", // optional, if there's array field, Guppy read the configs from this index.
   "auth_filter_field": "${AUTH_FILTER_FIELD}",
   "aggs_include_missing_data": true, // optional, by default true, this boolean decide whether elasticsearch aggregation should return missing data in result
-  "missing_data_alias": "No Data", // optional, only valid if `aggs_include_missing_data` is true, guppy will alias missing data into this keyword during aggregation. By default it's set to `__missing__`
+  "missing_data_alias": "no data", // optional, only valid if `aggs_include_missing_data` is true, guppy will alias missing data into this keyword during aggregation. By default it's set to `no data`.
 }
 ```
 
