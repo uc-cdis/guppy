@@ -22,7 +22,7 @@ const downloadRouter = async (req, res, next) => {
      * 1. if data commons is secure, add auth filter layer onto filter
      * 2. if data commons is regular:
      *   a. if request contains out-of-access resource, return 401
-     *   b. if request contains only accessable resouces, return response
+     *   b. if request contains only accessible resouces, return response
      * 3. if data commons is private, always return reponse without any auth check
      */
     switch (config.tierAccessLevel) {
