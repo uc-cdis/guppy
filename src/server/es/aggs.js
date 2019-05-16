@@ -4,6 +4,7 @@ import {
   AGGS_ITEM_STATS_NAME,
   AGGS_QUERY_NAME,
 } from './const';
+import config from '../config';
 
 const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
   const appendFilter = [];
@@ -297,6 +298,10 @@ export const textAggregation = async (
       defaultAuthFilter,
     );
   }
+  let missingAlias = {};
+  if (config.esConfig.aggregationIncludeMissingData) {
+    missingAlias = { missing: config.esConfig.missingDataAlias };
+  }
   const aggsName = `${field}Aggs`;
   queryBody.aggs = {
     [aggsName]: {
@@ -306,6 +311,7 @@ export const textAggregation = async (
             [field]: {
               terms: {
                 field,
+                ...missingAlias,
               },
             },
           },
@@ -333,5 +339,16 @@ export const textAggregation = async (
     queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);
   /* eslint-enable */
+
+  // make the missing data bucket to the bottom of the list
+  if (config.esConfig.aggregationIncludeMissingData) {
+    const missingDataIndex = finalResults
+      .findIndex(b => b.key === config.esConfig.missingDataAlias);
+    const missingDataItem = finalResults.find(b => b.key === config.esConfig.missingDataAlias);
+    if (missingDataItem) {
+      finalResults.splice(missingDataIndex, 1);
+      finalResults.splice(finalResults.length, 0, missingDataItem);
+    }
+  }
   return finalResults;
 };

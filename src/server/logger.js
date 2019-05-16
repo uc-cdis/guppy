@@ -33,11 +33,25 @@ log.levelEnums = {
   ERROR: 4,
   SILENT: 5,
 };
-log.setLevel(log.levels.DEBUG);
-log.info('log level set to', numLevels[log.getLevel()]);
+
+log.setLevel('INFO');
+log.setLogLevel = (level) => {
+  if (!Object.keys(numLevels).includes(level) && !Object.keys(log.levelEnums).includes(level)) {
+    throw new Error(`Invalid log level ${level}`);
+  }
+  log.setLevel(level);
+  log.info('log level set to', numLevels[log.getLevel()]);
+};
 
 log.rawOutput = (level, msg) => {
-  if (log.getLevel() > level) {
+  let parsedLevel = level;
+  if (typeof level === 'string') {
+    if (!Object.keys(log.levelEnums).includes(level)) {
+      throw new Error(`Invalid log level ${level}`);
+    }
+    parsedLevel = log.levelEnums[level];
+  }
+  if (parsedLevel >= log.getLevel()) {
     console.log(msg); // eslint-disable-line no-console
   }
 };

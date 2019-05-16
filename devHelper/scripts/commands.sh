@@ -129,12 +129,12 @@ declare -a vitalList
 declare -a fileTypeList
 declare -a fileFormat
 
-genderList=( male female )
-ethnicityList=( 'American Indian' 'Pacific Islander' 'Black' 'Multi-racial' 'White' 'Haspanic' )
-raceList=( white black hispanic asian mixed )
-vitalList=( Alive Dead )
-fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes")
-fileFormatList=( BEM BAM BED CSV FASTQ RAW TAR TSV TXT IDAT )
+genderList=( "male" "female" "unknown")
+ethnicityList=( "American Indian" "Pacific Islander" "Black" "Multi-racial" "White" "Haspanic" "__missing__" )
+raceList=( "white" "black" "hispanic" "asian" "mixed" "not reported" )
+vitalList=( "Alive" "Dead" "no data" )
+fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs Ribosomes" "Unknown" )
+fileFormatList=( "BEM" "BAM" "BED" "CSV" "FASTQ" "RAW" "TAR" "TSV" "TXT" "IDAT" "__missing__" )
 resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" "/programs/external/projects/test")
 projectList=( "jnkns-jenkins" "DEV-test" "external-test" )
 
@@ -202,8 +202,10 @@ curl -X PUT "${ESHOST}/${configIndexName}/_doc/0?pretty" \
   -H 'Content-Type: application/json' -d '
   {
     "timestamp": "1990-01-01T10:10:10",
-    "gen3-dev-subject.some_string_field": "array",
-    "gen3-dev-subject.some_integer_field": "array"
+    "array": [
+      "gen3-dev-subject.some_string_field",
+      "gen3-dev-subject.some_integer_field"
+    ]
   }
   '
 }

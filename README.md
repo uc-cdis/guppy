@@ -23,6 +23,8 @@ You could put following as your config files:
   ],
   "config_index": "${ES_ARRAY_CONFIG}", // optional, if there's array field, Guppy read the configs from this index.
   "auth_filter_field": "${AUTH_FILTER_FIELD}",
+  "aggs_include_missing_data": true, // optional, by default true, this boolean decide whether elasticsearch aggregation should return missing data in result
+  "missing_data_alias": "no data", // optional, only valid if `aggs_include_missing_data` is true, guppy will alias missing data into this keyword during aggregation. By default it's set to `no data`.
 }
 ```
 
@@ -55,6 +57,29 @@ Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LE
 
 For `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
 
+`regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`. 
+For example `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`: 
+
+```
+{
+  "indices": [
+    {
+      "index": "gen3-dev-subject",
+      "type": "subject"
+    },
+    {
+      "index": "gen3-dev-file",
+      "type": "file"
+    }
+  ],
+  "config_index": "gen3-dev-config",
+  "auth_filter_field": "gen3_resource_path",
+  "encrypt_whitelist": [ "do-not-encrypt-me" ]
+}
+```
+
+By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data']. 
+If you would like to disable whitelist, simply put `enable_encrypt_whitelist: false` in your config.
 
 For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100: 
 

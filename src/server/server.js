@@ -11,6 +11,7 @@ import config from './config';
 import log from './logger';
 import middlewares from './middlewares';
 import headerParser from './utils/headerParser';
+import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
 
@@ -31,9 +32,13 @@ const startServer = () => {
   const server = new ApolloServer({
     mocks: false,
     schema: schemaWithMiddleware,
-    context: ({ req }) => ({
-      jwt: headerParser.parseJWT(req),
-    }),
+    context: async ({ req }) => {
+      const jwt = headerParser.parseJWT(req);
+      const authHelper = await getAuthHelperInstance(jwt);
+      return {
+        authHelper,
+      };
+    },
   });
     // bind graphql server to express app at config.path
   server.applyMiddleware({

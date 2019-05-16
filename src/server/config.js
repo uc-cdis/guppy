@@ -23,6 +23,8 @@ const config = {
     ],
     configIndex: inputConfig.config_index,
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
+    aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing,
+    missingDataAlias: inputConfig.missing_data_alias || 'no data',
   },
 
   port: 80,
@@ -30,6 +32,9 @@ const config = {
   arboristEndpoint: 'mock',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
+  logLevel: 'INFO',
+  enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? true : inputConfig.enable_encrypt_whitelist,
+  encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -55,6 +60,10 @@ if (process.env.INTERNAL_LOCAL_TEST) {
   config.internalLocalTest = process.env.INTERNAL_LOCAL_TEST;
 }
 
+if (process.env.LOG_LEVEL) {
+  config.logLevel = process.env.LOG_LEVEL;
+}
+
 // only three options for tier access level: 'private' (default), 'regular', and 'libre'
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
@@ -65,6 +74,16 @@ if (process.env.TIER_ACCESS_LEVEL) {
   config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
 }
 
+// check whitelist is enabled
+if (config.enableEncryptWhiteList) {
+  if (typeof config.encryptWhitelist !== 'object') {
+    config.encryptWhitelist = [config.encryptWhitelist];
+  }
+} else {
+  config.encryptWhitelist = [];
+}
+
+log.setLogLevel(config.logLevel);
 log.info('[config] starting server using config', JSON.stringify(config, null, 4));
 
 export default config;
