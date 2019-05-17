@@ -182,11 +182,20 @@ class ES {
       log.info('[ES.initialize] no array fields from es config index.');
       return Promise.resolve({});
     }
+    if (!this.fieldTypes) {
+      return {};
+    }
     const arrayFields = {};
     log.info(`[ES.initialize] getting array fields from es config index "${this.config.configIndex}"...`);
     return this.client.search({
       index: this.config.configIndex,
-      body: { query: { match_all: {} } },
+      body: {
+        query: {
+          ids: {
+            values: Object.keys(this.fieldTypes),
+          },
+        },
+      },
     }).then((resp) => {
       try {
         resp.body.hits.hits.forEach((doc) => {
