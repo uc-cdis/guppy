@@ -71,16 +71,18 @@ class GuppyWrapper extends React.Component {
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
       });
     });
-    getAccessibleResources(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      this.props.accessibleFieldCheckList,
-    ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
-      this.setState({
-        accessibleFieldObject,
-        unaccessibleFieldObject,
+    if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
+      getAccessibleResources(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.props.accessibleFieldCheckList,
+      ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
+        this.setState({
+          accessibleFieldObject,
+          unaccessibleFieldObject,
+        });
       });
-    });
+    }
   }
 
   /**
@@ -292,7 +294,7 @@ GuppyWrapper.propTypes = {
 GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
-  accessibleFieldCheckList: ['project'],
+  accessibleFieldCheckList: undefined,
 };
 
 export default GuppyWrapper;
