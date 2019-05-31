@@ -151,6 +151,7 @@ Example result:
 
 ### 3. Numeric aggregation <a name="aggs-numeric"></a>
 For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***. 
+
 ***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example: 
 
 ```
@@ -269,7 +270,7 @@ Result:
 }
 ```
 
- - Giving "bin count" means telling Guppy the histogram should be divided to how many bins:
+ - Giving "bin count" means telling Guppy how many bins the histogram should be divided to:
 
 | argument   | description                 | type             | default   |
 |------------|-----------------------------|------------------|-----------|
@@ -342,7 +343,7 @@ Currently Guppy uses `JSON`-based syntax for filters. The JSON object key could 
 }
 ```
 
-Or you could use binary combination (`AND` or `OR`)to combine simple filter unites into more complicated big filters. Example:
+Or you could use binary combination (`AND` or `OR`)to combine simple filter units into more complicated big filters. Example:
 
 ```
 {
@@ -394,9 +395,7 @@ Or you could use binary combination (`AND` or `OR`)to combine simple filter unit
   
 
 In future Guppy will support `SQL` like syntax for filter, like `
-
 {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
-
 `.
 
 
