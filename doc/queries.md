@@ -1,6 +1,15 @@
 # Guppy Query Syntax
 
-## Queries
+Table of Contents
+- [Queries](#query)
+- [Aggregations](#aggregation)
+   - [Total Count Aggregation](#aggs-total)
+   - [Text Aggregation](#aggs-text)
+   - [Numeric Aggregation](#aggs-numeric)
+- [Some other queries and arguments](#other)
+
+
+## Queries <a name="query"></a>
 Guppy allows you to query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document for how filter syntax looks).
 
 Example query: 
@@ -68,9 +77,9 @@ Arguments:
 | filter        | filter object to apply for query                                | JSON                                | {}      |
 
 
-## Aggregations
+## Aggregations <a name="aggregation"></a>
 Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
-### 1. Total count aggregation
+### 1. Total count aggregation <a name="agg-total"></a>
  By using `_totalCount` keyword, return total count of the result. Example:
 
  ```
@@ -97,7 +106,7 @@ Example result:
 }
 ```
 
-### 2. Text aggregation
+### 2. Text aggregation <a name="aggs-text"></a>
 Text aggregation returns histogram for a text field, results are wrapped by keywords `key` and `count`, example: 
 
 ```
@@ -140,7 +149,7 @@ Example result:
 }
 ```
 
-### 3. Numeric aggregation
+### 3. Numeric aggregation <a name="aggs-numeric"></a>
 For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***. 
 ***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example: 
 
@@ -324,7 +333,7 @@ Result:
 ```
 
 
-## Filters
+## Filters <a name="filter"></a>
 Currently Guppy uses `JSON`-based syntax for filters. The JSON object key could be an operation like `=`, `>`. One simple example could be:
 
 ```
@@ -392,7 +401,7 @@ In future Guppy will support `SQL` like syntax for filter, like `
 
 
 
-## Some other queries and arguments
+## Some other queries and arguments <a name="other"></a>
 
 ### Mapping query
 Mapping query simply returns all fields under a doc type. Example: 
@@ -608,3 +617,4 @@ Result:
   }
 }
 ```
+
