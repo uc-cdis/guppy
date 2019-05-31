@@ -79,7 +79,7 @@ Arguments:
 
 ## Aggregations <a name="aggregation"></a>
 Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
-### 1. Total count aggregation <a name="agg-total"></a>
+### 1. Total count aggregation <a name="aggs-total"></a>
  By using `_totalCount` keyword, return total count of the result. Example:
 
  ```
