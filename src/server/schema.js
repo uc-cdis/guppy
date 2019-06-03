@@ -181,7 +181,7 @@ const getSchema = (esConfig, esInstance) => {
   ${mappingSchema}
 `;
   log.info('[schema] graphql schema generated.');
-  log.debug('[schema] graphql schema', schemaStr);
+  log.info('[schema] graphql schema', schemaStr);
 
   const finalSchema = gql`${schemaStr}`;
   return finalSchema;
