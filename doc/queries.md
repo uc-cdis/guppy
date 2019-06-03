@@ -83,7 +83,10 @@ Arguments:
 
 ## Aggregations 
 Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
-### 1. Total count aggregation <a name="aggs-total"></a>
+
+<a name="aggs-total"></a>
+
+### 1. Total count aggregation 
  By using `_totalCount` keyword, return total count of the result. Example:
 
  ```
@@ -189,10 +192,6 @@ Result:
         "file_count": {
           "histogram": [
             {
-              "key": [
-                0,
-                93
-              ],
               "min": 0,
               "max": 93,
               "avg": 43,
