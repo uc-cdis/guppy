@@ -6,10 +6,12 @@ Table of Contents
    - [Total Count Aggregation](#aggs-total)
    - [Text Aggregation](#aggs-text)
    - [Numeric Aggregation](#aggs-numeric)
+- [Filters](#filter)
 - [Some other queries and arguments](#other)
 
+<a name="query"></a>
 
-## Queries <a name="query"></a>
+## Queries 
 Guppy allows you to query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document for how filter syntax looks).
 
 Example query: 
@@ -74,7 +76,7 @@ Arguments:
 | first         | return rows of query result                                     | integer                             | 10      |
 | sort          | sort method for query result                                    | JSON                                | {}      |
 | [accessibility](#accessibility) | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
-| filter        | filter object to apply for query                                | JSON                                | {}      |
+| [filter](#filter)        | filter object to apply for query                                | JSON                                | {}      |
 
 
 <a name="aggregation"></a>
