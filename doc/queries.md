@@ -73,11 +73,13 @@ Arguments:
 | offset        | starting position of query result                               | integer                             | 0       |
 | first         | return rows of query result                                     | integer                             | 10      |
 | sort          | sort method for query result                                    | JSON                                | {}      |
-| accessibility | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
+| [accessibility](#accessibility) | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
 | filter        | filter object to apply for query                                | JSON                                | {}      |
 
 
-## Aggregations <a name="aggregation"></a>
+<a name="aggregation"></a>
+
+## Aggregations 
 Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
 ### 1. Total count aggregation <a name="aggs-total"></a>
  By using `_totalCount` keyword, return total count of the result. Example:
@@ -106,7 +108,9 @@ Example result:
 }
 ```
 
-### 2. Text aggregation <a name="aggs-text"></a>
+<a name="aggs-text"></a>
+
+### 2. Text aggregation 
 Text aggregation returns histogram for a text field, results are wrapped by keywords `key` and `count`, example: 
 
 ```
@@ -149,7 +153,9 @@ Example result:
 }
 ```
 
-### 3. Numeric aggregation <a name="aggs-numeric"></a>
+<a name="aggs-numeric"></a>
+
+### 3. Numeric aggregation 
 For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***. 
 
 ***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example: 
@@ -333,8 +339,9 @@ Result:
 }
 ```
 
+<a name="filter"></a>
 
-## Filters <a name="filter"></a>
+## Filters 
 Currently Guppy uses `JSON`-based syntax for filters. The JSON object key could be an operation like `=`, `>`. One simple example could be:
 
 ```
@@ -392,15 +399,13 @@ Or you could use binary combination (`AND` or `OR`)to combine simple filter unit
 }
 ```
 
-  
-
 In future Guppy will support `SQL` like syntax for filter, like `
 {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
 `.
 
+<a name="other"></a>
 
-
-## Some other queries and arguments <a name="other"></a>
+## Some other queries and arguments 
 
 ### Mapping query
 Mapping query simply returns all fields under a doc type. Example: 
@@ -446,8 +451,7 @@ Result:
 }
 ```
 
-
-  
+<a name="accessibility"></a>  
 
 ### "accessibility" argument for "regular" tier access level
 When choose "regular" mode for for tier access level, `accessibility` argument will be valid for raw data or aggregation query. It support 3 enum values: `all`, `accessible`, and `unaccessible`. And will return data by those three accessibility types. By default it is set to `all`.  Below are the different behaviors for each enum value. 
