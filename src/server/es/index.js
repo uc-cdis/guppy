@@ -44,6 +44,7 @@ class ES {
       type: esType,
       body: validatedQueryBody,
     }).then(resp => resp.body, (err) => {
+      console.trace(err.message);
       log.error('[ES.query] error during querying');
       throw new Error(err.message);
     });

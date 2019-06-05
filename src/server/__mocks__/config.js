@@ -1,6 +1,6 @@
 const config = {
   esConfig: {
-    host: 'http://mock-url-that-does-not-exist',
+    host: 'http://mock-eshost',
     indices: [
       {
         index: 'gen3-dev-subject',
@@ -19,7 +19,7 @@ const config = {
   path: '/graphql',
   tierAccessLevel: 'regular',
   tierAccessLimit: 20,
-  internalLocalTest: true,
+  arboristEndpoint: 'http://mock-arborist',
 };
 
 export default config;

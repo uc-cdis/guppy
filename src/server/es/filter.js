@@ -4,7 +4,6 @@ import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum, SCROLL_PAGE_SIZ
 const getNumericTextType = (
   esInstance,
   esIndex,
-  esType,
   field,
 ) => {
   if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
@@ -62,7 +61,7 @@ const getFilterItemForNumbers = (op, field, value) => {
       },
     };
   }
-  if (op === '=') {
+  if (op === '=' || op === 'eq' || op === 'EQ') {
     return {
       term: {
         [field]: value,
@@ -101,6 +100,7 @@ export const getFilterObj = (
   filterSelf = true,
   defaultAuthFilter = {},
 ) => {
+  if (!graphqlFilterObj) return null;
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   if (typeof topLevelOp === 'undefined') return null;
   let resultFilterObj = {};
@@ -133,7 +133,7 @@ export const getFilterObj = (
       return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    const numericOrTextType = getNumericTextType(esInstance, esIndex, esType, field);
+    const numericOrTextType = getNumericTextType(esInstance, esIndex, field);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value);
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -145,14 +145,32 @@ export const getFilterObj = (
   return resultFilterObj;
 };
 
-const getESSortBody = (graphqlSort) => {
+/**
+ * Transfer graphql sort arg to ES sort object
+ * @param {object} graphqlSort
+ */
+export const getESSortBody = (graphqlSort, esInstance, esIndex) => {
   let sortBody;
   if (typeof graphqlSort !== 'undefined') {
-    if (graphqlSort.length > 0) {
-      sortBody = graphqlSort;
-    } else {
-      sortBody = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
+    let graphqlSortObj = graphqlSort;
+    if (typeof (graphqlSort.length) === 'undefined') {
+      graphqlSortObj = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
     }
+    // check fields and sort methods are valid
+    for (let i = 0; i < graphqlSortObj.length; i += 1) {
+      if (!graphqlSortObj[i] || Object.keys(graphqlSortObj[i]).length !== 1) {
+        throw new UserInputError('Invalid sort argument');
+      }
+      const field = Object.keys(graphqlSortObj[i])[0];
+      if (typeof esInstance.fieldTypes[esIndex][field] === 'undefined') {
+        throw new UserInputError('Invalid sort argument');
+      }
+      const method = graphqlSortObj[i][field];
+      if (method !== 'asc' && method !== 'desc') {
+        throw new UserInputError('Invalid sort argument');
+      }
+    }
+    sortBody = graphqlSortObj;
   }
   return sortBody;
 };
@@ -167,7 +185,7 @@ const filterData = (
   if (typeof filter !== 'undefined') {
     queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
   }
-  queryBody.sort = getESSortBody(sort);
+  queryBody.sort = getESSortBody(sort, esInstance, esIndex);
   if (typeof size !== 'undefined') {
     queryBody.size = size;
   }
@@ -186,7 +204,7 @@ export const getDataUsingScroll = (
   return esInstance.scrollQuery(esIndex, esType, {
     filter: esFilterObj,
     fields,
-    sort: getESSortBody(sort),
+    sort: getESSortBody(sort, esInstance, esIndex),
   });
 };
 
@@ -219,33 +237,4 @@ export const getData = async (
     },
   );
   return result.hits.hits.map(item => item._source);
-};
-
-export const parseValuesFromFilter = (graphqlFilterObj, targetField) => {
-  if (!graphqlFilterObj) return [];
-  const topLevelOp = Object.keys(graphqlFilterObj)[0];
-  if (typeof topLevelOp === 'undefined') return [];
-  const topLevelOpLowerCase = topLevelOp.toLowerCase();
-  if (topLevelOpLowerCase === 'and' || topLevelOpLowerCase === 'or') {
-    let resultItemValues = [];
-    graphqlFilterObj[topLevelOp].forEach((filterItem) => {
-      const itemValues = parseValuesFromFilter(filterItem, targetField);
-      if (!itemValues) return;
-      if (typeof itemValues === 'string' || typeof itemValues === 'number') {
-        resultItemValues.push(itemValues);
-      } else if (itemValues.length > 0) {
-        resultItemValues = resultItemValues.concat(itemValues);
-      }
-    });
-    return resultItemValues;
-  }
-  const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
-  if (targetField !== field) {
-    return [];
-  }
-  const value = graphqlFilterObj[topLevelOp][field];
-  if (typeof value === 'string' || typeof itemValues === 'number') {
-    return [value];
-  }
-  return value;
 };

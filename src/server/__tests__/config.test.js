@@ -1,3 +1,4 @@
+/* eslint-disable global-require,import/no-dynamic-require */
 jest.mock('../logger');
 
 describe('config', () => {
@@ -60,5 +61,21 @@ describe('config', () => {
     const whitelist = require(fileName).encrypt_whitelist;
     expect(config.enableEncryptWhiteList).toBe(true);
     expect(config.encryptWhitelist).toEqual([whitelist]);
+  });
+
+  /* --------------- For missing data --------------- */
+  test('could exclude missing data for aggregation', async () => {
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/testConfigFiles/test-no-missing-data.json`;
+    const config = require('../config').default;
+    expect(config.esConfig.aggregationIncludeMissingData).toBe(false);
+  });
+
+  test('could include and alias missing data for aggregation', async () => {
+    const fileName = './testConfigFiles/test-missing-data.json';
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
+    const config = require('../config').default;
+    const alias = require(fileName).missing_data_alias;
+    expect(config.esConfig.aggregationIncludeMissingData).toBe(true);
+    expect(config.esConfig.missingDataAlias).toEqual(alias);
   });
 });

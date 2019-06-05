@@ -58,8 +58,8 @@ export class AuthHelper {
   }
 
   applyUnaccessibleFilter(filter) {
-    const accessiblePart = buildFilterWithResourceList(this._unaccessibleResourceList);
-    const appliedFilter = addTwoFilters(filter, accessiblePart);
+    const unaccessiblePart = buildFilterWithResourceList(this._unaccessibleResourceList);
+    const appliedFilter = addTwoFilters(filter, unaccessiblePart);
     return appliedFilter;
   }
 
