@@ -82,6 +82,11 @@ class ES {
     let totalData = [];
     let batchSize = 0;
 
+    // This is really ridiculous that ES's JS library has it, but we need to
+    // convert list of sort obj into comma separated strings to make it work
+    // see https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
+    const sortStringList = sort.map(item => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
+
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
@@ -91,9 +96,9 @@ class ES {
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
           _source: fields,
-          sort,
+          sort: sortStringList,
         }).then(resp => resp, (err) => {
-          log.error('[ES.query] error when query');
+          log.error('[ES.query] error when query: ', err);
           throw new Error(err.message);
         });
         currentBatch = res.body;

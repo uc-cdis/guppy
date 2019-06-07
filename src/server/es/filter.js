@@ -145,14 +145,32 @@ export const getFilterObj = (
   return resultFilterObj;
 };
 
-const getESSortBody = (graphqlSort) => {
+/**
+ * Transfer graphql sort arg to ES sort object
+ * @param {object} graphqlSort
+ */
+const getESSortBody = (graphqlSort, esInstance, esIndex) => {
   let sortBody;
   if (typeof graphqlSort !== 'undefined') {
-    if (graphqlSort.length > 0) {
-      sortBody = graphqlSort;
-    } else {
-      sortBody = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
+    let graphqlSortObj = graphqlSort;
+    if (typeof (graphqlSort.length) === 'undefined') {
+      graphqlSortObj = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
     }
+    // check fields and sort methods are valid
+    for (let i = 0; i < graphqlSortObj.length; i += 1) {
+      if (!graphqlSortObj[i] || Object.keys(graphqlSortObj[i]).length !== 1) {
+        throw new UserInputError('Invalid sort argument');
+      }
+      const field = Object.keys(graphqlSortObj[i])[0];
+      if (typeof esInstance.fieldTypes[esIndex][field] === 'undefined') {
+        throw new UserInputError('Invalid sort argument');
+      }
+      const method = graphqlSortObj[i][field];
+      if (method !== 'asc' && method !== 'desc') {
+        throw new UserInputError('Invalid sort argument');
+      }
+    }
+    sortBody = graphqlSortObj;
   }
   return sortBody;
 };
@@ -167,7 +185,7 @@ const filterData = (
   if (typeof filter !== 'undefined') {
     queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
   }
-  queryBody.sort = getESSortBody(sort);
+  queryBody.sort = getESSortBody(sort, esInstance, esIndex);
   if (typeof size !== 'undefined') {
     queryBody.size = size;
   }
@@ -186,7 +204,7 @@ export const getDataUsingScroll = (
   return esInstance.scrollQuery(esIndex, esType, {
     filter: esFilterObj,
     fields,
-    sort: getESSortBody(sort),
+    sort: getESSortBody(sort, esInstance, esIndex),
   });
 };
 
