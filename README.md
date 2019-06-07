@@ -2,6 +2,8 @@
 
 Server that support GraphQL queries on data from elasticsearch. 
 
+Please see [this doc](https://github.com/uc-cdis/guppy/blob/master/doc/queries.md) for syntax Guppy supports.
+
 Run `npm start` to start server at port 80. 
 
 ### Configurations: 
@@ -88,3 +90,6 @@ export TIER_ACCESS_LEVEL=regular
 export TIER_ACCESS_LIMIT=100
 npm start
 ```
+
+#### Download endpoint
+Guppy has another special endpoint `/download` for just fetching raw data from elasticsearch. please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for more details.  
