@@ -14,3 +14,52 @@ Currently we support following arguments for `/download` endpoint:
 | accessibility | no       | only valid when using "regular" tier access mode. With which accessibility type | enum: accessible, unaccessible, all                                                               | for "regular" tier access mode, by default is "all". So in this "regular" mode if user tries to download data containing external resources, the endpoint will return 401 forbidden. |
 
 
+Example request body: 
+
+```
+{
+	"type": "subject",
+	"fields": [
+		"gender", 
+		"race",
+		"file_count",
+		"subject_id"
+	],
+	"sort": [
+		{ "file_count": "asc" },
+		{ "gender": "desc" }
+	]
+}
+```
+
+Example result: 
+
+```
+[
+  {
+    "subject_id": "78",
+    "file_count": 1,
+    "gender": "female",
+    "race": "hispanic"
+  },
+  {
+    "subject_id": "45",
+    "file_count": 3,
+    "gender": "female",
+    "race": "hispanic"
+  },
+  {
+    "subject_id": "60",
+    "file_count": 5,
+    "gender": "female",
+    "race": "asian"
+  },
+  {
+    "subject_id": "58",
+    "file_count": 13,
+    "gender": "male",
+    "race": "white"
+  },
+  ...
+]
+```
