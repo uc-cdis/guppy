@@ -48,6 +48,10 @@ if (process.env.GEN3_ARBORIST_ENDPOINT) {
   config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT;
 }
 
+if (process.env.GEN3_ARBORIST_ENDPOINT_OVERRIDE) {
+  config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT_OVERRIDE;
+}
+
 if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
