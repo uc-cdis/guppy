@@ -13,6 +13,8 @@ const config = {
     ],
     configIndex: 'gen3-dev-config',
     authFilterField: 'gen3_resource_path',
+    aggregationIncludeMissingData: true,
+    missingDataAlias: 'no data',
   },
 
   port: 3000,

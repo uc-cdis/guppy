@@ -18,6 +18,7 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
+                  missing: 'no data',
                 },
               },
             },
@@ -165,12 +166,349 @@ const mockArrayConfig = () => {
     .reply(200, fakeArrayConfig);
 };
 
+const mockTextAggs = () => {
+  // non filter applied
+  const genderAggsQuery = {
+    size: 0,
+    aggs: {
+      genderAggs: {
+        composite: {
+          sources: [
+            {
+              gender: {
+                terms: {
+                  field: 'gender',
+                  missing: 'no data',
+                },
+              },
+            },
+          ],
+          size: 10000,
+        },
+      },
+    },
+  };
+  const fakeGenderAggs = {
+    aggregations: {
+      genderAggs: {
+        after_key: {
+          gender: 'unknown',
+        },
+        buckets: [
+          {
+            key: {
+              gender: 'no data',
+            },
+            doc_count: 40,
+          },
+          {
+            key: {
+              gender: 'unknown',
+            },
+            doc_count: 38,
+          },
+          {
+            key: {
+              gender: 'female',
+            },
+            doc_count: 35,
+          },
+          {
+            key: {
+              gender: 'male',
+            },
+            doc_count: 27,
+          },
+        ],
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, genderAggsQuery)
+    .reply(200, fakeGenderAggs);
+
+  // filter applied
+  const genderAggsQuery2 = {
+    size: 0,
+    query: {
+      terms: {
+        gender: [
+          'female',
+          'male',
+        ],
+      },
+    },
+    aggs: {
+      genderAggs: {
+        composite: {
+          sources: [
+            {
+              gender: {
+                terms: {
+                  field: 'gender',
+                  missing: 'no data',
+                },
+              },
+            },
+          ],
+          size: 10000,
+        },
+      },
+    },
+  };
+  const fakeGenderAggs2 = {
+    aggregations: {
+      genderAggs: {
+        after_key: {
+          gender: 'male',
+        },
+        buckets: [
+          {
+            key: {
+              gender: 'no data',
+            },
+            doc_count: 40,
+          },
+          {
+            key: {
+              gender: 'female',
+            },
+            doc_count: 35,
+          },
+          {
+            key: {
+              gender: 'male',
+            },
+            doc_count: 27,
+          },
+        ],
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, genderAggsQuery2)
+    .reply(200, fakeGenderAggs2);
+
+  // auth filter applied
+  const genderAggsQuery3 = {
+    size: 0,
+    query: {
+      terms: {
+        gen3_resource_path: [
+          'internal-project-1',
+          'internal-project-2',
+        ],
+      },
+    },
+    aggs: {
+      genderAggs: {
+        composite: {
+          sources: [
+            {
+              gender: {
+                terms: {
+                  field: 'gender',
+                  missing: 'no data',
+                },
+              },
+            },
+          ],
+          size: 10000,
+        },
+      },
+    },
+  };
+  const fakeGenderAggs3 = {
+    aggregations: {
+      genderAggs: {
+        after_key: {
+          gender: 'male',
+        },
+        buckets: [
+          {
+            key: {
+              gender: 'no data',
+            },
+            doc_count: 20,
+          },
+          {
+            key: {
+              gender: 'unknown',
+            },
+            doc_count: 19,
+          },
+          {
+            key: {
+              gender: 'female',
+            },
+            doc_count: 18,
+          },
+          {
+            key: {
+              gender: 'male',
+            },
+            doc_count: 15,
+          },
+        ],
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, genderAggsQuery3)
+    .reply(200, fakeGenderAggs3);
+};
+
+const mockNumericAggsGlobalStats = () => {
+  // non filter or range applied
+  const fileCountGlobalStatsAggsQuery = {
+    size: 0,
+    aggs: {
+      numeric_aggs_stats: {
+        stats: {
+          field: 'file_count',
+        },
+      },
+    },
+  };
+  const fakeFileCountGlobalStatsAggs = {
+    aggregations: {
+      numeric_aggs_stats: {
+        count: 100,
+        min: 1,
+        max: 99,
+        avg: 50,
+        sum: 5000,
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, fileCountGlobalStatsAggsQuery)
+    .reply(200, fakeFileCountGlobalStatsAggs);
+
+  // with filter applied
+  const fileCountGlobalStatsAggsQuery1 = {
+    size: 0,
+    query: {
+      term: {
+        gender: 'female',
+      },
+    },
+    aggs: {
+      numeric_aggs_stats: {
+        stats: {
+          field: 'file_count',
+        },
+      },
+    },
+  };
+  const fakeFileCountGlobalStatsAggs1 = {
+    aggregations: {
+      numeric_aggs_stats: {
+        count: 70,
+        min: 2,
+        max: 98,
+        avg: 50,
+        sum: 3000,
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, fileCountGlobalStatsAggsQuery1)
+    .reply(200, fakeFileCountGlobalStatsAggs1);
+
+  // with range applied
+  const fileCountGlobalStatsAggsQuery2 = {
+    size: 0,
+    query: {
+      bool: {
+        must: [
+          {
+            range: {
+              file_count: {
+                gte: 50,
+              },
+            },
+          },
+          {
+            range: {
+              file_count: {
+                lt: 70,
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      numeric_aggs_stats: {
+        stats: {
+          field: 'file_count',
+        },
+      },
+    },
+  };
+  const fakeFileCountGlobalStatsAggs2 = {
+    aggregations: {
+      numeric_aggs_stats: {
+        count: 70,
+        min: 50,
+        max: 70,
+        avg: 50,
+        sum: 3000,
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, fileCountGlobalStatsAggsQuery2)
+    .reply(200, fakeFileCountGlobalStatsAggs2);
+
+  // with range applied
+  const fileCountGlobalStatsAggsQuery3 = {
+    size: 0,
+    query: {
+      terms: {
+        gen3_resource_path: ['internal-project-1', 'internal-project-2'],
+      },
+    },
+    aggs: {
+      numeric_aggs_stats: {
+        stats: {
+          field: 'file_count',
+        },
+      },
+    },
+  };
+  const fakeFileCountGlobalStatsAggs3 = {
+    aggregations: {
+      numeric_aggs_stats: {
+        count: 70,
+        min: 20,
+        max: 80,
+        avg: 50,
+        sum: 3000,
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, fileCountGlobalStatsAggsQuery3)
+    .reply(200, fakeFileCountGlobalStatsAggs3);
+};
+
 const setup = () => {
   mockArborist();
   mockPing();
   mockResourcePath();
   mockESMapping();
   mockArrayConfig();
+  mockTextAggs();
+  mockNumericAggsGlobalStats();
 };
 
 export default setup;

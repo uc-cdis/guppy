@@ -1,4 +1,5 @@
-import { getFilterObj } from './filter';
+import { UserInputError } from 'apollo-server';
+import getFilterObj from './filter';
 import {
   AGGS_GLOBAL_STATS_NAME,
   AGGS_ITEM_STATS_NAME,
@@ -6,7 +7,15 @@ import {
 } from './const';
 import config from '../config';
 
-const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
+/**
+ * This function appends extra range limitation onto a query body "oldQuery"
+ * export for test
+ * @param {string} field - which field to append range limitation to
+ * @param {object} oldQuery  - the old query body to append
+ * @param {number} rangeStart - the range start
+ * @param {number} rangeEnd - the range end
+ */
+export const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
   const appendFilter = [];
   if (typeof rangeStart !== 'undefined') {
     appendFilter.push({
@@ -41,7 +50,7 @@ const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
  * @param {*} param0
  * @returns {min, max, sum, count, avg, key}
  */
-const numericGlobalStats = async (
+export const numericGlobalStats = async (
   {
     esInstance,
     esIndex,
@@ -52,10 +61,13 @@ const numericGlobalStats = async (
     field,
     rangeStart,
     rangeEnd,
+    defaultAuthFilter,
   }) => {
   const queryBody = { size: 0 };
-  if (typeof filter !== 'undefined') {
-    queryBody.query = getFilterObj(esInstance, esIndex, esType, filter);
+  if (!filter || !defaultAuthFilter) {
+    queryBody.query = getFilterObj(
+      esInstance, esIndex, esType, filter, undefined, undefined, defaultAuthFilter,
+    );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
@@ -77,7 +89,20 @@ const numericGlobalStats = async (
   return resultStats;
 };
 
-const numericHistogramWithFixedRangeStep = async (
+/**
+ * This function does aggregation for numeric field, and returns histogram with given width.
+ * Export for test.
+ * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
+ * @param {object} param1 - some graphql related arguments
+ * @param {object} param1.filter - filter (if any) to apply on aggregation
+ * @param {object} param1.field - field to aggregate
+ * @param {object} param1.rangeStart - start value of the histogram, if empty, default to minimum
+ * @param {object} param1.rangeEnd - end value of the histogram, if empty, default to maximum
+ * @param {object} param1.rangeStep - histogram width. Required.
+ * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
+ * @param {object} param1.defaultAuthFilter - some auth related filter (if any) by default
+ */
+export const numericHistogramWithFixedRangeStep = async (
   {
     esInstance,
     esIndex,
@@ -139,7 +164,7 @@ const numericHistogramWithFixedRangeStep = async (
   return parsedAggsResult;
 };
 
-const numericHistogramWithFixedBinCount = async (
+export const numericHistogramWithFixedBinCount = async (
   {
     esInstance,
     esIndex,
@@ -165,6 +190,7 @@ const numericHistogramWithFixedBinCount = async (
       field,
       rangeStart,
       rangeEnd,
+      defaultAuthFilter,
     },
   );
   const { min, max } = globalStats;
@@ -207,16 +233,16 @@ export const numericAggregation = async (
   },
 ) => {
   if (rangeStep <= 0) {
-    throw new Error(`Invalid rangeStep ${rangeStep}`);
+    throw new UserInputError(`Invalid rangeStep ${rangeStep}`);
   }
   if (rangeStart > rangeEnd) {
-    throw new Error(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`);
+    throw new UserInputError(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`);
   }
   if (binCount <= 0) {
-    throw new Error(`Invalid binCount ${binCount}`);
+    throw new UserInputError(`Invalid binCount ${binCount}`);
   }
   if (typeof rangeStep !== 'undefined' && typeof binCount !== 'undefined') {
-    throw new Error('Cannot set "rangeStep" and "binCount" at same time.');
+    throw new UserInputError('Invalid to set "rangeStep" and "binCount" at same time');
   }
   if (typeof rangeStep !== 'undefined') {
     return numericHistogramWithFixedRangeStep(
@@ -287,7 +313,7 @@ export const textAggregation = async (
   },
 ) => {
   const queryBody = { size: 0 };
-  if (typeof filter !== 'undefined') {
+  if (typeof filter !== 'undefined' || typeof defaultAuthFilter !== 'undefined') {
     queryBody.query = getFilterObj(
       esInstance,
       esIndex,
@@ -298,6 +324,7 @@ export const textAggregation = async (
       defaultAuthFilter,
     );
   }
+
   let missingAlias = {};
   if (config.esConfig.aggregationIncludeMissingData) {
     missingAlias = { missing: config.esConfig.missingDataAlias };
