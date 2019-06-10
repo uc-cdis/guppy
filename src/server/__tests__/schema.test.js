@@ -54,8 +54,8 @@ describe('Schema', () => {
       gender: String,
       file_count: Int,
       name: String,
-      some_array_integer_field: Int,
-      some_array_string_field: String,
+      some_array_integer_field: [Int],
+      some_array_string_field: [String],
       whatever_lab_result_value: Float,
     }
     type File {

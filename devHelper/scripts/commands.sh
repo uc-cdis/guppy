@@ -198,13 +198,12 @@ EOM
   let COUNT+=1
 done
 
-curl -X PUT "${ESHOST}/${configIndexName}/_doc/0?pretty" \
+curl -X PUT "${ESHOST}/${configIndexName}/_doc/gen3-dev-subject?pretty" \
   -H 'Content-Type: application/json' -d '
   {
-    "timestamp": "1990-01-01T10:10:10",
     "array": [
-      "gen3-dev-subject.some_string_field",
-      "gen3-dev-subject.some_integer_field"
+      "some_string_field",
+      "some_integer_field"
     ]
   }
   '

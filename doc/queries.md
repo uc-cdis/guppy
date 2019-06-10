@@ -1,19 +1,22 @@
-# Test
+# Guppy Query Syntax
 
-## Queries & Aggregations
-<table>
-<thead>
-<tr>
-<th>GraphQL query</th><th>Response</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td colspan="2">Query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document).</td>
-</tr>
-<tr>
-<td>
-<pre>
+Table of Contents
+- [Queries](#query)
+- [Aggregations](#aggregation)
+   - [Total Count Aggregation](#aggs-total)
+   - [Text Aggregation](#aggs-text)
+   - [Numeric Aggregation](#aggs-numeric)
+- [Filters](#filter)
+- [Some other queries and arguments](#other)
+
+<a name="query"></a>
+
+## Queries 
+Guppy allows you to query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document for how filter syntax looks).
+
+Example query: 
+
+```
 {
   subject(offset: 5, first: 100, sort: [
     {
@@ -30,84 +33,92 @@
     file_count
   }
 }
-</pre>
-</td>
-<td>
-<pre>
+```
+
+Example result: 
+
+```
 {
-  "subject": [
+  "data": {
+    "subject": [
       {
-        "subject_id": "52",
-        "gender": "female",
-        "ethnicity": "Black",
-        "vital_status": "Alive",
-        "file_count": 0
-      },
-      {
-        "subject_id": "54",
+        "subject_id": "9",
         "gender": "female",
         "ethnicity": "American Indian",
-        "vital_status": "Alive",
-        "file_count": 78
+        "vital_status": "no data",
+        "file_count": 13
       },
       {
-        "subject_id": "55",
-        "gender": "female",
+        "subject_id": "12",
+        "gender": "male",
         "ethnicity": "Pacific Islander",
         "vital_status": "Alive",
-        "file_count": 53
+        "file_count": 60
+      },
+      {
+        "subject_id": "13",
+        "gender": "male",
+        "ethnicity": "__missing__",
+        "vital_status": "Dead",
+        "file_count": 88
       },
       ...
-  ]
+    ]
+  }
 }
-</pre>
-</td>
-</tr>
-<tr>
-<td colspan="2">Three possible aggregations available: 
-  <li>
-  top-level aggregation - only total number; 
-  </li>
-  <li>
-  text aggregation - histogram for key and count for that key; 
-  </li>
-  <li>
-  numeric aggregation - minimum, maximum, average, sum and count for the whole dataset and for the histogram specified by <code>rangeStart</code>, <code>rangeEnd</code>, <code>rangeStep</code>, and <code>binCount</code>. 
-  <ul>
-    <li><code>rangeStart</code> default to min, <code>rangeEnd</code> default to max. 
-    <li>Without <code>rangeStep</code> and <code>binCount</code> it aggregates the whole dataset.</li>
-    <li><code>binCount</code> and <code>rangeStep</code> are exclusive, user could only set one of them. </li>
-  </ul>
-  </li>
-</td>
-</tr>
-<tr>
-<td>
-<pre>
-query ($filter: JSON) {
+```
+
+Arguments: 
+
+| argument      | description                                                     | type                                | default |
+|---------------|-----------------------------------------------------------------|-------------------------------------|---------|
+| offset        | starting position of query result                               | integer                             | 0       |
+| first         | return rows of query result                                     | integer                             | 10      |
+| sort          | sort method for query result                                    | JSON                                | {}      |
+| [accessibility](#accessibility) | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
+| [filter](#filter)        | filter object to apply for query                                | JSON                                | {}      |
+
+
+<a name="aggregation"></a>
+
+## Aggregations 
+Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
+
+<a name="aggs-total"></a>
+
+### 1. Total count aggregation 
+ By using `_totalCount` keyword, return total count of the result. Example:
+
+ ```
+ query ($filter: JSON) {
   _aggregation  {
     subject(filter: $filter) {
       _totalCount
     }
   }
 }
-</pre>
-</td>
-<td>
-<pre>
+```
+
+Example result: 
+
+```
 {
-  "_aggregation": {
-    "subject": {
-      "_totalCount": 46
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "_totalCount": 46
+      }
     }
   }
 }
-</pre>
-</td>
-</tr>
-<tr>
-<td>
-<pre>
+```
+
+<a name="aggs-text"></a>
+
+### 2. Text aggregation 
+Text aggregation returns histogram for a text field, results are wrapped by keywords `key` and `count`, example: 
+
+```
 query {
   _aggregation {
     subject {
@@ -120,11 +131,13 @@ query {
     }
   }
 }
-</pre>
-</td>
-<td>
-<pre>
+```
+
+Example result:
+
+```
 {
+  "data": {
     "_aggregation": {
       "subject": {
         "gender": {
@@ -141,19 +154,23 @@ query {
         }
       }
     }
+  }
 }
-</pre>
-</td>
-</tr>
-<tr>
-<td>
-<pre>
+```
+
+<a name="aggs-numeric"></a>
+
+### 3. Numeric aggregation 
+For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***. 
+
+***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example: 
+
+```
 query($filter: JSON) {
   _aggregation {
     subject(filter: $filter) {
       file_count {
         histogram{
-          key
           min
           max
           avg
@@ -164,21 +181,17 @@ query($filter: JSON) {
     }
   }
 }
+```
 
-</pre>
-</td>
-<td>
-<pre>
+Result: 
+```
 {
+  "data": {
     "_aggregation": {
       "subject": {
         "file_count": {
           "histogram": [
             {
-              "key": [
-                0,
-                93
-              ],
               "min": 0,
               "max": 93,
               "avg": 43,
@@ -189,13 +202,23 @@ query($filter: JSON) {
         }
       }
     }
+  }
 }
-</pre>
-</td>
-</tr>
-<tr>
-<td>
-<pre>
+```
+
+***Histogram***  could be built by 2 methods: giving bin width, or giving bin counts. 
+
+ - Giving "bin width" means giving start and end value of histogram, and giving a step as bin width: 
+
+| argument   | description                 | type             | default   |
+|------------|-----------------------------|------------------|-----------|
+| rangeStart | starting value of histogram | integer or float | min value |
+| rangeEnd   | ending value of histogram   | integer or float | max value |
+| rangeStep  | step for each histogram bin | integer or float | max - min |
+
+Example: 
+
+```
 query($filter: JSON) {
   _aggregation {
     subject(filter: $filter) {
@@ -212,12 +235,13 @@ query($filter: JSON) {
     }
   }
 }
+```
 
-</pre>
-</td>
-<td>
-<pre>
+Result:
+
+```
 {
+  "data": {
     "_aggregation": {
       "subject": {
         "file_count": {
@@ -249,84 +273,277 @@ query($filter: JSON) {
         }
       }
     }
-}
-</pre>
-</td>
-</tr>
-<tr>
-<td colspan="2">Query raw data or aggregation for different types
-</td>
-</tr>
-<tr>
-<td>
-<pre>
-{
-  subject(offset: 5, first: 100, sort: $sort1, filter: $filter1) {
-    subject_id
-    gender
-    ethnicity
-    vital_status
-    file_count
-  }
-  file (sort: $sort2, filter: $filter2){
-    file_id
-    subject_id
   }
 }
-</pre>
-</td>
-<td>
-<pre>
-{
-  "subject": [
-      {
-        "subject_id": "52",
-        "gender": "female",
-        "ethnicity": "Black",
-        "vital_status": "Alive",
-        "file_count": 0
-      },
-      {
-        "subject_id": "54",
-        "gender": "female",
-        "ethnicity": "American Indian",
-        "vital_status": "Alive",
-        "file_count": 78
-      },
-      {
-        "subject_id": "55",
-        "gender": "female",
-        "ethnicity": "Pacific Islander",
-        "vital_status": "Alive",
-        "file_count": 53
-      },
-      ...
-  ],
-  "file": [
-      {
-        "file_id": "file_id_201",
-        "subject_id": "42"
-      },
-      {
-        "file_id": "file_id_25",
-        "subject_id": "43"
-      },
-      {
-        "file_id": "file_id_894",
-        "subject_id": "44"
-      },
-      ...
-  ]
-}
-</pre>
-</td>
-</tr>
-<tr>
-<td>
-<pre>
-{
+```
+
+ - Giving "bin count" means telling Guppy how many bins the histogram should be divided to:
+
+| argument   | description                 | type             | default   |
+|------------|-----------------------------|------------------|-----------|
+| rangeStart | starting value of histogram | integer or float | min value |
+| rangeEnd   | ending value of histogram   | integer or float | max value |
+| binCount   | how many bins in histogram  | integer          | 1         |
+
+Example: 
+
+```
+query {
   _aggregation {
-    subject {
+    subject{
+      file_count {
+        histogram (binCount: 3) {
+          key
+          count
+        }
+      }
+    }
+  }
+}
+```
+
+Result: 
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "file_count": {
+          "histogram": [
+            {
+              "key": [
+                1,
+                34
+              ],
+              "count": 19
+            },
+            {
+              "key": [
+                34,
+                67
+              ],
+              "count": 28
+            },
+            {
+              "key": [
+                67,
+                100
+              ],
+              "count": 23
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+<a name="filter"></a>
+
+## Filters 
+Currently Guppy uses `JSON`-based syntax for filters. The JSON object key could be an operation like `=`, `>`. One simple example could be:
+
+```
+{
+  "filter": {"=": {"subject_id": "69"}}
+}
+```
+
+Or you could use binary combination (`AND` or `OR`)to combine simple filter units into more complicated big filters. Example:
+
+```
+{
+  "filter": {
+    "AND": [
+      {
+        "OR": [
+          {
+            "=": {
+              "race": "hispanic"
+            }
+          },
+          {
+            "=": {
+              "race": "asian"
+            }
+          }
+        ]
+      },
+      {
+        "AND": [
+          {
+            ">=": {
+              "file_count": 15
+            }
+          },
+          {
+            "<=": {
+              "file_count": 75
+            }
+          }
+        ]
+      },
+      {
+        "=": {
+          "project": "Proj-1"
+        }
+      },
+      {
+        "=": {
+          "gender": "female"
+        }
+      }
+    ]
+  }
+}
+```
+
+In future Guppy will support `SQL` like syntax for filter, like `
+{"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
+`.
+
+<a name="other"></a>
+
+## Some other queries and arguments 
+
+### Mapping query
+Mapping query simply returns all fields under a doc type. Example: 
+```
+{
+  _mapping {
+    file
+    subject
+  }
+}
+```
+
+Result: 
+
+```
+{
+  "data": {
+    "_mapping": {
+      "file": [
+        "file_id",
+        "gen3_resource_path",
+        "subject_id"
+      ],
+      "subject": [
+        "ethnicity",
+        "file_count",
+        "file_format",
+        "file_type",
+        "gen3_resource_path",
+        "gender",
+        "name",
+        "project",
+        "race",
+        "some_integer_field",
+        "some_string_field",
+        "study",
+        "subject_id",
+        "vital_status",
+        "whatever_lab_result_value"
+      ]
+    }
+  }
+}
+```
+
+<a name="accessibility"></a>  
+
+### "accessibility" argument for "regular" tier access level
+When choose "regular" mode for for tier access level, `accessibility` argument will be valid for raw data or aggregation query. It support 3 enum values: `all`, `accessible`, and `unaccessible`. And will return data by those three accessibility types. By default it is set to `all`.  Below are the different behaviors for each enum value. 
+
+| enum         | description                | when query raw data                                                                                                  | when query aggregation                                                                                                                                |
+|--------------|----------------------------|----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| all          | return all aggregation     | If response data contains any resources that user doesn't have access to, return 401.  Otherwise return result data. | Returns aggregation result. Maximum visible number may apply according to `TIER_ACCESS_LIMIT`, if there's resources that user doesn't have access to. |
+| accessible   | return aggregation for accessible data  | Only returns data that user has access to.                                                                           | Only returns aggregation result that user has access to.                                                                                              |
+| unaccessible | return aggregation for unaccessible data | Always returns 401                                                                                                   | Returns aggregation result.Maximum visible number may apply according to `TIER_ACCESS_LIMIT`                                                          |
+
+Example 1 (trying to get raw data for unaccessible resources is forbidden): 
+```
+query  {
+  subject (accessibility: unaccessible) {
+    gender
+  }
+}
+```
+
+Result: 
+```
+{
+  "errors": [
+    {
+      "message": "You don't have access to following resources:         [/programs/external/projects/test]",
+      "locations": [
+        {
+          "line": 2,
+          "column": 3
+        }
+      ],
+      "path": [
+        "subject"
+      ],
+      "extensions": {
+        "code": 401,
+        "exception": {
+          "stacktrace": [
+            "Error: You don't have access to following resources:         [/programs/external/projects/test]",
+      ...
+}
+```
+
+Example 2 (trying to get aggregation for unaccessible resources): 
+
+```
+query  {
+  _aggregation {
+    subject(accessibility: unaccessible) {
+      project {
+        histogram {
+          key
+          count
+        }
+      }
+    }
+  }
+}
+```
+
+Result: 
+```
+{
+
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "project": {
+          "histogram": [
+            {
+              "key": "external-test",
+              "count": 30
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+### `filterSelf`
+In some UI scenarios, there's need that aggregation should skip applying filters on those fields that appear in filter object. For example, in Guppy's filter UI component, when user select `gender=female`, the aggregation (with filter object include `gender=female`) should return all gender values including "female", "male", and "unknown" etc., because filter UI still need to render those options. 
+
+In order to skip applying filters for those fields, simply add `filterSelf=false`. 
+
+Example without setting `filterSelf` (default is `true`):
+```
+query {
+  _aggregation {
+    subject(filter: { eq: { gender: "female" } }) {
       gender {
         histogram {
           key
@@ -334,8 +551,38 @@ query($filter: JSON) {
         }
       }
     }
-    file {
-      file_id {
+  }
+}
+```
+
+Result: 
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "gender": {
+          "histogram": [
+            {
+              "key": "female",
+              "count": 24
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+Example with `filterSelf: false`: 
+
+```
+query {
+  _aggregation {
+    subject(filterSelf: false, filter: { eq: { gender: "female" } }) {
+      gender {
         histogram {
           key
           count
@@ -344,111 +591,34 @@ query($filter: JSON) {
     }
   }
 }
+```
 
-</pre>
-</td>
-<td>
-<pre>
+Result:
+
+```
 {
+  "data": {
     "_aggregation": {
       "subject": {
         "gender": {
           "histogram": [
             {
+              "key": "unknown",
+              "count": 28
+            },
+            {
               "key": "female",
-              "count": 46
+              "count": 24
             },
             {
               "key": "male",
-              "count": 54
+              "count": 18
             }
-          ]
-        }
-      },
-      "file": {
-        "file_id": {
-          "histogram": [
-            {
-              "key": "file_id_105",
-              "count": 1
-            },
-            {
-              "key": "file_id_113",
-              "count": 1
-            },
-            {
-              "key": "file_id_135",
-              "count": 1
-            },
-            ...
           ]
         }
       }
     }
-}
-</pre>
-</td>
-</tr>
-</tbody>
-</table>
-
-## Filters
-
-There is a discussion of two approaches:
-
-* `JSON`-based syntax
-  ```
-  {
-    "filter": {
-      "AND": [
-        {
-          "OR": [
-            {
-              "=": {
-                "race": "hispanic"
-              }
-            },
-            {
-              "=": {
-                "race": "asian"
-              }
-            }
-          ]
-        },
-        {
-          "AND": [
-            {
-              ">=": {
-                "file_count": 15
-              }
-            },
-            {
-              "<=": {
-                "file_count": 75
-              }
-            }
-          ]
-        },
-        {
-          "=": {
-            "project": "Proj-1"
-          }
-        },
-        {
-          "=": {
-            "gender": "female"
-          }
-        }
-      ]
-    }
   }
-  ```
+}
+```
 
-* `SQL`-like syntax
-  ```
-  {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
-  ```
-The implementation is relatively more difficult (to parse SQL string to object). But in future we want to support having a SQL-like syntax query in UI, so it is very rewarding.
-
-
-## Discussion

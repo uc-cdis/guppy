@@ -348,7 +348,7 @@ export const textAggregation = async (
     },
   };
   let resultSize;
-  const finalResults = [];
+  let finalResults = [];
   /* eslint-disable */
   do {
     const result = await esInstance.query(esIndex, esType, queryBody); 
@@ -366,6 +366,9 @@ export const textAggregation = async (
     queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);
   /* eslint-enable */
+
+  // order aggregations by doc count
+  finalResults = finalResults.sort((e1, e2) => e2.count - e1.count);
 
   // make the missing data bucket to the bottom of the list
   if (config.esConfig.aggregationIncludeMissingData) {

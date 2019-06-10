@@ -1,8 +1,8 @@
 import React from 'react';
-import ReactTable from "react-table";
+import ReactTable from 'react-table';
 import PropTypes from 'prop-types';
-import "react-table/react-table.css";
-import {tableConfig} from './conf';
+import 'react-table/react-table.css';
+import { tableConfig } from './conf';
 
 const defaultPageSize = 20;
 class ConnectedTableExample extends React.Component {
@@ -17,17 +17,15 @@ class ConnectedTableExample extends React.Component {
   fetchData(state, instance) {
     this.setState({ loading: true });
     const offset = state.page * state.pageSize;
-    const sort = state.sorted.map(i => {
-      return {
-        [i.id]: i.desc ? 'desc' : 'asc',
-      };
-    });
+    const sort = state.sorted.map(i => ({
+      [i.id]: i.desc ? 'desc' : 'asc',
+    }));
     const size = state.pageSize;
     this.props.fetchAndUpdateRawData({
       offset,
       size,
       sort,
-    }).then(res => {
+    }).then((res) => {
       this.setState({
         loading: false,
         pageSize: size,
@@ -36,9 +34,9 @@ class ConnectedTableExample extends React.Component {
   }
 
   render() {
-    const columnsConfig = tableConfig.map(c => ({Header: c.name, accessor: c.field}));
-    const totalCount = this.props.totalCount;
-    const pageSize = this.state.pageSize;
+    const columnsConfig = tableConfig.map(c => ({ Header: c.name, accessor: c.field }));
+    const { totalCount } = this.props;
+    const { pageSize } = this.state;
     const totalPages = Math.floor(totalCount / pageSize) + ((totalCount % pageSize === 0) ? 0 : 1);
     return (
       <ReactTable

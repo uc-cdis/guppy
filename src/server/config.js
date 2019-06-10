@@ -29,7 +29,7 @@ const config = {
 
   port: 80,
   path: '/graphql',
-  arboristEndpoint: 'mock',
+  arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   logLevel: 'INFO',

@@ -85,6 +85,11 @@ class ES {
     let totalData = [];
     let batchSize = 0;
 
+    // This is really ridiculous that ES's JS library has it, but we need to
+    // convert list of sort obj into comma separated strings to make it work
+    // see https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
+    const sortStringList = sort && sort.map(item => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
+
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
@@ -94,7 +99,7 @@ class ES {
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
           _source: fields,
-          sort,
+          sort: sortStringList,
         }).then(resp => resp, (err) => {
           log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
@@ -175,33 +180,49 @@ class ES {
     return fieldTypes;
   }
 
+  /**
+   * Read array config and check if there's any array fields for each index.
+   * Array fields are grouped and stored by index as a doc in array config,
+   * and we set _id as index name for this doc.
+   */
   async _getArrayFieldsFromConfigIndex() {
     if (typeof this.config.configIndex === 'undefined') {
       log.info('[ES.initialize] no array fields from es config index.');
       return Promise.resolve({});
     }
+    if (!this.fieldTypes) {
+      return {};
+    }
     const arrayFields = {};
     log.info(`[ES.initialize] getting array fields from es config index "${this.config.configIndex}"...`);
     return this.client.search({
       index: this.config.configIndex,
-      body: { query: { match_all: {} } },
+      body: {
+        query: {
+          ids: {
+            values: Object.keys(this.fieldTypes),
+          },
+        },
+      },
     }).then((resp) => {
       try {
-        const results = resp.body.hits.hits[0]._source.array;
-        results.forEach((res) => {
-          const twoParts = res.split('.');
-          if (twoParts.length !== 2) return;
-          const index = twoParts[0];
-          const field = twoParts[1];
+        resp.body.hits.hits.forEach((doc) => {
+          const index = doc._id;
           if (!this.fieldTypes[index]) {
-            const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found. `;
-            throw new Error(errMsg);
-          } else if (!this.fieldTypes[index][field]) {
-            const errMsg = `[ES.initialize] wrong array entry from config index: field "${field}" not found. `;
-            throw new Error(errMsg);
+            const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
+            log.error(errMsg);
+            return;
           }
-          if (!arrayFields[index]) arrayFields[index] = [];
-          arrayFields[index].push(field);
+          const fields = doc._source.array;
+          fields.forEach((field) => {
+            if (!this.fieldTypes[index][field]) {
+              const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+              log.error(errMsg);
+              return;
+            }
+            if (!arrayFields[index]) arrayFields[index] = [];
+            arrayFields[index].push(field);
+          });
         });
         log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
       } catch (err) {

@@ -192,7 +192,6 @@ export const buildSchemaString = (esConfig, esInstance) => {
 `;
   log.info('[schema] graphql schema generated.');
   log.info('[schema] graphql schema', schemaStr);
-
   return schemaStr;
 };
 

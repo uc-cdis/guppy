@@ -5,8 +5,9 @@ import {
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
-  getAccessableResourcesProjects,
+  getAccessibleResources,
 } from '../Utils/queries';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 
 /**
  * Wrapper that connects to Guppy server,
@@ -50,7 +51,9 @@ class GuppyWrapper extends React.Component {
       totalCount: 0,
       allFields: [],
       rawDataFields: [],
-      accessableProjectList: undefined,
+      accessibleFieldObject: undefined,
+      unaccessibleFieldObject: undefined,
+      accessibility: ENUM_ACCESSIBILITY.ALL,
     };
   }
 
@@ -68,15 +71,18 @@ class GuppyWrapper extends React.Component {
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
       });
     });
-    getAccessableResourcesProjects(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      this.props.projectField,
-    ).then((list) => {
-      this.setState({
-        accessableProjectList: list,
+    if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
+      getAccessibleResources(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.props.accessibleFieldCheckList,
+      ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
+        this.setState({
+          accessibleFieldObject,
+          unaccessibleFieldObject,
+        });
       });
-    });
+    }
   }
 
   /**
@@ -100,6 +106,7 @@ class GuppyWrapper extends React.Component {
       sort,
       offset,
       size,
+      this.state.accessibility,
     ).then((res) => {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -126,13 +133,17 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(filter) {
+  handleFilterChange(filter, accessibility) {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
     }
     this.filter = filter;
-    this.setState({ filter });
-    this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+    this.setState({
+      filter,
+      accessibility,
+    }, () => {
+      this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+    });
   }
 
   /**
@@ -156,6 +167,7 @@ class GuppyWrapper extends React.Component {
         fields: this.state.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
+        accessibility: this.state.accessibility,
       },
     );
   }
@@ -178,6 +190,7 @@ class GuppyWrapper extends React.Component {
         fields: targetFields,
         sort,
         filter: this.state.filter,
+        accessibility: this.state.accessibility,
       },
     );
   }
@@ -188,7 +201,11 @@ class GuppyWrapper extends React.Component {
    * @param {object} filter
    */
   handleAskGuppyForTotalCounts(type, filter) {
-    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
+    return askGuppyForTotalCounts(
+      this.props.guppyConfig.path,
+      type, filter,
+      this.state.accessibility,
+    );
   }
 
   /**
@@ -198,7 +215,12 @@ class GuppyWrapper extends React.Component {
    * @param {string[]} fields
    */
   handleDownloadRawDataByTypeAndFilter(type, filter, fields) {
-    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter)
+    return askGuppyForTotalCounts(
+      this.props.guppyConfig.path,
+      type,
+      filter,
+      this.state.accessibility,
+    )
       .then(count => downloadDataFromGuppy(
         this.props.guppyConfig.path,
         type,
@@ -208,6 +230,10 @@ class GuppyWrapper extends React.Component {
           filter,
         },
       ));
+  }
+
+  handleAccessLevelUpdate(accessLevel) {
+    this.setState({ accessibility: accessLevel });
   }
 
   render() {
@@ -225,7 +251,8 @@ class GuppyWrapper extends React.Component {
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
             allFields: this.state.allFields,
-            accessableProjectList: this.state.accessableProjectList,
+            accessibleFieldObject: this.state.accessibleFieldObject,
+            unaccessibleFieldObject: this.state.unaccessibleFieldObject,
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
@@ -235,6 +262,7 @@ class GuppyWrapper extends React.Component {
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
+            onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
           }))
         }
       </React.Fragment>
@@ -260,13 +288,13 @@ GuppyWrapper.propTypes = {
   rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
-  projectField: PropTypes.string,
+  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
 };
 
 GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
-  projectField: 'project',
+  accessibleFieldCheckList: undefined,
 };
 
 export default GuppyWrapper;
