@@ -47,9 +47,10 @@ You could set the endpoint by:
 export GEN3_ARBORIST_ENDPOINT=${arborist_service}
 ```
 
-If not set, Guppy will skip all authorization steps as default. 
-But if you just want to mock your own authorization behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. 
-Please look into `/src/server/utils/accessibilities.js` for more details. 
+If not set, it would default to `http://arborist-service`. You could set it to `mock` to
+skip all authorization steps. But if you just want to mock your own authorization
+behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. Please
+look into `/src/server/auth/utils.js` for more details.
 
 #### Tier access
 Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`: 
