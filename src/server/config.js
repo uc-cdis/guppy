@@ -29,7 +29,7 @@ const config = {
 
   port: 80,
   path: '/graphql',
-  arboristEndpoint: 'mock',
+  arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   logLevel: 'INFO',
@@ -46,10 +46,6 @@ if (!config.esConfig.host.startsWith('http')) {
 
 if (process.env.GEN3_ARBORIST_ENDPOINT) {
   config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT;
-}
-
-if (process.env.GEN3_ARBORIST_ENDPOINT_OVERRIDE) {
-  config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT_OVERRIDE;
 }
 
 if (process.env.GUPPY_PORT) {
