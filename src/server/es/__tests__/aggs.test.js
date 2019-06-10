@@ -228,6 +228,24 @@ describe('could aggregate for numeric fields', () => {
     expect(result).toEqual(expectedResults);
   });
 
+  test('aggregation for global stats, with filterSelf', async () => {
+    await esInstance.initialize();
+    const filter = { gte: { file_count: 50 } };
+    const result = await numericGlobalStats(
+      { esInstance, esIndex, esType },
+      { field, filter, filterSelf: false },
+    );
+    const expectedResults = {
+      key: [1, 99],
+      min: 1,
+      max: 99,
+      avg: 50,
+      sum: 5000,
+      count: 100,
+    };
+    expect(result).toEqual(expectedResults);
+  });
+
   test('aggregation for global stats, with defaultAuthFilter', async () => {
     await esInstance.initialize();
     const defaultAuthFilter = {

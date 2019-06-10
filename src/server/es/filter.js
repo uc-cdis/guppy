@@ -90,7 +90,8 @@ const getFilterItemForNumbers = (op, field, value) => {
  * @param {string[]} aggsField - target agg field, only need for agg queries
  * @param {boolean} filterSelf - whether we want to filter this field or not,
  *                               only need for agg queries
- * @param {object} defaultAuthFilter - a default filter for auth
+ * @param {object} defaultAuthFilter - once graphqlFilterObj is empty,
+ *                this function transfers and returns this auth filter as default
  */
 const getFilterObj = (
   esInstance,

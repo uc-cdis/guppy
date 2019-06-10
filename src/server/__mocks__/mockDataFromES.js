@@ -140,26 +140,26 @@ const mockESMapping = () => {
 };
 
 const mockArrayConfig = () => {
-  const arrayConfigQuery = {'query':{'ids':{'values':['gen3-dev-subject','gen3-dev-file']}}};
+  const arrayConfigQuery = { query: { ids: { values: ['gen3-dev-subject', 'gen3-dev-file'] } } };
   const fakeArrayConfig = {
-    "hits": {
-      "total": 1,
-      "max_score": 1.0,
-      "hits": [
+    hits: {
+      total: 1,
+      max_score: 1.0,
+      hits: [
         {
-          "_index": "gen3-dev-config",
-          "_type": "_doc",
-          "_id": "gen3-dev-subject",
-          "_score": 1.0,
-          "_source": {
-            "array": [
-              "some_array_integer_field",
-              "some_array_string_field"
-            ]
-          }
-        }
-      ]
-    }
+          _index: 'gen3-dev-config',
+          _type: '_doc',
+          _id: 'gen3-dev-subject',
+          _score: 1.0,
+          _source: {
+            array: [
+              'some_array_integer_field',
+              'some_array_string_field',
+            ],
+          },
+        },
+      ],
+    },
   };
   nock(config.esConfig.host)
     .persist()
