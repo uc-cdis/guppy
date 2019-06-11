@@ -68,6 +68,102 @@ const mockResourcePath = () => {
     .persist()
     .post(/_search$/, queryResource)
     .reply(200, fakeResource);
+
+  // with filter of internal resource
+  const queryResourceWithFilter1 = {
+    size: 0,
+    query: {
+      term: {
+        gen3_resource_path: 'internal-project-1',
+      },
+    },
+    aggs: {
+      gen3_resource_pathAggs: {
+        composite: {
+          sources: [
+            {
+              gen3_resource_path: {
+                terms: {
+                  field: 'gen3_resource_path',
+                  missing: 'no data',
+                },
+              },
+            },
+          ],
+          size: 10000,
+        },
+      },
+    },
+  };
+  const fakeResourceWithFilter1 = {
+    aggregations: {
+      gen3_resource_pathAggs: {
+        after_key: {
+          gen3_resource_path: 'internal-project-1',
+        },
+        buckets: [
+          {
+            key: {
+              gen3_resource_path: 'internal-project-1',
+            },
+            doc_count: 36,
+          },
+        ],
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, queryResourceWithFilter1)
+    .reply(200, fakeResourceWithFilter1);
+
+  // with filter of external resource
+  const queryResourceWithFilter2 = {
+    size: 0,
+    query: {
+      term: {
+        gen3_resource_path: 'external-project-1',
+      },
+    },
+    aggs: {
+      gen3_resource_pathAggs: {
+        composite: {
+          sources: [
+            {
+              gen3_resource_path: {
+                terms: {
+                  field: 'gen3_resource_path',
+                  missing: 'no data',
+                },
+              },
+            },
+          ],
+          size: 10000,
+        },
+      },
+    },
+  };
+  const fakeResourceWithFilter2 = {
+    aggregations: {
+      gen3_resource_pathAggs: {
+        after_key: {
+          gen3_resource_path: 'external-project-1',
+        },
+        buckets: [
+          {
+            key: {
+              gen3_resource_path: 'external-project-1',
+            },
+            doc_count: 36,
+          },
+        ],
+      },
+    },
+  };
+  nock(config.esConfig.host)
+    .persist()
+    .post(/_search$/, queryResourceWithFilter2)
+    .reply(200, fakeResourceWithFilter2);
 };
 
 const mockArborist = () => {

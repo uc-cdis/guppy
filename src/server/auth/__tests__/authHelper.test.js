@@ -19,18 +19,26 @@ describe('AuthHelper', () => {
   test('could get out-of-scope resources according to filter', async () => {
     const authHelper = await getAuthHelperInstance('fake-jwt');
     await esInstance.initialize();
-    const outOfScoprResources = await authHelper.getOutOfScopeResourceList('gen3-dev-subject', 'subject');
-    expect(outOfScoprResources).toEqual(['external-project-1', 'external-project-2']);
+    const outOfScopeResources = await authHelper.getOutOfScopeResourceList('gen3-dev-subject', 'subject');
+    expect(outOfScopeResources).toEqual(['external-project-1', 'external-project-2']);
 
-    // TODO: more test with filter
-    // const filter = {
-    //   "=": {
-    //     "gen3_resource_path": "internal-project-1"
-    //   }
-    // };
-    // const outOfScoprResources2 = await authHelper
-    //    .getOutOfScopeResourceList('gen3-dev-subject', 'subject', filter);
-    // console.log(outOfScoprResources2);
+    const filter1 = {
+      eq: {
+        gen3_resource_path: 'internal-project-1',
+      },
+    };
+    const outOfScopeResources1 = await authHelper
+      .getOutOfScopeResourceList('gen3-dev-subject', 'subject', filter1);
+    expect(outOfScopeResources1).toEqual([]); // with filter there's no out-of-scope resources
+
+    const filter2 = {
+      eq: {
+        gen3_resource_path: 'external-project-1',
+      },
+    };
+    const outOfScopeResources2 = await authHelper
+      .getOutOfScopeResourceList('gen3-dev-subject', 'subject', filter2);
+    expect(outOfScopeResources2).toEqual(['external-project-1']); // with filter there's one out-of-scope resources
   });
 
   test('could combine filter with accessible or unaccessible filter', async () => {
@@ -88,7 +96,7 @@ describe('AuthHelper', () => {
     expect(resultFilter3).toEqual(expectedFilter3);
   });
 
-  test('could combine filter with accessible or unaccessible filter', async () => {
+  test('could get accessible or unaccessible resource as default auth filter', async () => {
     const authHelper = await getAuthHelperInstance('fake-jwt');
 
     const res1 = authHelper.getDefaultFilter('all');
