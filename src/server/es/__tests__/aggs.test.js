@@ -7,7 +7,6 @@ import {
   numericGlobalStats,
   numericHistogramWithFixedRangeStep,
   // numericHistogramWithFixedBinCount, // TOOD: check with mock endpoint
-  // numericAggregation, // TODO: only check if this function correctly calls previous 2 functions
 } from '../aggs';
 import esInstance from '../index';
 
@@ -93,6 +92,7 @@ describe('could append range limitation onto ES query object', () => {
   });
 });
 
+// see /src/server/__mocks__/mockESData/mockTextAggs.js for mock results
 describe('could aggregate for text fields', () => {
   test('basic aggregation', async () => {
     await esInstance.initialize();
@@ -173,6 +173,7 @@ describe('could aggregate for text fields', () => {
   });
 });
 
+// see /src/server/__mocks__/mockESData/mockNumericAggsGlobalStats.js for mock results
 describe('could aggregate for numeric fields, global stats', () => {
   const field = 'file_count';
   test('basic global stats', async () => {
@@ -268,6 +269,7 @@ describe('could aggregate for numeric fields, global stats', () => {
   });
 });
 
+// see /src/server/__mocks__/mockESData/mockNumericHistogramFixWidth.js for mock results
 describe('could aggregate for numeric fields, fixed histogram width', () => {
   const field = 'file_count';
   test('fixed histogram width', async () => {

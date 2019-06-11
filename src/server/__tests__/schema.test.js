@@ -22,6 +22,7 @@ const removeDescriptions = str => str.replace(/"""[^"]+"""/g, '');
 
 const removeSpacesNewlinesAndDescriptions = str => removeDescriptions(removeSpacesAndNewlines(str));
 
+// see /src/server/__mocks__/mockDataFromES.js for mock ES mappings
 describe('Schema', () => {
   const expectedQuerySchemas = `
     type Query {
