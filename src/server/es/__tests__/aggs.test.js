@@ -1,14 +1,13 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { UserInputError } from 'apollo-server';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
 import {
   appendAdditionalRangeQuery,
   textAggregation,
   numericGlobalStats,
-  numericHistogramWithFixedRangeStep, // TOOD: check with mock endpoint
-  numericHistogramWithFixedBinCount, // TOOD: check with mock endpoint
-  numericAggregation, // TODO: only check if this function correctly calls previous 2 functions
+  numericHistogramWithFixedRangeStep,
+  // numericHistogramWithFixedBinCount, // TOOD: check with mock endpoint
+  // numericAggregation, // TODO: only check if this function correctly calls previous 2 functions
 } from '../aggs';
 import esInstance from '../index';
 
@@ -174,9 +173,9 @@ describe('could aggregate for text fields', () => {
   });
 });
 
-describe('could aggregate for numeric fields', () => {
+describe('could aggregate for numeric fields, global stats', () => {
   const field = 'file_count';
-  test('aggregation for global stats', async () => {
+  test('basic global stats', async () => {
     await esInstance.initialize();
     const result = await numericGlobalStats(
       { esInstance, esIndex, esType },
@@ -193,7 +192,7 @@ describe('could aggregate for numeric fields', () => {
     expect(result).toEqual(expectedResults);
   });
 
-  test('aggregation for global stats, with filter', async () => {
+  test('global stats with filter', async () => {
     await esInstance.initialize();
     const filter = { eq: { gender: 'female' } };
     const result = await numericGlobalStats(
@@ -211,7 +210,7 @@ describe('could aggregate for numeric fields', () => {
     expect(result).toEqual(expectedResults);
   });
 
-  test('aggregation for global stats, with range', async () => {
+  test('global stats with range', async () => {
     await esInstance.initialize();
     const result = await numericGlobalStats(
       { esInstance, esIndex, esType },
@@ -228,7 +227,7 @@ describe('could aggregate for numeric fields', () => {
     expect(result).toEqual(expectedResults);
   });
 
-  test('aggregation for global stats, with filterSelf', async () => {
+  test('global stats with filterSelf', async () => {
     await esInstance.initialize();
     const filter = { gte: { file_count: 50 } };
     const result = await numericGlobalStats(
@@ -246,7 +245,7 @@ describe('could aggregate for numeric fields', () => {
     expect(result).toEqual(expectedResults);
   });
 
-  test('aggregation for global stats, with defaultAuthFilter', async () => {
+  test('global stats with defaultAuthFilter', async () => {
     await esInstance.initialize();
     const defaultAuthFilter = {
       in: {
@@ -265,6 +264,264 @@ describe('could aggregate for numeric fields', () => {
       sum: 3000,
       count: 70,
     };
+    expect(result).toEqual(expectedResults);
+  });
+});
+
+describe('could aggregate for numeric fields, fixed histogram width', () => {
+  const field = 'file_count';
+  test('fixed histogram width', async () => {
+    await esInstance.initialize();
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      { field, rangeStep: 30 },
+    );
+    const expectedResults = [
+      {
+        avg: 16.2,
+        count: 25,
+        key: [
+          0,
+          30,
+        ],
+        max: 28,
+        min: 1,
+        sum: 405,
+      },
+      {
+        avg: 44.4,
+        count: 39,
+        key: [
+          30,
+          60,
+        ],
+        max: 59,
+        min: 30,
+        sum: 1732,
+      },
+      {
+        avg: 75.3,
+        count: 23,
+        key: [
+          60,
+          90,
+        ],
+        max: 89,
+        min: 60,
+        sum: 1734,
+      },
+      {
+        avg: 96,
+        count: 13,
+        key: [
+          90,
+          120,
+        ],
+        max: 99,
+        min: 92,
+        sum: 1248,
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('fixed histogram width, with filter', async () => {
+    await esInstance.initialize();
+    const filter = { eq: { gender: 'female' } };
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      { field, rangeStep: 30, filter },
+    );
+    const expectedResults = [
+      {
+        avg: 16.2,
+        count: 15,
+        key: [
+          0,
+          30,
+        ],
+        max: 28,
+        min: 1,
+        sum: 405,
+      },
+      {
+        avg: 44.4,
+        count: 29,
+        key: [
+          30,
+          60,
+        ],
+        max: 59,
+        min: 30,
+        sum: 1732,
+      },
+      {
+        avg: 75.3,
+        count: 13,
+        key: [
+          60,
+          90,
+        ],
+        max: 89,
+        min: 60,
+        sum: 1734,
+      },
+      {
+        avg: 96,
+        count: 3,
+        key: [
+          90,
+          120,
+        ],
+        max: 99,
+        min: 92,
+        sum: 1248,
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('fixed histogram width, with range', async () => {
+    await esInstance.initialize();
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      {
+        field, rangeStep: 30, rangeStart: 40, rangeEnd: 70,
+      },
+    );
+    const expectedResults = [
+      {
+        avg: 44.4,
+        count: 29,
+        key: [
+          40,
+          70,
+        ],
+        max: 69,
+        min: 40,
+        sum: 1732,
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('fixed histogram width, with filterSelf', async () => {
+    await esInstance.initialize();
+    const filter = { gte: { file_count: 50 } };
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      {
+        field, filter, filterSelf: false, rangeStep: 30,
+      },
+    );
+    const expectedResults = [
+      {
+        avg: 16.2,
+        count: 25,
+        key: [
+          0,
+          30,
+        ],
+        max: 28,
+        min: 1,
+        sum: 405,
+      },
+      {
+        avg: 44.4,
+        count: 39,
+        key: [
+          30,
+          60,
+        ],
+        max: 59,
+        min: 30,
+        sum: 1732,
+      },
+      {
+        avg: 75.3,
+        count: 23,
+        key: [
+          60,
+          90,
+        ],
+        max: 89,
+        min: 60,
+        sum: 1734,
+      },
+      {
+        avg: 96,
+        count: 13,
+        key: [
+          90,
+          120,
+        ],
+        max: 99,
+        min: 92,
+        sum: 1248,
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('fixed histogram width, with defaultAuthFilter', async () => {
+    await esInstance.initialize();
+    const defaultAuthFilter = {
+      in: {
+        gen3_resource_path: ['internal-project-1', 'internal-project-2'],
+      },
+    };
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      {
+        field, rangeStep: 30, defaultAuthFilter,
+      },
+    );
+    const expectedResults = [
+      {
+        avg: 16.2,
+        count: 25,
+        key: [
+          0,
+          30,
+        ],
+        max: 28,
+        min: 1,
+        sum: 405,
+      },
+      {
+        avg: 44.4,
+        count: 39,
+        key: [
+          30,
+          60,
+        ],
+        max: 59,
+        min: 30,
+        sum: 1732,
+      },
+      {
+        avg: 75.3,
+        count: 23,
+        key: [
+          60,
+          90,
+        ],
+        max: 89,
+        min: 60,
+        sum: 1734,
+      },
+      {
+        avg: 96,
+        count: 13,
+        key: [
+          90,
+          120,
+        ],
+        max: 99,
+        min: 92,
+        sum: 1248,
+      },
+    ];
     expect(result).toEqual(expectedResults);
   });
 });

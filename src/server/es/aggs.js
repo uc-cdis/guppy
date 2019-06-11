@@ -51,7 +51,7 @@ export const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
  * @param {object} param1 - some graphql related arguments
  * @param {object} param1.filter - filter (if any) to apply on aggregation
- * @param {object} param1.field - field to aggregate
+ * @param {object} param1.field - field to aggregate. Required
  * @param {object} param1.rangeStart - start value of the histogram, if empty, default to minimum
  * @param {object} param1.rangeEnd - end value of the histogram, if empty, default to maximum
  * @param {object} param1.rangeStep - histogram width. Required.
@@ -106,7 +106,7 @@ export const numericGlobalStats = async (
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
  * @param {object} param1 - some graphql related arguments
  * @param {object} param1.filter - filter (if any) to apply on aggregation
- * @param {object} param1.field - field to aggregate
+ * @param {object} param1.field - field to aggregate. Required
  * @param {object} param1.rangeStart - start value of the histogram, if empty, default to minimum
  * @param {object} param1.rangeEnd - end value of the histogram, if empty, default to maximum
  * @param {object} param1.rangeStep - histogram width. Required.
@@ -182,7 +182,7 @@ export const numericHistogramWithFixedRangeStep = async (
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
  * @param {object} param1 - some graphql related arguments
  * @param {object} param1.filter - filter (if any) to apply on aggregation
- * @param {object} param1.field - field to aggregate
+ * @param {object} param1.field - field to aggregate. Required
  * @param {object} param1.rangeStart - start value of the histogram, if empty, default to minimum
  * @param {object} param1.rangeEnd - end value of the histogram, if empty, default to maximum
  * @param {object} param1.binCount - histogram bin count. Required.
@@ -247,7 +247,7 @@ export const numericHistogramWithFixedBinCount = async (
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
  * @param {object} param1 - some graphql related arguments
  * @param {object} param1.filter - filter (if any) to apply on aggregation
- * @param {object} param1.field - field to aggregate
+ * @param {object} param1.field - field to aggregate. Required
  * @param {object} param1.rangeStart - start value of the histogram, if empty, default to minimum
  * @param {object} param1.rangeEnd - end value of the histogram, if empty, default to maximum
  * @param {object} param1.rangeStep - histogram width, conflict with `binCount`
@@ -348,7 +348,7 @@ const PAGE_SIZE = 10000;
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
  * @param {object} param1 - some graphql related arguments
  * @param {object} param1.filter - filter (if any) to apply on aggregation
- * @param {object} param1.field - field to aggregate
+ * @param {object} param1.field - field to aggregate. Required
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
