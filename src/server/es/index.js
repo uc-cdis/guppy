@@ -1,7 +1,9 @@
 import { Client } from '@elastic/elasticsearch';
 import _ from 'lodash';
+import { UserInputError } from 'apollo-server';
 import config from '../config';
-import * as esFilter from './filter';
+import getFilterObj from './filter';
+import getESSortBody from './sort';
 import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
@@ -98,7 +100,7 @@ class ES {
           _source: fields,
           sort: sortStringList,
         }).then(resp => resp, (err) => {
-          log.error('[ES.query] error when query: ', err);
+          log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
         });
         currentBatch = res.body;
@@ -303,38 +305,61 @@ class ES {
     return (this.arrayFields[esIndex] && this.arrayFields[esIndex].includes(field));
   }
 
-  getCount(esIndex, esType, filter) {
-    return esFilter.getCount(this, esIndex, esType, filter);
+  filterData(
+    { esIndex, esType },
+    {
+      filter, fields = [], sort, offset = 0, size,
+    },
+  ) {
+    const queryBody = { from: offset };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, esType, filter);
+    }
+    queryBody.sort = getESSortBody(sort, this, esIndex);
+    if (typeof size !== 'undefined') {
+      queryBody.size = size;
+    }
+    if (fields && fields.length > 0) {
+      queryBody._source = fields;
+    }
+    const resultPromise = this.query(esIndex, esType, queryBody);
+    return resultPromise;
   }
 
-  getData({
+  async getCount(esIndex, esType, filter) {
+    const result = await this.filterData(
+      { esInstance: this, esIndex, esType },
+      { filter, fields: [] },
+    );
+    return result.hits.total;
+  }
+
+  async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
-    return esFilter.getData(
+    if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
+      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE}, 
+      offset = ${offset} and size = ${size},
+      please use download endpoint for large data queries instead.`);
+    }
+    const result = await this.filterData(
+      { esInstance: this, esIndex, esType },
       {
-        esInstance: this,
-        esIndex,
-        esType,
-      },
-      {
-        fields, filter, sort, offset, size,
+        filter, fields, sort, offset, size,
       },
     );
+    return result.hits.hits.map(item => item._source);
   }
 
   downloadData({
     esIndex, esType, fields, filter, sort,
   }) {
-    return esFilter.getDataUsingScroll(
-      {
-        esInstance: this,
-        esIndex,
-        esType,
-      },
-      {
-        fields, filter, sort,
-      },
-    );
+    const esFilterObj = filter ? getFilterObj(this, esIndex, esType, filter) : undefined;
+    return this.scrollQuery(esIndex, esType, {
+      filter: esFilterObj,
+      fields,
+      sort: getESSortBody(sort, this, esIndex),
+    });
   }
 
   numericAggregation({

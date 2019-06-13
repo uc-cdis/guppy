@@ -93,8 +93,7 @@ const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
   return aggsSchema;
 };
 
-const getSchema = (esConfig, esInstance) => {
-  const querySchema = `
+export const getQuerySchema = esConfig => `
     type Query {
       ${esConfig.indices.map(cfg => getQuerySchemaForType(cfg.type)).join('\n')}
       _aggregation: Aggregation
@@ -102,17 +101,9 @@ const getSchema = (esConfig, esInstance) => {
     }
   `;
 
-  const typesSchemas = esConfig.indices.map(cfg => getTypeSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+export const getTypesSchemas = (esConfig, esInstance) => esConfig.indices.map(cfg => getTypeSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
 
-  const accessibilityEnum = `
-    enum Accessibility {
-      all
-      accessible
-      unaccessible
-    }
-  `;
-
-  const aggregationSchema = `
+export const getAggregationSchema = esConfig => `
     type Aggregation {
       ${esConfig.indices.map(cfg => `${cfg.type} (
         filter: JSON, 
@@ -123,7 +114,30 @@ const getSchema = (esConfig, esInstance) => {
     }
   `;
 
-  const aggregationSchemasForEachType = esConfig.indices.map(cfg => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map(cfg => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+
+export const getMappingSchema = esConfig => `
+    type Mapping {
+      ${esConfig.indices.map(cfg => `${cfg.type}: [String]`).join('\n')}
+    }
+  `;
+
+export const buildSchemaString = (esConfig, esInstance) => {
+  const querySchema = getQuerySchema(esConfig);
+
+  const typesSchemas = getTypesSchemas(esConfig, esInstance);
+
+  const accessibilityEnum = `
+    enum Accessibility {
+      all
+      accessible
+      unaccessible
+    }
+  `;
+
+  const aggregationSchema = getAggregationSchema(esConfig);
+
+  const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
 
   const textHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
@@ -161,11 +175,7 @@ const getSchema = (esConfig, esInstance) => {
     }
   `;
 
-  const mappingSchema = `
-    type Mapping {
-      ${esConfig.indices.map(cfg => `${cfg.type}: [String]`).join('\n')}
-    }
-  `;
+  const mappingSchema = getMappingSchema(esConfig);
 
   const schemaStr = `
   scalar JSON
@@ -182,7 +192,11 @@ const getSchema = (esConfig, esInstance) => {
 `;
   log.info('[schema] graphql schema generated.');
   log.info('[schema] graphql schema', schemaStr);
+  return schemaStr;
+};
 
+const getSchema = (esConfig, esInstance) => {
+  const schemaStr = buildSchemaString(esConfig, esInstance);
   const finalSchema = gql`${schemaStr}`;
   return finalSchema;
 };

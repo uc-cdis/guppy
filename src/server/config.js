@@ -23,7 +23,7 @@ const config = {
     ],
     configIndex: inputConfig.config_index,
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',
-    aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing,
+    aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
   },
 

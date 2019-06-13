@@ -1,0 +1,15 @@
+language: node_js
+git:
+  depth: 1
+node_js:
+  - "10"
+
+services:
+    - docker
+
+install:
+    - npm install
+
+script:
+    - npm run eslint
+    - npm run test
