@@ -400,6 +400,7 @@ class ES {
     esType,
     filter,
     field,
+    nestedAggFields,
     filterSelf,
     defaultAuthFilter,
   }) {
@@ -412,6 +413,7 @@ class ES {
       {
         filter,
         field,
+        nestedAggFields,
         filterSelf,
         defaultAuthFilter,
       },

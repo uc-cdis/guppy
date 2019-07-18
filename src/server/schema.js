@@ -108,6 +108,7 @@ export const getAggregationSchema = esConfig => `
       ${esConfig.indices.map(cfg => `${cfg.type} (
         filter: JSON, 
         filterSelf: Boolean=true, 
+        nestedAggFields: JSON
         """Only used when it's regular level data commons, if set, returns aggregation data within given accessibility"""
         accessibility: Accessibility=all
       ): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}
@@ -149,6 +150,15 @@ export const buildSchemaString = (esConfig, esInstance) => {
     type BucketsForString {
       key: String
       count: Int
+      missingFields: [BucketsForNestedAggFields]
+      termsFields: [BucketsForNestedAggFields]
+    }
+  `;
+
+  const nestedAggFieldsBucketSchema = `
+    type BucketsForNestedAggFields {
+      key: String
+      count: Int
     }
   `;
 
@@ -187,6 +197,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${textHistogramSchema}
   ${numberHistogramSchema}
   ${textHistogramBucketSchema}
+  ${nestedAggFieldsBucketSchema}
   ${numberHistogramBucketSchema}
   ${mappingSchema}
 `;

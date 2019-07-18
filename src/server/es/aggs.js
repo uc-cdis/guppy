@@ -362,6 +362,7 @@ export const textAggregation = async (
   {
     filter,
     field,
+    nestedAggFields,
     filterSelf,
     defaultAuthFilter,
   },
@@ -384,6 +385,29 @@ export const textAggregation = async (
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
+  const nestedAggQuery = {};
+  if (nestedAggFields) {
+    nestedAggQuery.aggs = {};
+    if (nestedAggFields.termsFields) {
+      nestedAggFields.termsFields.forEach((element) => {
+        nestedAggQuery.aggs[element] = {
+          terms: {
+            field: element,
+          },
+        };
+      });
+    }
+    if (nestedAggFields.missingFields) {
+      nestedAggFields.missingFields.forEach((element) => {
+        nestedAggQuery.aggs[element] = {
+          missing: {
+            field: element,
+          },
+        };
+      });
+    }
+  }
+
   queryBody.aggs = {
     [aggsName]: {
       composite: {
@@ -399,6 +423,7 @@ export const textAggregation = async (
         ],
         size: PAGE_SIZE,
       },
+      ...nestedAggQuery,
     },
   };
   let resultSize;
@@ -407,11 +432,44 @@ export const textAggregation = async (
   do {
     const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
-
+        
     result.aggregations[aggsName].buckets.forEach((item) => {
+      let missingFieldResult = []
+      if (nestedAggFields.missingFields) {
+        nestedAggFields.missingFields.forEach((element) => {
+          missingFieldResult.push({
+              key: element,
+              count: item[element].doc_count,
+            },
+          );
+        });
+      }
+      let termsFieldResult = []
+      if (nestedAggFields.termsFields) {
+        nestedAggFields.termsFields.forEach((element) => {
+          termsFieldResult[element] = []
+          console.log(element)
+          if (item.element) {
+          item.element.forEach((itemElement) => {
+            termsFieldResult[element].push({
+              key: itemElement.buckets.key,
+              count: itemElement.buckets.doc_count,
+            })
+          })
+        } else {
+          termsFieldResult[element].push({
+            key: null,
+            count: 0
+          })
+        }
+        });
+      }
+
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
+        missingFields: missingFieldResult,
+        termsFields: termsFieldResult,
       });
       resultSize += 1;
     });
