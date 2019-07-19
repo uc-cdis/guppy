@@ -45,6 +45,67 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   }).then(response => response.json());
 };
 
+const nestedHistogramQueryStrForEachField = mainField => (`
+  ${mainField} {
+    histogram {
+      key
+      count
+      missingFields {
+        field
+        count
+      }
+      termsFields {
+        field
+        terms {
+          key
+          count
+        }
+      } 
+    }
+  }`);
+
+const queryGuppyForNestedAgg = (
+  path,
+  type,
+  mainField,
+  termsNestedFields,
+  missedNestedFields,
+  gqlFilter,
+  acc,
+) => {
+  let accessibility = acc;
+  if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
+    accessibility = 'all';
+  }
+
+  const query = `query {
+    _aggregation {
+      ${type} (termsNestedFields: ${termsNestedFields}, missedNestedFields: ${missedNestedFields}, accessibility: ${accessibility}) {
+        ${nestedHistogramQueryStrForEachField(mainField)}
+      }
+    }
+  }`;
+  const queryBody = { query };
+  if (gqlFilter) {
+    const queryWithFilter = `query ($filter: JSON) {
+      _aggregation {
+        ${type} (filter: $filter, filterSelf: false, termsNestedFields: ${termsNestedFields}, missedNestedFields: ${missedNestedFields}, accessibility: ${accessibility}) {
+          ${nestedHistogramQueryStrForEachField(mainField)}
+        }
+      }
+    }`;
+    queryBody.variables = { filter: gqlFilter };
+    queryBody.query = queryWithFilter;
+  }
+  return fetch(`${path}${graphqlEndpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(queryBody),
+  }).then(response => response.json());
+};
+
 const queryGuppyForRawDataAndTotalCounts = (
   path,
   type,
@@ -124,6 +185,27 @@ export const getGQLFilter = (filterObj) => {
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+};
+
+export const askGuppyForNestedAggregationData = (
+  path,
+  type,
+  mainField,
+  termsNestedFields,
+  missedNestedFields,
+  filter,
+  accessibility,
+) => {
+  const gqlFilter = getGQLFilter(filter);
+  return queryGuppyForNestedAgg(
+    path,
+    type,
+    mainField,
+    termsNestedFields,
+    missedNestedFields,
+    gqlFilter,
+    accessibility,
+  );
 };
 
 export const askGuppyForRawData = (

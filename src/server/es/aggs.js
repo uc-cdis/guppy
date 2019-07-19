@@ -438,7 +438,7 @@ export const textAggregation = async (
       if (nestedAggFields.missingFields) {
         nestedAggFields.missingFields.forEach((element) => {
           missingFieldResult.push({
-              key: element,
+              field: element,
               count: item[element].doc_count,
             },
           );
@@ -447,22 +447,25 @@ export const textAggregation = async (
       let termsFieldResult = []
       if (nestedAggFields.termsFields) {
         nestedAggFields.termsFields.forEach((element) => {
-          termsFieldResult[element] = []
-          console.log(element)
-          if (item.element) {
-          item.element.forEach((itemElement) => {
-            termsFieldResult[element].push({
-              key: itemElement.buckets.key,
-              count: itemElement.buckets.doc_count,
+          let tempResult = {}
+          tempResult.field = element
+          tempResult.terms = []
+          if (item[element].buckets && item[element].buckets.length > 0) {
+            item[element].buckets.forEach((itemElement) => {
+              tempResult.terms.push({
+              key: itemElement.key,
+              count: itemElement.doc_count,
             })
           })
         } else {
-          termsFieldResult[element].push({
+          tempResult.terms.push({
             key: null,
             count: 0
           })
         }
+        termsFieldResult.push(tempResult)
         });
+        console.log(termsFieldResult)
       }
 
       finalResults.push({

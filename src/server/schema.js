@@ -142,21 +142,35 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const textHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
-      histogram: [BucketsForString]
+      histogram: [BucketsForNestedStringAgg]
     }
   `;
 
   const textHistogramBucketSchema = `
-    type BucketsForString {
+    type BucketsForNestedStringAgg {
       key: String
       count: Int
-      missingFields: [BucketsForNestedAggFields]
-      termsFields: [BucketsForNestedAggFields]
+      missingFields: [BucketsForNestedMissingFields]
+      termsFields: [BucketsForNestedTermsFields]
     }
   `;
 
-  const nestedAggFieldsBucketSchema = `
-    type BucketsForNestedAggFields {
+  const nestedMissingFieldsBucketSchema = `
+    type BucketsForNestedMissingFields {
+      field: String
+      count: Int
+    }
+  `;
+
+  const nestedTermsFieldsBucketSchema = `
+    type BucketsForNestedTermsFields {
+      field: String
+      terms: [BucketsForString]
+    }
+  `;
+
+  const stringBucketSchema = `
+    type BucketsForString {
       key: String
       count: Int
     }
@@ -197,7 +211,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${textHistogramSchema}
   ${numberHistogramSchema}
   ${textHistogramBucketSchema}
-  ${nestedAggFieldsBucketSchema}
+  ${nestedMissingFieldsBucketSchema}
+  ${nestedTermsFieldsBucketSchema}
+  ${stringBucketSchema}
   ${numberHistogramBucketSchema}
   ${mappingSchema}
 `;
