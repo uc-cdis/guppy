@@ -32,7 +32,7 @@ const config = {
   arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
-  logLevel: 'DEBUG',
+  logLevel: 'INFO',
   enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? true : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
 };
