@@ -68,8 +68,8 @@ const queryGuppyForNestedAgg = (
   path,
   type,
   mainField,
-  termsNestedFields,
-  missedNestedFields,
+  termsFields,
+  missingFields,
   gqlFilter,
   acc,
 ) => {
@@ -78,23 +78,32 @@ const queryGuppyForNestedAgg = (
     accessibility = 'all';
   }
 
-  const query = `query {
+  const nestedAggFields = {};
+  if (termsFields) {
+    nestedAggFields.termsFields = termsFields;
+  }
+  if (missingFields) {
+    nestedAggFields.missingFields = missingFields;
+  }
+
+  const query = `query ($nestedAggFields: JSON) {
     _aggregation {
-      ${type} (termsNestedFields: ${termsNestedFields}, missedNestedFields: ${missedNestedFields}, accessibility: ${accessibility}) {
+      ${type} (nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
         ${nestedHistogramQueryStrForEachField(mainField)}
       }
     }
   }`;
   const queryBody = { query };
+  queryBody.variables = { nestedAggFields };
   if (gqlFilter) {
-    const queryWithFilter = `query ($filter: JSON) {
+    const queryWithFilter = `query ($filter: JSON, $nestedAggFields: JSON) {
       _aggregation {
-        ${type} (filter: $filter, filterSelf: false, termsNestedFields: ${termsNestedFields}, missedNestedFields: ${missedNestedFields}, accessibility: ${accessibility}) {
+        ${type} (filter: $filter, filterSelf: false, nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
           ${nestedHistogramQueryStrForEachField(mainField)}
         }
       }
     }`;
-    queryBody.variables = { filter: gqlFilter };
+    queryBody.variables = { filter: gqlFilter, nestedAggFields };
     queryBody.query = queryWithFilter;
   }
   return fetch(`${path}${graphqlEndpoint}`, {
