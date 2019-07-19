@@ -400,9 +400,9 @@ class ES {
     esType,
     filter,
     field,
-    nestedAggFields,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) {
     return esAggregator.textAggregation(
       {
@@ -413,9 +413,9 @@ class ES {
       {
         filter,
         field,
-        nestedAggFields,
         filterSelf,
         defaultAuthFilter,
+        nestedAggFields,
       },
     );
   }

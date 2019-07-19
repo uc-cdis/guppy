@@ -76,11 +76,13 @@ describe('Schema', () => {
       subject (
         filter: JSON, 
         filterSelf: Boolean=true, 
+        nestedAggFields:JSON,
         accessibility: Accessibility=all
       ): SubjectAggregation
       file (
         filter: JSON, 
         filterSelf: Boolean=true, 
+        nestedAggFields:JSON,
         accessibility: Accessibility=all
       ): FileAggregation
     }`;

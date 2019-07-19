@@ -362,9 +362,9 @@ export const textAggregation = async (
   {
     filter,
     field,
-    nestedAggFields,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -435,7 +435,7 @@ export const textAggregation = async (
         
     result.aggregations[aggsName].buckets.forEach((item) => {
       let missingFieldResult = []
-      if (nestedAggFields.missingFields) {
+      if (nestedAggFields && nestedAggFields.missingFields) {
         nestedAggFields.missingFields.forEach((element) => {
           missingFieldResult.push({
               field: element,
@@ -445,7 +445,7 @@ export const textAggregation = async (
         });
       }
       let termsFieldResult = []
-      if (nestedAggFields.termsFields) {
+      if (nestedAggFields && nestedAggFields.termsFields) {
         nestedAggFields.termsFields.forEach((element) => {
           let tempResult = {}
           tempResult.field = element

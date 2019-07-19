@@ -108,7 +108,7 @@ export const getAggregationSchema = esConfig => `
       ${esConfig.indices.map(cfg => `${cfg.type} (
         filter: JSON, 
         filterSelf: Boolean=true, 
-        nestedAggFields: JSON
+        nestedAggFields: JSON,
         """Only used when it's regular level data commons, if set, returns aggregation data within given accessibility"""
         accessibility: Accessibility=all
       ): ${firstLetterUpperCase(cfg.type)}Aggregation`).join('\n')}

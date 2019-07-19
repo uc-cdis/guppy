@@ -124,9 +124,9 @@ const textHistogramResolver = async (parent, args, context) => {
     esType,
     filter,
     field,
-    nestedAggFields,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   });
   return resultPromise;
 };
