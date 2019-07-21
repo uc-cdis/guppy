@@ -105,26 +105,18 @@ describe('could aggregate for text fields', () => {
       {
         key: 'unknown',
         count: 38,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'female',
         count: 35,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'male',
         count: 27,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'no data',
         count: 40,
-        missingFields: [],
-        termsFields: [],
       }, // missing data always at end
     ];
     expect(result).toEqual(expectedResults);
@@ -146,20 +138,14 @@ describe('could aggregate for text fields', () => {
       {
         key: 'female',
         count: 35,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'male',
         count: 27,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'no data',
         count: 40,
-        missingFields: [],
-        termsFields: [],
       }, // missing data always at end
     ];
     expect(result).toEqual(expectedResults);
@@ -181,26 +167,18 @@ describe('could aggregate for text fields', () => {
       {
         key: 'unknown',
         count: 38,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'female',
         count: 35,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'male',
         count: 27,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'no data',
         count: 40,
-        missingFields: [],
-        termsFields: [],
       }, // missing data always at end
     ];
     expect(result).toEqual(expectedResults);
@@ -222,26 +200,18 @@ describe('could aggregate for text fields', () => {
       {
         key: 'unknown',
         count: 19,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'female',
         count: 18,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'male',
         count: 15,
-        missingFields: [],
-        termsFields: [],
       },
       {
         key: 'no data',
         count: 20,
-        missingFields: [],
-        termsFields: [],
       }, // missing data always at end
     ];
     expect(result).toEqual(expectedResults);
