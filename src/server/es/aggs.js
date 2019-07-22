@@ -390,7 +390,8 @@ export const textAggregation = async (
     nestedAggQuery.aggs = {};
     if (nestedAggFields.termsFields) {
       nestedAggFields.termsFields.forEach((element) => {
-        nestedAggQuery.aggs[element] = {
+        const variableName = `${element}Terms`;
+        nestedAggQuery.aggs[variableName] = {
           terms: {
             field: element,
           },
@@ -399,7 +400,8 @@ export const textAggregation = async (
     }
     if (nestedAggFields.missingFields) {
       nestedAggFields.missingFields.forEach((element) => {
-        nestedAggQuery.aggs[element] = {
+        const variableName = `${element}Missing`;
+        nestedAggQuery.aggs[variableName] = {
           missing: {
             field: element,
           },
@@ -438,9 +440,10 @@ export const textAggregation = async (
       if (nestedAggFields && nestedAggFields.missingFields) {
         missingFieldResult = []
         nestedAggFields.missingFields.forEach((element) => {
+          const variableName = `${element}Missing`;
           missingFieldResult.push({
               field: element,
-              count: item[element].doc_count,
+              count: item[variableName].doc_count,
             },
           );
         });
@@ -452,8 +455,9 @@ export const textAggregation = async (
           let tempResult = {}
           tempResult.field = element
           tempResult.terms = []
-          if (item[element].buckets && item[element].buckets.length > 0) {
-            item[element].buckets.forEach((itemElement) => {
+          const variableName = `${element}Terms`;
+          if (item[variableName].buckets && item[variableName].buckets.length > 0) {
+            item[variableName].buckets.forEach((itemElement) => {
               tempResult.terms.push({
               key: itemElement.key,
               count: itemElement.doc_count,
@@ -469,6 +473,8 @@ export const textAggregation = async (
         });
       }
 
+      console.log(JSON.stringify(missingFieldResult))
+      console.log(JSON.stringify(termsFieldResult))
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
