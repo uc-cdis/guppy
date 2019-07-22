@@ -345,10 +345,13 @@ Result:
 
 ### 4. Nested Aggregation
 Guppy supports nested aggregations (sub-aggregations) for fields. Currently Guppy only supports two-level-sub-aggregations.
+
 There are two types of nested aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
 
 #### 4.1. Terms Aggregation
-Terms aggregation returns histogram for a single `field` an array of fields. It means for each of the `key` of the single `field`, what is the distribution of each element from the array of fields. Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
+Terms aggregation requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, what is the distribution of each element from the array of fields in the sub-aggregations.
+
+Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
 
 ```
 query ($nestedAggFields: JSON) {
@@ -385,6 +388,8 @@ This query requires a `JSON` format variable `nestedAggFields`, which contains a
 ```
 
 Result:
+
+- Here `internal-test-1` and `internal-test-2` are example values of field `project`.
 
 ```
 {
@@ -466,7 +471,9 @@ Result:
 ```
 
 #### 4.2. Missing Aggregation
-Missing aggregation also returns histogram for a single `field` an array of fields. It means for each of the `key` of the single `field`, how many elements from the array of fields is missing from it. Results are wrapped by keywords `field` and `count`, example:
+Missing aggregation also requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, how many elements from the array of fields in the sub-aggregation are missing from it.
+
+Results are wrapped by keywords `field` and `count`, example:
 
 ```
 query ($nestedAggFields: JSON) {
@@ -500,6 +507,8 @@ This query requires a `JSON` format variable `nestedAggFields`, which contains a
 ```
 
 Result:
+
+- Here `internal-test-1` and `internal-test-2` are example values of field `project`.
 
 ```
 {
