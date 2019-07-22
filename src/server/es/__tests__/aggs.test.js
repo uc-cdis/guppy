@@ -862,3 +862,240 @@ describe('could aggregate for numeric fields, fixed bin count', () => {
     expect(result).toEqual(expectedResults);
   });
 });
+
+// see /src/server/__mocks__/mockESData/mockNestedAggs.js for mock results
+describe('could only aggregate to find missing fields (both existing and non-existing fields)', () => {
+  test('nested missing-only aggregation', async () => {
+    await esInstance.initialize();
+    const field = 'project';
+    const nestedAggFields = {
+      missingFields: [
+        'gender',
+        'someNonExistingField',
+      ],
+    };
+    const result = await textAggregation(
+      { esInstance, esIndex, esType },
+      { field, nestedAggFields },
+    );
+    const expectedResults = [
+      {
+        key: 'internal-project-1',
+        count: 41,
+        missingFields: [
+          {
+            field: 'gender',
+            count: 0,
+          },
+          {
+            field: 'someNonExistingField',
+            count: 41,
+          },
+        ],
+      },
+      {
+        key: 'internal-project-2',
+        count: 35,
+        missingFields: [
+          {
+            field: 'gender',
+            count: 0,
+          },
+          {
+            field: 'someNonExistingField',
+            count: 35,
+          },
+        ],
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('nested terms-only aggregation', async () => {
+    await esInstance.initialize();
+    const field = 'project';
+    const nestedAggFields = {
+      termsFields: [
+        'gender',
+        'someNonExistingField',
+      ],
+    };
+    const result = await textAggregation(
+      { esInstance, esIndex, esType },
+      { field, nestedAggFields },
+    );
+    const expectedResults = [
+      {
+        key: 'internal-project-1',
+        count: 41,
+        termsFields: [
+          {
+            field: 'gender',
+            terms: [
+              {
+                key: 'male',
+                count: 22,
+              },
+              {
+                key: 'unknown',
+                count: 10,
+              },
+              {
+                key: 'female',
+                count: 9,
+              },
+            ],
+          },
+          {
+            field: 'someNonExistingField',
+            terms: [
+              {
+                key: null,
+                count: 0,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'internal-project-2',
+        count: 35,
+        termsFields: [
+          {
+            field: 'gender',
+            terms: [
+              {
+                key: 'male',
+                count: 13,
+              },
+              {
+                key: 'female',
+                count: 11,
+              },
+              {
+                key: 'unknown',
+                count: 11,
+              },
+            ],
+          },
+          {
+            field: 'someNonExistingField',
+            terms: [
+              {
+                key: null,
+                count: 0,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('nested terms and missing combined aggregation', async () => {
+    await esInstance.initialize();
+    const field = 'project';
+    const nestedAggFields = {
+      missingFields: [
+        'gender',
+        'someNonExistingField',
+      ],
+      termsFields: [
+        'gender',
+        'someNonExistingField',
+      ],
+    };
+    const result = await textAggregation(
+      { esInstance, esIndex, esType },
+      { field, nestedAggFields },
+    );
+    const expectedResults = [
+      {
+        key: 'internal-project-1',
+        count: 41,
+        missingFields: [
+          {
+            field: 'gender',
+            count: 0,
+          },
+          {
+            field: 'someNonExistingField',
+            count: 41,
+          },
+        ],
+        termsFields: [
+          {
+            field: 'gender',
+            terms: [
+              {
+                key: 'male',
+                count: 22,
+              },
+              {
+                key: 'unknown',
+                count: 10,
+              },
+              {
+                key: 'female',
+                count: 9,
+              },
+            ],
+          },
+          {
+            field: 'someNonExistingField',
+            terms: [
+              {
+                key: null,
+                count: 0,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        key: 'internal-project-2',
+        count: 35,
+        missingFields: [
+          {
+            field: 'gender',
+            count: 0,
+          },
+          {
+            field: 'someNonExistingField',
+            count: 35,
+          },
+        ],
+        termsFields: [
+          {
+            field: 'gender',
+            terms: [
+              {
+                key: 'male',
+                count: 13,
+              },
+              {
+                key: 'female',
+                count: 11,
+              },
+              {
+                key: 'unknown',
+                count: 11,
+              },
+            ],
+          },
+          {
+            field: 'someNonExistingField',
+            terms: [
+              {
+                key: null,
+                count: 0,
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+});
