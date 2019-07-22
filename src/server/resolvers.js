@@ -43,7 +43,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
  */
 const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) => {
   const {
-    filter, filterSelf, needEncryptAgg, accessibility,
+    filter, filterSelf, nestedAggFields, needEncryptAgg, accessibility,
   } = args;
   log.debug('[resolver.typeAggsQueryResolver] args', args);
   return {
@@ -52,6 +52,7 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
     esInstance,
     esIndex,
     esType,
+    nestedAggFields,
     needEncryptAgg,
     accessibility,
   };
@@ -113,8 +114,9 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility,
   } = parent;
+  log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   const resultPromise = esInstance.textAggregation({
@@ -124,6 +126,7 @@ const textHistogramResolver = async (parent, args, context) => {
     field,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   });
   return resultPromise;
 };

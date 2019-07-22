@@ -402,6 +402,7 @@ class ES {
     field,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) {
     return esAggregator.textAggregation(
       {
@@ -414,6 +415,7 @@ class ES {
         field,
         filterSelf,
         defaultAuthFilter,
+        nestedAggFields,
       },
     );
   }

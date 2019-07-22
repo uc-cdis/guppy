@@ -364,6 +364,7 @@ export const textAggregation = async (
     field,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -384,6 +385,31 @@ export const textAggregation = async (
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
+  const nestedAggQuery = {};
+  if (nestedAggFields) {
+    nestedAggQuery.aggs = {};
+    if (nestedAggFields.termsFields) {
+      nestedAggFields.termsFields.forEach((element) => {
+        const variableName = `${element}Terms`;
+        nestedAggQuery.aggs[variableName] = {
+          terms: {
+            field: element,
+          },
+        };
+      });
+    }
+    if (nestedAggFields.missingFields) {
+      nestedAggFields.missingFields.forEach((element) => {
+        const variableName = `${element}Missing`;
+        nestedAggQuery.aggs[variableName] = {
+          missing: {
+            field: element,
+          },
+        };
+      });
+    }
+  }
+
   queryBody.aggs = {
     [aggsName]: {
       composite: {
@@ -399,6 +425,7 @@ export const textAggregation = async (
         ],
         size: PAGE_SIZE,
       },
+      ...nestedAggQuery,
     },
   };
   let resultSize;
@@ -407,11 +434,50 @@ export const textAggregation = async (
   do {
     const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
-
+        
     result.aggregations[aggsName].buckets.forEach((item) => {
+      let missingFieldResult = undefined
+      if (nestedAggFields && nestedAggFields.missingFields) {
+        missingFieldResult = []
+        nestedAggFields.missingFields.forEach((element) => {
+          const variableName = `${element}Missing`;
+          missingFieldResult.push({
+              field: element,
+              count: item[variableName].doc_count,
+            },
+          );
+        });
+      }
+      let termsFieldResult = undefined
+      if (nestedAggFields && nestedAggFields.termsFields) {
+        termsFieldResult = []
+        nestedAggFields.termsFields.forEach((element) => {
+          let tempResult = {}
+          tempResult.field = element
+          tempResult.terms = []
+          const variableName = `${element}Terms`;
+          if (item[variableName].buckets && item[variableName].buckets.length > 0) {
+            item[variableName].buckets.forEach((itemElement) => {
+              tempResult.terms.push({
+              key: itemElement.key,
+              count: itemElement.doc_count,
+            })
+          })
+        } else {
+          tempResult.terms.push({
+            key: null,
+            count: 0
+          })
+        }
+        termsFieldResult.push(tempResult)
+        });
+      }
+
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
+        ...(missingFieldResult && {missingFields: missingFieldResult}),
+        ...(termsFieldResult && {termsFields: termsFieldResult}),
       });
       resultSize += 1;
     });

@@ -105,7 +105,7 @@ const tierAccessResolver = (
 };
 
 /**
- * This resolver middleware is appended after aggreagtion resolvers,
+ * This resolver middleware is appended after aggregation resolvers,
  * it hide number that is less than allowed visible number for regular tier access
  * @param {bool} isGettingTotalCount
  */
@@ -119,7 +119,7 @@ const hideNumberResolver = isGettingTotalCount => async (resolve, root, args, co
   }
 
   const encryptedResult = result.map((item) => {
-    if (isWhitelisted(item.key)) { // we don't excrypt whitelisted results
+    if (isWhitelisted(item.key)) { // we don't encrypt whitelisted results
       return item;
     }
     if (item.count < config.tierAccessLimit) {
