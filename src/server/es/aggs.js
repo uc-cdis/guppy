@@ -436,7 +436,7 @@ export const textAggregation = async (
     result.aggregations[aggsName].buckets.forEach((item) => {
       let missingFieldResult = undefined
       if (nestedAggFields && nestedAggFields.missingFields) {
-        let missingFieldResult = []
+        missingFieldResult = []
         nestedAggFields.missingFields.forEach((element) => {
           missingFieldResult.push({
               field: element,
@@ -447,7 +447,7 @@ export const textAggregation = async (
       }
       let termsFieldResult = undefined
       if (nestedAggFields && nestedAggFields.termsFields) {
-        let termsFieldResult = []
+        termsFieldResult = []
         nestedAggFields.termsFields.forEach((element) => {
           let tempResult = {}
           tempResult.field = element
@@ -467,7 +467,6 @@ export const textAggregation = async (
         }
         termsFieldResult.push(tempResult)
         });
-        console.log(termsFieldResult)
       }
 
       finalResults.push({
