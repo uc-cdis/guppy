@@ -348,7 +348,7 @@ Guppy supports nested aggregations (sub-aggregations) for fields. Currently Gupp
 There are two types of nested aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
 
 #### 4.1. Terms Aggregation
-Terms aggregation returns histogram for a single `field` an array of fields. It means for each of the `key`s of the single `field`, what is the distribution of each element from the array of fields. Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
+Terms aggregation returns histogram for a single `field` an array of fields. It means for each of the `key` of the single `field`, what is the distribution of each element from the array of fields. Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
 
 ```
 query ($nestedAggFields: JSON) {
@@ -466,7 +466,7 @@ Result:
 ```
 
 #### 4.2. Missing Aggregation
-Missing aggregation also returns histogram for a single `field` an array of fields. It means for each of the `key`s of the single `field`, how many elements from the array of fields is missing from it. Results are wrapped by keywords `field` and `count`, example:
+Missing aggregation also returns histogram for a single `field` an array of fields. It means for each of the `key` of the single `field`, how many elements from the array of fields is missing from it. Results are wrapped by keywords `field` and `count`, example:
 
 ```
 query ($nestedAggFields: JSON) {
