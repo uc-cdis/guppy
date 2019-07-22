@@ -6,6 +6,7 @@ Table of Contents
    - [Total Count Aggregation](#aggs-total)
    - [Text Aggregation](#aggs-text)
    - [Numeric Aggregation](#aggs-numeric)
+   - [Nested Aggregation](#aggs-nested)
 - [Filters](#filter)
 - [Some other queries and arguments](#other)
 
@@ -331,6 +332,209 @@ Result:
                 100
               ],
               "count": 23
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+<a name="aggs-nested"></a>
+
+### 4. Nested Aggregation
+Guppy supports nested aggregations (sub-aggregations) for fields. Currently Guppy only supports two-level-sub-aggregations.
+There are two types of nested aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+
+#### 4.1. Terms Aggregation
+Terms aggregation returns histogram for a single `field` an array of fields. It means for each of the `key`s of the single `field`, what is the distribution of each element from the array of fields. Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
+
+```
+query ($nestedAggFields: JSON) {
+  _aggregation {
+  subject (nestedAggFields: $nestedAggFields) {
+    project {
+      histogram {
+        key
+        count
+        termsFields {
+          field
+          terms {
+            key
+            count
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+This query requires a `JSON` format variable `nestedAggFields`, which contains an array of `termsFields`. For example:
+
+```
+{
+  nestedAggFields: {
+    termsFields: [
+      gender,
+      someNonExistingField
+    ]
+  }
+}
+```
+
+Result:
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "project": {
+          "histogram": [
+            {
+              "key": "internal-test-1",
+              "count": 41,
+              "termsFields": [
+                {
+                  "field": "gender",
+                  "terms": [
+                    {
+                      "key": "male",
+                      "count": 22
+                    },
+                    {
+                      "key": "unknown",
+                      "count": 10
+                    },
+                    {
+                      "key": "female",
+                      "count": 9
+                    }
+                  ]
+                },
+                {
+                  "field": "someNonExistingField",
+                  "terms": [
+                    {
+                      "key": null,
+                      "count": 0
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "key": "internal-test-2",
+              "count": 35,
+              "termsFields": [
+                {
+                  "field": "gender",
+                  "terms": [
+                    {
+                      "key": "male",
+                      "count": 13
+                    },
+                    {
+                      "key": "female",
+                      "count": 11
+                    },
+                    {
+                      "key": "unknown",
+                      "count": 11
+                    }
+                  ]
+                },
+                {
+                  "field": "someNonExistingField",
+                  "terms": [
+                    {
+                      "key": null,
+                      "count": 0
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+#### 4.2. Missing Aggregation
+Missing aggregation also returns histogram for a single `field` an array of fields. It means for each of the `key`s of the single `field`, how many elements from the array of fields is missing from it. Results are wrapped by keywords `field` and `count`, example:
+
+```
+query ($nestedAggFields: JSON) {
+  _aggregation {
+  subject (nestedAggFields: $nestedAggFields) {
+    project {
+      histogram {
+        key
+        count
+        missingFields {
+          field
+          count
+        }
+      }
+    }
+  }
+}
+```
+
+This query requires a `JSON` format variable `nestedAggFields`, which contains an array of `missingFields`. For example:
+
+```
+{
+  nestedAggFields: {
+    missingFields: [
+      gender,
+      someNonExistingField
+    ]
+  }
+}
+```
+
+Result:
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "project": {
+          "histogram": [
+            {
+              "key": "internal-test-1",
+              "count": 41,
+              "missingFields": [
+                {
+                  "field": "gender",
+                  "count": 0
+                },
+                {
+                  "field": "someNonExistingField",
+                  "count": 41
+                }
+              ]
+            },
+            {
+              "key": "internal-test-2",
+              "count": 35,
+              "missingFields": [
+                {
+                  "field": "gender",
+                  "count": 0
+                },
+                {
+                  "field": "someNonExistingField",
+                  "count": 35
+                }
+              ]
             }
           ]
         }
