@@ -473,8 +473,6 @@ export const textAggregation = async (
         });
       }
 
-      console.log(JSON.stringify(missingFieldResult))
-      console.log(JSON.stringify(termsFieldResult))
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
