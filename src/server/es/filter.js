@@ -16,7 +16,6 @@ const getNumericTextType = (
   return numericTextType;
 };
 
-// FIXME: support "is not"
 const getFilterItemForString = (op, field, value) => {
   switch (op) {
     case '=':
@@ -32,6 +31,18 @@ const getFilterItemForString = (op, field, value) => {
       return {
         terms: {
           [field]: value,
+        },
+      };
+    case '!=':
+      return {
+        bool: {
+          must_not: [
+            {
+              term: {
+                [field]: value,
+              },
+            },
+          ],
         },
       };
     default:
@@ -72,6 +83,24 @@ const getFilterItemForNumbers = (op, field, value) => {
     return {
       terms: {
         [field]: value,
+      },
+    };
+  }
+  if (op === '!=') {
+    return {
+      bool: {
+        should: [
+          {
+            range: {
+              [field]: { gt: value },
+            },
+          },
+          {
+            range: {
+              [field]: { lt: value },
+            },
+          },
+        ],
       },
     };
   }
