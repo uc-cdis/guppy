@@ -80,14 +80,16 @@ const aggsTotalQueryResolver = (parent) => {
 const numericHistogramResolver = async (parent, args, context) => {
   const {
     esInstance, esIndex, esType,
-    filter, field, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility,
   } = parent;
+  log.debug('[resolver.numericHistogramResolver] parent', parent);
   const {
     rangeStart, rangeEnd, rangeStep, binCount,
   } = args;
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
+
   const resultPromise = esInstance.numericAggregation({
     esIndex,
     esType,
@@ -99,6 +101,7 @@ const numericHistogramResolver = async (parent, args, context) => {
     binCount,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   });
   return resultPromise;
 };
@@ -217,6 +220,7 @@ const getResolver = (esConfig, esInstance) => {
     ...typeAggregationResolvers,
     HistogramForNumber: {
       histogram: numericHistogramResolver,
+      asTextHistogram: textHistogramResolver,
     },
     HistogramForString: {
       histogram: textHistogramResolver,

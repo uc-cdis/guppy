@@ -183,12 +183,13 @@ export const buildSchemaString = (esConfig, esInstance) => {
         rangeEnd: Int, 
         rangeStep: Int,
         binCount: Int,
-      ): [BucketsForNumber]
+      ): [BucketsForNestedNumberAgg],
+      asTextHistogram: [BucketsForNestedStringAgg]
     }
   `;
 
   const numberHistogramBucketSchema = `
-    type BucketsForNumber {
+    type BucketsForNestedNumberAgg {
       """Lower and higher bounds for this bucket"""
       key: [Float]
       min: Float
@@ -196,6 +197,8 @@ export const buildSchemaString = (esConfig, esInstance) => {
       avg: Float
       sum: Float
       count: Int
+      missingFields: [BucketsForNestedMissingFields]
+      termsFields: [BucketsForNestedTermsFields]
     }
   `;
 
