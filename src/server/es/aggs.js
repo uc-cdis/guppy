@@ -263,12 +263,17 @@ export const numericHistogramWithFixedRangeStep = async (
   }
   queryBody.aggs = aggsObj;
   const result = await esInstance.query(esIndex, esType, queryBody);
-  // FIXME: parse nested result
-  const parsedAggsResult = result.aggregations[AGGS_QUERY_NAME].buckets.forEach(item => ({
-    key: [item.key, item.key + rangeStep],
-    ...item[AGGS_ITEM_STATS_NAME],
-  }));
-  return parsedAggsResult;
+  const finalResults = [];
+  let resultObj;
+  result.aggregations[AGGS_QUERY_NAME].buckets.forEach((item) => {
+    resultObj = processResultsForNestedAgg(nestedAggFields, item, resultObj);
+    finalResults.push({
+      key: [item.key, item.key + rangeStep],
+      ...item[AGGS_ITEM_STATS_NAME],
+      ...resultObj,
+    });
+  });
+  return finalResults;
 };
 
 /**
