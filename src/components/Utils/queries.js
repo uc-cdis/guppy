@@ -45,9 +45,9 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   }).then(response => response.json());
 };
 
-const nestedHistogramQueryStrForEachField = mainField => (`
+const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
   ${mainField} {
-    histogram {
+    ${numericAggAsText ? 'asTextHistogram' : 'histogram'} {
       key
       count
       missingFields {
@@ -68,6 +68,7 @@ const queryGuppyForNestedAgg = (
   path,
   type,
   mainField,
+  numericAggAsText = false,
   termsFields,
   missingFields,
   gqlFilter,
@@ -89,7 +90,7 @@ const queryGuppyForNestedAgg = (
   const query = `query ($nestedAggFields: JSON) {
     _aggregation {
       ${type} (nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
-        ${nestedHistogramQueryStrForEachField(mainField)}
+        ${nestedHistogramQueryStrForEachField(mainField, numericAggAsText)}
       }
     }
   }`;
@@ -99,7 +100,7 @@ const queryGuppyForNestedAgg = (
     const queryWithFilter = `query ($filter: JSON, $nestedAggFields: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
-          ${nestedHistogramQueryStrForEachField(mainField)}
+          ${nestedHistogramQueryStrForEachField(mainField, numericAggAsText)}
         }
       }
     }`;
@@ -112,7 +113,10 @@ const queryGuppyForNestedAgg = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json());
+  }).then(response => response.json())
+    .catch((err) => {
+      throw new Error(`Error during queryGuppyForNestedAgg ${err}`);
+    });
 };
 
 const queryGuppyForRawDataAndTotalCounts = (
@@ -157,7 +161,10 @@ const queryGuppyForRawDataAndTotalCounts = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json());
+  }).then(response => response.json())
+    .catch((err) => {
+      throw new Error(`Error during queryGuppyForRawDataAndTotalCounts ${err}`);
+    });
 };
 
 export const askGuppyAboutAllFieldsAndOptions = (
@@ -200,6 +207,7 @@ export const askGuppyForNestedAggregationData = (
   path,
   type,
   mainField,
+  numericAggAsText,
   termsNestedFields,
   missedNestedFields,
   filter,
@@ -210,6 +218,7 @@ export const askGuppyForNestedAggregationData = (
     path,
     type,
     mainField,
+    numericAggAsText,
     termsNestedFields,
     missedNestedFields,
     gqlFilter,
