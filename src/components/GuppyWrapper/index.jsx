@@ -6,6 +6,7 @@ import {
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
   getAccessibleResources,
+  askGuppyForNestedAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 
@@ -98,6 +99,38 @@ class GuppyWrapper extends React.Component {
     if (!fields || fields.length === 0) {
       return Promise.resolve({ data: [], totalCount: 0 });
     }
+
+    // nested aggregation
+    if (this.props.guppyConfig.mainField) {
+      const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
+      return askGuppyForNestedAggregationData(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.props.guppyConfig.mainField,
+        numericAggregation,
+        [],
+        this.props.guppyConfig.aggFields,
+        this.filter,
+        this.state.accessibility,
+      ).then((res) => {
+        if (!res || !res.data) {
+          throw new Error(`Nested aggregation - Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
+        }
+        const data = res.data._aggregation[this.props.guppyConfig.type];
+        const field = numericAggregation ? 'asTextHistogram' : 'histogram';
+        const parsedData = data[this.props.guppyConfig.mainField][field];
+        if (updateDataWhenReceive) {
+          this.setState({
+            rawData: parsedData,
+          });
+        }
+        return {
+          data: res.data,
+        };
+      });
+    }
+
+    // non-nested aggregation
     return askGuppyForRawData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -274,6 +307,9 @@ GuppyWrapper.propTypes = {
   guppyConfig: PropTypes.shape({
     path: PropTypes.string,
     type: PropTypes.string,
+    mainField: PropTypes.string,
+    mainFieldIsNumeric: PropTypes.string,
+    aggFields: PropTypes.string,
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
