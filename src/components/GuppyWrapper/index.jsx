@@ -114,7 +114,7 @@ class GuppyWrapper extends React.Component {
         this.state.accessibility,
       ).then((res) => {
         if (!res || !res.data) {
-          throw new Error(`Nested aggregation - Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
+          throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
         }
         const data = res.data._aggregation[this.props.guppyConfig.type];
         const field = numericAggregation ? 'asTextHistogram' : 'histogram';
@@ -308,8 +308,8 @@ GuppyWrapper.propTypes = {
     path: PropTypes.string,
     type: PropTypes.string,
     mainField: PropTypes.string,
-    mainFieldIsNumeric: PropTypes.string,
-    aggFields: PropTypes.string,
+    mainFieldIsNumeric: PropTypes.bool,
+    aggFields: PropTypes.array,
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
@@ -321,7 +321,7 @@ GuppyWrapper.propTypes = {
       fields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
-  rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  rawDataFields: PropTypes.arrayOf(PropTypes.string),
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
@@ -330,6 +330,7 @@ GuppyWrapper.propTypes = {
 GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
+  rawDataFields: [],
   accessibleFieldCheckList: undefined,
 };
 
