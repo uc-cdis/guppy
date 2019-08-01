@@ -1,5 +1,6 @@
 import { ApolloError, UserInputError } from 'apollo-server';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
+import config from '../config';
 
 const getNumericTextType = (
   esInstance,
@@ -21,16 +22,74 @@ const getFilterItemForString = (op, field, value) => {
     case '=':
     case 'eq':
     case 'EQ':
+      if (config.esConfig.aggregationIncludeMissingData
+        && value === config.esConfig.missingDataAlias) {
+        return {
+          bool: {
+            must_not: [
+              {
+                exists: {
+                  field,
+                },
+              },
+            ],
+          },
+        };
+      }
       return {
-        term: {
-          [field]: value,
+        bool: {
+          must: [
+            {
+              term: {
+                [field]: value,
+              },
+            },
+          ],
         },
       };
     case 'in':
     case 'IN':
+      if (config.esConfig.aggregationIncludeMissingData
+          && value.includes(config.esConfig.missingDataAlias)) {
+        const newValue = value.filter(element => element !== config.esConfig.missingDataAlias);
+        return {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: {
+                        field,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  must: [
+                    {
+                      terms: {
+                        [field]: newValue,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        };
+      }
       return {
-        terms: {
-          [field]: value,
+        bool: {
+          must: [
+            {
+              terms: {
+                [field]: value,
+              },
+            },
+          ],
         },
       };
     case '!=':
@@ -74,15 +133,27 @@ const getFilterItemForNumbers = (op, field, value) => {
   }
   if (op === '=' || op === 'eq' || op === 'EQ') {
     return {
-      term: {
-        [field]: value,
+      bool: {
+        must: [
+          {
+            term: {
+              [field]: value,
+            },
+          },
+        ],
       },
     };
   }
   if (op === 'IN' || op === 'in') {
     return {
-      terms: {
-        [field]: value,
+      bool: {
+        must: [
+          {
+            terms: {
+              [field]: value,
+            },
+          },
+        ],
       },
     };
   }
