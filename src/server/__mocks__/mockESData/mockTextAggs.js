@@ -63,10 +63,16 @@ const mockTextAggs = () => {
   const genderAggsQuery2 = {
     size: 0,
     query: {
-      terms: {
-        gender: [
-          'female',
-          'male',
+      bool: {
+        must: [
+          {
+            terms: {
+              gender: [
+                'female',
+                'male',
+              ],
+            },
+          },
         ],
       },
     },
@@ -123,10 +129,16 @@ const mockTextAggs = () => {
   const genderAggsQuery3 = {
     size: 0,
     query: {
-      terms: {
-        gen3_resource_path: [
-          'internal-project-1',
-          'internal-project-2',
+      bool: {
+        must: [
+          {
+            terms: {
+              gen3_resource_path: [
+                'internal-project-1',
+                'internal-project-2',
+              ],
+            },
+          },
         ],
       },
     },

@@ -114,8 +114,14 @@ const mockHistogramFixBinCount = () => {
       bool: {
         must: [
           {
-            term: {
-              gender: 'female',
+            bool: {
+              must: [
+                {
+                  term: {
+                    gender: 'female',
+                  },
+                },
+              ],
             },
           },
           [
@@ -333,10 +339,13 @@ const mockHistogramFixBinCount = () => {
       bool: {
         must: [
           {
-            terms: {
-              gen3_resource_path: [
-                'internal-project-1',
-                'internal-project-2',
+            bool: {
+              must: [
+                {
+                  terms: {
+                    gen3_resource_path: ['internal-project-1', 'internal-project-2'],
+                  },
+                },
               ],
             },
           },
