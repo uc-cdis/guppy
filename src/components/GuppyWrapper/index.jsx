@@ -103,6 +103,7 @@ class GuppyWrapper extends React.Component {
     // nested aggregation
     if (this.props.guppyConfig.mainField) {
       const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
+      // use missedNestedFields instead of termsNestedFields for performance
       return askGuppyForNestedAggregationData(
         this.props.guppyConfig.path,
         this.props.guppyConfig.type,
