@@ -22,6 +22,7 @@ const getFilterItemForString = (op, field, value) => {
     case '=':
     case 'eq':
     case 'EQ':
+      // special case when missingDataAlias is in using
       if (config.esConfig.aggregationIncludeMissingData
         && value === config.esConfig.missingDataAlias) {
         return {
@@ -49,6 +50,8 @@ const getFilterItemForString = (op, field, value) => {
       };
     case 'in':
     case 'IN':
+      // if using missingDataAlias, we need to remove the missingDataAlias from filter values
+      // and then add a must_not exists bool func to compensate missingDataAlias
       if (config.esConfig.aggregationIncludeMissingData
           && value.includes(config.esConfig.missingDataAlias)) {
         const newValue = value.filter(element => element !== config.esConfig.missingDataAlias);
@@ -81,6 +84,7 @@ const getFilterItemForString = (op, field, value) => {
           },
         };
       }
+      // if not using missingDataAlias or filter doesn't contain missingDataAlias
       return {
         bool: {
           must: [

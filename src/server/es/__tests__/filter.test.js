@@ -36,7 +36,17 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     const resultESFilter1 = getFilterObj(esInstance, esIndex, esType, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, esType, gqlFilter2);
     const resultESFilter3 = getFilterObj(esInstance, esIndex, esType, gqlFilter3);
-    const expectedESFilter = { term: { gender: 'female' } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            term: {
+              gender: 'female',
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
     expect(resultESFilter3).toEqual(expectedESFilter);
@@ -49,7 +59,17 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     const gqlFilter2 = { IN: { gender: ['female', 'unknown'] } };
     const resultESFilter1 = getFilterObj(esInstance, esIndex, esType, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, esType, gqlFilter2);
-    const expectedESFilter = { terms: { gender: ['female', 'unknown'] } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            terms: {
+              gender: ['female', 'unknown'],
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
   });
@@ -63,7 +83,17 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     const resultESFilter1 = getFilterObj(esInstance, esIndex, esType, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, esType, gqlFilter2);
     const resultESFilter3 = getFilterObj(esInstance, esIndex, esType, gqlFilter3);
-    const expectedESFilter = { term: { file_count: 10 } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            term: {
+              file_count: 10,
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
     expect(resultESFilter3).toEqual(expectedESFilter);
@@ -76,7 +106,17 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     const gqlFilter2 = { IN: { file_count: [10, 20] } };
     const resultESFilter1 = getFilterObj(esInstance, esIndex, esType, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, esType, gqlFilter2);
-    const expectedESFilter = { terms: { file_count: [10, 20] } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            terms: {
+              file_count: [10, 20],
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
   });
@@ -185,8 +225,28 @@ describe('Transfer GraphQL filter to ES filter, combined filter', () => {
     const expectedESFilter = {
       bool: {
         must: [
-          { term: { gender: 'female' } },
-          { term: { file_count: 10 } },
+          {
+            bool: {
+              must: [
+                {
+                  term: {
+                    gender: 'female',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must: [
+                {
+                  term: {
+                    file_count: 10,
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     };
@@ -213,8 +273,28 @@ describe('Transfer GraphQL filter to ES filter, combined filter', () => {
     const expectedESFilter = {
       bool: {
         should: [
-          { term: { gender: 'female' } },
-          { term: { file_count: 10 } },
+          {
+            bool: {
+              must: [
+                {
+                  term: {
+                    gender: 'female',
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must: [
+                {
+                  term: {
+                    file_count: 10,
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     };
@@ -257,8 +337,28 @@ describe('Transfer GraphQL filter to ES filter, combined filter', () => {
           {
             bool: {
               must: [
-                { term: { gender: 'female' } },
-                { term: { file_count: 10 } },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          gender: 'female',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          file_count: 10,
+                        },
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -268,16 +368,56 @@ describe('Transfer GraphQL filter to ES filter, combined filter', () => {
                 {
                   bool: {
                     must: [
-                      { term: { gender: 'male' } },
-                      { term: { file_count: 20 } },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                gender: 'male',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                file_count: 20,
+                              },
+                            },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
                 {
                   bool: {
                     must: [
-                      { term: { gender: 'unknown' } },
-                      { term: { file_count: 30 } },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                gender: 'unknown',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                file_count: 30,
+                              },
+                            },
+                          ],
+                        },
+                      },
                     ],
                   },
                 },
@@ -311,7 +451,17 @@ describe('Transfer GraphQL filter to ES filter, with other params', () => {
     const expectedESFilter = {
       bool: {
         must: [
-          { term: { file_count: 10 } },
+          {
+            bool: {
+              must: [
+                {
+                  term: {
+                    file_count: 10,
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     };
@@ -322,7 +472,17 @@ describe('Transfer GraphQL filter to ES filter, with other params', () => {
     await esInstance.initialize();
     const gqlFilter = { eq: { gender: 'female' } };
     const resultESFilter = getFilterObj(esInstance, esIndex, esType, gqlFilter, 'file_count', false);
-    const expectedESFilter = { term: { gender: 'female' } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            term: {
+              gender: 'female',
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter).toEqual(expectedESFilter);
   });
 
@@ -331,7 +491,17 @@ describe('Transfer GraphQL filter to ES filter, with other params', () => {
     const defaultAuthFilter = { '=': { gen3_resource_path: 'internal' } };
     const gqlFilter = { eq: { gender: 'female' } };
     const resultESFilter = getFilterObj(esInstance, esIndex, esType, gqlFilter, 'gender', false, defaultAuthFilter);
-    const expectedESFilter = { term: { gen3_resource_path: 'internal' } };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          {
+            term: {
+              gen3_resource_path: 'internal',
+            },
+          },
+        ],
+      },
+    };
     expect(resultESFilter).toEqual(expectedESFilter);
   });
 });
