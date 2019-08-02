@@ -74,8 +74,14 @@ const mockResourcePath = () => {
   const queryResourceWithFilter1 = {
     size: 0,
     query: {
-      term: {
-        gen3_resource_path: 'internal-project-1',
+      bool: {
+        must: [
+          {
+            term: {
+              gen3_resource_path: 'internal-project-1',
+            },
+          },
+        ],
       },
     },
     aggs: {
@@ -122,8 +128,14 @@ const mockResourcePath = () => {
   const queryResourceWithFilter2 = {
     size: 0,
     query: {
-      term: {
-        gen3_resource_path: 'external-project-1',
+      bool: {
+        must: [
+          {
+            term: {
+              gen3_resource_path: 'external-project-1',
+            },
+          },
+        ],
       },
     },
     aggs: {

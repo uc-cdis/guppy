@@ -83,8 +83,14 @@ const mockHistogramFixWidth = () => {
   const fileCountHistogramFixWidthQuery1 = {
     size: 0,
     query: {
-      term: {
-        gender: 'female',
+      bool: {
+        must: [
+          {
+            term: {
+              gender: 'female',
+            },
+          },
+        ],
       },
     },
     aggs: {
@@ -232,10 +238,13 @@ const mockHistogramFixWidth = () => {
   const fileCountHistogramFixWidthQuery3 = {
     size: 0,
     query: {
-      terms: {
-        gen3_resource_path: [
-          'internal-project-1',
-          'internal-project-2',
+      bool: {
+        must: [
+          {
+            terms: {
+              gen3_resource_path: ['internal-project-1', 'internal-project-2'],
+            },
+          },
         ],
       },
     },
