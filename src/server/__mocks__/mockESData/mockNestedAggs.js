@@ -12,7 +12,6 @@ const mockNestedAggs = () => {
               project: {
                 terms: {
                   field: 'project',
-                  missing: 'no data',
                 },
               },
             },
@@ -82,7 +81,6 @@ const mockNestedAggs = () => {
               project: {
                 terms: {
                   field: 'project',
-                  missing: 'no data',
                 },
               },
             },
@@ -181,7 +179,6 @@ const mockNestedAggs = () => {
               project: {
                 terms: {
                   field: 'project',
-                  missing: 'no data',
                 },
               },
             },

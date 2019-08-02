@@ -68,7 +68,9 @@ class ConnectedFilter extends React.Component {
   }
 
   setFilter(filter) {
-    this.filterGroupRef.current.resetFilter();
+    if (this.filterGroupRef.current) {
+      this.filterGroupRef.current.resetFilter();
+    }
     this.handleFilterChange(filter);
   }
 

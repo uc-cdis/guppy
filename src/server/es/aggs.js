@@ -7,6 +7,78 @@ import {
 } from './const';
 import config from '../config';
 
+const updateAggObjectForTermsFields = (termsFields, aggsObj) => {
+  const newAggsObj = { ...aggsObj };
+  termsFields.forEach((element) => {
+    const variableName = `${element}Terms`;
+    newAggsObj[variableName] = {
+      terms: {
+        field: element,
+      },
+    };
+  });
+  return newAggsObj;
+};
+
+const updateAggObjectForMissingFields = (missingFields, aggsObj) => {
+  const newAggsObj = { ...aggsObj };
+  missingFields.forEach((element) => {
+    const variableName = `${element}Missing`;
+    newAggsObj[variableName] = {
+      missing: {
+        field: element,
+      },
+    };
+  });
+  return newAggsObj;
+};
+
+const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
+  let missingFieldResult;
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    missingFieldResult = [];
+    nestedAggFields.missingFields.forEach((element) => {
+      const variableName = `${element}Missing`;
+      missingFieldResult.push({
+        field: element,
+        count: item[variableName].doc_count,
+      });
+    });
+  }
+
+  let termsFieldResult;
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    termsFieldResult = [];
+    nestedAggFields.termsFields.forEach((element) => {
+      const tempResult = {};
+      tempResult.field = element;
+      tempResult.terms = [];
+      const variableName = `${element}Terms`;
+      if (item[variableName].buckets && item[variableName].buckets.length > 0) {
+        item[variableName].buckets.forEach((itemElement) => {
+          tempResult.terms.push({
+            key: itemElement.key,
+            count: itemElement.doc_count,
+          });
+        });
+      } else {
+        tempResult.terms.push({
+          key: null,
+          count: 0,
+        });
+      }
+      termsFieldResult.push(tempResult);
+    });
+  }
+
+  const newResultObj = {
+    ...resultObj,
+    ...(missingFieldResult && { missingFields: missingFieldResult }),
+    ...(termsFieldResult && { termsFields: termsFieldResult }),
+  };
+  return newResultObj;
+};
+
 /**
  * This function appends extra range limitation onto a query body "oldQuery"
  * export for test
@@ -73,6 +145,7 @@ export const numericGlobalStats = async (
     rangeEnd,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
@@ -81,11 +154,17 @@ export const numericGlobalStats = async (
     );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
-  const aggsObj = {
+  let aggsObj = {
     [AGGS_GLOBAL_STATS_NAME]: {
       stats: { field },
     },
   };
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    aggsObj = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj);
+  }
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    aggsObj = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj);
+  }
   queryBody.aggs = aggsObj;
   const result = await esInstance.query(esIndex, esType, queryBody);
   let resultStats = result.aggregations[AGGS_GLOBAL_STATS_NAME];
@@ -97,6 +176,7 @@ export const numericGlobalStats = async (
     key: range,
     ...resultStats,
   };
+  resultStats = processResultsForNestedAgg(nestedAggFields, result.aggregations, resultStats);
   return resultStats;
 };
 
@@ -128,6 +208,7 @@ export const numericHistogramWithFixedRangeStep = async (
     rangeStep,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
@@ -139,6 +220,7 @@ export const numericHistogramWithFixedRangeStep = async (
       field,
       filterSelf,
       defaultAuthFilter,
+      nestedAggFields,
     );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
@@ -167,13 +249,31 @@ export const numericHistogramWithFixedRangeStep = async (
     }
     aggsObj[AGGS_QUERY_NAME].histogram.offset = offset;
   }
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    aggsObj[AGGS_QUERY_NAME].aggs = updateAggObjectForTermsFields(
+      nestedAggFields.termsFields,
+      aggsObj[AGGS_QUERY_NAME].aggs,
+    );
+  }
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    aggsObj[AGGS_QUERY_NAME].aggs = updateAggObjectForMissingFields(
+      nestedAggFields.missingFields,
+      aggsObj[AGGS_QUERY_NAME].aggs,
+    );
+  }
   queryBody.aggs = aggsObj;
   const result = await esInstance.query(esIndex, esType, queryBody);
-  const parsedAggsResult = result.aggregations[AGGS_QUERY_NAME].buckets.map(item => ({
-    key: [item.key, item.key + rangeStep],
-    ...item[AGGS_ITEM_STATS_NAME],
-  }));
-  return parsedAggsResult;
+  const finalResults = [];
+  let resultObj;
+  result.aggregations[AGGS_QUERY_NAME].buckets.forEach((item) => {
+    resultObj = processResultsForNestedAgg(nestedAggFields, item, resultObj);
+    finalResults.push({
+      key: [item.key, item.key + rangeStep],
+      ...item[AGGS_ITEM_STATS_NAME],
+      ...resultObj,
+    });
+  });
+  return finalResults;
 };
 
 /**
@@ -204,6 +304,7 @@ export const numericHistogramWithFixedBinCount = async (
     binCount,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) => {
   const globalStats = await numericGlobalStats(
     {
@@ -218,6 +319,7 @@ export const numericHistogramWithFixedBinCount = async (
       rangeEnd,
       filterSelf,
       defaultAuthFilter,
+      nestedAggFields,
     },
   );
   const { min, max } = globalStats;
@@ -238,6 +340,7 @@ export const numericHistogramWithFixedBinCount = async (
       rangeStep,
       filterSelf,
       defaultAuthFilter,
+      nestedAggFields,
     },
   );
 };
@@ -271,6 +374,7 @@ export const numericAggregation = async (
     binCount,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   },
 ) => {
   if (rangeStep <= 0) {
@@ -302,6 +406,7 @@ export const numericAggregation = async (
         rangeStep,
         filterSelf,
         defaultAuthFilter,
+        nestedAggFields,
       },
     );
   }
@@ -320,6 +425,7 @@ export const numericAggregation = async (
         binCount,
         filterSelf,
         defaultAuthFilter,
+        nestedAggFields,
       },
     );
   }
@@ -336,6 +442,7 @@ export const numericAggregation = async (
       rangeEnd,
       filterSelf,
       defaultAuthFilter,
+      nestedAggFields,
     },
   );
   return [result];
@@ -385,29 +492,15 @@ export const textAggregation = async (
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
-  const nestedAggQuery = {};
-  if (nestedAggFields) {
-    nestedAggQuery.aggs = {};
-    if (nestedAggFields.termsFields) {
-      nestedAggFields.termsFields.forEach((element) => {
-        const variableName = `${element}Terms`;
-        nestedAggQuery.aggs[variableName] = {
-          terms: {
-            field: element,
-          },
-        };
-      });
-    }
-    if (nestedAggFields.missingFields) {
-      nestedAggFields.missingFields.forEach((element) => {
-        const variableName = `${element}Missing`;
-        nestedAggQuery.aggs[variableName] = {
-          missing: {
-            field: element,
-          },
-        };
-      });
-    }
+  const aggsObj = {};
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    missingAlias = {};
+    aggsObj.aggs = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj.aggs);
+  }
+
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    missingAlias = {};
+    aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
   }
 
   queryBody.aggs = {
@@ -425,7 +518,7 @@ export const textAggregation = async (
         ],
         size: PAGE_SIZE,
       },
-      ...nestedAggQuery,
+      ...aggsObj,
     },
   };
   let resultSize;
@@ -436,48 +529,11 @@ export const textAggregation = async (
     resultSize = 0;
         
     result.aggregations[aggsName].buckets.forEach((item) => {
-      let missingFieldResult = undefined
-      if (nestedAggFields && nestedAggFields.missingFields) {
-        missingFieldResult = []
-        nestedAggFields.missingFields.forEach((element) => {
-          const variableName = `${element}Missing`;
-          missingFieldResult.push({
-              field: element,
-              count: item[variableName].doc_count,
-            },
-          );
-        });
-      }
-      let termsFieldResult = undefined
-      if (nestedAggFields && nestedAggFields.termsFields) {
-        termsFieldResult = []
-        nestedAggFields.termsFields.forEach((element) => {
-          let tempResult = {}
-          tempResult.field = element
-          tempResult.terms = []
-          const variableName = `${element}Terms`;
-          if (item[variableName].buckets && item[variableName].buckets.length > 0) {
-            item[variableName].buckets.forEach((itemElement) => {
-              tempResult.terms.push({
-              key: itemElement.key,
-              count: itemElement.doc_count,
-            })
-          })
-        } else {
-          tempResult.terms.push({
-            key: null,
-            count: 0
-          })
-        }
-        termsFieldResult.push(tempResult)
-        });
-      }
-
+      const resultObj = processResultsForNestedAgg (nestedAggFields, item, resultObj)
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
-        ...(missingFieldResult && {missingFields: missingFieldResult}),
-        ...(termsFieldResult && {termsFields: termsFieldResult}),
+        ...resultObj
       });
       resultSize += 1;
     });

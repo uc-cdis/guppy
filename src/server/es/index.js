@@ -373,6 +373,7 @@ class ES {
     binCount,
     filterSelf,
     defaultAuthFilter,
+    nestedAggFields,
   }) {
     return esAggregator.numericAggregation(
       {
@@ -391,6 +392,7 @@ class ES {
         binCount,
         filterSelf,
         defaultAuthFilter,
+        nestedAggFields,
       },
     );
   }

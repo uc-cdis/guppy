@@ -6,6 +6,7 @@ import {
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
   getAccessibleResources,
+  askGuppyForNestedAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 
@@ -98,6 +99,39 @@ class GuppyWrapper extends React.Component {
     if (!fields || fields.length === 0) {
       return Promise.resolve({ data: [], totalCount: 0 });
     }
+
+    // nested aggregation
+    if (this.props.guppyConfig.mainField) {
+      const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
+      // use missedNestedFields instead of termsNestedFields for performance
+      return askGuppyForNestedAggregationData(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.props.guppyConfig.mainField,
+        numericAggregation,
+        [],
+        this.props.guppyConfig.aggFields,
+        this.filter,
+        this.state.accessibility,
+      ).then((res) => {
+        if (!res || !res.data) {
+          throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
+        }
+        const data = res.data._aggregation[this.props.guppyConfig.type];
+        const field = numericAggregation ? 'asTextHistogram' : 'histogram';
+        const parsedData = data[this.props.guppyConfig.mainField][field];
+        if (updateDataWhenReceive) {
+          this.setState({
+            rawData: parsedData,
+          });
+        }
+        return {
+          data: res.data,
+        };
+      });
+    }
+
+    // non-nested aggregation
     return askGuppyForRawData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -274,6 +308,9 @@ GuppyWrapper.propTypes = {
   guppyConfig: PropTypes.shape({
     path: PropTypes.string,
     type: PropTypes.string,
+    mainField: PropTypes.string,
+    mainFieldIsNumeric: PropTypes.bool,
+    aggFields: PropTypes.array,
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
@@ -285,7 +322,7 @@ GuppyWrapper.propTypes = {
       fields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
-  rawDataFields: PropTypes.arrayOf(PropTypes.string).isRequired,
+  rawDataFields: PropTypes.arrayOf(PropTypes.string),
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
@@ -294,6 +331,7 @@ GuppyWrapper.propTypes = {
 GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
+  rawDataFields: [],
   accessibleFieldCheckList: undefined,
 };
 
