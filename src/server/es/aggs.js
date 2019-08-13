@@ -7,6 +7,8 @@ import {
 } from './const';
 import config from '../config';
 
+const PAGE_SIZE = 10000;
+
 const updateAggObjectForTermsFields = (termsFields, aggsObj) => {
   const newAggsObj = { ...aggsObj };
   termsFields.forEach((element) => {
@@ -14,6 +16,7 @@ const updateAggObjectForTermsFields = (termsFields, aggsObj) => {
     newAggsObj[variableName] = {
       terms: {
         field: element,
+        size: PAGE_SIZE,
       },
     };
   });
@@ -447,8 +450,6 @@ export const numericAggregation = async (
   );
   return [result];
 };
-
-const PAGE_SIZE = 10000;
 
 /**
  * This function does aggregation for text field, and returns histogram

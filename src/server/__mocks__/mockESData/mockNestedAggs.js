@@ -91,11 +91,13 @@ const mockNestedAggs = () => {
           genderTerms: {
             terms: {
               field: 'gender',
+              size: 10000,
             },
           },
           someNonExistingFieldTerms: {
             terms: {
               field: 'someNonExistingField',
+              size: 10000,
             },
           },
         },
@@ -199,11 +201,13 @@ const mockNestedAggs = () => {
           genderTerms: {
             terms: {
               field: 'gender',
+              size: 10000,
             },
           },
           someNonExistingFieldTerms: {
             terms: {
               field: 'someNonExistingField',
+              size: 10000,
             },
           },
         },
