@@ -35,6 +35,9 @@ Example query:
     ethnicity
     vital_status
     file_count
+    experiment {
+        
+    }
   }
 }
 ```

@@ -10,9 +10,9 @@ const getNumericTextType = (
   if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
     throw new UserInputError('Please check your syntax for input "filter" argument');
   }
-  const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+  const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field].type];
   if (typeof numericTextType === 'undefined') {
-    throw new ApolloError(`ES type ${esInstance.fieldTypes[esIndex][field]} not supported.`, 500);
+    throw new ApolloError(`ES type ${esInstance.fieldTypes[esIndex][field].type} not supported.`, 500);
   }
   return numericTextType;
 };
@@ -224,7 +224,6 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
 const getFilterObj = (
   esInstance,
   esIndex,
-  esType,
   graphqlFilterObj,
   aggsField,
   filterSelf = true,
@@ -235,7 +234,7 @@ const getFilterObj = (
     if (!defaultAuthFilter) {
       return null;
     }
-    return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
+    return getFilterObj(esInstance, esIndex, defaultAuthFilter);
   }
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   let resultFilterObj = {};
@@ -245,7 +244,7 @@ const getFilterObj = (
     const boolItemsList = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
-        esInstance, esIndex, esType, filterItem, aggsField, filterSelf, defaultAuthFilter,
+        esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter,
       );
       if (filterObj) {
         boolItemsList.push(filterObj);
@@ -282,7 +281,7 @@ const getFilterObj = (
     if (aggsField === field && !filterSelf) {
       // if `filterSelf` flag is false, should not filter the target field itself,
       // instead, only apply an auth filter if exists
-      return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
+      return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
     const numericOrTextType = getNumericTextType(esInstance, esIndex, field);

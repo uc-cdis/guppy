@@ -44,7 +44,8 @@ describe('Schema', () => {
       _mapping: Mapping
     }`;
   test('could create query schemas', async () => {
-    const querySchema = getQuerySchema(config.esConfig);
+    await esInstance.initialize();
+    const querySchema = getQuerySchema(config.esConfig, esInstance);
     expect(removeSpacesNewlinesAndDescriptions(querySchema))
       .toEqual(removeSpacesAndNewlines(expectedQuerySchemas));
   });

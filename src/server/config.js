@@ -20,6 +20,10 @@ const config = {
         index: 'gen3-dev-file',
         type: 'file',
       },
+      // {
+      //   index: 'va_data',
+      //   type: 'patients',
+      // },
     ],
     configIndex: inputConfig.config_index,
     authFilterField: inputConfig.auth_filter_field || 'gen3_resource_path',

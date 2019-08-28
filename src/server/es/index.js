@@ -80,7 +80,7 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields);
+    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields.map(f => f.type));
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
         400,
@@ -156,13 +156,7 @@ class ES {
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
-        const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
-          const esFieldType = mappingObj[field].type;
-          acc[field] = esFieldType;
-          return acc;
-        }, {});
-        return fieldTypes;
+        return resp.body[esIndexAlias].mappings[esType].properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -286,7 +280,10 @@ class ES {
       res[cfg.index] = {
         index: cfg.index,
         type: cfg.type,
-        fields: Object.keys(this.fieldTypes[cfg.index]),
+        fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
+          const r = { name: key, type: value.type };
+          return r;
+        }),
       };
     });
     if (typeof esIndex === 'undefined') {
@@ -324,7 +321,7 @@ class ES {
   ) {
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, esType, filter);
+      queryBody.query = getFilterObj(this, esIndex, filter);
     }
     queryBody.sort = getESSortBody(sort, this, esIndex);
     if (typeof size !== 'undefined') {

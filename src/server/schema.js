@@ -14,7 +14,9 @@ const esgqlTypeMapping = {
   half_float: 'Float',
   scaled_float: 'Float',
   array: 'Object',
+  nested: 'Object',
 };
+
 const getGQLType = (esInstance, esIndex, field, esFieldType) => {
   const gqlType = esgqlTypeMapping[esFieldType];
   if (!gqlType) {
@@ -23,6 +25,9 @@ const getGQLType = (esInstance, esIndex, field, esFieldType) => {
   const isArrayField = esInstance.isArrayField(esIndex, field);
   if (isArrayField) {
     return `[${gqlType}]`;
+  }
+  if (esFieldType === 'nested') {
+    return `[${field}]`;
   }
   return gqlType;
 };
@@ -42,61 +47,120 @@ const gqlTypeToAggsHistogramName = {
 
 const getAggsHistogramName = (gqlType) => {
   if (!gqlTypeToAggsHistogramName[gqlType]) {
-    throw new Error(`Invalid elasticsearch type ${gqlType}`);
+    // throw new Error(`Invalid elasticsearch type ${gqlType}`);
+    return ``;
   }
   return gqlTypeToAggsHistogramName[gqlType];
 };
 
-const getQuerySchemaForType = (esType) => {
+const getQuerySchemaForType = (esInstance, esIndex, esType) => {
   const esTypeObjName = firstLetterUpperCase(esType);
-  return `${esType} (
+  const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
+  const existingFields = new Set([]);
+
+  const queueFields = [];
+  Object.keys(fieldESTypeMap).forEach((field) => {
+    const esFieldType = fieldESTypeMap[field].type;
+    if (esFieldType === 'nested' && !existingFields.has(field)) {
+      queueFields.push(field);
+      existingFields.add(field);
+    }
+  });
+  let sType = `${esType} (
     offset: Int, 
     first: Int,
     filter: JSON,
     sort: JSON,
     accessibility: Accessibility=all,
     ): [${esTypeObjName}]`;
+  while (queueFields.length > 0) {
+    const f = queueFields.shift();
+    sType += `
+
+    ${f} (
+      offset: Int, 
+      first: Int,
+      filter: JSON,
+      sort: JSON,
+      accessibility: Accessibility=all,
+    ):  [${firstLetterUpperCase(f)}]`;
+  }
+  return `${sType}
+  `;
 };
+
+// eslint-disable-next-line max-len
+const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => Object.keys(properties).map((field) => {
+  const gqlType = getGQLType(esInstance, esIndex, field, properties[field].type);
+  return { field, type: gqlType };
+});
 
 const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
   const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
-  const fieldGQLTypeMap = Object.keys(fieldESTypeMap).map((field) => {
-    const esFieldType = fieldESTypeMap[field];
-    const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
-    return { field, type: gqlType };
-  });
-  return fieldGQLTypeMap;
+  return getFieldGQLTypeMapForProperties(esInstance, esIndex, fieldESTypeMap);
 };
 
 const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
+  const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
   const esTypeObjName = firstLetterUpperCase(esType);
-  const typeSchema = `
+  const existingFields = new Set([]);
+
+  const queueTypes = [];
+  Object.keys(fieldESTypeMap).forEach((field) => {
+    const esFieldType = fieldESTypeMap[field].type;
+    if (esFieldType === 'nested' && !existingFields.has(field)) {
+      queueTypes.push({ type: field, props: fieldESTypeMap[field].properties });
+      existingFields.add(field);
+    }
+  });
+  // console.info(fieldESTypeMap);
+  // console.info(queueTypes);
+
+  let sTypeSchema = `
     type ${esTypeObjName} {
       ${fieldGQLTypeMap.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
       _matched: [MatchedItem]
     }
   `;
-  return typeSchema;
+  while (queueTypes.length > 0) {
+    const t = queueTypes.shift();
+    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.props);
+    sTypeSchema += `
+    type ${t.type} {
+      ${gqlTypes.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
+    }
+  `;
+  }
+  // log.info(sTypeSchema);
+  return sTypeSchema;
+};
+
+const getAggregationType = (entry) => {
+  if (entry.aggType !== '') {
+    return `${entry.field}: ${entry.aggType},`;
+  }
+  return '';
 };
 
 const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
-  const fieldAggsTypeMap = fieldGQLTypeMap.map(entry => ({
+  // console.info(fieldGQLTypeMap);
+  const fieldAggsTypeMap = fieldGQLTypeMap.filter(f => f.type !== 'Object').map(entry => ({
     field: entry.field,
     aggType: getAggsHistogramName(entry.type),
   }));
   const aggsSchema = `type ${esTypeObjName}Aggregation {
     _totalCount: Int
-    ${fieldAggsTypeMap.map(entry => `${entry.field}: ${entry.aggType},`).join('\n')}
+    ${fieldAggsTypeMap.map(entry => `${getAggregationType(entry)}`).join('\n')}
   }`;
   return aggsSchema;
 };
 
-export const getQuerySchema = esConfig => `
+export const getQuerySchema = (esConfig, esInstance) => `
     type Query {
-      ${esConfig.indices.map(cfg => getQuerySchemaForType(cfg.type)).join('\n')}
+      ${esConfig.indices.map(cfg => getQuerySchemaForType(esInstance, cfg.index, cfg.type)).join('\n')}
       _aggregation: Aggregation
       _mapping: Mapping
     }
@@ -125,7 +189,7 @@ export const getMappingSchema = esConfig => `
   `;
 
 export const buildSchemaString = (esConfig, esInstance) => {
-  const querySchema = getQuerySchema(esConfig);
+  const querySchema = getQuerySchema(esConfig, esInstance);
 
   const matchedItemSchema = `
     type MatchedItem {
