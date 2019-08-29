@@ -39,7 +39,6 @@ describe('config', () => {
 
   /* --------------- For whitelist --------------- */
   test('could disable whitelist', async () => {
-    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/testConfigFiles/test-no-whitelist.json`;
     const config = require('../config').default;
     expect(config.enableEncryptWhiteList).toBe(false);
     expect(config.encryptWhitelist).toEqual([]);
