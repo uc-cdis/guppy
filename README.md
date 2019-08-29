@@ -60,7 +60,9 @@ Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LE
 
 For `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
 
-`regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`. 
+`regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
+By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data'].
+Also the whitelist is disabled by default due to security reasons. If you would like to enable whitelist, simply put `enable_encrypt_whitelist: true` in your config.
 For example `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`: 
 
 ```
@@ -77,12 +79,10 @@ For example `regular` leveled commons with config looks like this will skip encr
   ],
   "config_index": "gen3-dev-config",
   "auth_filter_field": "gen3_resource_path",
+  "enable_encrypt_whitelist": true,
   "encrypt_whitelist": [ "do-not-encrypt-me" ]
 }
 ```
-
-By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data']. 
-If you would like to disable whitelist, simply put `enable_encrypt_whitelist: false` in your config.
 
 For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100: 
 
