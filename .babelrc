@@ -1,6 +1,10 @@
 {
   "presets": [
-    "@babel/preset-env",
+    ["env", {
+      "targets": {
+        "node": "current"
+      }
+    }],
     "@babel/preset-react"
   ],
   "sourceMaps": "inline",
