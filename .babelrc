@@ -8,10 +8,5 @@
     "@babel/preset-react"
   ],
   "sourceMaps": "inline",
-  "retainLines": true,
-  "env": {
-    "test": {
-      "plugins": ["@babel/plugin-transform-runtime"]
-    }
-  }
+  "retainLines": true
 }
