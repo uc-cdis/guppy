@@ -13,7 +13,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /guppy
+COPY . /guppy/
 WORKDIR /guppy
 
 RUN COMMIT=`git rev-parse HEAD` && echo "export const guppyCommit = \"${COMMIT}\";" >versions.js
@@ -21,9 +21,15 @@ RUN VERSION=`git describe --always --tags` && echo "export const guppyVersion =\
 RUN /bin/rm -rf .git
 RUN /bin/rm -rf node_modules
 
+RUN useradd -d /guppy gen3 && chown -R gen3: /guppy
+# see https://superuser.com/questions/710253/allow-non-root-process-to-bind-to-port-80-and-443
+RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/node
+USER gen3
 RUN npm ci --unsafe-perm
+RUN npm run-script prepare
 
 EXPOSE 3000
+EXPOSE 80
 
-CMD npm start
+CMD node dist/server/server.js
 

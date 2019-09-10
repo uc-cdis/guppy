@@ -530,7 +530,7 @@ export const textAggregation = async (
     resultSize = 0;
         
     result.aggregations[aggsName].buckets.forEach((item) => {
-      const resultObj = processResultsForNestedAgg (nestedAggFields, item, resultObj)
+      const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
       finalResults.push({
         key: item.key[field],
         count: item.doc_count,
