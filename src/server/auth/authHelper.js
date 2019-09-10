@@ -29,7 +29,7 @@ export class AuthHelper {
       log.debug('[AuthHelper] accessible resources: ', this._accessibleResourceList);
       log.debug('[AuthHelper] unaccessible resources: ', this._unaccessibleResourceList);
     } catch (err) {
-      log.error('[AuthHelper] error when initializing');
+      log.error('[AuthHelper] error when initializing', err);
     }
   }
 
