@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+var _logger = _interopRequireDefault(require("../logger"));
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
@@ -173,6 +174,7 @@ export const askGuppyAboutAllFieldsAndOptions = (
 
 export const getGQLFilter = (filterObj) => {
   console.log('\n\n\n-------\n\n\n guppy 175: ', filterObj);
+  _logger["default"].info('[7654321] 175: ', JSON.stringify(validatedQueryBody));
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     console.log('\n\n\n-------\n\n\n guppy 178: ', field);
@@ -184,7 +186,7 @@ export const getGQLFilter = (filterObj) => {
           [field]: filterValues.selectedValues,
         },
       });
-    } else if (filterValues.lowerBound && filterValues.upperBound) {
+    } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
       console.log('\n\n\n-------\n\n\n guppy 188: ', field, ' ' , filterValues);
       facetsList.push({
         AND: [
