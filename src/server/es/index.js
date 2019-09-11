@@ -11,6 +11,8 @@ import CodedError from '../utils/error';
 
 class ES {
   constructor(esConfig = config.esConfig) {
+    console.log('765432 guppy 14: in ES constructor');
+    log.info('765432 guppy 14: in ES constructor');
     this.config = esConfig;
     this.client = new Client({
       node: this.config.host,

@@ -174,7 +174,7 @@ export const askGuppyAboutAllFieldsAndOptions = (
 
 export const getGQLFilter = (filterObj) => {
   console.log('\n\n\n-------\n\n\n guppy 175: ', filterObj);
-  _logger["default"].info('[7654321] 175: ', JSON.stringify(validatedQueryBody));
+  _logger["default"].info('[7654321] 175: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     console.log('\n\n\n-------\n\n\n guppy 178: ', field);
