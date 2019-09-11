@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch';
-var _logger = _interopRequireDefault(require("../logger"));
+import log from '../logger';
+
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
@@ -173,21 +174,20 @@ export const askGuppyAboutAllFieldsAndOptions = (
 ) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
 
 export const getGQLFilter = (filterObj) => {
-  console.log('\n\n\n-------\n\n\n guppy 175: ', filterObj);
-  _logger["default"].info('[7654321] 175: ', filterObj);
+  log.info('\n\n\n-------\n\n\n guppy 175: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
-    console.log('\n\n\n-------\n\n\n guppy 178: ', field);
+    log.info('\n\n\n-------\n\n\n guppy 178: ', field);
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
-      console.log('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
+      log.info('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
       facetsList.push({
         IN: {
           [field]: filterValues.selectedValues,
         },
       });
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      console.log('\n\n\n-------\n\n\n guppy 188: ', field, ' ' , filterValues);
+      log.info('\n\n\n-------\n\n\n guppy 188: ', field, ' ' , filterValues);
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },
@@ -195,7 +195,7 @@ export const getGQLFilter = (filterObj) => {
         ],
       });
     } else {
-      console.log('\n\n\n-------\n\n\n guppy 196: ', field, ' ' , filterValues);
+      log.info('\n\n\n-------\n\n\n guppy 196: ', field, ' ' , filterValues);
       throw new Error(`Invalid filter object ${filterValues}`);
     }
   });
