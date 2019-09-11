@@ -172,16 +172,20 @@ export const askGuppyAboutAllFieldsAndOptions = (
 ) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
 
 export const getGQLFilter = (filterObj) => {
+  console.log('\n\n\n-------\n\n\n guppy 175: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
+    console.log('\n\n\n-------\n\n\n guppy 178: ', field);
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
+      console.log('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
       facetsList.push({
         IN: {
           [field]: filterValues.selectedValues,
         },
       });
     } else if (filterValues.lowerBound && filterValues.upperBound) {
+      console.log('\n\n\n-------\n\n\n guppy 188: ', field, ' ' , filterValues);
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },
@@ -189,6 +193,7 @@ export const getGQLFilter = (filterObj) => {
         ],
       });
     } else {
+      console.log('\n\n\n-------\n\n\n guppy 196: ', field, ' ' , filterValues);
       throw new Error(`Invalid filter object ${filterValues}`);
     }
   });
