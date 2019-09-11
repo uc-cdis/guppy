@@ -5,6 +5,8 @@ import log from '../logger';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
+log.info('\n\n\n-------\n\n\n guppy 8 src/component/Utils: ');
+
 const histogramQueryStrForEachField = field => (`
   ${field} {
     histogram {
