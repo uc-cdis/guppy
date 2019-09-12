@@ -178,7 +178,9 @@ export const getGQLFilter = (filterObj) => {
   console.log('\n\n\n-------\n\n\n guppy 175 getGQLFilter: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
-    console.log('\n\n\n-------\n\n\n guppy 178: ', field);
+    if(field == 'bmi') {
+      console.log('bmi, expect filter values');
+    }
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
       console.log('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
@@ -188,7 +190,9 @@ export const getGQLFilter = (filterObj) => {
         },
       });
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      console.log('\n\n\n-------\n\n\n guppy 188: ', field, ' ' , filterValues);
+      if(field == 'bmi') {
+        console.log('\n\n\n-------\n\n\n bmi filter values: ', field, ' ' , filterValues);
+      }
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },

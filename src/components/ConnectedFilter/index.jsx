@@ -68,6 +68,7 @@ class ConnectedFilter extends React.Component {
   }
 
   setFilter(filter) {
+    console.log('index.jsx setFilter filter 71: ', filter);
     if (this.filterGroupRef.current) {
       this.filterGroupRef.current.resetFilter();
     }
@@ -92,6 +93,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
+    console.log('ConnectedFilter/index.jsx handleFilterChange filterResults: ', filterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
