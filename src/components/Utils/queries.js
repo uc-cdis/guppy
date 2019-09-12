@@ -146,7 +146,7 @@ const queryGuppyForRawDataAndTotalCounts = (
   }
   const query = `${queryLine}
     ${dataTypeLine} 
-      ${fields.join('\n')}:
+      ${fields.join('\n')}
     }
     _aggregation {
       ${typeAggsLine} 
