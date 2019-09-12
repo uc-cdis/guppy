@@ -207,6 +207,7 @@ export const getGQLFilter = (filterObj) => {
 };
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
+  console.log('210: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
@@ -221,6 +222,7 @@ export const askGuppyForNestedAggregationData = (
   filter,
   accessibility,
 ) => {
+  console.log('225: filter');
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForNestedAgg(
     path,
@@ -244,6 +246,7 @@ export const askGuppyForRawData = (
   size = 20,
   accessibility = 'all',
 ) => {
+  console.log('249: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
     path,
@@ -280,6 +283,7 @@ export const downloadDataFromGuppy = (
   if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };
     if (fields) queryBody.fields = fields;
+    console.log('guppy 283: ', queryBody);
     if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
     if (typeof accessibility !== 'undefined') queryBody.accessibility = accessibility;
@@ -307,6 +311,7 @@ export const askGuppyForTotalCounts = (
   filter,
   accessibility = 'all',
 ) => {
+  console.log('guppy 311: ', filter);
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
   const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: ${accessibility}) {`;
