@@ -12,10 +12,12 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   }
   // if this is for range slider
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
+    console.log('utils .js line 14 getSingleFilterOption initHistogramRes', initHistogramRes);
+    console.log('utils .js line 15 getSingleFilterOption item', item);
     const rangeOptions = histogramResult.histogram.map((item) => {
       const minValue = initHistogramRes ? initHistogramRes.histogram[0].key[0] : item.key[0];
       const maxValue = initHistogramRes ? initHistogramRes.histogram[0].key[1] : item.key[1];
-      return {
+      const rv = {
         filterType: 'range',
         min: Math.floor(minValue),
         max: Math.ceil(maxValue),
@@ -23,6 +25,8 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
         upperBound: item.key[1],
         count: item.count,
       };
+      console.log('utils.js 28 rv: ', rv);
+      return rv;
     });
     return rangeOptions;
   }

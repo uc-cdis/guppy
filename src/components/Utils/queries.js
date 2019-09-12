@@ -146,7 +146,7 @@ const queryGuppyForRawDataAndTotalCounts = (
   }
   const query = `${queryLine}
     ${dataTypeLine} 
-      ${fields.join('\n')}
+      ${fields.join('\n')}:
     }
     _aggregation {
       ${typeAggsLine} 
@@ -175,7 +175,7 @@ export const askGuppyAboutAllFieldsAndOptions = (
 ) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
 
 export const getGQLFilter = (filterObj) => {
-  console.log('\n\n\n-------\n\n\n guppy 175: ', filterObj);
+  console.log('\n\n\n-------\n\n\n guppy 175 getGQLFilter: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     console.log('\n\n\n-------\n\n\n guppy 178: ', field);
@@ -207,7 +207,7 @@ export const getGQLFilter = (filterObj) => {
 };
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
-  console.log('210: ', filter);
+  console.log('210 askGuppyForAggregationData: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
@@ -222,7 +222,7 @@ export const askGuppyForNestedAggregationData = (
   filter,
   accessibility,
 ) => {
-  console.log('225: filter');
+  console.log('225 askGuppyForNestedAggregationData: filter');
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForNestedAgg(
     path,
@@ -246,7 +246,7 @@ export const askGuppyForRawData = (
   size = 20,
   accessibility = 'all',
 ) => {
-  console.log('249: ', filter);
+  console.log('249 askGuppyForRawData: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
     path,
