@@ -4,8 +4,6 @@ import fetch from 'isomorphic-fetch';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
-console.log('\n\n\n-------\n\n\n guppy 8 src/component/Utils: ');
-
 const histogramQueryStrForEachField = field => (`
   ${field} {
     histogram {
@@ -175,22 +173,16 @@ export const askGuppyAboutAllFieldsAndOptions = (
 ) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
 
 export const getGQLFilter = (filterObj) => {
-  console.log('\n\n\n-------\n\n\n guppy 175 getGQLFilter: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
-    console.log(field, ' expect filter values. filterObj: ', filterObj);
-    
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
-      console.log('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
       facetsList.push({
         IN: {
           [field]: filterValues.selectedValues,
         },
       });
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      console.log('\n\n\n-------\n\n\n ', field,  ' filter values: ', field, ' ' , filterValues);
-      
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },
@@ -198,11 +190,9 @@ export const getGQLFilter = (filterObj) => {
         ],
       });
     } else {
-      console.log('\n\n\n-------\n\n\n guppy 196: ', field, ' ' , filterValues);
-      // throw new Error(`Invalid filter object ${filterValues}`);
+      throw new Error(`Invalid filter object ${filterValues}`);
     }
   });
-  console.log('205 facetsList: ', facetsList);
   const gqlFilter = {
     AND: facetsList,
   };
@@ -210,7 +200,6 @@ export const getGQLFilter = (filterObj) => {
 };
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
-  console.log('210 askGuppyForAggregationData: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
@@ -225,7 +214,6 @@ export const askGuppyForNestedAggregationData = (
   filter,
   accessibility,
 ) => {
-  console.log('225 askGuppyForNestedAggregationData: filter');
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForNestedAgg(
     path,
@@ -249,7 +237,6 @@ export const askGuppyForRawData = (
   size = 20,
   accessibility = 'all',
 ) => {
-  console.log('249 askGuppyForRawData: ', filter);
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
     path,
@@ -286,7 +273,6 @@ export const downloadDataFromGuppy = (
   if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };
     if (fields) queryBody.fields = fields;
-    console.log('guppy 283: ', queryBody);
     if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
     if (typeof accessibility !== 'undefined') queryBody.accessibility = accessibility;
@@ -314,7 +300,6 @@ export const askGuppyForTotalCounts = (
   filter,
   accessibility = 'all',
 ) => {
-  console.log('guppy 311: ', filter);
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
   const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: ${accessibility}) {`;
