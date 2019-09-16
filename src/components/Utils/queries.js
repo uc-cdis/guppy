@@ -1,6 +1,5 @@
 import fetch from 'isomorphic-fetch';
 
-
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
