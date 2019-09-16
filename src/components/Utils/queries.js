@@ -178,9 +178,8 @@ export const getGQLFilter = (filterObj) => {
   console.log('\n\n\n-------\n\n\n guppy 175 getGQLFilter: ', filterObj);
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
-    if(field == 'bmi') {
-      console.log('bmi, expect filter values');
-    }
+    console.log(field, ' expect filter values. filterObj: ', filterObj);
+    
     const filterValues = filterObj[field];
     if (filterValues.selectedValues) {
       console.log('\n\n\n-------\n\n\n guppy 181: ', field, ' ', filterValues.selectedValues);
@@ -190,9 +189,8 @@ export const getGQLFilter = (filterObj) => {
         },
       });
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      if(field == 'bmi') {
-        console.log('\n\n\n-------\n\n\n bmi filter values: ', field, ' ' , filterValues);
-      }
+      console.log('\n\n\n-------\n\n\n ', field,  ' filter values: ', field, ' ' , filterValues);
+      
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },
@@ -201,9 +199,10 @@ export const getGQLFilter = (filterObj) => {
       });
     } else {
       console.log('\n\n\n-------\n\n\n guppy 196: ', field, ' ' , filterValues);
-      throw new Error(`Invalid filter object ${filterValues}`);
+      // throw new Error(`Invalid filter object ${filterValues}`);
     }
   });
+  console.log('205 facetsList: ', facetsList);
   const gqlFilter = {
     AND: facetsList,
   };
