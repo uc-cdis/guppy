@@ -83,6 +83,11 @@ class ConnectedFilter extends React.Component {
     }
   }
 
+  handleFilterChangeWrapper(filterResults, extraParam) {
+    console.log('handleFilterChangeWrapper filterResults');
+    return handleFilterChange(filterResults);
+  }
+
   /**
    * Handler function that is called everytime filter changes
    * What this function does:
@@ -133,7 +138,7 @@ class ConnectedFilter extends React.Component {
         className={this.props.className}
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
-        onFilterChange={e => this.handleFilterChange(e)}
+        onFilterChange={e => this.handleFilterChangeWrapper(e)}
         hideZero={this.props.hideZero}
       />
     );
