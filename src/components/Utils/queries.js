@@ -181,7 +181,7 @@ export const getGQLFilter = (filterObj) => {
           [field]: filterValues.selectedValues,
         },
       });
-    } else if (filterValues.lowerBound && filterValues.upperBound) {
+    } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
       facetsList.push({
         AND: [
           { '>=': { [field]: filterValues.lowerBound } },
