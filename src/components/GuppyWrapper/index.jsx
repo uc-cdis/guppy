@@ -96,6 +96,7 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
+    console.log('GuppyWrapper line 99 -- getDataFromGuppy: ', fields, ' ', size, ' ', offset);
     if (!fields || fields.length === 0) {
       return Promise.resolve({ data: [], totalCount: 0 });
     }
@@ -152,6 +153,7 @@ class GuppyWrapper extends React.Component {
           totalCount,
         });
       }
+      console.log('returning from askGuppyForRawData callback in getDataFromGuppy: ', parsedData, ' and ', totalCount);
       return {
         data: parsedData,
         totalCount,
