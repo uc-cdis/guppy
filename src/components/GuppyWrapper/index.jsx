@@ -195,7 +195,7 @@ class GuppyWrapper extends React.Component {
     let mergedFilter = filter;
     if(Object.keys(this.props.adminAppliedPreFilters).length > 0) {
       console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
-      mergedFilter = this.mergeFilters(filters, this.props.adminAppliedPreFilters);
+      mergedFilter = this.mergeFilters(filter, this.props.adminAppliedPreFilters);
     }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
