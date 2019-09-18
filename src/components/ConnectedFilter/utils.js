@@ -53,6 +53,7 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
       ),
     };
   });
+  console.log('guppy utils.js line 56 sections: ', sections);
   return sections;
 };
 

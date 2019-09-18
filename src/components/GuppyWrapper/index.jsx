@@ -327,6 +327,9 @@ GuppyWrapper.propTypes = {
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
+  adminFilterConfig: PropTypes.shape({
+    aggFields: PropTypes.array,
+  })
 };
 
 GuppyWrapper.defaultProps = {
