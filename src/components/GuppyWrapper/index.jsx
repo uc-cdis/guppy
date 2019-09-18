@@ -73,6 +73,8 @@ class GuppyWrapper extends React.Component {
         filterAB[key].selectedValues = filterA[key].selectedValues.concat(
           filterB[key].selectedValues
         );
+      } else {
+        filterAB.key = filterB.key;
       }
     }
     console.log('guppy mergeFilters. filterAB: ', filterAB);
