@@ -193,12 +193,12 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(filter, accessibility) {
-    console.log('guppy HANDLE FILTER CHANGE 192 filter:', filter);
-    let mergedFilter = filter;
+  handleFilterChange(userFilter, accessibility) {
+    console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
+    let filter = Object.assign(userFilter);
     if(Object.keys(this.props.adminAppliedPreFilters).length > 0) {
       console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
-      mergedFilter = this.mergeFilters(filter, this.props.adminAppliedPreFilters);
+      filter = this.mergeFilters(userFilter, this.props.adminAppliedPreFilters);
     }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
