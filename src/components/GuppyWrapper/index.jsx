@@ -45,6 +45,7 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.filter = {}; // to avoid asynchronizations, we store another filter as private var
+    console.log('inside guppywrapper constructor with adminAppliedPreFilters:', adminAppliedPreFilters);
     this.state = {
       aggsData: {},
       filter: {},
@@ -57,6 +58,25 @@ class GuppyWrapper extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
     };
   }
+
+  /**
+   * This function takes two objects containing filters to be applied
+   * and combines them into one filter object in the same format.
+  **/
+  mergeFilters(filterA, filterB) {
+    console.log('guppy mergeFilters. filterA: ', filterA);
+    console.log('guppy mergeFilters. filterB: ', filterB);
+    const filterAB = Object.assign({}, filterA);
+    for (key in filterB) {
+      if (Object.prototype.hasOwnProperty.call(filterA, key)) {
+        console.log('mergeFilters 72: ', key);
+        const filterA.selectedValues = [];
+      }
+    }
+    console.log('guppy mergeFilters. filterAB: ', filterAB);
+    return filterAB;
+  }
+
 
   componentDidMount() {
     getAllFieldsFromGuppy(
@@ -169,6 +189,12 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(filter, accessibility) {
+    console.log('guppy HANDLE FILTER CHANGE 192 filter:', filter);
+    let mergedFilter = filter;
+    if(Object.keys(this.props.adminAppliedPreFilters).length > 0) {
+      console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
+      mergedFilter = this.mergeFilters(filters, this.props.adminAppliedPreFilters);
+    }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
     }
@@ -327,9 +353,7 @@ GuppyWrapper.propTypes = {
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
-  adminFilterConfig: PropTypes.shape({
-    aggFields: PropTypes.array,
-  })
+  adminAppliedPreFilters: PropTypes.object
 };
 
 GuppyWrapper.defaultProps = {
@@ -337,6 +361,7 @@ GuppyWrapper.defaultProps = {
   onFilterChange: () => {},
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
+  adminAppliedPreFilters: {}
 };
 
 export default GuppyWrapper;
