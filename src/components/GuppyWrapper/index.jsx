@@ -45,7 +45,7 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.filter = {}; // to avoid asynchronizations, we store another filter as private var
-    console.log('inside guppywrapper constructor with adminAppliedPreFilters:', adminAppliedPreFilters);
+    console.log('inside guppywrapper constructor with adminAppliedPreFilters:', this.props.adminAppliedPreFilters);
     this.state = {
       aggsData: {},
       filter: {},
