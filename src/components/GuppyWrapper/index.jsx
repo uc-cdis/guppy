@@ -70,7 +70,9 @@ class GuppyWrapper extends React.Component {
     for (key in filterB) {
       if (Object.prototype.hasOwnProperty.call(filterA, key)) {
         console.log('mergeFilters 72: ', key);
-        const filterA.selectedValues = [];
+        filterAB[key].selectedValues = filterA[key].selectedValues.concat(
+          filterB[key].selectedValues
+        );
       }
     }
     console.log('guppy mergeFilters. filterAB: ', filterAB);
