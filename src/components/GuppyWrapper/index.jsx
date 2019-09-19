@@ -171,6 +171,9 @@ class GuppyWrapper extends React.Component {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
       const parsedData = res.data[this.props.guppyConfig.type];
+      console.log(' DEBUG ME!!! askGuppyForRawData res', res);
+      console.log(' and res.data._aggregation', res.data._aggregation);
+      console.log(' and this.props.guppyConfig.type', this.props.guppyConfig.type);
       const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
       if (updateDataWhenReceive) {
         this.setState({
