@@ -51,20 +51,22 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
     console.log('label: ', label);
     console.log('tabsOptions[field]', tabsOptions[field]);
     console.log('initialTabsOptions', initialTabsOptions);
+    
+    let tabsOptionsFiltered = Object.assign({}, tabsOptions[field]);
+    if (Object.keys(adminAppliedPreFilters).includes(field)) {
+      tabsOptionsFiltered.histogram = tabsOptionsFiltered.histogram.filter(x => 
+        adminAppliedPreFilters[field].selectedValues.includes(x.key)
+      );
+    }
+    console.log('tabOptionsFiltered: ', tabOptionsFiltered);
+
     let defaultOptions = getSingleFilterOption(
-      tabsOptions[field],
+      tabOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
-    if (Object.keys(adminAppliedPreFilters).includes(field)) {
-      let adminOptions = getSingleFilterOption(
-        adminAppliedPreFilters,
-        undefined
-      );
-
-      Object.assign(defaultOptions, adminOptions);
-    }
-    console.log('defaultOptions after Object.assign: ', defaultOptions);
+    
+    
     const rv = {
       title: label,
       options: defaultOptions,
