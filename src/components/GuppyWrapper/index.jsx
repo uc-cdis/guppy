@@ -57,6 +57,7 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
     };
+    Object.freeze(this.props.adminAppliedPreFilters);
   }
 
   /**

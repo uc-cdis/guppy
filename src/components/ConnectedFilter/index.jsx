@@ -23,6 +23,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
     };
     this.filterGroupRef = React.createRef();
+    Object.freeze(this.props.adminAppliedPreFilters);
   }
 
   componentDidMount() {
