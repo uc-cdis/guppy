@@ -49,11 +49,23 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
     console.log('overrideName: ', overrideName);
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
     console.log('label: ', label);
-    const defaultOptions = getSingleFilterOption(
+    console.log('tabsOptions[field]', tabsOptions[field]);
+    console.log('initialTabsOptions', initialTabsOptions);
+    let defaultOptions = getSingleFilterOption(
       tabsOptions[field],
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
-    console.log('defaultOptions: ', defaultOptions);
+
+    Object.assign(defaultOptions, admin);
+    if (Object.keys(adminAppliedPreFilters).includes(field)) {
+      let adminOptions = getSingleFilterOption(
+        adminAppliedPreFilters,
+        undefined
+      );
+
+      Object.assign(defaultOptions, adminOptions);
+    }
+    console.log('defaultOptions after Object.assign: ', defaultOptions);
     const rv = {
       title: label,
       options: defaultOptions,
