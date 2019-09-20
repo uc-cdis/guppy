@@ -93,7 +93,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    console.log('ConnectedFilter handleFilterChange: ', filterResults);
+    console.log('ConnectedFilter handleFilterChange: ', JSON.parse(JSON.stringify(filterResults)));
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
