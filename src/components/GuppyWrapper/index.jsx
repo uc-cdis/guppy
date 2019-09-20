@@ -80,7 +80,7 @@ class GuppyWrapper extends React.Component {
         // The admin filter overrides the user filter to maintain exclusivity.
         filterAB[key].selectedValues = adminAppliedPreFilter[key].allowedValues;
       } else if (Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-        filterAB[key] = adminAppliedPreFilter[key];
+        filterAB[key] = { 'selectedValues' : adminAppliedPreFilter[key].allowedValues };
       }
     }
     console.log('guppy mergeFilters. filterAB: ', filterAB);
