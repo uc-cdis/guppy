@@ -56,7 +56,6 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
-    Object.assign(defaultOptions, admin);
     if (Object.keys(adminAppliedPreFilters).includes(field)) {
       let adminOptions = getSingleFilterOption(
         adminAppliedPreFilters,
