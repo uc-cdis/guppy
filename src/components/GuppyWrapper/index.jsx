@@ -57,7 +57,7 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
     };
-    Object.freeze(this.props.adminAppliedPreFilters);
+    this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
   }
 
   /**
@@ -203,6 +203,7 @@ class GuppyWrapper extends React.Component {
 
   handleFilterChange(userFilter, accessibility) {
     console.log('(204) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.props.adminAppliedPreFilters)));
+    console.log('(205) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.adminObjectReadOnly)));
     console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.props.adminAppliedPreFilters).length > 0) {
