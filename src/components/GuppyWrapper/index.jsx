@@ -336,6 +336,7 @@ class GuppyWrapper extends React.Component {
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
+            adminAppliedPreFilters: this.props.adminAppliedPreFilters,
           }))
         }
       </React.Fragment>
