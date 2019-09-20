@@ -59,7 +59,8 @@ class ConnectedFilter extends React.Component {
       <FilterList
         key={index}
         sections={
-          getFilterSections(fields, fieldMapping, processedTabsOptions, this.state.initialAggsData)
+          getFilterSections(fields, fieldMapping, processedTabsOptions, 
+            this.state.initialAggsData, this.props.adminAppliedPreFilters)
         }
         tierAccessLimit={this.props.tierAccessLimit}
       />
@@ -161,6 +162,7 @@ ConnectedFilter.propTypes = {
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
+  adminAppliedPreFilters: PropTypes.object,
 };
 
 ConnectedFilter.defaultProps = {
@@ -172,6 +174,7 @@ ConnectedFilter.defaultProps = {
   tierAccessLimit: undefined,
   onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
+  adminAppliedPreFilters: {},
 };
 
 export default ConnectedFilter;

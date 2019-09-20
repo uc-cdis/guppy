@@ -41,7 +41,8 @@ const capitalizeFirstLetter = (str) => {
   return res.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
-export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabsOptions) => {
+export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters) => {
+  console.log('GUPPY GET FILTER SECTIONS ADMIN FILTERS ', adminAppliedPreFilters);
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find(entry => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
