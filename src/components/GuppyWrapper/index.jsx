@@ -310,6 +310,7 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
+    console.log('GUPPY WRAPPER 313 adminAppliedPreFilters: ', this.props.adminAppliedPreFilters);
     return (
       <React.Fragment>
         {
