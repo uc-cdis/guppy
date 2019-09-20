@@ -58,10 +58,10 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
         adminAppliedPreFilters[field].selectedValues.includes(x.key)
       );
     }
-    console.log('tabOptionsFiltered: ', tabOptionsFiltered);
+    console.log('tabsOptionsFiltered: ', tabsOptionsFiltered);
 
     let defaultOptions = getSingleFilterOption(
-      tabOptionsFiltered,
+      tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
