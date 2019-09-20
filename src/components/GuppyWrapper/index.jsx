@@ -201,7 +201,7 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(userFilter, accessibility) {
-    console.log('(204) GUPPY WRAPPER HANDLE FILTER CHANGE! ', this.props.adminAppliedPreFilter);
+    console.log('(204) GUPPY WRAPPER HANDLE FILTER CHANGE! ', this.props.adminAppliedPreFilters);
     console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.props.adminAppliedPreFilters).length > 0) {
