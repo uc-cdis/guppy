@@ -44,6 +44,7 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.type,
       this.state.allFields,
       this.state.accessibility,
+      this.state.filter,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type], this.state.adminAppliedPreFilters);
