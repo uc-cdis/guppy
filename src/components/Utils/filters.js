@@ -16,9 +16,9 @@
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
         console.log('mergeFilters 72: ', key);
         // The admin filter overrides the user filter to maintain exclusivity.
-        filterAB[key].selectedValues = adminAppliedPreFilter[key].allowedValues;
+        filterAB[key].selectedValues = adminAppliedPreFilter[key].selectedValues;
       } else if (Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-        filterAB[key] = { 'selectedValues' : adminAppliedPreFilter[key].allowedValues };
+        filterAB[key] = { 'selectedValues' : adminAppliedPreFilter[key].selectedValues };
       }
     }
     console.log('guppy mergeFilters. filterAB: ', filterAB);

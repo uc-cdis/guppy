@@ -55,7 +55,7 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
     let tabsOptionsFiltered = Object.assign({}, tabsOptions[field]);
     if (Object.keys(adminAppliedPreFilters).includes(field)) {
       tabsOptionsFiltered.histogram = tabsOptionsFiltered.histogram.filter(x => 
-        adminAppliedPreFilters[field].allowedValues.includes(x.key)
+        adminAppliedPreFilters[field].selectedValues.includes(x.key)
       );
     }
     console.log('tabsOptionsFiltered: ', tabsOptionsFiltered);
