@@ -23,4 +23,4 @@
     }
     console.log('guppy mergeFilters. filterAB: ', filterAB);
     return filterAB;
-  }
+  };

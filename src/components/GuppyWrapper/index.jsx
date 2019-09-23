@@ -9,7 +9,7 @@ import {
   askGuppyForNestedAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
-import { mergeFilters } from '../Utils/queries';
+import { mergeFilters } from '../Utils/filters';
 
 /**
  * Wrapper that connects to Guppy server,

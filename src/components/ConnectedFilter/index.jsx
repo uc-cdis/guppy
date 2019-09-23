@@ -12,7 +12,7 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
-import { mergeFilters } from '../Utils/queries';
+import { mergeFilters } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
