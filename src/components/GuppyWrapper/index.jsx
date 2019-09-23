@@ -213,7 +213,6 @@ class GuppyWrapper extends React.Component {
     this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
     console.log('(2089) state prefilter after string assign ', this.state.adminAppliedPreFilters);
     console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
-    this.props.
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
