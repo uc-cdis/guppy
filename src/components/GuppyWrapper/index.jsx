@@ -102,6 +102,7 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
+    console.log('(-105-) inside getDataFromGuppy with', this.filter);
     console.log('GuppyWrapper line 99 -- getDataFromGuppy: ', fields, ' ', size, ' ', offset);
     if (!fields || fields.length === 0) {
       return Promise.resolve({ data: [], totalCount: 0 });
@@ -120,6 +121,7 @@ class GuppyWrapper extends React.Component {
         this.filter,
         this.state.accessibility,
       ).then((res) => {
+        console.log('124 res.data: ', res.data);
         if (!res || !res.data) {
           throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
         }
@@ -148,6 +150,7 @@ class GuppyWrapper extends React.Component {
       size,
       this.state.accessibility,
     ).then((res) => {
+      console.log('153 res.data: ', res.data);
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
