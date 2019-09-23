@@ -7,7 +7,7 @@
    amount of data shown when combined, but an admin filter should always decrease
    or keep constant the amount of dat shown when combined with a user filter).
   * */
-  mergeFilters(userFilter, adminAppliedPreFilter) {
+  export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
     console.log('guppy mergeFilters. userFilter: ', userFilter);
     console.log('guppy mergeFilters. adminAppliedPreFilter: ', adminAppliedPreFilter);
     const filterAB = Object.assign({}, userFilter);
