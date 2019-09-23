@@ -12,6 +12,7 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
+import { mergeFilters } from '../Utils/queries';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
@@ -99,22 +100,24 @@ class ConnectedFilter extends React.Component {
    */
   handleFilterChange(filterResults) {
     console.log('ConnectedFilter handleFilterChange: ', JSON.parse(JSON.stringify(filterResults)));
+    this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
+    let mergedFilterResults = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      filterResults,
+      mergedFilterResults,
       this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          filterResults,
+          mergedFilterResults,
         );
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(filterResults, this.state.accessibility);
+      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
   }
 

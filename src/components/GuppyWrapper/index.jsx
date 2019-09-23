@@ -9,6 +9,7 @@ import {
   askGuppyForNestedAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
+import { mergeFilters } from '../Utils/queries';
 
 /**
  * Wrapper that connects to Guppy server,
@@ -63,34 +64,6 @@ class GuppyWrapper extends React.Component {
     this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
 
   }
-
-  /**
-   * This function takes two objects containing filters to be applied
-   * and combines them into one filter object in the same format.
-   * Note: the admin filter takes precedence. Selected values in the user
-   * filter will be discarded if the key collides. This is to avoid
-   * the user undoing the admin filter. (Multiple user checkboxes increase the 
-   amount of data shown when combined, but an admin filter should always decrease
-   or keep constant the amount of dat shown when combined with a user filter).
-  * */
-  mergeFilters(userFilter, adminAppliedPreFilter) {
-    console.log('guppy mergeFilters. userFilter: ', userFilter);
-    console.log('guppy mergeFilters. adminAppliedPreFilter: ', adminAppliedPreFilter);
-    const filterAB = Object.assign({}, userFilter);
-    for (const key in adminAppliedPreFilter) {
-      if (Object.prototype.hasOwnProperty.call(userFilter, key)
-          && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-        console.log('mergeFilters 72: ', key);
-        // The admin filter overrides the user filter to maintain exclusivity.
-        filterAB[key].selectedValues = adminAppliedPreFilter[key].allowedValues;
-      } else if (Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-        filterAB[key] = { 'selectedValues' : adminAppliedPreFilter[key].allowedValues };
-      }
-    }
-    console.log('guppy mergeFilters. filterAB: ', filterAB);
-    return filterAB;
-  }
-
 
   componentDidMount() {
     getAllFieldsFromGuppy(
@@ -211,12 +184,12 @@ class GuppyWrapper extends React.Component {
     console.log('(206) GUPPY WRAPPER HANDLE FILTER CHANGE! ', this.adminObjectFrozenString);
     console.log('(207) state prefilter before string assign ', this.state.adminAppliedPreFilters);
     this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
-    console.log('(2089) state prefilter after string assign ', this.state.adminAppliedPreFilters);
+    console.log('(209) state prefilter after string assign ', this.state.adminAppliedPreFilters);
     console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
-      filter = this.mergeFilters(userFilter, this.state.adminAppliedPreFilters);
+      filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
     }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
