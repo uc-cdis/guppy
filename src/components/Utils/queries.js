@@ -12,6 +12,7 @@ const histogramQueryStrForEachField = field => (`
   }`);
 
 const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+  console.log('queries.js line 15 queryGuppyForAggs, filter: ', filter);
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
