@@ -102,6 +102,7 @@ class ConnectedFilter extends React.Component {
     console.log('ConnectedFilter handleFilterChange: ', JSON.parse(JSON.stringify(filterResults)));
     this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
     let mergedFilterResults = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
+    console.log('ConnectedFilter mergedFilterResults: ', mergedFilterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
