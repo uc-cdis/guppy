@@ -36,7 +36,7 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
-      this.props.onFilterChange({}, this.state.accessibility);
+      this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
