@@ -23,6 +23,7 @@ class ConnectedFilter extends React.Component {
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
+      filter: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.filterGroupRef = React.createRef();
 
