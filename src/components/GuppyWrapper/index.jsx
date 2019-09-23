@@ -47,9 +47,12 @@ class GuppyWrapper extends React.Component {
     super(props);
     this.filter = {}; // to avoid asynchronizations, we store another filter as private var
     console.log('inside guppywrapper constructor with adminAppliedPreFilters:', this.props.adminAppliedPreFilters);
+    this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
+    Object.freeze(this.adminObjectReadOnly);
+    this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
     this.state = {
       aggsData: {},
-      filter: {},
+      filter: Object.assign({}, this.props.adminAppliedPreFilters),
       rawData: [],
       totalCount: 0,
       allFields: [],
@@ -59,10 +62,6 @@ class GuppyWrapper extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
     };
-    this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
-    Object.freeze(this.adminObjectReadOnly);
-    this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
-
   }
 
   componentDidMount() {

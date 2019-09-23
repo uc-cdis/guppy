@@ -36,6 +36,7 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
+      console.log('componentDidMount has ', this.state.adminAppliedPreFilters);
       this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
