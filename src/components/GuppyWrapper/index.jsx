@@ -56,6 +56,7 @@ class GuppyWrapper extends React.Component {
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
+      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
     Object.freeze(this.adminObjectReadOnly);
@@ -208,11 +209,15 @@ class GuppyWrapper extends React.Component {
     console.log('(204) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.props.adminAppliedPreFilters)));
     console.log('(205) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.adminObjectReadOnly)));
     console.log('(206) GUPPY WRAPPER HANDLE FILTER CHANGE! ', this.adminObjectFrozenString);
+    console.log('(207) state prefilter before string assign ', this.state.adminAppliedPreFilters);
+    this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
+    console.log('(2089) state prefilter after string assign ', this.state.adminAppliedPreFilters);
     console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
+    this.props.
     let filter = Object.assign({}, userFilter);
-    if (Object.keys(this.props.adminAppliedPreFilters).length > 0) {
+    if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
-      filter = this.mergeFilters(userFilter, this.props.adminAppliedPreFilters);
+      filter = this.mergeFilters(userFilter, this.state.adminAppliedPreFilters);
     }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
@@ -319,6 +324,9 @@ class GuppyWrapper extends React.Component {
   render() {
     console.log('GUPPY WRAPPER 313 adminAppliedPreFilters: ', 
       JSON.parse(JSON.stringify(this.props.adminAppliedPreFilters
+    )));
+    console.log('GUPPY WRAPPER 314 adminAppliedPreFilters: ', 
+      JSON.parse(JSON.stringify(this.state.adminAppliedPreFilters
     )));
     return (
       <React.Fragment>

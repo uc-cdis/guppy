@@ -21,9 +21,13 @@ class ConnectedFilter extends React.Component {
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
+      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.filterGroupRef = React.createRef();
+
     this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
+    Object.freeze(this.adminObjectReadOnly);
+    this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
   }
 
   componentDidMount() {
@@ -61,7 +65,7 @@ class ConnectedFilter extends React.Component {
         key={index}
         sections={
           getFilterSections(fields, fieldMapping, processedTabsOptions, 
-            this.state.initialAggsData, this.props.adminAppliedPreFilters)
+            this.state.initialAggsData, this.state.adminAppliedPreFilters)
         }
         tierAccessLimit={this.props.tierAccessLimit}
       />
