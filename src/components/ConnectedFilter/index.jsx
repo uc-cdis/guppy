@@ -37,7 +37,6 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
-      console.log('componentDidMount has ', this.state.adminAppliedPreFilters);
       this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
@@ -102,10 +101,8 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    console.log('ConnectedFilter handleFilterChange: ', JSON.parse(JSON.stringify(filterResults)));
     this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
     let mergedFilterResults = mergeFilters(filterResults, this.state.adminAppliedPreFilters);
-    console.log('ConnectedFilter mergedFilterResults: ', mergedFilterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,

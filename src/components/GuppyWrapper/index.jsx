@@ -46,7 +46,6 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.filter = Object.assign({}, this.props.adminAppliedPreFilters); // to avoid asynchronizations, we store another filter as private var
-    console.log('inside guppywrapper constructor with adminAppliedPreFilters:', this.props.adminAppliedPreFilters);
     this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
     Object.freeze(this.adminObjectReadOnly);
     this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
@@ -102,8 +101,6 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
-    console.log('(-105-) inside getDataFromGuppy with', this.filter);
-    console.log('GuppyWrapper line 99 -- getDataFromGuppy: ', fields, ' ', size, ' ', offset);
     if (!fields || fields.length === 0) {
       return Promise.resolve({ data: [], totalCount: 0 });
     }
@@ -121,7 +118,6 @@ class GuppyWrapper extends React.Component {
         this.filter,
         this.state.accessibility,
       ).then((res) => {
-        console.log('124 res.data: ', res.data);
         if (!res || !res.data) {
           throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
         }
@@ -150,14 +146,10 @@ class GuppyWrapper extends React.Component {
       size,
       this.state.accessibility,
     ).then((res) => {
-      console.log('153 res.data: ', res.data);
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
       const parsedData = res.data[this.props.guppyConfig.type];
-      console.log(' DEBUG ME!!! askGuppyForRawData res', res);
-      console.log(' and res.data._aggregation', res.data._aggregation);
-      console.log(' and this.props.guppyConfig.type', this.props.guppyConfig.type);
       const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
       if (updateDataWhenReceive) {
         this.setState({
@@ -165,7 +157,6 @@ class GuppyWrapper extends React.Component {
           totalCount,
         });
       }
-      console.log('returning from askGuppyForRawData callback in getDataFromGuppy: ', parsedData, ' and ', totalCount);
       return {
         data: parsedData,
         totalCount,
@@ -181,16 +172,9 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(userFilter, accessibility) {
-    console.log('(204) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.props.adminAppliedPreFilters)));
-    console.log('(205) GUPPY WRAPPER HANDLE FILTER CHANGE! ', JSON.parse(JSON.stringify(this.adminObjectReadOnly)));
-    console.log('(206) GUPPY WRAPPER HANDLE FILTER CHANGE! ', this.adminObjectFrozenString);
-    console.log('(207) state prefilter before string assign ', this.state.adminAppliedPreFilters);
     this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
-    console.log('(209) state prefilter after string assign ', this.state.adminAppliedPreFilters);
-    console.log('guppy HANDLE FILTER CHANGE 192 filter:', userFilter);
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
-      console.log('guppy HANDLE FILTER CHANGE 194 merging filters');
       filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
     }
     if (this.props.onFilterChange) {
@@ -296,12 +280,6 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
-    console.log('GUPPY WRAPPER 313 adminAppliedPreFilters: ', 
-      JSON.parse(JSON.stringify(this.props.adminAppliedPreFilters
-    )));
-    console.log('GUPPY WRAPPER 314 adminAppliedPreFilters: ', 
-      JSON.parse(JSON.stringify(this.state.adminAppliedPreFilters
-    )));
     return (
       <React.Fragment>
         {

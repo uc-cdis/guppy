@@ -8,19 +8,15 @@
    or keep constant the amount of dat shown when combined with a user filter).
   * */
   export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
-    console.log('guppy mergeFilters. userFilter: ', userFilter);
-    console.log('guppy mergeFilters. adminAppliedPreFilter: ', adminAppliedPreFilter);
     const filterAB = Object.assign({}, userFilter);
     for (const key in adminAppliedPreFilter) {
       if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-        console.log('mergeFilters 72: ', key);
         // The admin filter overrides the user filter to maintain exclusivity.
         filterAB[key].selectedValues = adminAppliedPreFilter[key].selectedValues;
       } else if (Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
         filterAB[key] = { 'selectedValues' : adminAppliedPreFilter[key].selectedValues };
       }
     }
-    console.log('guppy mergeFilters. filterAB: ', filterAB);
     return filterAB;
   };

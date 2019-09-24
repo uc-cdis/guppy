@@ -42,15 +42,9 @@ const capitalizeFirstLetter = (str) => {
 };
 
 export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters) => {
-  console.log('-----------');
-  console.log('(46) GUPPY GET FILTER SECTIONS ADMIN FILTERS ', adminAppliedPreFilters);
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find(entry => (entry.field === field));
-    console.log('overrideName: ', overrideName);
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
-    console.log('label: ', label);
-    console.log('tabsOptions[field]', tabsOptions[field]);
-    console.log('initialTabsOptions', initialTabsOptions);
     
     let tabsOptionsFiltered = Object.assign({}, tabsOptions[field]);
     if (Object.keys(adminAppliedPreFilters).includes(field)) {
@@ -58,7 +52,6 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
         adminAppliedPreFilters[field].selectedValues.includes(x.key)
       );
     }
-    console.log('tabsOptionsFiltered: ', tabsOptionsFiltered);
 
     let defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
@@ -70,8 +63,6 @@ export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabs
       options: defaultOptions,
     };
   });
-  console.log('guppy utils.js line 56 sections: ', sections);
-  console.log('(74) GUPPY GET FILTER SECTIONS ADMIN FILTERS ', adminAppliedPreFilters);
 
   return sections;
 };
