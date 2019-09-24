@@ -169,8 +169,12 @@ const queryGuppyForRawDataAndTotalCounts = (
 };
 
 export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility, gqlFilter
-) => queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  path, type, fields, accessibility, filter
+) => { 
+  const gqlFilter = getGQLFilter(filter);
+  console.log('175 askGuppyAboutAllFieldsAndOptions: ', gqlFilter);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility); 
+}
 
 export const getGQLFilter = (filterObj) => {
   const facetsList = [];
