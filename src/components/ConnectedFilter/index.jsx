@@ -27,10 +27,7 @@ class ConnectedFilter extends React.Component {
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.filterGroupRef = React.createRef();
-
-    this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
-    Object.freeze(this.adminObjectReadOnly);
-    this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
+    this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
   }
 
   componentDidMount() {
@@ -105,7 +102,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
+    this.state.adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
     const mergedFilterResults = mergeFilters(filterResults, this.state.adminAppliedPreFilters);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,

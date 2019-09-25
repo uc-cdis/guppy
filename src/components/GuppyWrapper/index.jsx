@@ -48,9 +48,7 @@ class GuppyWrapper extends React.Component {
     super(props);
     // to avoid asynchronizations, we store another filter as private var
     this.filter = Object.assign({}, this.props.adminAppliedPreFilters);
-    this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
-    Object.freeze(this.adminObjectReadOnly);
-    this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
+    this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       aggsData: {},
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
@@ -174,7 +172,7 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(userFilter, accessibility) {
-    this.state.adminAppliedPreFilters = JSON.parse(this.adminObjectFrozenString);
+    this.state.adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
