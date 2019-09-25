@@ -172,7 +172,7 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(userFilter, accessibility) {
-    this.state.adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     let filter = Object.assign({}, userFilter);
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
