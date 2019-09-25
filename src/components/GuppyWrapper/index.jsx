@@ -1,3 +1,4 @@
+/* eslint react/forbid-prop-types: 0 */
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -45,7 +46,8 @@ import { mergeFilters } from '../Utils/filters';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
-    this.filter = Object.assign({}, this.props.adminAppliedPreFilters); // to avoid asynchronizations, we store another filter as private var
+    // to avoid asynchronizations, we store another filter as private var
+    this.filter = Object.assign({}, this.props.adminAppliedPreFilters);
     this.adminObjectReadOnly = Object.assign({}, this.props.adminAppliedPreFilters);
     Object.freeze(this.adminObjectReadOnly);
     this.adminObjectFrozenString = JSON.stringify(this.adminObjectReadOnly).slice();
