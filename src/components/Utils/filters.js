@@ -6,8 +6,8 @@
    * Note: the admin filter takes precedence. Selected values in the user
    * filter will be discarded if the key collides. This is to avoid
    * the user undoing the admin filter. (Multiple user checkboxes increase the
-   amount of data shown when combined, but an admin filter should always decrease
-   or keep constant the amount of dat shown when combined with a user filter).
+   * amount of data shown when combined, but an admin filter should always decrease
+   * or keep constant the amount of data shown when combined with a user filter).
   * */
 export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   const filterAB = Object.assign({}, userFilter);
