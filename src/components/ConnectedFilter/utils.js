@@ -41,18 +41,31 @@ const capitalizeFirstLetter = (str) => {
   return res.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
-export const getFilterSections = (fields, fieldMapping, tabsOptions, initialTabsOptions) => {
+export const getFilterSections = (
+  fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
+) => {
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find(entry => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
+
+    const tabsOptionsFiltered = Object.assign({}, tabsOptions[field]);
+    if (Object.keys(adminAppliedPreFilters).includes(field)) {
+      tabsOptionsFiltered.histogram = tabsOptionsFiltered.histogram.filter(
+        x => adminAppliedPreFilters[field].selectedValues.includes(x.key),
+      );
+    }
+
+    const defaultOptions = getSingleFilterOption(
+      tabsOptionsFiltered,
+      initialTabsOptions ? initialTabsOptions[field] : undefined,
+    );
+
     return {
       title: label,
-      options: getSingleFilterOption(
-        tabsOptions[field],
-        initialTabsOptions ? initialTabsOptions[field] : undefined,
-      ),
+      options: defaultOptions,
     };
   });
+
   return sections;
 };
 

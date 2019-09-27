@@ -167,10 +167,6 @@ const queryGuppyForRawDataAndTotalCounts = (
     });
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility,
-) => queryGuppyForAggs(path, type, fields, undefined, accessibility);
-
 export const getGQLFilter = (filterObj) => {
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
@@ -196,6 +192,13 @@ export const getGQLFilter = (filterObj) => {
     AND: facetsList,
   };
   return gqlFilter;
+};
+
+export const askGuppyAboutAllFieldsAndOptions = (
+  path, type, fields, accessibility, filter,
+) => {
+  const gqlFilter = getGQLFilter(filter);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {

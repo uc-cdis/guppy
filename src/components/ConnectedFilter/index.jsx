@@ -1,3 +1,4 @@
+/* eslint react/forbid-prop-types: 0 */
 import React from 'react';
 import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
@@ -12,6 +13,7 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
+import { mergeFilters } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
@@ -21,8 +23,11 @@ class ConnectedFilter extends React.Component {
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
+      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
+      filter: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.filterGroupRef = React.createRef();
+    this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
   }
 
   componentDidMount() {
@@ -30,16 +35,20 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
-      this.props.onFilterChange({}, this.state.accessibility);
+      this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
       this.state.accessibility,
+      this.state.filter,
     )
       .then((res) => {
-        this.handleReceiveNewAggsData(res.data._aggregation[this.props.guppyConfig.type]);
+        this.handleReceiveNewAggsData(
+          res.data._aggregation[this.props.guppyConfig.type],
+          this.state.adminAppliedPreFilters,
+        );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
   }
@@ -59,7 +68,8 @@ class ConnectedFilter extends React.Component {
       <FilterList
         key={index}
         sections={
-          getFilterSections(fields, fieldMapping, processedTabsOptions, this.state.initialAggsData)
+          getFilterSections(fields, fieldMapping, processedTabsOptions,
+            this.state.initialAggsData, this.state.adminAppliedPreFilters)
         }
         tierAccessLimit={this.props.tierAccessLimit}
       />
@@ -92,22 +102,24 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    const mergedFilterResults = mergeFilters(filterResults, this.state.adminAppliedPreFilters);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      filterResults,
+      mergedFilterResults,
       this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          filterResults,
+          mergedFilterResults,
         );
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(filterResults, this.state.accessibility);
+      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
   }
 
@@ -160,6 +172,7 @@ ConnectedFilter.propTypes = {
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
+  adminAppliedPreFilters: PropTypes.object,
 };
 
 ConnectedFilter.defaultProps = {
@@ -171,6 +184,7 @@ ConnectedFilter.defaultProps = {
   tierAccessLimit: undefined,
   onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
+  adminAppliedPreFilters: {},
 };
 
 export default ConnectedFilter;

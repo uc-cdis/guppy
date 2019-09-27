@@ -1,3 +1,4 @@
+/* eslint react/forbid-prop-types: 0 */
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -9,6 +10,7 @@ import {
   askGuppyForNestedAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
+import { mergeFilters } from '../Utils/filters';
 
 /**
  * Wrapper that connects to Guppy server,
@@ -44,10 +46,12 @@ import { ENUM_ACCESSIBILITY } from '../Utils/const';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
-    this.filter = {}; // to avoid asynchronizations, we store another filter as private var
+    // to avoid asynchronizations, we store another filter as private var
+    this.filter = Object.assign({}, this.props.adminAppliedPreFilters);
+    this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       aggsData: {},
-      filter: {},
+      filter: Object.assign({}, this.props.adminAppliedPreFilters),
       rawData: [],
       totalCount: 0,
       allFields: [],
@@ -55,6 +59,7 @@ class GuppyWrapper extends React.Component {
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
+      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
     };
   }
 
@@ -166,7 +171,12 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(filter, accessibility) {
+  handleFilterChange(userFilter, accessibility) {
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    let filter = Object.assign({}, userFilter);
+    if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
+      filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
+    }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(filter);
     }
@@ -296,6 +306,7 @@ class GuppyWrapper extends React.Component {
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
+            adminAppliedPreFilters: this.props.adminAppliedPreFilters,
           }))
         }
       </React.Fragment>
@@ -325,6 +336,7 @@ GuppyWrapper.propTypes = {
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
+  adminAppliedPreFilters: PropTypes.object,
 };
 
 GuppyWrapper.defaultProps = {
@@ -332,6 +344,7 @@ GuppyWrapper.defaultProps = {
   onFilterChange: () => {},
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
+  adminAppliedPreFilters: {},
 };
 
 export default GuppyWrapper;
