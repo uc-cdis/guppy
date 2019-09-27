@@ -14,8 +14,17 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   Object.keys(adminAppliedPreFilter).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-      // The admin filter overrides the user filter to maintain exclusivity.
-      filterAB[key].selectedValues = adminAppliedPreFilter[key].selectedValues;
+
+      const userFilterSubset = userFilter[key].selectedValues.filter(
+        x => adminAppliedPreFilter[key].selectedValues.includes(x)
+      );
+      if(userFilterSubset.length > 0) {
+        // The user-applied filter is more exclusive than the admin-applied filter.
+        filterAB[key].selectedValues = userFilter[key].selectedValues;
+      } else {
+        // The admin-applied filter is more exclusive than the user-applied filter.
+        filterAB[key].selectedValues = adminAppliedPreFilter[key].selectedValues;
+      }
     } else if (Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
       filterAB[key] = { selectedValues: adminAppliedPreFilter[key].selectedValues };
     }
