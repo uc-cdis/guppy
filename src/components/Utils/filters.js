@@ -14,11 +14,10 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   Object.keys(adminAppliedPreFilter).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
-
       const userFilterSubset = userFilter[key].selectedValues.filter(
-        x => adminAppliedPreFilter[key].selectedValues.includes(x)
+        x => adminAppliedPreFilter[key].selectedValues.includes(x),
       );
-      if(userFilterSubset.length > 0) {
+      if (userFilterSubset.length > 0) {
         // The user-applied filter is more exclusive than the admin-applied filter.
         filterAB[key].selectedValues = userFilter[key].selectedValues;
       } else {
