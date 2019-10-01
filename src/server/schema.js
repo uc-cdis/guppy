@@ -48,7 +48,7 @@ const gqlTypeToAggsHistogramName = {
 const getAggsHistogramName = (gqlType) => {
   if (!gqlTypeToAggsHistogramName[gqlType]) {
     // throw new Error(`Invalid elasticsearch type ${gqlType}`);
-    return ``;
+    return '';
   }
   return gqlTypeToAggsHistogramName[gqlType];
 };
@@ -91,8 +91,9 @@ const getQuerySchemaForType = (esInstance, esIndex, esType) => {
 
 // eslint-disable-next-line max-len
 const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => Object.keys(properties).map((field) => {
-  const gqlType = getGQLType(esInstance, esIndex, field, properties[field].type);
-  return { field, type: gqlType };
+  const esFieldType = properties[field].type;
+  const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
+  return { field, type: gqlType, esType: esFieldType };
 });
 
 const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
@@ -100,35 +101,53 @@ const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
   return getFieldGQLTypeMapForProperties(esInstance, esIndex, fieldESTypeMap);
 };
 
+const getArgsByField = (fieldType, props) => {
+  const keys = Object.keys(props);
+  const baseProps = [];
+  keys.forEach((k) => {
+    if (props[k].type !== 'nested') baseProps.push({ field: k, type: esgqlTypeMapping[props[k].type] });
+  });
+  return `(${baseProps.map(entry => `${entry.field}: [${entry.type}]`).join(',')})`;
+};
+
+const getSchemaType = (fieldType, fieldToArgs) => {
+  if (fieldType.esType === 'nested') {
+    return `${fieldType.field} ${fieldToArgs[fieldType.field]}: ${fieldType.type}`;
+  }
+  return `${fieldType.field}: ${fieldType.type}`;
+};
+
 const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
   const esTypeObjName = firstLetterUpperCase(esType);
   const existingFields = new Set([]);
+  const fieldToArgs = {};
 
   const queueTypes = [];
   Object.keys(fieldESTypeMap).forEach((field) => {
     const esFieldType = fieldESTypeMap[field].type;
     if (esFieldType === 'nested' && !existingFields.has(field)) {
-      queueTypes.push({ type: field, props: fieldESTypeMap[field].properties });
+      const props = fieldESTypeMap[field].properties;
+      queueTypes.push({ type: field, props });
       existingFields.add(field);
+      fieldToArgs[field] = getArgsByField(field, props);
     }
   });
-  // console.info(fieldESTypeMap);
-  // console.info(queueTypes);
 
   let sTypeSchema = `
     type ${esTypeObjName} {
-      ${fieldGQLTypeMap.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
+      ${fieldGQLTypeMap.map(entry => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
       _matched: [MatchedItem]
     }
   `;
+
   while (queueTypes.length > 0) {
     const t = queueTypes.shift();
     const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.props);
     sTypeSchema += `
     type ${t.type} {
-      ${gqlTypes.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
+      ${gqlTypes.map(entry => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
     }
   `;
   }

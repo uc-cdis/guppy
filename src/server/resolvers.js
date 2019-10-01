@@ -29,6 +29,7 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
   } = args;
   log.debug('[resolver.typeQueryResolver] es type', esType);
   log.debug('[resolver.typeQueryResolver] args', args);
+  log.info('args', args);
   const fields = parseFieldsFromTypeResolveInfo(resolveInfo);
   const dataPromise = esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size: first,

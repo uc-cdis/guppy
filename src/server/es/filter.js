@@ -38,14 +38,8 @@ const getFilterItemForString = (op, field, value) => {
         };
       }
       return {
-        bool: {
-          must: [
-            {
-              term: {
-                [field]: value,
-              },
-            },
-          ],
+        term: {
+          [field]: value,
         },
       };
     case 'in':
@@ -70,14 +64,8 @@ const getFilterItemForString = (op, field, value) => {
                 },
               },
               {
-                bool: {
-                  must: [
-                    {
-                      terms: {
-                        [field]: newValue,
-                      },
-                    },
-                  ],
+                terms: {
+                  [field]: newValue,
                 },
               },
             ],
@@ -86,14 +74,8 @@ const getFilterItemForString = (op, field, value) => {
       }
       // if not using missingDataAlias or filter doesn't contain missingDataAlias
       return {
-        bool: {
-          must: [
-            {
-              terms: {
-                [field]: value,
-              },
-            },
-          ],
+        terms: {
+          [field]: value,
         },
       };
     case '!=':
@@ -137,27 +119,15 @@ const getFilterItemForNumbers = (op, field, value) => {
   }
   if (op === '=' || op === 'eq' || op === 'EQ') {
     return {
-      bool: {
-        must: [
-          {
-            term: {
-              [field]: value,
-            },
-          },
-        ],
+      term: {
+        [field]: value,
       },
     };
   }
   if (op === 'IN' || op === 'in') {
     return {
-      bool: {
-        must: [
-          {
-            terms: {
-              [field]: value,
-            },
-          },
-        ],
+      terms: {
+        [field]: value,
       },
     };
   }
