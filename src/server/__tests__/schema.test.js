@@ -62,6 +62,7 @@ describe('Schema', () => {
     type File {
       gen3_resource_path: String,
       file_id: String,
+      file_size: Float,
       subject_id: String,
     }`;
   test('could create type schemas', async () => {
@@ -107,6 +108,7 @@ describe('Schema', () => {
       _totalCount: Int
       gen3_resource_path: HistogramForString,
       file_id: HistogramForString,
+      file_size: HistogramForNumber,
       subject_id: HistogramForString,
     }`;
   test('could create aggregation schemas for each type', async () => {
