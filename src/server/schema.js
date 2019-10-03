@@ -6,7 +6,7 @@ const esgqlTypeMapping = {
   text: 'String',
   keyword: 'String',
   integer: 'Int',
-  long: 'Int',
+  long: 'Float',
   short: 'Int',
   byte: 'Int',
   double: 'Float',

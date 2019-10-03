@@ -56,7 +56,8 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" },
           "some_string_field": { "type": "keyword" },
-          "some_integer_field": { "type": "integer" }
+          "some_integer_field": { "type": "integer" },
+          "some_long_field": { "type": "long" }
         }
       }
     }
@@ -156,6 +157,7 @@ while [[ $COUNT -lt $endIndex ]]; do
   randomFloatNumber="$(( $RANDOM % 100 )).$(( $RANDOM % 100 ))"
   stringArray='["1", "2"]'
   intArray='[1, 2]'
+  longNumber="10737418240"
 
   cat - > "$tmpName" <<EOM
 {
@@ -173,7 +175,8 @@ while [[ $COUNT -lt $endIndex ]]; do
   "file_count": $fileCounts,
   "whatever_lab_result_value": $randomFloatNumber,
   "some_string_field": $stringArray,
-  "some_integer_field": $intArray
+  "some_integer_field": $intArray,
+  "some_long_field": $longNumber
 }
 EOM
   cat - $tmpName <<EOM

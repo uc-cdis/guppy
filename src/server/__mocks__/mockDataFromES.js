@@ -238,6 +238,9 @@ const mockESMapping = () => {
             file_id: {
               type: 'keyword',
             },
+            file_size: {
+              type: 'long',
+            },
             subject_id: {
               type: 'keyword',
             },
