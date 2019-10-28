@@ -16,7 +16,7 @@ cd scripts/ && sh ./generate_data.sh
 Go to repo root directory, and run
 
 ```
-npm start
+GUPPY_PORT=3000 INTERNAL_LOCAL_TEST=true npm start
 ```
 
 The Guppy server will be hosted at [localhost:3000/graphql](http://localhost:3000/graphql), now use Insomnia or Postman to play with it! 
