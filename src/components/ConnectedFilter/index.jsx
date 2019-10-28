@@ -18,8 +18,14 @@ import { mergeFilters } from '../Utils/filters';
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
+
+    const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
+    const allFields = props.accessibleFieldCheckList
+      ? filterConfigsFields.concat(props.accessibleFieldCheckList)
+      : filterConfigsFields;
+
     this.state = {
-      allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
+      allFields,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -173,6 +179,7 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
 };
 
 ConnectedFilter.defaultProps = {
@@ -185,6 +192,7 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  accessibleFieldCheckList: undefined,
 };
 
 export default ConnectedFilter;
