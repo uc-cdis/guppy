@@ -21,7 +21,7 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
 
   log.debug('[authMiddleware] list resources: ', JSON.stringify(data, null, 4));
   if (data && data.error) {
-    // if user is not in arborist db
+    // if user is not in arborist db, assume has no access to any
     if (data.error.code === 404) {
       return [];
     }
