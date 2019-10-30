@@ -1,4 +1,5 @@
 /* eslint react/forbid-prop-types: 0 */
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
@@ -21,7 +22,7 @@ class ConnectedFilter extends React.Component {
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const allFields = props.accessibleFieldCheckList
-      ? filterConfigsFields.concat(props.accessibleFieldCheckList)
+      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
 
     this.state = {
