@@ -38,3 +38,36 @@ export const isWhitelisted = (key) => {
   const lowerCasedKey = (typeof key === 'string') ? key.toLowerCase() : key;
   return lowerCasedWhitelist.includes(lowerCasedKey);
 };
+
+
+export const fromFieldsToSource = (parsedInfo) => {
+  let stack = Object.values(parsedInfo.fieldsByTypeName[firstLetterUpperCase(parsedInfo.name)]);
+  const levels = { 0: stack.length };
+  const fields = [];
+  let curNodeName = '';
+  let currentLevel = 0;
+
+  while (stack.length > 0) {
+    if (levels[currentLevel] === 0) {
+      currentLevel -= 1;
+      const lastPeriod = curNodeName.lastIndexOf('.');
+      curNodeName = curNodeName.slice(0, (lastPeriod !== -1) ? lastPeriod : 0);
+    } else {
+      const cur = stack.pop();
+      const newTypeName = cur.name;
+      const fieldName = [curNodeName, newTypeName].filter(s => s.length > 0).join('.');
+      if (newTypeName in cur.fieldsByTypeName) {
+        const children = Object.values(cur.fieldsByTypeName[newTypeName]);
+        curNodeName = fieldName;
+        levels[currentLevel] -= 1;
+        currentLevel += 1;
+        levels[currentLevel] = children.length;
+        stack = stack.concat(children);
+      } else {
+        fields.push(fieldName);
+        levels[currentLevel] -= 1;
+      }
+    }
+  }
+  return fields;
+};

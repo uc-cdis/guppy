@@ -746,7 +746,49 @@ In future Guppy will support `SQL` like syntax for filter, like `
 
 <a name="other"></a>
 
-## Some other queries and arguments
+### Nested filter
+Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similiar to the ES query.
+Assuming that there is `File` node nested inside `subject`. The nested query will be written as below:
+```
+{
+  "filter": {
+    "AND": [
+      {
+        "OR": [
+          {
+            "=": {
+              "race": "hispanic"
+            }
+          },
+          {
+            "=": {
+              "race": "asian"
+            }
+          }
+        ]
+      },
+      {
+        "nested": {
+          "path": "File",
+          "AND": [
+            {
+              ">=": {"file_count": 15}
+            },
+            {
+              "<=": {"file_count": 75}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+ElasticSearch only support the nested filter on the level of document for returning data. It means that the filter `file_count >=15` and `file_count<=75` will return the whole document having a `file_count` in the range of `[15, 75]`.
+The returned data will not filter the nested `file_count`(s) that are out of that range for that document.
+
+## Some other queries and arguments 
 
 ### Mapping query
 Mapping query simply returns all fields under a doc type. Example:

@@ -2,22 +2,40 @@ import { ApolloError, UserInputError } from 'apollo-server';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
 
+const fromPathToNode = (esInstance, esIndex, path) => {
+  let node = esInstance.fieldTypes[esIndex];
+  if (path !== null && path !== undefined) {
+    const nodes = path.split('.');
+    nodes.forEach((n) => {
+      if (n in node) {
+        node = node[n].properties;
+      } else {
+        throw new UserInputError(`Field ${n} does not exist in ES index`);
+      }
+    });
+  }
+  return node;
+};
+
 const getNumericTextType = (
   esInstance,
   esIndex,
   field,
+  path,
 ) => {
-  if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
+  const node = fromPathToNode(esInstance, esIndex, path);
+  if (!esInstance.fieldTypes[esIndex] || !node[field]) {
     throw new UserInputError('Please check your syntax for input "filter" argument');
   }
-  const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field].type];
+  const numericTextType = esFieldNumericTextTypeMapping[node[field].type];
   if (typeof numericTextType === 'undefined') {
-    throw new ApolloError(`ES type ${esInstance.fieldTypes[esIndex][field].type} not supported.`, 500);
+    throw new ApolloError(`ES type ${node[field].type} not supported.`, 500);
   }
   return numericTextType;
 };
 
-const getFilterItemForString = (op, field, value) => {
+const getFilterItemForString = (op, pField, value, path) => {
+  const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
   switch (op) {
     case '=':
     case 'eq':
@@ -95,7 +113,8 @@ const getFilterItemForString = (op, field, value) => {
   }
 };
 
-const getFilterItemForNumbers = (op, field, value) => {
+const getFilterItemForNumbers = (op, pField, value, path) => {
+  const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
   const rangeOperator = {
     '>': 'gt',
     gt: 'gt',
@@ -198,6 +217,7 @@ const getFilterObj = (
   aggsField,
   filterSelf = true,
   defaultAuthFilter,
+  objPath = null,
 ) => {
   if (!graphqlFilterObj
     || typeof Object.keys(graphqlFilterObj)[0] === 'undefined') {
@@ -214,7 +234,7 @@ const getFilterObj = (
     const boolItemsList = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
-        esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter,
+        esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter, objPath,
       );
       if (filterObj) {
         boolItemsList.push(filterObj);
@@ -246,6 +266,18 @@ const getFilterObj = (
     resultFilterObj = getESSearchFilterFragment(
       esInstance, esIndex, targetSearchFields, targetSearchKeyword,
     );
+  } else if (topLevelOp === 'nested') {
+    const { path } = graphqlFilterObj[topLevelOp];
+    const filterOpObj = Object.keys(graphqlFilterObj[topLevelOp])
+      .filter(key => key !== 'path')
+      .reduce((o, k) => ({ ...o, [k]: graphqlFilterObj[topLevelOp][k] }), {});
+    resultFilterObj = {
+      nested: {
+        path,
+        query: getFilterObj(esInstance, esIndex, filterOpObj,
+          aggsField, filterSelf, defaultAuthFilter, path),
+      },
+    };
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
@@ -254,11 +286,11 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    const numericOrTextType = getNumericTextType(esInstance, esIndex, field);
+    const numericOrTextType = getNumericTextType(esInstance, esIndex, field, objPath);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
-      resultFilterObj = getFilterItemForString(topLevelOp, field, value);
+      resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
-      resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value);
+      resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
     } else {
       throw new ApolloError(`Invalid es field type ${numericOrTextType}`, 500);
     }

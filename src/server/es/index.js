@@ -8,6 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
+import { fromFieldsToSource } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -80,7 +81,7 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields.map(f => f.type));
+    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields.map(f => f.name));
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
         400,
@@ -316,7 +317,7 @@ class ES {
   filterData(
     { esIndex, esType },
     {
-      filter, fields = [], sort, offset = 0, size,
+      filter, fields, sort, offset = 0, size,
     },
   ) {
     const queryBody = { from: offset };
@@ -327,17 +328,17 @@ class ES {
     if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
-    if (fields && fields.length > 0) {
-      queryBody._source = fields;
+    if (fields) {
+      const esFields = fromFieldsToSource(fields);
+      if (esFields.length > 0) queryBody._source = esFields;
     }
-    const resultPromise = this.query(esIndex, esType, queryBody);
-    return resultPromise;
+    return this.query(esIndex, esType, queryBody);
   }
 
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter, fields: [] },
+      { filter },
     );
     return result.hits.total;
   }
@@ -387,7 +388,7 @@ class ES {
   downloadData({
     esIndex, esType, fields, filter, sort,
   }) {
-    const esFilterObj = filter ? getFilterObj(this, esIndex, esType, filter) : undefined;
+    const esFilterObj = filter ? getFilterObj(this, esIndex, filter) : undefined;
     return this.scrollQuery(esIndex, esType, {
       filter: esFilterObj,
       fields,

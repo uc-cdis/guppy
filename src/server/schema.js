@@ -59,14 +59,14 @@ const getQuerySchemaForType = (esInstance, esIndex, esType) => {
   const existingFields = new Set([]);
 
   const queueFields = [];
-  Object.keys(fieldESTypeMap).forEach((field) => {
-    const esFieldType = fieldESTypeMap[field].type;
-    if (esFieldType === 'nested' && !existingFields.has(field)) {
-      queueFields.push(field);
-      existingFields.add(field);
+  Object.keys(fieldESTypeMap).forEach((fieldKey) => {
+    const esFieldType = fieldESTypeMap[fieldKey].type;
+    if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
+      queueFields.push({ key: fieldKey, value: fieldESTypeMap[fieldKey] });
+      existingFields.add(fieldKey);
     }
   });
-  let sType = `${esType} (
+  let type = `${esType} (
     offset: Int, 
     first: Int,
     filter: JSON,
@@ -75,26 +75,39 @@ const getQuerySchemaForType = (esInstance, esIndex, esType) => {
     ): [${esTypeObjName}]`;
   while (queueFields.length > 0) {
     const f = queueFields.shift();
-    sType += `
+    type += `
 
-    ${f} (
-      offset: Int, 
+    ${f.key} (
+      offset: Int,
       first: Int,
       filter: JSON,
       sort: JSON,
       accessibility: Accessibility=all,
-    ):  [${firstLetterUpperCase(f)}]`;
+    ):  [${firstLetterUpperCase(f.key)}]`;
+    Object.keys(f.value.properties).forEach((p) => {
+      if (!existingFields.has(p)) {
+        const field = f.value.properties[p];
+        if (field.type === 'nested') {
+          queueFields.push({ key: p, value: field });
+          existingFields.add(p);
+        }
+      }
+    });
   }
-  return `${sType}
+  return `${type}
   `;
 };
 
-// eslint-disable-next-line max-len
-const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => Object.keys(properties).map((field) => {
-  const esFieldType = properties[field].type;
-  const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
-  return { field, type: gqlType, esType: esFieldType };
-});
+const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {
+  const result = Object.keys(properties).map((field) => {
+    const esFieldType = properties[field].type;
+    const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
+    return {
+      field, type: gqlType, esType: esFieldType, props: properties[field].properties,
+    };
+  });
+  return result;
+};
 
 const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
   const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
@@ -125,13 +138,13 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const fieldToArgs = {};
 
   const queueTypes = [];
-  Object.keys(fieldESTypeMap).forEach((field) => {
-    const esFieldType = fieldESTypeMap[field].type;
-    if (esFieldType === 'nested' && !existingFields.has(field)) {
-      const props = fieldESTypeMap[field].properties;
-      queueTypes.push({ type: field, props });
-      existingFields.add(field);
-      fieldToArgs[field] = getArgsByField(field, props);
+  Object.keys(fieldESTypeMap).forEach((fieldKey) => {
+    const esFieldType = fieldESTypeMap[fieldKey].type;
+    if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
+      const props = fieldESTypeMap[fieldKey].properties;
+      queueTypes.push({ type: fieldKey, props });
+      existingFields.add(fieldKey);
+      fieldToArgs[fieldKey] = getArgsByField(fieldKey, props);
     }
   });
 
@@ -145,13 +158,19 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   while (queueTypes.length > 0) {
     const t = queueTypes.shift();
     const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.props);
+    gqlTypes.forEach((entry) => {
+      if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
+        queueTypes.push({ type: entry.field, props: entry.props });
+        existingFields.add(entry.field);
+        fieldToArgs[entry.field] = getArgsByField(entry.field, entry.props);
+      }
+    });
     sTypeSchema += `
-    type ${t.type} {
-      ${gqlTypes.map(entry => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
-    }
-  `;
+      type ${t.type} {
+        ${gqlTypes.map(entry => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
+      }
+    `;
   }
-  // log.info(sTypeSchema);
   return sTypeSchema;
 };
 
@@ -165,16 +184,14 @@ const getAggregationType = (entry) => {
 const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
-  // console.info(fieldGQLTypeMap);
   const fieldAggsTypeMap = fieldGQLTypeMap.filter(f => f.type !== 'Object').map(entry => ({
     field: entry.field,
     aggType: getAggsHistogramName(entry.type),
   }));
-  const aggsSchema = `type ${esTypeObjName}Aggregation {
+  return `type ${esTypeObjName}Aggregation {
     _totalCount: Int
     ${fieldAggsTypeMap.map(entry => `${getAggregationType(entry)}`).join('\n')}
   }`;
-  return aggsSchema;
 };
 
 export const getQuerySchema = (esConfig, esInstance) => `

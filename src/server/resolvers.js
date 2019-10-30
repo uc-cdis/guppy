@@ -4,20 +4,6 @@ import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
 
 /**
- * This function parses all requesting fields from a request
- * @param {object} resolveInfo - info argument from resolver function
- * @returns {string[]} parsed fields
- */
-const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
-  const reservedNames = ['_matched']; // This is for search results
-  const parsedInfo = parseResolveInfo(resolveInfo);
-  const typeName = firstLetterUpperCase(parsedInfo.name);
-  const fields = Object.keys(parsedInfo.fieldsByTypeName[typeName])
-    .filter(f => !reservedNames.includes(f));
-  return fields;
-};
-
-/**
  * This is for getting raw data, by specific es index and es type
  * @param {object} esInstance
  * @param {string} esIndex
@@ -27,14 +13,10 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
   const {
     offset, first, filter, sort,
   } = args;
-  log.debug('[resolver.typeQueryResolver] es type', esType);
-  log.debug('[resolver.typeQueryResolver] args', args);
-  log.info('args', args);
-  const fields = parseFieldsFromTypeResolveInfo(resolveInfo);
-  const dataPromise = esInstance.getData({
+  const fields = parseResolveInfo(resolveInfo);
+  return esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size: first,
   });
-  return dataPromise;
 };
 
 /**
@@ -69,8 +51,7 @@ const aggsTotalQueryResolver = (parent) => {
   const {
     filter, esInstance, esIndex, esType,
   } = parent;
-  const countPromise = esInstance.getCount(esIndex, esType, filter);
-  return countPromise;
+  return esInstance.getCount(esIndex, esType, filter);
 };
 
 /**
@@ -79,6 +60,7 @@ const aggsTotalQueryResolver = (parent) => {
  * and then calls numeric aggregation function, and finally returns response
  * @param {object} parent
  * @param {object} args
+ * @param {object} context
  */
 const numericHistogramResolver = async (parent, args, context) => {
   const {
@@ -93,7 +75,7 @@ const numericHistogramResolver = async (parent, args, context) => {
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
 
-  const resultPromise = esInstance.numericAggregation({
+  return esInstance.numericAggregation({
     esIndex,
     esType,
     filter,
@@ -106,7 +88,6 @@ const numericHistogramResolver = async (parent, args, context) => {
     defaultAuthFilter,
     nestedAggFields,
   });
-  return resultPromise;
 };
 
 /**
@@ -115,6 +96,7 @@ const numericHistogramResolver = async (parent, args, context) => {
  * and then calls text aggregation function, and finally returns response
  * @param {object} parent
  * @param {object} args
+ * @param {object} context
  */
 const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
@@ -125,7 +107,7 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
-  const resultPromise = esInstance.textAggregation({
+  return esInstance.textAggregation({
     esIndex,
     esType,
     filter,
@@ -134,7 +116,6 @@ const textHistogramResolver = async (parent, args, context) => {
     defaultAuthFilter,
     nestedAggFields,
   });
-  return resultPromise;
 };
 
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
