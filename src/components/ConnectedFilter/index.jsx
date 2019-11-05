@@ -1,4 +1,5 @@
 /* eslint react/forbid-prop-types: 0 */
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
@@ -18,8 +19,14 @@ import { mergeFilters } from '../Utils/filters';
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
+
+    const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
+    const allFields = props.accessibleFieldCheckList
+      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
+      : filterConfigsFields;
+
     this.state = {
-      allFields: getAllFieldsFromFilterConfigs(this.props.filterConfig.tabs),
+      allFields,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -173,6 +180,7 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
 };
 
 ConnectedFilter.defaultProps = {
@@ -185,6 +193,7 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  accessibleFieldCheckList: undefined,
 };
 
 export default ConnectedFilter;
