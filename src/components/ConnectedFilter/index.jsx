@@ -79,6 +79,8 @@ class ConnectedFilter extends React.Component {
             this.state.initialAggsData, this.state.adminAppliedPreFilters)
         }
         tierAccessLimit={this.props.tierAccessLimit}
+        lockedTooltipMessage={this.props.lockedTooltipMessage}
+        disabledTooltipMessage={this.props.disabledTooltipMessage}
       />
     ));
     return tabs;
@@ -180,6 +182,8 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  lockedTooltipMessage: PropTypes.string,
+  disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
 };
 
@@ -193,6 +197,8 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  lockedTooltipMessage: '',
+  disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
 };
 
