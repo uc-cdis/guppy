@@ -50,6 +50,7 @@ class GuppyWrapper extends React.Component {
     this.filter = Object.assign({}, this.props.adminAppliedPreFilters);
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
+      gettingDataFromGuppy: false,
       aggsData: {},
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
       rawData: [],
@@ -101,7 +102,9 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
+    this.setState({ gettingDataFromGuppy: true });
     if (!fields || fields.length === 0) {
+      this.setState({ gettingDataFromGuppy: false });
       return Promise.resolve({ data: [], totalCount: 0 });
     }
 
@@ -129,6 +132,7 @@ class GuppyWrapper extends React.Component {
             rawData: parsedData,
           });
         }
+        this.setState({ gettingDataFromGuppy: false });
         return {
           data: res.data,
         };
@@ -157,6 +161,7 @@ class GuppyWrapper extends React.Component {
           totalCount,
         });
       }
+      this.setState({ gettingDataFromGuppy: false });
       return {
         data: parsedData,
         totalCount,
@@ -286,6 +291,7 @@ class GuppyWrapper extends React.Component {
           React.Children.map(this.props.children, child => React.cloneElement(child, {
             // pass data to children
             aggsData: this.state.aggsData,
+            aggsDataIsLoading: this.state.gettingDataFromGuppy,
             filter: this.state.filter,
             filterConfig: this.props.filterConfig,
             rawData: this.state.rawData, // raw data (with current filter applied)
