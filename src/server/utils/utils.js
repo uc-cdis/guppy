@@ -1,6 +1,6 @@
 import config from '../config';
 
-export const firstLetterUpperCase = str => str.charAt(0).toUpperCase() + str.slice(1);
+export const firstLetterUpperCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
 /**
  * transfer '/programs/DEV/projects/test' to 'DEV-test'
@@ -39,7 +39,12 @@ export const isWhitelisted = (key) => {
   return lowerCasedWhitelist.includes(lowerCasedKey);
 };
 
-
+/**
+ * Convert from fields of graphql query produced by graphql library to list of querying fields
+ * This list will be put to _source fields of the ES query
+ * @param parsedInfo: parsing information from graphql library
+ * @returns: list of selected fields.
+ */
 export const fromFieldsToSource = (parsedInfo) => {
   let stack = Object.values(parsedInfo.fieldsByTypeName[firstLetterUpperCase(parsedInfo.name)]);
   const levels = { 0: stack.length };
@@ -55,7 +60,7 @@ export const fromFieldsToSource = (parsedInfo) => {
     } else {
       const cur = stack.pop();
       const newTypeName = cur.name;
-      const fieldName = [curNodeName, newTypeName].filter(s => s.length > 0).join('.');
+      const fieldName = [curNodeName, newTypeName].filter((s) => s.length > 0).join('.');
       if (newTypeName in cur.fieldsByTypeName) {
         const children = Object.values(cur.fieldsByTypeName[newTypeName]);
         curNodeName = fieldName;

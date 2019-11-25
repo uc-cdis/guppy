@@ -66,7 +66,7 @@ const getFilterItemForString = (op, pField, value, path) => {
       // and then add a must_not exists bool func to compensate missingDataAlias
       if (config.esConfig.aggregationIncludeMissingData
           && value.includes(config.esConfig.missingDataAlias)) {
-        const newValue = value.filter(element => element !== config.esConfig.missingDataAlias);
+        const newValue = value.filter((element) => element !== config.esConfig.missingDataAlias);
         return {
           bool: {
             should: [
@@ -185,7 +185,7 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
         throw new UserInputError(`invalid field ${f} in "filter" variable`);
       }
     });
-    analyzedFields = fields.map(f => `${f}${config.analyzedTextFieldSuffix}`);
+    analyzedFields = fields.map((f) => `${f}${config.analyzedTextFieldSuffix}`);
   }
   return {
     multi_match: {
@@ -202,13 +202,13 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
  * And finally combines all filter units from down to top.
  * @param {string} esInstance
  * @param {string} esIndex
- * @param {string} esType
  * @param {object} graphqlFilterObj
  * @param {string[]} aggsField - target agg field, only need for agg queries
  * @param {boolean} filterSelf - whether we want to filter this field or not,
  *                               only need for agg queries
  * @param {object} defaultAuthFilter - once graphqlFilterObj is empty,
  *                this function transfers and returns this auth filter as default
+ * @param objPath: path to object
  */
 const getFilterObj = (
   esInstance,
@@ -269,7 +269,7 @@ const getFilterObj = (
   } else if (topLevelOp === 'nested') {
     const { path } = graphqlFilterObj[topLevelOp];
     const filterOpObj = Object.keys(graphqlFilterObj[topLevelOp])
-      .filter(key => key !== 'path')
+      .filter((key) => key !== 'path')
       .reduce((o, k) => ({ ...o, [k]: graphqlFilterObj[topLevelOp][k] }), {});
     resultFilterObj = {
       nested: {

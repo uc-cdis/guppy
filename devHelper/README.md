@@ -7,9 +7,10 @@ docker-compose -f ./esearch.yml up -d
 ```
 
 ## Step.2 import mock data into elasticsearch index
+Go to the repository's root directory and run the following command.
 
 ```
-cd scripts/ && sh ./generate_data.sh
+sh ./generate_data.sh
 ```
 
 ## Step.3 start server for developing server side code

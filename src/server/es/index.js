@@ -57,7 +57,7 @@ class ES {
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
-    }).then(resp => resp.body, (err) => {
+    }).then((resp) => resp.body, (err) => {
       log.error('[ES.query] error during querying');
       throw new Error(err.message);
     });
@@ -81,7 +81,8 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields.map(f => f.name));
+    const fieldsNotBelong = _.difference(fields,
+      this.getESFields(esIndex).fields.map((f) => f.name));
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
         400,
@@ -99,7 +100,7 @@ class ES {
     // This is really ridiculous that ES's JS library has it, but we need to
     // convert list of sort obj into comma separated strings to make it work
     // see https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
-    const sortStringList = sort && sort.map(item => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
+    const sortStringList = sort && sort.map((item) => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
 
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
@@ -111,7 +112,7 @@ class ES {
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort: sortStringList,
-        }).then(resp => resp, (err) => {
+        }).then((resp) => resp, (err) => {
           log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
         });
@@ -131,7 +132,7 @@ class ES {
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
 
       // TODO: change it to streaming
-      totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
+      totalData = totalData.concat(currentBatch.hits.hits.map((item) => item._source));
     }
 
     log.debug('[ES scrollQuery] end scrolling');
@@ -174,8 +175,8 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type)
-        .then(res => ({ index: cfg.index, fieldTypes: res })));
+      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
+        .then((res) => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
@@ -299,7 +300,7 @@ class ES {
    * @param {string} esType
    */
   getESIndexByType(esType) {
-    const index = this.config.indices.find(i => i.type === esType);
+    const index = this.config.indices.find((i) => i.type === esType);
     if (index) return index.index;
     throw new CodedError(
       400,

@@ -16,11 +16,11 @@ jest.mock('../logger');
 
 setupMockDataEndpoint();
 
-const removeSpacesAndNewlines = str => str.replace(/[\n\s]/g, '');
+const removeSpacesAndNewlines = (str) => str.replace(/[\n\s]/g, '');
 
-const removeDescriptions = str => str.replace(/"""[^"]+"""/g, '');
+const removeDescriptions = (str) => str.replace(/"""[^"]+"""/g, '');
 
-const removeSpacesNewlinesAndDescriptions = str => removeDescriptions(removeSpacesAndNewlines(str));
+const removeSpacesNewlinesAndDes = (str) => removeDescriptions(removeSpacesAndNewlines(str));
 
 // see /src/server/__mocks__/mockDataFromES.js for mock ES mappings
 describe('Schema', () => {
@@ -44,15 +44,15 @@ describe('Schema', () => {
       _mapping: Mapping
     }`;
   test('could create query schemas', async () => {
-    await esInstance.initialize();
-    const querySchema = getQuerySchema(config.esConfig, esInstance);
-    expect(removeSpacesNewlinesAndDescriptions(querySchema))
+    const querySchema = getQuerySchema(config.esConfig);
+    expect(removeSpacesNewlinesAndDes(querySchema))
       .toEqual(removeSpacesAndNewlines(expectedQuerySchemas));
   });
 
   const expectedTypesSchemas = `
     type Subject {
       gen3_resource_path: String,
+      visits(days_to_visit:[Int],visit_label:[String]):[visits],
       gender: String,
       file_count: Int,
       name: String,
@@ -60,6 +60,18 @@ describe('Schema', () => {
       some_array_string_field: [String],
       whatever_lab_result_value: Float,
       _matched:[MatchedItem]
+    }
+    type visits {
+      days_to_visit:Int,
+      visit_label:String,
+      follow_ups (
+        days_to_follow_up:[Int],
+        follow_up_label:[String]
+      ):[follow_ups],
+    }
+    type follow_ups {
+      days_to_follow_up:Int,
+      follow_up_label:String,
     }
     type File {
       gen3_resource_path: String,
@@ -71,7 +83,7 @@ describe('Schema', () => {
   test('could create type schemas', async () => {
     await esInstance.initialize();
     const typeSchema = getTypesSchemas(config.esConfig, esInstance);
-    expect(removeSpacesNewlinesAndDescriptions(typeSchema))
+    expect(removeSpacesNewlinesAndDes(typeSchema))
       .toEqual(removeSpacesAndNewlines(expectedTypesSchemas));
   });
 
@@ -92,7 +104,7 @@ describe('Schema', () => {
     }`;
   test('could create aggregation schemas', async () => {
     const aggSchema = getAggregationSchema(config.esConfig);
-    expect(removeSpacesNewlinesAndDescriptions(aggSchema))
+    expect(removeSpacesNewlinesAndDes(aggSchema))
       .toEqual(removeSpacesAndNewlines(expectedAggregationSchema));
   });
 
@@ -117,7 +129,7 @@ describe('Schema', () => {
   test('could create aggregation schemas for each type', async () => {
     await esInstance.initialize();
     const aggSchemas = getAggregationSchemaForEachType(config.esConfig, esInstance);
-    expect(removeSpacesNewlinesAndDescriptions(aggSchemas))
+    expect(removeSpacesNewlinesAndDes(aggSchemas))
       .toEqual(removeSpacesAndNewlines(expectedIndividualAggsSchemas));
   });
 
@@ -128,7 +140,7 @@ describe('Schema', () => {
     }`;
   test('could create mapping schema', async () => {
     const mappingSchema = getMappingSchema(config.esConfig);
-    expect(removeSpacesNewlinesAndDescriptions(mappingSchema))
+    expect(removeSpacesNewlinesAndDes(mappingSchema))
       .toEqual(removeSpacesAndNewlines(expectedMappingSchema));
   });
 });

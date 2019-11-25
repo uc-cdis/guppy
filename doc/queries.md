@@ -747,7 +747,7 @@ In future Guppy will support `SQL` like syntax for filter, like `
 <a name="other"></a>
 
 ### Nested filter
-Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similiar to the ES query.
+Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similar to the ES query.
 Assuming that there is `File` node nested inside `subject`. The nested query will be written as below:
 ```
 {

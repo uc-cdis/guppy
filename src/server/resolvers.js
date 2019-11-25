@@ -123,7 +123,7 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const { fields } = esInstance.getESFields(esIndex);
   fields.forEach((field) => {
     if (field.type !== 'nested') {
-      fieldAggregationResolverMappings[`${field.name}`] = (parent => ({ ...parent, field: field.name }));
+      fieldAggregationResolverMappings[`${field.name}`] = ((parent) => ({ ...parent, field: field.name }));
     }
   });
   return fieldAggregationResolverMappings;
@@ -189,7 +189,7 @@ const getResolver = (esConfig, esInstance) => {
   }, {});
 
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
-    acc[cfg.type] = () => (esInstance.getESFields(cfg.index).fields.map(f => f.name));
+    acc[cfg.type] = () => (esInstance.getESFields(cfg.index).fields.map((f) => f.name));
     return acc;
   }, {});
 
@@ -197,8 +197,8 @@ const getResolver = (esConfig, esInstance) => {
     JSON: GraphQLJSON,
     Query: {
       ...typeResolverMappings,
-      _aggregation: parent => ({ ...parent }),
-      _mapping: parent => ({ ...parent }),
+      _aggregation: (parent) => ({ ...parent }),
+      _mapping: (parent) => ({ ...parent }),
     },
     Aggregation: {
       ...typeAggregationResolverMappings,

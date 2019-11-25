@@ -23,6 +23,7 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'react/destructuring-assignment': 'off',
     'react/no-array-index-key': 'off',
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true}]
   },
   overrides: [
     {
