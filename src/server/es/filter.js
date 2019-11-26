@@ -182,6 +182,30 @@ const getFilterItemForNumbers = (op, field, value) => {
   throw new UserInputError(`Invalid numeric operation "${op}" for field "${field}" in filter argument`);
 };
 
+const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
+  let analyzedFields = [`*${config.analyzedTextFieldSuffix}`]; // search all fields by default
+  if (typeof fields !== 'undefined') {
+    if (typeof fields === 'string') {
+      fields = [fields]; // eslint-disable-line no-param-reassign
+    }
+    // Check fields are valid
+    fields.forEach((f) => {
+      if (!esInstance.fieldTypes[esIndex]) {
+        throw new UserInputError(`es index ${esIndex} doesn't exist`);
+      } else if (!esInstance.fieldTypes[esIndex][f]) {
+        throw new UserInputError(`invalid field ${f} in "filter" variable`);
+      }
+    });
+    analyzedFields = fields.map(f => `${f}.${config.analyzedTextFieldSuffix}`);
+  }
+  return {
+    multi_match: {
+      query: keyword,
+      fields: analyzedFields,
+    },
+  };
+};
+
 /**
  * This function transfer graphql filter arg to ES filter object
  * It first parse graphql filter object recursively from top to down,
@@ -236,6 +260,20 @@ const getFilterObj = (
         },
       };
     }
+  } else if (topLevelOpLowerCase === 'search') {
+    if (!('keyword' in graphqlFilterObj[topLevelOp])) { // "keyword" required
+      throw new UserInputError('Invalid search filter syntax: missing \'keyword\' field');
+    }
+    Object.keys(graphqlFilterObj[topLevelOp]).forEach((o) => { // check filter syntax
+      if (o !== 'keyword' && o !== 'fields') {
+        throw new UserInputError(`Invalid search filter syntax: unrecognize field '${o}'`);
+      }
+    });
+    const targetSearchKeyword = graphqlFilterObj[topLevelOp].keyword;
+    const targetSearchFields = graphqlFilterObj[topLevelOp].fields;
+    resultFilterObj = getESSearchFilterFragment(
+      esInstance, esIndex, targetSearchFields, targetSearchKeyword,
+    );
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {

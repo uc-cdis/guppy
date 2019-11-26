@@ -35,6 +35,8 @@ const config = {
   logLevel: 'INFO',
   enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? false : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
+  analyzedTextFieldSuffix: '.analyzed',
+  matchedTextHighlightTagName: 'em',
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
