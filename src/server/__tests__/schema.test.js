@@ -58,12 +58,14 @@ describe('Schema', () => {
       some_array_integer_field: [Int],
       some_array_string_field: [String],
       whatever_lab_result_value: Float,
+      _matched:[MatchedItem]
     }
     type File {
       gen3_resource_path: String,
       file_id: String,
       file_size: Float,
       subject_id: String,
+      _matched:[MatchedItem]
     }`;
   test('could create type schemas', async () => {
     await esInstance.initialize();
