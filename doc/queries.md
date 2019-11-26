@@ -570,11 +570,18 @@ One simple example could look like:
 
 ```
 {
-  "filter": {"=": {"subject_id": "sbj_69"}}
+  "filter": {
+    "=": {
+      "subject_id": "sbj_69"
+    }
+  }
 }
 ```
 
+
 Currently we support following operators: 
+
+
 | operator     | meaning                  | support field type | example                                                          |
 |--------------|--------------------------|--------------------|------------------------------------------------------------------|
 | eq, EQ, =    | equal                    | string, number     | {"eq": {"gender": "female"}}                                     |
@@ -585,6 +592,7 @@ Currently we support following operators:
 | lt, LT, <    | less then                | number             | {"<": {"age": 50}}                                               |
 | lte, LTE, <= | less than or equal to    | number             | {"<=": {"age": 50}}                                              |
 | search       | [search text](#filter-search)              | text               | {"search": {"keyword": "asian","fields": ["race", "ethnicity"]}} |
+
 
 
 <a name="filter-search"></a>
