@@ -4,6 +4,7 @@ import { UserInputError } from 'apollo-server';
 import getFilterObj from '../filter';
 import esInstance from '../index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
+import config from '../../config';
 
 jest.mock('../../config');
 jest.mock('../../logger');
@@ -179,6 +180,28 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
     expect(resultESFilter3).toEqual(expectedESFilter);
+  });
+
+  test('could transfer graphql filter to ES filter object, "search" operator', async () => {
+    await esInstance.initialize();
+    const keyword = 'male';
+    const gqlFilter1 = { search: { keyword } };
+    const resultESFilter1 = getFilterObj(esInstance, esIndex, esType, gqlFilter1);
+    const expectedESFilter1 = { multi_match: { query: keyword, fields: [`*${config.analyzedTextFieldSuffix}`] } };
+    expect(resultESFilter1).toEqual(expectedESFilter1);
+
+    const targetFields = ['gender', 'name'];
+    const gqlFilter2 = { search: { keyword, fields: targetFields } };
+    const resultESFilter2 = getFilterObj(esInstance, esIndex, esType, gqlFilter2);
+    const expectedTargetFields = targetFields.map(f => `${f}${config.analyzedTextFieldSuffix}`);
+    const expectedESFilter2 = { multi_match: { query: keyword, fields: expectedTargetFields } };
+    expect(resultESFilter2).toEqual(expectedESFilter2);
+
+    const targetField = 'gender';
+    const gqlFilter3 = { search: { keyword, fields: targetField } };
+    const resultESFilter3 = getFilterObj(esInstance, esIndex, esType, gqlFilter3);
+    const expectedESFilter3 = { multi_match: { query: keyword, fields: [`${targetField}${config.analyzedTextFieldSuffix}`] } };
+    expect(resultESFilter3).toEqual(expectedESFilter3);
   });
 
   test('could throw err for invalid operator', async () => {

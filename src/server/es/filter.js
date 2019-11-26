@@ -196,7 +196,7 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
         throw new UserInputError(`invalid field ${f} in "filter" variable`);
       }
     });
-    analyzedFields = fields.map(f => `${f}.${config.analyzedTextFieldSuffix}`);
+    analyzedFields = fields.map(f => `${f}${config.analyzedTextFieldSuffix}`);
   }
   return {
     multi_match: {
@@ -270,6 +270,9 @@ const getFilterObj = (
       }
     });
     const targetSearchKeyword = graphqlFilterObj[topLevelOp].keyword;
+    if (targetSearchKeyword.length < config.allowedMinimumSearchLen) {
+      throw new UserInputError(`Keyword too short (length < ${config.allowedMinimumSearchLen}`);
+    }
     const targetSearchFields = graphqlFilterObj[topLevelOp].fields;
     resultFilterObj = getESSearchFilterFragment(
       esInstance, esIndex, targetSearchFields, targetSearchKeyword,

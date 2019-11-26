@@ -37,6 +37,7 @@ const config = {
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
+  allowedMinimumSearchLen: 2,
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -64,6 +65,10 @@ if (process.env.INTERNAL_LOCAL_TEST) {
 
 if (process.env.LOG_LEVEL) {
   config.logLevel = process.env.LOG_LEVEL;
+}
+
+if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
+  config.analyzedTextFieldSuffix = process.env.ANALYZED_TEXT_FIELD_SUFFIX;
 }
 
 // only three options for tier access level: 'private' (default), 'regular', and 'libre'

@@ -8,6 +8,9 @@ Table of Contents
    - [Numeric Aggregation](#aggs-numeric)
    - [Nested Aggregation](#aggs-nested)
 - [Filters](#filter)
+   - [Basic Filter Unit](#filter-unit)
+   - [Text Search Unit in Filter](#filter-search)
+   - [Combined Filters](#filter-comb)
 - [Some other queries and arguments](#other)
 
 <a name="query"></a>
@@ -556,15 +559,55 @@ Result:
 <a name="filter"></a>
 
 ## Filters 
-Currently Guppy uses `JSON`-based syntax for filters. The JSON object key could be an operation like `=`, `>`. One simple example could be:
+
+<a name="filter-unit"></a>
+
+### Basic filter unit
+Currently Guppy uses `JSON`-based syntax for filters.
+The JSON object key could be an operation like `=`, `>`. 
+A very basic filter unit would look like: `{<operater>: {<field_name> : <value_expression>}}`. 
+One simple example could look like:
 
 ```
 {
-  "filter": {"=": {"subject_id": "69"}}
+  "filter": {"=": {"subject_id": "sbj_69"}}
 }
 ```
 
-Or you could use binary combination (`AND` or `OR`)to combine simple filter units into more complicated big filters. Example:
+Currently we support following operators: 
+| operator     | meaning                  | support field type | example                                                          |
+|--------------|--------------------------|--------------------|------------------------------------------------------------------|
+| eq, EQ, =    | equal                    | string, number     | {"eq": {"gender": "female"}}                                     |
+| in, IN       | inside                   | string, number     | {"in": {"gender": ["female", "F"]}}                              |
+| !=           | is not                   | string, number     | {"!=": {"gender": "male"}}                                       |
+| gt, GT, >    | greater than             | number             | {">": {"age": 50}}                                               |
+| gte, GTE, >= | greater than or equal to | number             | {">=": {"age": 50}}                                              |
+| lt, LT, <    | less then                | number             | {"<": {"age": 50}}                                               |
+| lte, LTE, <= | less than or equal to    | number             | {"<=": {"age": 50}}                                              |
+| search       | [search text](#filter-search)              | text               | {"search": {"keyword": "asian","fields": ["race", "ethnicity"]}} |
+
+
+<a name="filter-search"></a>
+
+### A search unit in filter
+You could add a search unit into your filter, the syntax looks like: 
+
+```
+{
+  "search": {
+    "keyword": <any text to search>,
+    "fields": <a list of fields for search>
+  }
+}
+```
+
+Notice that `keyword` is required. But `fields` is optional, 
+and if not set, guppy will search thru all analyzed text fields that matched the suffix pattern set in `ANALYZED_TEXT_FIELD_SUFFIX` (by default `.analyzed`, which means search thru all `*.analyzed` fields). 
+
+<a name="filter-comb"></a>
+
+### Combine into advanced filters
+You could use binary combination (`AND` or `OR`) to combine simple filter units into more complicated big filters. Example:
 
 ```
 {
