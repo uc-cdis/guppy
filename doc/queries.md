@@ -612,6 +612,79 @@ You could add a search unit into your filter, the syntax looks like:
 Notice that `keyword` is required. But `fields` is optional, 
 and if not set, guppy will search thru all analyzed text fields that matched the suffix pattern set in `ANALYZED_TEXT_FIELD_SUFFIX` (by default `.analyzed`, which means search thru all `*.analyzed` fields). 
 
+#### Matched results and highlights
+Guppy will return matched fields and highlight partial in `_matched` keyword, 
+with the matched field name, and highlighted partial words wrapped inside `<em>` tags. 
+A example search filter: 
+
+```
+query ($filter: JSON) {
+  subject (filter: $filter, first: 20) {
+    gender
+    race
+    ethnicity
+    _matched {
+      field
+      highlights
+    }
+  }
+}
+```
+
+with variable:
+
+```
+{
+  "filter": {
+      "search": {
+        "keyword": "asia",
+        "fields": "race"
+      }
+  }
+}
+```
+
+example result:
+
+```
+{
+  "data": {
+    "subject": [
+      {
+        "gender": "female",
+        "race": "asian",
+        "ethnicity": "__missing__",
+        "_matched": [
+          {
+            "field": "race",
+            "highlights": [
+              "<em>asia</em>n"
+            ]
+          }
+        ]
+      },
+      {
+        "gender": "male",
+        "race": "asian",
+        "ethnicity": "White",
+        "_matched": [
+          {
+            "field": "race",
+            "highlights": [
+              "<em>asia</em>n"
+            ]
+          }
+        ]
+      },
+      ...
+    ]
+  }
+}
+```
+
+
+
+
 <a name="filter-comb"></a>
 
 ### Combine into advanced filters
