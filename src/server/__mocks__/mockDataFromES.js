@@ -32,6 +32,17 @@ const mockResourcePath = () => {
         },
       },
     },
+    highlight: {
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
+      fields: {
+        '*.analyzed': {},
+      },
+    },
   };
   const fakeResource = {
     aggregations: {
@@ -101,6 +112,17 @@ const mockResourcePath = () => {
         },
       },
     },
+    highlight: {
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
+      fields: {
+        '*.analyzed': {},
+      },
+    },
   };
   const fakeResourceWithFilter1 = {
     aggregations: {
@@ -153,6 +175,17 @@ const mockResourcePath = () => {
           ],
           size: 10000,
         },
+      },
+    },
+    highlight: {
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
+      fields: {
+        '*.analyzed': {},
       },
     },
   };

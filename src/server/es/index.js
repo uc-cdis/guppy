@@ -40,6 +40,17 @@ class ES {
         validatedQueryBody[key] = queryBody[key];
       }
     });
+    validatedQueryBody.highlight = {
+      pre_tags: [
+        `<${config.matchedTextHighlightTagName}>`,
+      ],
+      post_tags: [
+        `</${config.matchedTextHighlightTagName}>`,
+      ],
+      fields: {
+        [`*${config.analyzedTextFieldSuffix}`]: {},
+      },
+    };
     log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
@@ -348,7 +359,32 @@ class ES {
         filter, fields, sort, offset, size,
       },
     );
-    return result.hits.hits.map(item => item._source);
+    const { hits } = result.hits;
+    const hitsWithMatchedResults = hits.map((h) => {
+      if (!('highlight' in h)) {
+        // ES doesn't returns "highlight"
+        return h._source;
+      }
+      // ES returns highlight, transfer them into "_matched" schema
+      const matchedList = Object.keys(h.highlight).map((f) => {
+        let field = f;
+        if (f.endsWith(config.analyzedTextFieldSuffix)) {
+          // remove ".analyzed" suffix from field name
+          field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
+        }
+        return {
+          field,
+          // just use ES highlights' format,
+          // should be a list of string, with matched part emphasized with <
+          highlights: h.highlight[f],
+        };
+      });
+      return {
+        ...h._source,
+        _matched: matchedList,
+      };
+    });
+    return hitsWithMatchedResults;
   }
 
   downloadData({

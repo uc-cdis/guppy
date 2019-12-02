@@ -9,9 +9,11 @@ import { firstLetterUpperCase } from './utils/utils';
  * @returns {string[]} parsed fields
  */
 const parseFieldsFromTypeResolveInfo = (resolveInfo) => {
+  const reservedNames = ['_matched']; // This is for search results
   const parsedInfo = parseResolveInfo(resolveInfo);
   const typeName = firstLetterUpperCase(parsedInfo.name);
-  const fields = Object.keys(parsedInfo.fieldsByTypeName[typeName]);
+  const fields = Object.keys(parsedInfo.fieldsByTypeName[typeName])
+    .filter(f => !reservedNames.includes(f));
   return fields;
 };
 

@@ -34,28 +34,52 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
 -H 'Content-Type: application/json' -d'
 {
     "settings" : {
-        "index" : {
-            "number_of_shards" : 1,
-            "number_of_replicas" : 0
+      "index" : {
+        "number_of_shards" : 1,
+        "number_of_replicas" : 0,
+        "analysis": {
+          "tokenizer": {
+            "ngram_tokenizer": {
+              "type": "ngram",
+              "min_gram": 2,
+              "max_gram": 20,
+              "token_chars": [ "letter", "digit" ]
+            }
+          },
+          "analyzer": {
+            "ngram_analyzer": { 
+              "type": "custom",
+              "tokenizer": "ngram_tokenizer",
+              "filter": [
+                "lowercase"
+              ]
+            },
+            "search_analyzer": {
+              "type": "custom",
+              "tokenizer": "keyword",
+              "filter": "lowercase"
+            }
+          }
         }
+      }
     },
     "mappings": {
       "subject": {
         "properties": {
-          "subject_id": { "type": "keyword" },
-          "name": { "type": "text" },
-          "project": { "type": "keyword" },
-          "study": { "type": "keyword" },
-          "gender": { "type": "keyword" },
-          "race": { "type": "keyword" },
-          "ethnicity": { "type": "keyword" },
-          "vital_status": { "type": "keyword" },
-          "file_type": { "type": "keyword" },
-          "file_format": { "type": "keyword" },
-          "gen3_resource_path": { "type": "keyword" },
+          "subject_id": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "name": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "project": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "study": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "gender": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "race": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "ethnicity": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "vital_status": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "file_type": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "file_format": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "gen3_resource_path": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" },
-          "some_string_field": { "type": "keyword" },
+          "some_string_field": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "some_integer_field": { "type": "integer" },
           "some_long_field": { "type": "long" }
         }

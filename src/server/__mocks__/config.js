@@ -22,6 +22,8 @@ const config = {
   tierAccessLevel: 'regular',
   tierAccessLimit: 20,
   arboristEndpoint: 'http://mock-arborist',
+  analyzedTextFieldSuffix: '.analyzed',
+  matchedTextHighlightTagName: 'em',
 };
 
 export default config;

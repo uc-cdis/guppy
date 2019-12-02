@@ -74,6 +74,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const typeSchema = `
     type ${esTypeObjName} {
       ${fieldGQLTypeMap.map(entry => `${entry.field}: ${entry.type},`).join('\n')}
+      _matched: [MatchedItem]
     }
   `;
   return typeSchema;
@@ -125,6 +126,13 @@ export const getMappingSchema = esConfig => `
 
 export const buildSchemaString = (esConfig, esInstance) => {
   const querySchema = getQuerySchema(esConfig);
+
+  const matchedItemSchema = `
+    type MatchedItem {
+      field: String
+      highlights: [String]
+    }
+  `;
 
   const typesSchemas = getTypesSchemas(esConfig, esInstance);
 
@@ -206,6 +214,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const schemaStr = `
   scalar JSON
+  ${matchedItemSchema}
   ${querySchema}
   ${accessibilityEnum}
   ${typesSchemas}
