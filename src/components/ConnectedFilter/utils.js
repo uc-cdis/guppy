@@ -7,6 +7,7 @@ export const getFilterGroupConfig = filterConfig => ({
 });
 
 const getSingleFilterOption = (histogramResult, initHistogramRes) => {
+  console.log('getSingleFilterOption: ', histogramResult);
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -33,6 +34,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     count: item.count,
     accessible: item.accessible,
   }));
+  console.log("getSingleFilterOption textOptions: ", textOptions);
   return textOptions;
 };
 
@@ -44,9 +46,8 @@ const capitalizeFirstLetter = (str) => {
 export const getFilterSections = (
   fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
 ) => {
-  console.log('tabsOptions: ', tabsOptions);
+  console.log('tabsOptions: ', tabsOptions.project_id.histogram);
   const sections = fields.map((field) => {
-    console.log('field: ', field);
     const overrideName = fieldMapping.find(entry => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
 
@@ -67,7 +68,7 @@ export const getFilterSections = (
       options: defaultOptions,
     };
   });
-  console.log('returning from getFilterSections with ', sections);
+  console.log('returning from getFilterSections with ', sections[0]);
   return sections;
 };
 
