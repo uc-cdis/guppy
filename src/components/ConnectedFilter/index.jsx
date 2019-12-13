@@ -72,7 +72,7 @@ class ConnectedFilter extends React.Component {
     console.log('entering getFilterTabs with this.state.filter: ', this.state.filter);
     console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
     const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
-    console.log('processedTabsOptions: ', processedTabsOptions.project_id.histogram);
+    console.log('processedTabsOptions: ', processedTabsOptions);
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
