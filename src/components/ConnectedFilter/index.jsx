@@ -68,11 +68,13 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    console.log('------------------');
+    console.log('entering getFilterTabs with this.state.filter: ', this.state.filter);
+    console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
     const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
-    console.log('processedTabsOptions: ', processedTabsOptions);
+    console.log('processedTabsOptions: ', processedTabsOptions.project_id.histogram);
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    console.log('------------------');
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
       <FilterList
         key={index}
@@ -85,6 +87,7 @@ class ConnectedFilter extends React.Component {
         disabledTooltipMessage={this.props.disabledTooltipMessage}
       />
     ));
+    console.log('returning from getFilterTabs with this.state.filter: ', this.state.filter);
     return tabs;
   }
 
