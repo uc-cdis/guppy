@@ -44,6 +44,7 @@ const capitalizeFirstLetter = (str) => {
 export const getFilterSections = (
   fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
 ) => {
+  console.log('tabsOptions: ', tabsOptions);
   const sections = fields.map((field) => {
     console.log('field: ', field);
     const overrideName = fieldMapping.find(entry => (entry.field === field));
