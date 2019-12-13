@@ -45,6 +45,7 @@ export const getFilterSections = (
   fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
 ) => {
   const sections = fields.map((field) => {
+    console.log('field: ', field);
     const overrideName = fieldMapping.find(entry => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
 
@@ -65,7 +66,7 @@ export const getFilterSections = (
       options: defaultOptions,
     };
   });
-
+  console.log('returning from getFilterSections with ', sections);
   return sections;
 };
 
