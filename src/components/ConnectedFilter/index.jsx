@@ -81,7 +81,7 @@ class ConnectedFilter extends React.Component {
     // else {
     //   processedTabsOptions = this.state.initialTabsOptions;
     // }
-    processedTabsOptions = this.state.initialTabsOptions;
+    // processedTabsOptions = this.state.initialTabsOptions;
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
