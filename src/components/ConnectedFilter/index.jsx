@@ -25,6 +25,7 @@ class ConnectedFilter extends React.Component {
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
 
+    this.initialTabsOptions = {};
     this.state = {
       allFields,
       initialAggsData: {},
@@ -32,7 +33,6 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
-      initialTabsOptions: {},
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -72,16 +72,16 @@ class ConnectedFilter extends React.Component {
     console.log('------------------');
     console.log('entering getFilterTabs with this.state.filter: ', this.state.filter);
     console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
-    const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+    var processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     console.log('processedTabsOptions: ', processedTabsOptions);
-    console.log('initialTabsOptions: ', this.state.initialTabsOptions);
-    // if (Object.keys(this.state.initialTabsOptions).length == 0) {
-    //   this.setState({'initialTabsOptions' : processedTabsOptions})
-    // }
-    // else {
-    //   processedTabsOptions = this.state.initialTabsOptions;
-    // }
-    // processedTabsOptions = this.state.initialTabsOptions;
+    console.log('initialTabsOptions: ', this.initialTabsOptions);
+    if (Object.keys(this.initialTabsOptions).length == 0) {
+      this.initialTabsOptions = processedTabsOptions;
+    }
+    else {
+      processedTabsOptions = this.initialTabsOptions;
+    }
+    // processedTabsOptions = this.initialTabsOptions;
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
