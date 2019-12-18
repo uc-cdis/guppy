@@ -32,6 +32,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
+      userFilter: Object.assign({}, this.props.adminAppliedPreFilters),
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -135,7 +136,7 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
-    console.log('handleFilterChange - i want to set this.state.filter to ' , mergedFilterResults);
+    this.setState({ 'userFilter': mergedFilterResults });
   }
 
   /**
@@ -196,7 +197,7 @@ ConnectedFilter.propTypes = {
 ConnectedFilter.defaultProps = {
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
-  hideZero: true,
+  hideZero: false,
   className: '',
   fieldMapping: [],
   tierAccessLimit: undefined,
