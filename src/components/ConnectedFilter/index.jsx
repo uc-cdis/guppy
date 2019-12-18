@@ -62,6 +62,31 @@ class ConnectedFilter extends React.Component {
   }
 
   /**
+   * This function updates the counts in the initial set of tab options calculated from unfiltered data.
+   * It is used to retain field options in the rendering even if those options have no histogram results.
+   */
+  updateCountsInInitialTabsOptions(initialTabsOptions, processedTabsOptions) {
+    let updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
+
+    let initialFields = Object.keys(initialTabsOptions);
+    for (let i = 0; i < initialFields; i++) {
+      let fieldName = initialFields[i];
+      let initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
+      let processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
+      for (let j = 0; j < initialFieldOptions.length; j++) {
+        let optionName = initialFieldOptions[j];
+        if (processedFieldOptions.includes(optionName)) {
+          updatedFieldOptions[fieldName].histogram[j] = processedFieldOptions[fieldName].histogram[j];
+        } else {
+          updatedFieldOptions[fieldName] = 0;
+        }
+      }
+      updatedTabsOptions[fieldName] = updatedFieldOptions;
+    }
+    return updatedTabsOptions;
+  }
+
+  /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
    * But before that, the function first calls `this.props.onProcessFilterAggsData`, which is
@@ -72,17 +97,22 @@ class ConnectedFilter extends React.Component {
     console.log('------------------');
     console.log('entering getFilterTabs with this.state.filter: ', this.state.filter);
     console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
-    var processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
-    console.log('processedTabsOptions: ', processedTabsOptions);
+    let updatedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+    console.log('updatedTabsOptions: ', updatedTabsOptions);
     console.log('initialTabsOptions: ', this.initialTabsOptions);
     if (Object.keys(this.initialTabsOptions).length == 0) {
-      console.log('a; setting initialTabsOptions to ', processedTabsOptions);
-      this.initialTabsOptions = processedTabsOptions;
+      console.log('a; setting initialTabsOptions to ', updatedTabsOptions);
+      this.initialTabsOptions = updatedTabsOptions;
     }
-    else {
-      console.log('b; setting processedTabsOptions to ', this.initialTabsOptions);
-      processedTabsOptions = this.initialTabsOptions;
-    }
+    
+    let processedTabsOptions = this.updateCountsInInitialTabsOptions(
+      this.initialTabsOptions, updatedTabsOptions
+    );
+
+    // else {
+    //   console.log('b; setting processedTabsOptions to ', this.initialTabsOptions);
+    //   processedTabsOptions = this.initialTabsOptions;
+    // }
     // processedTabsOptions = this.initialTabsOptions;
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
