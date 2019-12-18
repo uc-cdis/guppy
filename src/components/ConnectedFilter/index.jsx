@@ -81,6 +81,7 @@ class ConnectedFilter extends React.Component {
     // else {
     //   processedTabsOptions = this.state.initialTabsOptions;
     // }
+    processedTabsOptions = this.state.initialTabsOptions;
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
@@ -159,6 +160,7 @@ class ConnectedFilter extends React.Component {
     if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
+    console.log('guppy render filterTabs: ', filterTabs);
     return (
       <FilterGroup
         ref={this.filterGroupRef}
