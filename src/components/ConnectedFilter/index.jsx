@@ -32,7 +32,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
-      userFilter: Object.assign({}, this.props.adminAppliedPreFilters),
+      initialTabsOptions: {},
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -74,6 +74,13 @@ class ConnectedFilter extends React.Component {
     console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
     const processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     console.log('processedTabsOptions: ', processedTabsOptions);
+    console.log('initialTabsOptions: ', this.state.initialTabsOptions);
+    if (Object.keys(this.state.initialTabsOptions).length == 0) {
+      this.setState({'initialTabsOptions' : processedTabsOptions})
+    }
+    else {
+      processedTabsOptions = this.state.initialTabsOptions;
+    }
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
@@ -136,7 +143,6 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
-    this.setState({ 'userFilter': mergedFilterResults });
   }
 
   /**
