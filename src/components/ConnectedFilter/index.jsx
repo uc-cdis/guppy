@@ -135,6 +135,7 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
+    console.log('handleFilterChange - i want to set this.state.filter to ' , mergedFilterResults);
   }
 
   /**
