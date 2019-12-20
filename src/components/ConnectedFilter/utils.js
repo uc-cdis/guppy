@@ -46,7 +46,6 @@ const capitalizeFirstLetter = (str) => {
 export const getFilterSections = (
   fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
 ) => {
-  // console.log('tabsOptions: ', tabsOptions.project_id.histogram);
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find(entry => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
@@ -68,7 +67,6 @@ export const getFilterSections = (
       options: defaultOptions,
     };
   });
-  // console.log('returning from getFilterSections with ', sections[0]);
   return sections;
 };
 
