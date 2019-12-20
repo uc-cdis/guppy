@@ -33,36 +33,39 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 };
 
 /**
-   * This function updates the counts in the initial set of tab options calculated from unfiltered data.
-   * It is used to retain field options in the rendering even if those options have no histogram results.
+   * This function updates the counts in the initial set of tab options
+   * calculated from unfiltered data.
+   * It is used to retain field options in the rendering even if
+   * those options have no histogram results.
    */
-  export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions) => {
-    let updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
-    let initialFields = Object.keys(initialTabsOptions);
-    for (let i = 0; i < initialFields.length; i++) {
-      let fieldName = initialFields[i];
-      let initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
-      let processedFieldOptions = [];
-      if (processedTabsOptions.hasOwnProperty(fieldName)) {
-        processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
+export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions) => {
+  const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
+  const initialFields = Object.keys(initialTabsOptions);
+  for (let i = 0; i < initialFields.length; i += 1) {
+    const fieldName = initialFields[i];
+    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
+    let processedFieldOptions = [];
+    if (Object.prototype.hasOwnProperty.call(processedTabsOptions, fieldName)) {
+      processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
+    }
+
+    for (let j = 0; j < initialFieldOptions.length; j += 1) {
+      const optionName = initialFieldOptions[j];
+      let newCount;
+      if (processedFieldOptions.includes(optionName)) {
+        newCount = processedTabsOptions[fieldName].histogram.filter(
+          x => x.key === optionName,
+        )[0].count;
+      } else {
+        newCount = 0;
       }
-      
-      let updatedFieldOptions = JSON.parse(JSON.stringify(initialFieldOptions));
-      for (let j = 0; j < initialFieldOptions.length; j++) {
-        let optionName = initialFieldOptions[j];
-        let newCount;
-        if (processedFieldOptions.includes(optionName)) {
-          newCount = processedTabsOptions[fieldName].histogram.filter(x => x.key == optionName)[0].count;
-        } else {
-          newCount = 0;
-        }
-        for(let k = 0; k < updatedTabsOptions[fieldName].histogram.length; k++) {
-          let option = updatedTabsOptions[fieldName].histogram[k];
-          if (option.key == optionName) {
-            updatedTabsOptions[fieldName].histogram[k].count = newCount;
-          }
+      for (let k = 0; k < updatedTabsOptions[fieldName].histogram.length; k += 1) {
+        const option = updatedTabsOptions[fieldName].histogram[k];
+        if (option.key === optionName) {
+          updatedTabsOptions[fieldName].histogram[k].count = newCount;
         }
       }
     }
-    return updatedTabsOptions;
-  };
+  }
+  return updatedTabsOptions;
+};

@@ -69,13 +69,13 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    let updatedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
-    if (Object.keys(this.initialTabsOptions).length == 0) {
+    const updatedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+    if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = updatedTabsOptions;
     }
-    
-    let processedTabsOptions = updateCountsInInitialTabsOptions(
-      this.initialTabsOptions, updatedTabsOptions
+
+    const processedTabsOptions = updateCountsInInitialTabsOptions(
+      this.initialTabsOptions, updatedTabsOptions,
     );
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
