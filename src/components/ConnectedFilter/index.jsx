@@ -198,7 +198,7 @@ ConnectedFilter.propTypes = {
 ConnectedFilter.defaultProps = {
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
-  hideZero: true,
+  hideZero: false,
   className: '',
   fieldMapping: [],
   tierAccessLimit: undefined,
