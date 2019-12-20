@@ -207,7 +207,6 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawData(sort) {
-    console.log('inside handleDownloadRawData with this.state.filter: ', this.state.filter);
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -227,7 +226,6 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawDataByFields({ fields, sort = [] }) {
-    console.log('inside handleDownloadRawDataByFields with this.state.filter: ', this.state.filter);
     let targetFields = fields;
     if (typeof fields === 'undefined') {
       targetFields = this.state.rawDataFields;
@@ -287,7 +285,6 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
-    console.log('inside render with this.state.filter: ', this.state.filter);
     return (
       <React.Fragment>
         {

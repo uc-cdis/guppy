@@ -69,27 +69,14 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    console.log('------------------');
-    console.log('entering getFilterTabs with this.state.filter: ', this.state.filter);
-    console.log('inside getFilterTabs with receivedAggsData: ', this.state.receivedAggsData);
     let updatedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
-    console.log('updatedTabsOptions: ', updatedTabsOptions);
-    console.log('initialTabsOptions: ', this.initialTabsOptions);
     if (Object.keys(this.initialTabsOptions).length == 0) {
-      console.log('a; setting initialTabsOptions to ', updatedTabsOptions);
       this.initialTabsOptions = updatedTabsOptions;
     }
     
     let processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions, updatedTabsOptions
     );
-    console.log('reSULT OF MY FUnCTION: ', processedTabsOptions);
-
-    // else {
-    //   console.log('b; setting processedTabsOptions to ', this.initialTabsOptions);
-    //   processedTabsOptions = this.initialTabsOptions;
-    // }
-    // processedTabsOptions = this.initialTabsOptions;
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
@@ -104,7 +91,6 @@ class ConnectedFilter extends React.Component {
         disabledTooltipMessage={this.props.disabledTooltipMessage}
       />
     ));
-    console.log('returning from getFilterTabs with this.state.filter: ', this.state.filter);
     return tabs;
   }
 
@@ -168,7 +154,6 @@ class ConnectedFilter extends React.Component {
     if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
-    console.log('guppy render filterTabs: ', filterTabs);
     return (
       <FilterGroup
         ref={this.filterGroupRef}
