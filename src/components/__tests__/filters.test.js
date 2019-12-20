@@ -107,7 +107,7 @@ describe('can update a small set of tabs with new counts', () => {
     initialTabsOptions, processedTabsOptions,
   );
 
-  test('merge filters', async () => {
+  test('update tab counts', async () => {
     expect(expectedUpdatedTabsOptions)
       .toEqual(actualUpdatedTabsOptions);
   });
