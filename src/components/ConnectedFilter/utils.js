@@ -7,7 +7,6 @@ export const getFilterGroupConfig = filterConfig => ({
 });
 
 const getSingleFilterOption = (histogramResult, initHistogramRes) => {
-  // console.log('getSingleFilterOption: ', histogramResult);
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -34,7 +33,6 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     count: item.count,
     accessible: item.accessible,
   }));
-  // console.log("getSingleFilterOption textOptions: ", textOptions);
   return textOptions;
 };
 
