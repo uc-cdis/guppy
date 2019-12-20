@@ -108,6 +108,7 @@ class ConnectedFilter extends React.Component {
     let processedTabsOptions = this.updateCountsInInitialTabsOptions(
       this.initialTabsOptions, updatedTabsOptions
     );
+    console.log('reSULT OF MY FUnCTION: ', processedTabsOptions);
 
     // else {
     //   console.log('b; setting processedTabsOptions to ', this.initialTabsOptions);
