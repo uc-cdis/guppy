@@ -1,6 +1,6 @@
 /* eslint-disable global-require,import/no-dynamic-require */
 // Tests for Utils/filters.js
-import { mergeFilters } from '../Utils/filters';
+import { mergeFilters, updateCountsInInitialTabsOptions } from '../Utils/filters';
 
 describe('can merge simple selectedValue filters', () => {
   const userFilter = { data_format: { selectedValues: ['VCF'] } };
@@ -58,5 +58,47 @@ describe('will select user-applied filter for a given key if it is more exclusiv
     const mergedFilter = mergeFilters(userFilter, adminFilter);
     expect(mergedFilter)
       .toEqual(mergedFilterExpected);
+  });
+});
+
+
+describe('can update a small set of tabs with new counts', () => {
+  const initialTabsOptions = {
+    "annotated_sex": { 'histogram': [
+      {key: "yellow", count: 137675},
+      {key: "pink", count: 56270},
+      {key: "orange", count: 107574}
+    ]},
+    "extra_data": { 'histogram': [
+      {key: "a", count: 2}
+    ]}
+  };
+
+  const processedTabsOptions = {
+    "annotated_sex": { 'histogram': [
+      {key: "yellow", count: 1},
+      {key: "orange", count: 107574}
+    ]},
+    "extra_data": { 'histogram': [] }
+  };
+
+  const expectedUpdatedTabsOptions = {
+    "annotated_sex": { 'histogram': [ 
+      {key: "yellow", count: 1},
+      {key: "pink", count: 0},
+      {key: "orange", count: 107574}
+    ]},
+    "extra_data": { 'histogram': [
+      {key: "a", count: 0}
+    ]}
+  };
+  
+  const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
+    initialTabsOptions, processedTabsOptions
+  );
+
+  test('merge filters', async () => {
+    expect(expectedUpdatedTabsOptions)
+    .toEqual(actualUpdatedTabsOptions);
   });
 });

@@ -14,7 +14,7 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
-import { mergeFilters } from '../Utils/filters';
+import { mergeFilters, updateCountsInInitialTabsOptions } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
@@ -62,31 +62,6 @@ class ConnectedFilter extends React.Component {
   }
 
   /**
-   * This function updates the counts in the initial set of tab options calculated from unfiltered data.
-   * It is used to retain field options in the rendering even if those options have no histogram results.
-   */
-  updateCountsInInitialTabsOptions(initialTabsOptions, processedTabsOptions) {
-    let updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
-
-    let initialFields = Object.keys(initialTabsOptions);
-    for (let i = 0; i < initialFields; i++) {
-      let fieldName = initialFields[i];
-      let initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
-      let processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
-      for (let j = 0; j < initialFieldOptions.length; j++) {
-        let optionName = initialFieldOptions[j];
-        if (processedFieldOptions.includes(optionName)) {
-          updatedFieldOptions[fieldName].histogram[j] = processedFieldOptions[fieldName].histogram[j];
-        } else {
-          updatedFieldOptions[fieldName] = 0;
-        }
-      }
-      updatedTabsOptions[fieldName] = updatedFieldOptions;
-    }
-    return updatedTabsOptions;
-  }
-
-  /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
    * But before that, the function first calls `this.props.onProcessFilterAggsData`, which is
@@ -105,7 +80,7 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions = updatedTabsOptions;
     }
     
-    let processedTabsOptions = this.updateCountsInInitialTabsOptions(
+    let processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions, updatedTabsOptions
     );
     console.log('reSULT OF MY FUnCTION: ', processedTabsOptions);
