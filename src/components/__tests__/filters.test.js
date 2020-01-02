@@ -121,6 +121,7 @@ describe('can sort tabs options', () => {
         { key: 'orange', count: 30 },
         { key: 'pink', count: 21 },
         { key: 'yellow', count: 99 },
+        { key: 'zorp', count: 4162 },
         { key: 'shiny', count: 0 },
         { key: 'green', count: 0 },
         { key: 'blue', count: 0 }
@@ -138,6 +139,7 @@ describe('can sort tabs options', () => {
   const expectedSort = {
     annotated_sex: {
       histogram: [
+        { key: 'zorp', count: 4162 },
         { key: 'yellow', count: 99 },
         { key: 'orange', count: 30 },
         { key: 'pink', count: 21 },

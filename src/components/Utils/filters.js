@@ -70,6 +70,10 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
   return updatedTabsOptions;
 };
 
+function sortNumber(a, b) {
+  return a - b;
+}
+
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
   const sortedTabsOptions = {};
@@ -92,12 +96,13 @@ export const sortTabsOptions = (tabsOptions) => {
 
     // Sort the keys in each count
     const countKeys = Object.keys(countToKeys);
+    countKeys = countKeys.map(x => parseInt(x));
     for (let j = 0; j < countKeys.length; j += 1) {
       countToKeys[countKeys[j]].sort(); // Alphabetically ascending order
     }
 
     // Sort the count-groups
-    countKeys.sort();
+    countKeys.sort(sortNumber);
     countKeys.reverse(); // Numerically descending order
     sortedTabsOptions[field] = {"histogram": [] }
     for (let k = 0; k < countKeys.length; k += 1) {
