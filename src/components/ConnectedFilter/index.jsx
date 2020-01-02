@@ -14,7 +14,7 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
-import { mergeFilters, updateCountsInInitialTabsOptions } from '../Utils/filters';
+import { mergeFilters, updateCountsInInitialTabsOptions, sortTabsOptions } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
@@ -74,9 +74,12 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions = updatedTabsOptions;
     }
 
-    const processedTabsOptions = updateCountsInInitialTabsOptions(
+    let processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions, updatedTabsOptions,
     );
+
+    processedTabsOptions = sortTabsOptions(processedTabsOptions);
+
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (

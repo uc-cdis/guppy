@@ -1,6 +1,6 @@
 /* eslint-disable global-require,import/no-dynamic-require */
 // Tests for Utils/filters.js
-import { mergeFilters, updateCountsInInitialTabsOptions } from '../Utils/filters';
+import { mergeFilters, updateCountsInInitialTabsOptions, sortTabsOptions } from '../Utils/filters';
 
 describe('can merge simple selectedValue filters', () => {
   const userFilter = { data_format: { selectedValues: ['VCF'] } };
@@ -110,5 +110,55 @@ describe('can update a small set of tabs with new counts', () => {
   test('update tab counts', async () => {
     expect(expectedUpdatedTabsOptions)
       .toEqual(actualUpdatedTabsOptions);
+  });
+});
+
+
+describe('can sort tabs options', () => {
+  const tabsOptionsOne = {
+    annotated_sex: {
+      histogram: [
+        { key: 'yellow', count: 30 },
+        { key: 'pink', count: 21 },
+        { key: 'orange', count: 99 },
+        { key: 'shiny', count: 0 },
+        { key: 'green', count: 0 },
+        { key: 'blue', count: 0 }
+      ],
+    },
+    extra_data: {
+      histogram: [
+        { key: 'a', count: 0 },
+        { key: 'b', count: 0 },
+        { key: 'c', count: 1 }
+      ],
+    },
+  };
+
+  const expectedSort = {
+    annotated_sex: {
+      histogram: [
+        { key: 'orange', count: 99 },
+        { key: 'yellow', count: 30 },
+        { key: 'pink', count: 21 },
+        { key: 'blue', count: 0 },
+        { key: 'green', count: 0 },
+        { key: 'shiny', count: 0 }
+      ],
+    },
+    extra_data: {
+      histogram: [
+        { key: 'c', count: 1 },
+        { key: 'a', count: 0 },
+        { key: 'b', count: 0 },
+      ],
+    },
+  };
+
+  const actualSort = sortTabsOptions(tabsOptionsOne);
+
+  test('test sorting tabs options', async () => {
+    expect(actualSort)
+      .toEqual(expectedSort);
   });
 });

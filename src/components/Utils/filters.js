@@ -69,3 +69,47 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
   }
   return updatedTabsOptions;
 };
+
+export const sortTabsOptions = (tabsOptions) => {
+  const fields = Object.keys(tabsOptions);
+  const sortedTabsOptions = {};
+  for (let x = 0; x < fields.length; x += 1) {
+    let field = fields[x];
+
+    const optionsForThisField = tabsOptions[field].histogram;
+
+    // Make { count -> [keys with this count] } dictionary
+    const countToKeys = {};
+    for (let i = 0; i < optionsForThisField.length; i += 1) {
+      let keyName = optionsForThisField[i].key;
+      let count = optionsForThisField[i].count;
+      if (countToKeys.hasOwnProperty(count)) {
+        countToKeys[count].push(keyName);
+      } else {
+        countToKeys[count] = [ keyName ];
+      }
+    }
+
+    // Sort the keys in each count
+    const countKeys = Object.keys(countToKeys);
+    for (let j = 0; j < countKeys.length; j += 1) {
+      countToKeys[countKeys[j]].sort(); // Alphabetically ascending order
+    }
+
+    // Sort the count-groups
+    countKeys.sort();
+    countKeys.reverse(); // Numerically descending order
+    sortedTabsOptions[field] = {"histogram": [] }
+    for (let k = 0; k < countKeys.length; k += 1) {
+      let fieldsAtThisCount = countToKeys[countKeys[k]];
+      for (let m = 0; m < fieldsAtThisCount.length; m += 1) {
+        let keyForCount = countToKeys[countKeys[k]][m];
+        sortedTabsOptions[field].histogram.push({
+          'key': keyForCount, 
+          'count': parseInt(countKeys[k])
+        });
+      }
+    }
+  }
+  return sortedTabsOptions;
+}
