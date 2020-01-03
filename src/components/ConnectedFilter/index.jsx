@@ -69,14 +69,16 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    const updatedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+    let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
-      this.initialTabsOptions = updatedTabsOptions;
+      this.initialTabsOptions = processedTabsOptions;
     }
 
-    let processedTabsOptions = updateCountsInInitialTabsOptions(
-      this.initialTabsOptions, updatedTabsOptions,
-    );
+    if (!this.props.hideZeroCountFilterOptions) {
+      processedTabsOptions = updateCountsInInitialTabsOptions(
+        this.initialTabsOptions, updatedTabsOptions,
+      );
+    }
     
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
 
@@ -164,7 +166,7 @@ class ConnectedFilter extends React.Component {
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
         onFilterChange={e => this.handleFilterChange(e)}
-        hideZero={this.props.hideZero}
+        hideZero={this.props.hideZeroCountFilterOptions}
       />
     );
   }
@@ -183,7 +185,6 @@ ConnectedFilter.propTypes = {
   }).isRequired,
   onFilterChange: PropTypes.func,
   onReceiveNewAggsData: PropTypes.func,
-  hideZero: PropTypes.bool,
   className: PropTypes.string,
   fieldMapping: PropTypes.arrayOf(PropTypes.shape({
     field: PropTypes.string,
@@ -196,12 +197,12 @@ ConnectedFilter.propTypes = {
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
+  hideZeroCountFilterOptions: PropTypes.bool,
 };
 
 ConnectedFilter.defaultProps = {
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
-  hideZero: false,
   className: '',
   fieldMapping: [],
   tierAccessLimit: undefined,
@@ -211,6 +212,7 @@ ConnectedFilter.defaultProps = {
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
+  hideZeroCountFilterOptions: false,
 };
 
 export default ConnectedFilter;
