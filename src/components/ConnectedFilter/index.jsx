@@ -76,7 +76,7 @@ class ConnectedFilter extends React.Component {
 
     if (!this.props.hideZeroCountFilterOptions) {
       processedTabsOptions = updateCountsInInitialTabsOptions(
-        this.initialTabsOptions, updatedTabsOptions,
+        this.initialTabsOptions, processedTabsOptions
       );
     }
     
