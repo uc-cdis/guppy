@@ -32,6 +32,18 @@ const resolverWithUnaccessibleFilterApplied = (
   return resolve(root, newArgs, context, info);
 };
 
+// const resolverWithSensitivityFilterApplied = (
+//   resolve, root, args, context, info, authHelper, filter,
+// ) => {
+//   const appliedFilter = authHelper.applySensitiveFilter(filter);
+//   const newArgs = {
+//     ...args,
+//     filter: appliedFilter,
+//     needEncryptAgg: false,
+//   };
+//   return resolve(root, newArgs, context, info);
+// };
+
 const tierAccessResolver = (
   {
     isRawDataQuery,
@@ -76,6 +88,15 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
+    console.log('guppy server line 91 with filter: ', filter);
+    if (accessibility == 'all' || accessibility == 'unaccessible') {
+      console.log('chillin on line 93');
+      // getUnaccessibleResources()
+      // filter: ( sensitive = false && have project id in the list of projects the user has access to)
+      // filter = modifyFilter();
+    }
+    console.log('guppy server line 95 with filter: ', filter);
+
     if (accessibility === 'all') {
       return resolve(root, { ...args, needEncryptAgg: true }, context, info);
     }
