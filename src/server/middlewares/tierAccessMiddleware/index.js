@@ -50,21 +50,26 @@ const tierAccessResolver = (
     esType,
   },
 ) => async (resolve, root, args, context, info) => {
+  log.info('[yeah] entered tieraccessresolver 53');
   try {
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
     const { filter, accessibility } = args;
+    log.info('[yeah] 59 filter: ', JSON.stringify(filter));
 
     const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
       esIndex, esType, filter,
     );
+    log.info('[yeah] 63');
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
       // unless it's requesting for `unaccessible` data, just resolve this
       if (accessibility !== 'unaccessible') {
+        log.info('[yeah] 67');
         return resolve(root, { ...args, needEncryptAgg: false }, context, info);
       }
+      log.info('[yeah] 70');
       return resolverWithUnaccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
       );
@@ -72,6 +77,7 @@ const tierAccessResolver = (
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
       if (accessibility === 'accessible') {
+        log.info('[yeah] 78');
         return resolverWithAccessibleFilterApplied(
           resolve, root, args, context, info, authHelper, filter,
         );
@@ -80,6 +86,7 @@ const tierAccessResolver = (
       throw new ApolloError(`You don't have access to following resources: \
         [${outOfScopeResourceList.join(', ')}]`, 401);
     }
+    log.info('[yeah] 88');
 
     /**
      * Here we have a bypass for `regular`-tier-access-leveled commons:
