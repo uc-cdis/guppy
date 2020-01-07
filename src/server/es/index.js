@@ -51,13 +51,13 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
-    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
+    log.info('[ES.query] kwerbiwehriu query body: ', JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
     }).then(resp => resp.body, (err) => {
-      log.error('[ES.query] error during querying');
+      log.error('[ES.query] iuewhfiuewhriuewhr error during querying');
       throw new Error(err.message);
     });
   }
@@ -111,7 +111,7 @@ class ES {
           _source: fields,
           sort: sortStringList,
         }).then(resp => resp, (err) => {
-          log.error('[ES.query] error when query', err.message);
+          log.error('[ES.query] qwrbiqwehuoiw error when query', err.message);
           throw new Error(err.message);
         });
         currentBatch = res.body;

@@ -63,6 +63,12 @@ export class AuthHelper {
     return appliedFilter;
   }
 
+  // applySensitivityFilter(filter) {
+  //   const sensitivePart = buildFilterWithResourceList(this._unaccessibleResourceList);
+  //   const appliedFilter = addTwoFilters(filter, unaccessiblePart);
+  //   return appliedFilter;
+  // }
+
   getDefaultFilter(accessibility) {
     if (accessibility === 'all') {
       return {};

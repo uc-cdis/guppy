@@ -88,14 +88,14 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
-    log.info('guppy server line 91 with filter: ', JSON.stringify(filter));
+    log.info('[yeah] guppy server line 91 with filter: ', JSON.stringify(filter));
     if (accessibility == 'all' || accessibility == 'unaccessible') {
       log.info('chillin on line 93');
       // getUnaccessibleResources()
       // filter: ( sensitive = false && have project id in the list of projects the user has access to)
       // filter = modifyFilter();
     }
-    log.info('guppy server line 95 with filter: ', JSON.stringify(filter));
+    log.info('[yeah] guppy server line 95 with filter: ', JSON.stringify(filter));
 
     if (accessibility === 'all') {
       return resolve(root, { ...args, needEncryptAgg: true }, context, info);
