@@ -1,6 +1,7 @@
 import authMiddleware from './authMiddleware';
 import tierAccessMiddleware from './tierAccessMiddleware';
 import config from '../config';
+import log from '../logger';
 
 const middlewares = [];
 log.info('[yeah] insidee middlewares index.js 6');
