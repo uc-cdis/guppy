@@ -51,6 +51,7 @@ const tierAccessResolver = (
   },
 ) => async (resolve, root, args, context, info) => {
   log.info('[yeah] entered tieraccessresolver 53');
+  console.log('[yeah] entered tieraccessresolver 53');
   try {
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
@@ -166,6 +167,8 @@ const queryTypeMapping = {};
 const aggsTypeMapping = {};
 const totalCountTypeMapping = {};
 config.esConfig.indices.forEach((item) => {
+  console.log('[yeah] esConfig ', JSON.stringify(item));
+  log.info('[yeah] esConfig ', JSON.stringify(item));
   queryTypeMapping[item.type] = tierAccessResolver({
     isRawDataQuery: true,
     esType: item.type,
