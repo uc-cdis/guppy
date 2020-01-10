@@ -96,9 +96,27 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
-    log.info('[yeah] guppy server line 91 with filter: ', JSON.stringify(filter));
+    log.info('[cool] guppy server line 91 with filter: ', JSON.stringify(filter));
     if (accessibility == 'all' || accessibility == 'unaccessible') {
-      log.info('chillin on line 93');
+      // This is specifically the case where 
+      // the user is requesting aggregate counts (not a raw query)
+      // and the out-of-scope resource list is non-zero
+      
+      log.info('[cool] going to modify the filter!');
+      
+      let projectsUserHasAccessTo = authHelper.getAccessibleResources();
+      
+      log.info('[cool] got projects from user: ', JSON.stringify(projectsUserHasAccessTo));
+
+      let filterAndList = filter["AND"] || [];
+      
+      // {"AND":[{"IN":{"carotid_plaque":["Plaque not present"]}},{"IN":{"carotid_stenosis":["75%-99%"]}}]}
+      
+      filterAndList.push( { "IN" : { "sensitive": [ "false" ] } } );
+      filterAndList.push( { "IN" : { "project_id": projectsUserHasAccessTo } } );
+      filter["AND"] = filterAndList;
+      
+
       // getUnaccessibleResources()
       // filter: ( sensitive = false && have project id in the list of projects the user has access to)
       // filter = modifyFilter();
