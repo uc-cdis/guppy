@@ -32,18 +32,6 @@ const resolverWithUnaccessibleFilterApplied = (
   return resolve(root, newArgs, context, info);
 };
 
-// const resolverWithSensitivityFilterApplied = (
-//   resolve, root, args, context, info, authHelper, filter,
-// ) => {
-//   const appliedFilter = authHelper.applySensitiveFilter(filter);
-//   const newArgs = {
-//     ...args,
-//     filter: appliedFilter,
-//     needEncryptAgg: false,
-//   };
-//   return resolve(root, newArgs, context, info);
-// };
-
 const tierAccessResolver = (
   {
     isRawDataQuery,
