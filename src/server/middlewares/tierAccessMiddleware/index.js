@@ -100,7 +100,7 @@ const tierAccessResolver = (
       
       // {"AND":[{"IN":{"carotid_plaque":["Plaque not present"]}},{"IN":{"carotid_stenosis":["75%-99%"]}}]}
       
-      filterAndList.push( { "IN" : { "sensitive": [ "false" ] } } );
+      filterAndList.push( { "IN" : { "sensitive_study": [ "false" ] } } );
       filterAndList.push( { "IN" : { "project_id": projectsUserHasAccessTo } } );
       filter["AND"] = filterAndList;
       
