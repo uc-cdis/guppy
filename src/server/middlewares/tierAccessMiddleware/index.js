@@ -84,42 +84,38 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
-    log.info('[cool] guppy server line 91 with filter: ', JSON.stringify(filter));
-    if (accessibility == 'all' || accessibility == 'unaccessible') {
-      // This is specifically the case where 
-      // the user is requesting aggregate counts (not a raw query)
-      // and the out-of-scope resource list is non-zero
-      
-      log.info('[cool] going to modify the filter!');
-      
-      let projectsUserHasAccessTo = authHelper.getAccessibleResources();
-      
-      log.info('[cool] got projects from user: ', JSON.stringify(projectsUserHasAccessTo));
-
-      let filterAndList = filter["AND"] || [];
-      
-      // {"AND":[{"IN":{"carotid_plaque":["Plaque not present"]}},{"IN":{"carotid_stenosis":["75%-99%"]}}]}
-      
-      filterAndList.push( { "IN" : { "sensitive_study": [ "false" ] } } );
-      filterAndList.push( { "IN" : { "project_id": projectsUserHasAccessTo } } );
-      filter["AND"] = filterAndList;
-      
-
-      // getUnaccessibleResources()
-      // filter: ( sensitive = false && have project id in the list of projects the user has access to)
-      // filter = modifyFilter();
-    }
-    log.info('[yeah] guppy server line 95 with filter: ', JSON.stringify(filter));
-
     if (accessibility === 'all') {
+      // Apply sensitive studies filter. For all of the projects user does not
+      // have access to, hide the studies marked 'sensitive' from the aggregation.
+      // const projectsUserHasAccessTo = authHelper.getAccessibleResources();
+      // const sensitiveStudiesFilter = {
+      //   OR: {
+      //     IN: {
+      //       project_id: projectsUserHasAccessTo,
+      //     },
+      //     NOT: {
+      //       sensitive_study: ['true'],
+      //     },
+      //   },
+      // };
       return resolve(root, { ...args, needEncryptAgg: true }, context, info);
     }
     if (accessibility === 'accessible') {
+      // We do not need to apply sensitive studies filter here, because
+      // user has access to all of these projects.
       log.debug('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
       );
     }
+    // accessibility === 'unaccessible'
+    // Apply sensitive studies filter. Hide the studies marked 'sensitive' from
+    // the aggregation.
+    // const sensitiveStudiesFilter = {
+    //   NOT: {
+    //     sensitive_study: ['true'],
+    //   },
+    // };
     return resolverWithUnaccessibleFilterApplied(
       resolve, root, args, context, info, authHelper, filter,
     );
