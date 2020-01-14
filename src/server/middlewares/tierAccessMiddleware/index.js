@@ -4,7 +4,7 @@ import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
 import CodedError from '../../utils/error';
-import { firstLetterUpperCase, isWhitelisted } from '../../utils/utils';
+import { firstLetterUpperCase, isWhitelisted, addTwoFilters } from '../../utils/utils';
 
 const ENCRYPT_COUNT = -1;
 
@@ -38,27 +38,21 @@ const tierAccessResolver = (
     esType,
   },
 ) => async (resolve, root, args, context, info) => {
-  log.info('[yeah] entered tieraccessresolver 53');
-  console.log('[yeah] entered tieraccessresolver 53');
   try {
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
     const { filter, accessibility } = args;
-    log.info('[yeah] 59 filter: ', JSON.stringify(filter));
 
     const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
       esIndex, esType, filter,
     );
-    log.info('[yeah] 63');
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
       // unless it's requesting for `unaccessible` data, just resolve this
       if (accessibility !== 'unaccessible') {
-        log.info('[yeah] 67');
         return resolve(root, { ...args, needEncryptAgg: false }, context, info);
       }
-      log.info('[yeah] 70');
       return resolverWithUnaccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
       );
@@ -66,7 +60,6 @@ const tierAccessResolver = (
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
       if (accessibility === 'accessible') {
-        log.info('[yeah] 78');
         return resolverWithAccessibleFilterApplied(
           resolve, root, args, context, info, authHelper, filter,
         );
@@ -75,7 +68,6 @@ const tierAccessResolver = (
       throw new ApolloError(`You don't have access to following resources: \
         [${outOfScopeResourceList.join(', ')}]`, 401);
     }
-    log.info('[yeah] 88');
 
     /**
      * Here we have a bypass for `regular`-tier-access-leveled commons:
@@ -84,21 +76,49 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
+    const sensitiveStudyExclusionEnabled = !!config.tierAccessSensitiveStudyExclusionField;
     if (accessibility === 'all') {
-      // Apply sensitive studies filter. For all of the projects user does not
-      // have access to, hide the studies marked 'sensitive' from the aggregation.
-      // const projectsUserHasAccessTo = authHelper.getAccessibleResources();
-      // const sensitiveStudiesFilter = {
-      //   OR: {
-      //     IN: {
-      //       project_id: projectsUserHasAccessTo,
-      //     },
-      //     NOT: {
-      //       sensitive_study: ['true'],
-      //     },
-      //   },
-      // };
-      return resolve(root, { ...args, needEncryptAgg: true }, context, info);
+      if (sensitiveStudyExclusionEnabled) {
+        // Sensitive study exclusion is enabled: For all of the projects user does
+        // not have access to, hide the studies marked 'sensitive' from the aggregation.
+        // (See doc/queries.md#Tiered_Access_sensitive_record_exclusion)
+        const projectsUserHasAccessTo = authHelper.getAccessibleResources();
+        const sensitiveStudiesFilter = {
+          OR: [
+            {
+              IN: {
+                [config.esConfig.authFilterField]: projectsUserHasAccessTo,
+              },
+            },
+            {
+              '!=': {
+                [config.tierAccessSensitiveStudyExclusionField]: 'true',
+              },
+            },
+          ],
+        };
+        return resolve(
+          root,
+          {
+            accessibility,
+            filter: addTwoFilters(filter, sensitiveStudiesFilter),
+            needEncryptAgg: true,
+          },
+          context,
+          info,
+        );
+      }
+
+      return resolve(
+        root,
+        {
+          accessibility,
+          filter,
+          needEncryptAgg: true,
+        },
+        context,
+        info,
+      );
     }
     if (accessibility === 'accessible') {
       // We do not need to apply sensitive studies filter here, because
@@ -108,14 +128,25 @@ const tierAccessResolver = (
         resolve, root, args, context, info, authHelper, filter,
       );
     }
-    // accessibility === 'unaccessible'
-    // Apply sensitive studies filter. Hide the studies marked 'sensitive' from
-    // the aggregation.
-    // const sensitiveStudiesFilter = {
-    //   NOT: {
-    //     sensitive_study: ['true'],
-    //   },
-    // };
+    // The below code executes if accessibility === 'unaccessible'.
+    if (sensitiveStudyExclusionEnabled) {
+      // Apply sensitive studies filter. Hide the studies marked 'sensitive' from
+      // the aggregation.
+      const sensitiveStudiesFilter = {
+        '!=': {
+          [config.tierAccessSensitiveStudyExclusionField]: 'true',
+        },
+      };
+      return resolverWithUnaccessibleFilterApplied(
+        resolve,
+        root,
+        args,
+        context,
+        info,
+        authHelper,
+        addTwoFilters(filter, sensitiveStudiesFilter),
+      );
+    }
     return resolverWithUnaccessibleFilterApplied(
       resolve, root, args, context, info, authHelper, filter,
     );
@@ -169,8 +200,6 @@ const queryTypeMapping = {};
 const aggsTypeMapping = {};
 const totalCountTypeMapping = {};
 config.esConfig.indices.forEach((item) => {
-  console.log('[yeah] esConfig ', JSON.stringify(item));
-  log.info('[yeah] esConfig ', JSON.stringify(item));
   queryTypeMapping[item.type] = tierAccessResolver({
     isRawDataQuery: true,
     esType: item.type,

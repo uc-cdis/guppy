@@ -81,7 +81,8 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "whatever_lab_result_value": { "type": "float" },
           "some_string_field": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "some_integer_field": { "type": "integer" },
-          "some_long_field": { "type": "long" }
+          "some_long_field": { "type": "long" },
+          "sensitive": { "type": "keyword" }
         }
       }
     }
@@ -162,6 +163,7 @@ fileTypeList=( "mRNA Array" "Unaligned Reads" "Lipdomic MS" "Protionic MS" "1Gs 
 fileFormatList=( "BEM" "BAM" "BED" "CSV" "FASTQ" "RAW" "TAR" "TSV" "TXT" "IDAT" "__missing__" )
 resourceList=( "/programs/jnkns/projects/jenkins" "/programs/DEV/projects/test" "/programs/external/projects/test")
 projectList=( "jnkns-jenkins" "DEV-test" "external-test" )
+sensitiveList=( "true" "false" )
 
 COUNT=$startIndex
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
@@ -182,6 +184,7 @@ while [[ $COUNT -lt $endIndex ]]; do
   stringArray='["1", "2"]'
   intArray='[1, 2]'
   longNumber="10737418240"
+  sensitive="${sensitiveList[$(( $RANDOM % ${#sensitiveList[@]} ))]}"
 
   cat - > "$tmpName" <<EOM
 {
@@ -200,7 +203,9 @@ while [[ $COUNT -lt $endIndex ]]; do
   "whatever_lab_result_value": $randomFloatNumber,
   "some_string_field": $stringArray,
   "some_integer_field": $intArray,
-  "some_long_field": $longNumber
+  "some_long_field": $longNumber,
+  "sensitive": $sensitive
+
 }
 EOM
   cat - $tmpName <<EOM
