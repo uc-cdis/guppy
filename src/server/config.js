@@ -30,11 +30,8 @@ const config = {
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
-  tierAccessLevel: 'regular',
-  tierAccessLimit: 1,
-  tierAccessExcludeSensitiveRecords: {
-    filterField: 'sensitive',
-  },
+  tierAccessLevel: 'private',
+  tierAccessLimit: 1000,
   logLevel: 'INFO',
   enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? false : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
