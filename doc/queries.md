@@ -871,6 +871,44 @@ Result:
 }
 ```
 
+### Tiered Access Sensitive Record Exclusion
+It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
+The purpose of this is to "hide" information about certain sensitive resources, essentially making this an escape hatch from Tiered Access. Specifically, this feature is used in a Gen3 data commons to hide the existence of some studies from clients who do not have access, while keeping the features of Tiered Access for the non-sensitive studies.
+
+Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
+be counted in the aggregation query whether or not it is sensitive.
+
+To enable Sensitive Record Exclusion, the `tierAccessSensitiveRecordExclusionField` value should be set in Guppy's config. The value of the `tierAccessSensitiveRecordExclusionField` should match a boolean field in the Elasticsearch index that indicates whether or not a record is sensitive.
+(E.g., `tierAccessSensitiveRecordExclusionField: "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
+
+
+> Example: We have a index called "subject" with `100` records in it. Of those, `55` are inaccessible to this user.
+Of the inaccessible records, `15` records are sensitive. There are also `5` other sensitive records which are accessible to the user.
+> 
+> __What will Guppy return when we ask for a total count of all records in the index?__ 
+> ```
+> query {
+>   _aggregation{
+>     $indexName(accessibility: all) {
+>       _totalCount
+>     }
+>   }
+> }
+>```
+> * Expected output: 
+> ```
+> {
+>     "data": {
+>         "_aggregation": {
+>             "$indexName": {
+>                 "_totalCount": 85
+>             }
+>         }
+>     }
+> }
+>```
+> If sensitive study exclusion is enabled, Guppy will return `85`, instead of `100`. This is because Guppy excludes the `15` sensitive records that are not accessible to the user. Importantly, Guppy does not exclude the `5` sensitive records which are accessible to the user.
+>
 ### `filterSelf`
 In some UI scenarios, there's need that aggregation should skip applying filters on those fields that appear in filter object. For example, in Guppy's filter UI component, when user select `gender=female`, the aggregation (with filter object include `gender=female`) should return all gender values including "female", "male", and "unknown" etc., because filter UI still need to render those options. 
 
