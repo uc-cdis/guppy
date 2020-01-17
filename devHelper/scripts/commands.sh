@@ -103,7 +103,8 @@ curl -iv -X PUT "${ESHOST}/${fileIndexName}" \
         "properties": {
           "file_id": { "type": "keyword" },
           "gen3_resource_path": { "type": "keyword" },
-          "subject_id": { "type": "keyword" }
+          "subject_id": { "type": "keyword" },
+          "sensitive": { "type": "keyword" }
         }
       }
     }
@@ -219,7 +220,8 @@ EOM
 {
   "subject_id": "$COUNT",
   "gen3_resource_path": "${resourceName}",
-  "file_id": "file_id_$(( $RANDOM % 1000 ))"
+  "file_id": "file_id_$(( $RANDOM % 1000 ))",
+  "sensitive": $sensitive
 }
 EOM
   cat - $tmpName <<EOM
