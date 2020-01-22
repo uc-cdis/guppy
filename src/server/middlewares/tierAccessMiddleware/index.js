@@ -39,6 +39,7 @@ const tierAccessResolver = (
   },
 ) => async (resolve, root, args, context, info) => {
   try {
+    log.info('tierAccessResolver called');
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
@@ -76,10 +77,10 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
-    const sensitiveStudyExclusionEnabled = !!config.tierAccessSensitiveStudyExclusionField;
-    log.debug(`sensitive Study exclusion enabled? [${sensitiveStudyExclusionEnabled}]`);
+    const sensitiveRecordExclusionEnabled = !!config.tierAccessSensitiveRecordExclusionField;
+    log.info(`sensitive Study exclusion enabled? [${sensitiveRecordExclusionEnabled}]`);
     if (accessibility === 'all') {
-      if (sensitiveStudyExclusionEnabled) {
+      if (sensitiveRecordExclusionEnabled) {
         // Sensitive study exclusion is enabled: For all of the projects user does
         // not have access to, hide the studies marked 'sensitive' from the aggregation.
         // (See doc/queries.md#Tiered_Access_sensitive_record_exclusion)
@@ -93,7 +94,7 @@ const tierAccessResolver = (
             },
             {
               '!=': {
-                [config.tierAccessSensitiveStudyExclusionField]: 'true',
+                [config.tierAccessSensitiveRecordExclusionField]: 'true',
               },
             },
           ],
@@ -125,18 +126,18 @@ const tierAccessResolver = (
     if (accessibility === 'accessible') {
       // We do not need to apply sensitive studies filter here, because
       // user has access to all of these projects.
-      log.info('[tierAccessResolver] applying "accessible" to resolver');
+      log.debug('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
       );
     }
     // The below code executes if accessibility === 'unaccessible'.
-    if (sensitiveStudyExclusionEnabled) {
+    if (sensitiveRecordExclusionEnabled) {
       // Apply sensitive studies filter. Hide the studies marked 'sensitive' from
       // the aggregation.
       const sensitiveStudiesFilter = {
         '!=': {
-          [config.tierAccessSensitiveStudyExclusionField]: 'true',
+          [config.tierAccessSensitiveRecordExclusionField]: 'true',
         },
       };
       return resolverWithUnaccessibleFilterApplied(
