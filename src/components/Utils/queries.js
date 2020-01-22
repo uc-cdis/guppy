@@ -3,24 +3,40 @@ import fetch from 'isomorphic-fetch';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
-const histogramQueryStrForEachField = field => (`
+const histogramQueryStrForEachField = (field, histogramConfig = {}) => {
+  const { binCount, rangeStart, rangeEnd } = histogramConfig;
+  let binCountStr = '';
+  if (typeof binCount !== 'undefined') {
+    binCountStr = `(binCount: ${binCount}`;
+    if (typeof rangeStart !== 'undefined') {
+      binCountStr += `, rangeStart: ${rangeStart}`;
+    }
+    if (typeof rangeEnd !== 'undefined') {
+      binCountStr += `, rangeEnd: ${rangeEnd}`;
+    }
+    binCountStr += ')';
+  }
+  return `
   ${field} {
-    histogram {
+    histogram ${binCountStr} {
       key
       count
     }
-  }`);
+  }`;
+};
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter, acc, histogramConfigs) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
   }
+  // eslint-disable-next-line no-param-reassign
+  histogramConfigs = histogramConfigs || {};
 
   const query = `query {
     _aggregation {
       ${type} (accessibility: ${accessibility}) {
-        ${fields.map(field => histogramQueryStrForEachField(field))}
+        ${fields.map(field => histogramQueryStrForEachField(field, histogramConfigs[field]))}
       }
     }
   }`;
@@ -29,7 +45,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
-          ${fields.map(field => histogramQueryStrForEachField(field))}
+          ${fields.map(field => histogramQueryStrForEachField(field, histogramConfigs[field]))}
         }
       }
     }`;
@@ -194,16 +210,26 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility, filter,
-) => {
+export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
+/**
+ * 
+ * @param {*} path
+ * @param {*} type
+ * @param {*} fields
+ * @param {*} filter
+ * @param {*} accessibility
+ * @param {obj} chartConfig: {<field_id:stirng>: { binCount: <count:int> }}
+ */
+export const askGuppyForChartData = (
+  path, type, filter, accessibility, chartConfig,
+) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  const fields = Object.keys(chartConfig);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility, chartConfig);
 };
 
 export const askGuppyForNestedAggregationData = (

@@ -10,7 +10,6 @@ import {
 } from './utils';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
-  askGuppyAboutAllFieldsAndOptions,
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
@@ -44,12 +43,12 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
-    askGuppyAboutAllFieldsAndOptions(
+    askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      this.state.accessibility,
       this.state.filter,
+      this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(

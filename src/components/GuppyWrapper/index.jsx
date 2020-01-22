@@ -8,6 +8,7 @@ import {
   getAllFieldsFromGuppy,
   getAccessibleResources,
   askGuppyForNestedAggregationData,
+  askGuppyForChartData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
@@ -61,6 +62,7 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
+      chartData: {},
     };
   }
 
@@ -90,6 +92,24 @@ class GuppyWrapper extends React.Component {
         });
       });
     }
+
+    askGuppyForChartData(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.filter,
+      this.state.accessibility,
+      this.props.chartConfig,
+    )
+      .then((data) => {
+        try {
+          const resData = data.data._aggregation[this.props.guppyConfig.type];
+          this.setState({
+            chartData: resData,
+          });
+        } catch (err) {
+          console.err('Error downloading chart histogram data');
+        }
+      });
   }
 
   /**
@@ -302,6 +322,7 @@ class GuppyWrapper extends React.Component {
             allFields: this.state.allFields,
             accessibleFieldObject: this.state.accessibleFieldObject,
             unaccessibleFieldObject: this.state.unaccessibleFieldObject,
+            chartData: this.state.chartData,
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
@@ -344,6 +365,7 @@ GuppyWrapper.propTypes = {
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
+  chartConfig: PropTypes.object,
 };
 
 GuppyWrapper.defaultProps = {
@@ -352,6 +374,7 @@ GuppyWrapper.defaultProps = {
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
+  chartConfig: {},
 };
 
 export default GuppyWrapper;
