@@ -92,7 +92,10 @@ class GuppyWrapper extends React.Component {
         });
       });
     }
+    this.getChartDataFromGuppy();
+  }
 
+  getChartDataFromGuppy() {
     askGuppyForChartData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -107,6 +110,7 @@ class GuppyWrapper extends React.Component {
             chartData: resData,
           });
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.err('Error downloading chart histogram data');
         }
       });
@@ -211,6 +215,7 @@ class GuppyWrapper extends React.Component {
       accessibility,
     }, () => {
       this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+      this.getChartDataFromGuppy();
     });
   }
 

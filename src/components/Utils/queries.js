@@ -216,7 +216,7 @@ export const askGuppyForAggregationData = (path, type, fields, filter, accessibi
 };
 
 /**
- * 
+ *
  * @param {*} path
  * @param {*} type
  * @param {*} fields
