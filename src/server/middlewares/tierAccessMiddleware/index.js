@@ -98,7 +98,7 @@ const tierAccessResolver = (
             },
           ],
         };
-        log.debug(`Filtering accessibility==all aggregation query with filter:\n${JSON.stringify(sensitiveStudiesFilter, 0, 2)}`);
+        log.info(`Filtering accessibility==all aggregation query with filter:\n${JSON.stringify(sensitiveStudiesFilter, 0, 2)}`);
         return resolve(
           root,
           {
@@ -125,7 +125,7 @@ const tierAccessResolver = (
     if (accessibility === 'accessible') {
       // We do not need to apply sensitive studies filter here, because
       // user has access to all of these projects.
-      log.debug('[tierAccessResolver] applying "accessible" to resolver');
+      log.info('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
       );
