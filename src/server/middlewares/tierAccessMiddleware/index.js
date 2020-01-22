@@ -77,6 +77,7 @@ const tierAccessResolver = (
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
     const sensitiveStudyExclusionEnabled = !!config.tierAccessSensitiveStudyExclusionField;
+    log.debug(`sensitive Study exclusion enabled? [${sensitiveStudyExclusionEnabled}]`);
     if (accessibility === 'all') {
       if (sensitiveStudyExclusionEnabled) {
         // Sensitive study exclusion is enabled: For all of the projects user does
@@ -97,6 +98,7 @@ const tierAccessResolver = (
             },
           ],
         };
+        log.debug(`Filtering accessibility==all aggregation query with filter:\n${JSON.stringify(sensitiveStudiesFilter, 0, 2)}`);
         return resolve(
           root,
           {
