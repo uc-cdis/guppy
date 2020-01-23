@@ -39,7 +39,6 @@ const tierAccessResolver = (
   },
 ) => async (resolve, root, args, context, info) => {
   try {
-    log.info('tierAccessResolver called');
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
@@ -78,7 +77,6 @@ const tierAccessResolver = (
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
     const sensitiveRecordExclusionEnabled = !!config.tierAccessSensitiveRecordExclusionField;
-    log.info(`sensitive Study exclusion enabled? [${sensitiveRecordExclusionEnabled}]`);
     if (accessibility === 'all') {
       if (sensitiveRecordExclusionEnabled) {
         // Sensitive study exclusion is enabled: For all of the projects user does
@@ -99,7 +97,6 @@ const tierAccessResolver = (
             },
           ],
         };
-        log.info(`Filtering accessibility==all aggregation query with filter:\n${JSON.stringify(sensitiveStudiesFilter, 0, 2)}`);
         return resolve(
           root,
           {
