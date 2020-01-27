@@ -35,10 +35,10 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 /**
    * This function updates the counts in the initial set of tab options
    * calculated from unfiltered data.
-   * It is used to retain field options in the rendering even if
-   * those options have no histogram results.
+   * It is used to retain field options in the rendering if
+   * they are still checked but their counts are zero.
    */
-export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions) => {
+export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions, filter) => {
   const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
   const initialFields = Object.keys(initialTabsOptions);
   for (let i = 0; i < initialFields.length; i += 1) {
@@ -67,54 +67,29 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
       }
     }
   }
+
+  console.log("inside updateCountsInInitialTabsOptions with ", this.state.filter);
+  
   return updatedTabsOptions;
 };
 
-function sortNumber(a, b) {
-  return a - b;
+function sortCountThenAlpha(a, b) {
+  if (a.count === b.count) {
+    return a.key < b.key ? -1 : 1;
+ }
+ return b.count - a.count;
 }
 
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
-  const sortedTabsOptions = {};
+  const sortedTabsOptions = Object.assign({}, tabsOptions);
   for (let x = 0; x < fields.length; x += 1) {
     let field = fields[x];
 
-    const optionsForThisField = tabsOptions[field].histogram;
+    const optionsForThisField = sortedTabsOptions[field].histogram;
+    optionsForThisField.sort(sortCountThenAlpha);
+    sortedTabsOptions[field].histogram = optionsForThisField;
 
-    // Make { count -> [keys with this count] } dictionary
-    const countToKeys = {};
-    for (let i = 0; i < optionsForThisField.length; i += 1) {
-      let keyName = optionsForThisField[i].key;
-      let count = optionsForThisField[i].count;
-      if (countToKeys.hasOwnProperty(count)) {
-        countToKeys[count].push(keyName);
-      } else {
-        countToKeys[count] = [ keyName ];
-      }
     }
-
-    // Sort the keys in each count
-    const countKeys = Object.keys(countToKeys);
-    countKeys = countKeys.map(x => parseInt(x));
-    for (let j = 0; j < countKeys.length; j += 1) {
-      countToKeys[countKeys[j]].sort(); // Alphabetically ascending order
-    }
-
-    // Sort the count-groups
-    countKeys.sort(sortNumber);
-    countKeys.reverse(); // Numerically descending order
-    sortedTabsOptions[field] = {"histogram": [] }
-    for (let k = 0; k < countKeys.length; k += 1) {
-      let fieldsAtThisCount = countToKeys[countKeys[k]];
-      for (let m = 0; m < fieldsAtThisCount.length; m += 1) {
-        let keyForCount = countToKeys[countKeys[k]][m];
-        sortedTabsOptions[field].histogram.push({
-          'key': keyForCount, 
-          'count': parseInt(countKeys[k])
-        });
-      }
-    }
-  }
   return sortedTabsOptions;
 }
