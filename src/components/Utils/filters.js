@@ -68,8 +68,8 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
     }
   }
 
-  console.log("inside updateCountsInInitialTabsOptions with ", this.state.filter);
-  
+  console.log("inside updateCountsInInitialTabsOptions with ", filter);
+
   return updatedTabsOptions;
 };
 
