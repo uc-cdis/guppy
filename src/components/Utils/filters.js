@@ -34,6 +34,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 
 function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   console.log('should it be hidden? ', option);
+  console.log('selected values :', filtersApplied[fieldName].selectedValues);
   if (option.count > 0) {
     return false;
   }
