@@ -32,7 +32,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   return filterAB;
 };
 
-isFilterOptionToBeHidden = (option, filtersApplied, fieldName) => {
+function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   console.log('should it be hidden? ', option);
   if (option.count > 0) {
     return false;
