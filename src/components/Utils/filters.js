@@ -38,7 +38,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * It is used to retain field options in the rendering if
    * they are still checked but their counts are zero.
    */
-export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions, filter) => {
+export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions, filtersApplied) => {
   const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
   const initialFields = Object.keys(initialTabsOptions);
   for (let i = 0; i < initialFields.length; i += 1) {
@@ -68,7 +68,7 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
     }
   }
 
-  console.log("inside updateCountsInInitialTabsOptions with ", this.state.filtersApplied);
+  console.log("inside updateCountsInInitialTabsOptions with ", filtersApplied);
 
   return updatedTabsOptions;
 };
