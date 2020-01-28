@@ -86,11 +86,6 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
     }
   }
 
-  console.log("inside updateCountsInInitialTabsOptions with filtersApplied", filtersApplied);
-
-  updatedTabsOptions.filter(option => isFilterOptionToBeHidden(option, filtersApplied));
-
-
   return updatedTabsOptions;
 };
 
