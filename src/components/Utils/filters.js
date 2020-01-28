@@ -32,6 +32,20 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   return filterAB;
 };
 
+isFilterOptionToBeHidden = (option, filtersApplied, fieldName) => {
+  console.log('should it be hidden? ', option);
+  if (option.count > 0) {
+    return false;
+  }
+  try {
+    if (filtersApplied[fieldName].selectedValues.includes(option.key)) {
+      return false;
+    }
+  } catch(err) {
+    return true;
+  }
+}
+
 /**
    * This function updates the counts in the initial set of tab options
    * calculated from unfiltered data.
@@ -63,12 +77,19 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
         const option = updatedTabsOptions[fieldName].histogram[k];
         if (option.key === optionName) {
           updatedTabsOptions[fieldName].histogram[k].count = newCount;
+          if (isFilterOptionToBeHidden(updatedTabsOptions[fieldName].histogram[k], filtersApplied)) {
+            console.log('removing ', updatedTabsOptions[fieldName].histogram[k]);
+            updatedTabsOptions[fieldName].histogram.splice(k, 1);
+          }
         }
       }
     }
   }
 
-  console.log("inside updateCountsInInitialTabsOptions with ", filtersApplied);
+  console.log("inside updateCountsInInitialTabsOptions with filtersApplied", filtersApplied);
+
+  updatedTabsOptions.filter(option => isFilterOptionToBeHidden(option, filtersApplied));
+
 
   return updatedTabsOptions;
 };
