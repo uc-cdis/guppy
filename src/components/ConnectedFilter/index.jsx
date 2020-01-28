@@ -79,6 +79,7 @@ class ConnectedFilter extends React.Component {
         this.initialTabsOptions, processedTabsOptions, this.state.filter
       );
     }
+    console.log('82 processedTabsOptions: ', processedTabsOptions);
     
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
 
