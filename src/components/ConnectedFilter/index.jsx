@@ -33,6 +33,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
       filter: Object.assign({}, this.props.adminAppliedPreFilters),
+      filtersApplied: {},
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -74,11 +75,9 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions = processedTabsOptions;
     }
 
-    if (!this.props.hideZeroCountFilterOptions) {
-      processedTabsOptions = updateCountsInInitialTabsOptions(
-        this.initialTabsOptions, processedTabsOptions, this.state.filter
-      );
-    }
+    processedTabsOptions = updateCountsInInitialTabsOptions(
+      this.initialTabsOptions, processedTabsOptions, this.state.filter
+    );
     console.log('82 processedTabsOptions: ', processedTabsOptions);
     
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
@@ -127,6 +126,7 @@ class ConnectedFilter extends React.Component {
   handleFilterChange(filterResults) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, this.state.adminAppliedPreFilters);
+    this.setState({filtersApplied: mergedFilterResults});
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
