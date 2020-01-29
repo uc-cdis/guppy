@@ -34,7 +34,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 
 function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   if (fieldName == 'project_id') { 
-    console.log('should it be hidden? ', option);
+    console.log('should it be hidden? ', option.key);
     console.log('filtersApplied :', filtersApplied);
     console.log('fieldName: ', fieldName);
     console.log('filtersApplied[fieldName] :', filtersApplied[fieldName]);
@@ -46,19 +46,18 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
     }
     return false;
   }
-  try {
-    if (filtersApplied[fieldName].selectedValues.includes(option.key)) {
-      if (fieldName == 'project_id') { 
-        console.log('51');
-      }
-      return false;
+  
+  if (filtersApplied[fieldName] && filtersApplied[fieldName].selectedValues.includes(option.key)) {
+    if (fieldName == 'project_id') { 
+      console.log('51');
     }
-  } catch(err) {
-    if (fieldName == 'project_id') {
-      console.log('58');
-    }
-    return true;
+    return false;
   }
+
+  if (fieldName == 'project_id') {
+    console.log('58');
+  }
+  return true;
 }
 
 /**
