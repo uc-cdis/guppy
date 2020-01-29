@@ -100,7 +100,7 @@ const tierAccessResolver = (
         return resolve(
           root,
           {
-            accessibility,
+            ...args,
             filter: addTwoFilters(filter, sensitiveStudiesFilter),
             needEncryptAgg: true,
           },
@@ -112,7 +112,7 @@ const tierAccessResolver = (
       return resolve(
         root,
         {
-          accessibility,
+          ...args,
           filter,
           needEncryptAgg: true,
         },
