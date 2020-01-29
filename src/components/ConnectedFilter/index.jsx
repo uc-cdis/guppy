@@ -76,9 +76,9 @@ class ConnectedFilter extends React.Component {
     }
 
     processedTabsOptions = updateCountsInInitialTabsOptions(
-      this.initialTabsOptions, processedTabsOptions, this.state.filtersApplied
+      this.initialTabsOptions, processedTabsOptions, this.state.filtersApplied,
     );
-    
+
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
@@ -124,8 +124,8 @@ class ConnectedFilter extends React.Component {
    */
   handleFilterChange(filterResults) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
-    const mergedFilterResults = mergeFilters(filterResults, this.state.adminAppliedPreFilters);
-    this.setState({filtersApplied: mergedFilterResults});
+    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
+    this.setState({ filtersApplied: mergedFilterResults });
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,

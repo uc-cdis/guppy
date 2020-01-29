@@ -36,7 +36,7 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   if (option.count > 0) {
     return false;
   }
-  
+
   if (filtersApplied[fieldName] && filtersApplied[fieldName].selectedValues.includes(option.key)) {
     return false;
   }
@@ -50,7 +50,9 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
    * It is used to retain field options in the rendering if
    * they are still checked but their counts are zero.
    */
-export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTabsOptions, filtersApplied) => {
+export const updateCountsInInitialTabsOptions = (
+  initialTabsOptions, processedTabsOptions, filtersApplied,
+) => {
   const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
   const initialFields = Object.keys(initialTabsOptions);
   for (let i = 0; i < initialFields.length; i += 1) {
@@ -75,7 +77,9 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
         const option = updatedTabsOptions[fieldName].histogram[k];
         if (option.key === optionName) {
           updatedTabsOptions[fieldName].histogram[k].count = newCount;
-          if (isFilterOptionToBeHidden(updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName)) {
+          if (isFilterOptionToBeHidden(
+            updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
+          )) {
             updatedTabsOptions[fieldName].histogram.splice(k, 1);
           }
         }
@@ -89,20 +93,19 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
 function sortCountThenAlpha(a, b) {
   if (a.count === b.count) {
     return a.key < b.key ? -1 : 1;
- }
- return b.count - a.count;
+  }
+  return b.count - a.count;
 }
 
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
   const sortedTabsOptions = Object.assign({}, tabsOptions);
   for (let x = 0; x < fields.length; x += 1) {
-    let field = fields[x];
+    const field = fields[x];
 
     const optionsForThisField = sortedTabsOptions[field].histogram;
     optionsForThisField.sort(sortCountThenAlpha);
     sortedTabsOptions[field].histogram = optionsForThisField;
-
-    }
+  }
   return sortedTabsOptions;
-}
+};

@@ -124,14 +124,14 @@ describe('can sort tabs options', () => {
         { key: 'zorp', count: 4162 },
         { key: 'shiny', count: 0 },
         { key: 'green', count: 0 },
-        { key: 'blue', count: 0 }
+        { key: 'blue', count: 0 },
       ],
     },
     extra_data: {
       histogram: [
         { key: 'a', count: 0 },
         { key: 'b', count: 0 },
-        { key: 'c', count: 1 }
+        { key: 'c', count: 1 },
       ],
     },
   };
@@ -145,7 +145,7 @@ describe('can sort tabs options', () => {
         { key: 'pink', count: 21 },
         { key: 'blue', count: 0 },
         { key: 'green', count: 0 },
-        { key: 'shiny', count: 0 }
+        { key: 'shiny', count: 0 },
       ],
     },
     extra_data: {
