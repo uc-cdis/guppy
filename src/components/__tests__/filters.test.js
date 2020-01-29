@@ -68,6 +68,7 @@ describe('can update a small set of tabs with new counts', () => {
       histogram: [
         { key: 'yellow', count: 137675 },
         { key: 'pink', count: 56270 },
+        { key: 'silver', count: 2020 },
         { key: 'orange', count: 107574 },
       ],
     },
@@ -88,28 +89,29 @@ describe('can update a small set of tabs with new counts', () => {
     extra_data: { histogram: [] },
   };
 
+  const filtersApplied = { annotated_sex: { selectedValues: ['silver'] } };
+
+  // Silver has a count of zero, but it is in the filter, so it should remain visible
   const expectedUpdatedTabsOptions = {
     annotated_sex: {
       histogram: [
         { key: 'yellow', count: 1 },
-        { key: 'pink', count: 0 },
+        { key: 'silver', count: 0 },
         { key: 'orange', count: 107574 },
       ],
     },
     extra_data: {
-      histogram: [
-        { key: 'a', count: 0 },
-      ],
+      histogram: [],
     },
   };
 
   const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
-    initialTabsOptions, processedTabsOptions,
+    initialTabsOptions, processedTabsOptions, filtersApplied,
   );
 
   test('update tab counts', async () => {
-    expect(expectedUpdatedTabsOptions)
-      .toEqual(actualUpdatedTabsOptions);
+    expect(actualUpdatedTabsOptions)
+      .toEqual(expectedUpdatedTabsOptions);
   });
 });
 

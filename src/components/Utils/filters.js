@@ -37,7 +37,9 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
     return false;
   }
 
-  if (filtersApplied[fieldName] && filtersApplied[fieldName].selectedValues.includes(option.key)) {
+  if (typeof filtersApplied !== 'undefined'
+      && filtersApplied[fieldName]
+      && filtersApplied[fieldName].selectedValues.includes(option.key)) {
     return false;
   }
 
