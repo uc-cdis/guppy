@@ -33,30 +33,14 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 };
 
 function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
-  if (fieldName == 'project_id') { 
-    console.log('should it be hidden? ', option.key);
-    console.log('filtersApplied :', filtersApplied);
-    console.log('fieldName: ', fieldName);
-    console.log('filtersApplied[fieldName] :', filtersApplied[fieldName]);
-  }
-
   if (option.count > 0) {
-    if (fieldName == 'project_id') { 
-      console.log('45 ');
-    }
     return false;
   }
   
   if (filtersApplied[fieldName] && filtersApplied[fieldName].selectedValues.includes(option.key)) {
-    if (fieldName == 'project_id') { 
-      console.log('51');
-    }
     return false;
   }
 
-  if (fieldName == 'project_id') {
-    console.log('58');
-  }
   return true;
 }
 
@@ -92,9 +76,6 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
         if (option.key === optionName) {
           updatedTabsOptions[fieldName].histogram[k].count = newCount;
           if (isFilterOptionToBeHidden(updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName)) {
-            if (fieldName == 'project_id') {
-              console.log('removing ', updatedTabsOptions[fieldName].histogram[k]);
-            }
             updatedTabsOptions[fieldName].histogram.splice(k, 1);
           }
         }
