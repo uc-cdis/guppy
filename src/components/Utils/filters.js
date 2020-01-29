@@ -35,6 +35,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   console.log('should it be hidden? ', option);
   console.log('filtersApplied :', filtersApplied);
+  console.log('fieldName: ', fieldName);
   console.log('filtersApplied[fieldName] :', filtersApplied[fieldName]);
   if (option.count > 0) {
     return false;
@@ -79,7 +80,7 @@ export const updateCountsInInitialTabsOptions = (initialTabsOptions, processedTa
         const option = updatedTabsOptions[fieldName].histogram[k];
         if (option.key === optionName) {
           updatedTabsOptions[fieldName].histogram[k].count = newCount;
-          if (isFilterOptionToBeHidden(updatedTabsOptions[fieldName].histogram[k], filtersApplied)) {
+          if (isFilterOptionToBeHidden(updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName)) {
             console.log('removing ', updatedTabsOptions[fieldName].histogram[k]);
             updatedTabsOptions[fieldName].histogram.splice(k, 1);
           }
