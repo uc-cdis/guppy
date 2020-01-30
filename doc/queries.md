@@ -15,10 +15,10 @@ Table of Contents
 
 <a name="query"></a>
 
-## Queries 
+## Queries
 Guppy allows you to query the raw data with offset, maximum number of rows, sorting and filters (see the end of the document for how filter syntax looks).
 
-Example query: 
+Example query:
 
 ```
 {
@@ -39,7 +39,7 @@ Example query:
 }
 ```
 
-Example result: 
+Example result:
 
 ```
 {
@@ -72,7 +72,7 @@ Example result:
 }
 ```
 
-Arguments: 
+Arguments:
 
 | argument      | description                                                     | type                                | default |
 |---------------|-----------------------------------------------------------------|-------------------------------------|---------|
@@ -85,12 +85,12 @@ Arguments:
 
 <a name="aggregation"></a>
 
-## Aggregations 
-Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available: 
+## Aggregations
+Aggregation query is wrapped within `_aggregation` keyword. Three possible aggregations available:
 
 <a name="aggs-total"></a>
 
-### 1. Total count aggregation 
+### 1. Total count aggregation
  By using `_totalCount` keyword, return total count of the result. Example:
 
  ```
@@ -103,7 +103,7 @@ Aggregation query is wrapped within `_aggregation` keyword. Three possible aggre
 }
 ```
 
-Example result: 
+Example result:
 
 ```
 {
@@ -119,8 +119,8 @@ Example result:
 
 <a name="aggs-text"></a>
 
-### 2. Text aggregation 
-Text aggregation returns histogram for a text field, results are wrapped by keywords `key` and `count`, example: 
+### 2. Text aggregation
+Text aggregation returns histogram for a text field, results are wrapped by keywords `key` and `count`, example:
 
 ```
 query {
@@ -164,10 +164,10 @@ Example result:
 
 <a name="aggs-numeric"></a>
 
-### 3. Numeric aggregation 
-For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***. 
+### 3. Numeric aggregation
+For numeric field, aggregation can calculate ***statistical summary*** or ***histogram***.
 
-***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example: 
+***Statistical summary*** includes minimum, maximum, average, sum and count for the data. Example:
 
 ```
 query($filter: JSON) {
@@ -187,7 +187,7 @@ query($filter: JSON) {
 }
 ```
 
-Result: 
+Result:
 ```
 {
   "data": {
@@ -210,9 +210,9 @@ Result:
 }
 ```
 
-***Histogram***  could be built by 2 methods: giving bin width, or giving bin counts. 
+***Histogram***  could be built by 2 methods: giving bin width, or giving bin counts.
 
- - Giving "bin width" means giving start and end value of histogram, and giving a step as bin width: 
+ - Giving "bin width" means giving start and end value of histogram, and giving a step as bin width:
 
 | argument   | description                 | type             | default   |
 |------------|-----------------------------|------------------|-----------|
@@ -220,7 +220,7 @@ Result:
 | rangeEnd   | ending value of histogram   | integer or float | max value |
 | rangeStep  | step for each histogram bin | integer or float | max - min |
 
-Example: 
+Example:
 
 ```
 query($filter: JSON) {
@@ -289,7 +289,7 @@ Result:
 | rangeEnd   | ending value of histogram   | integer or float | max value |
 | binCount   | how many bins in histogram  | integer          | 1         |
 
-Example: 
+Example:
 
 ```
 query {
@@ -306,7 +306,7 @@ query {
 }
 ```
 
-Result: 
+Result:
 
 ```
 {
@@ -558,14 +558,14 @@ Result:
 
 <a name="filter"></a>
 
-## Filters 
+## Filters
 
 <a name="filter-unit"></a>
 
 ### Basic filter unit
 Currently Guppy uses `JSON`-based syntax for filters.
-The JSON object key could be an operation like `=`, `>`. 
-A very basic filter unit would look like: `{<operater>: {<field_name> : <value_expression>}}`. 
+The JSON object key could be an operation like `=`, `>`.
+A very basic filter unit would look like: `{<operater>: {<field_name> : <value_expression>}}`.
 One simple example could look like:
 
 ```
@@ -579,7 +579,7 @@ One simple example could look like:
 ```
 
 
-Currently we support following operators: 
+Currently we support following operators:
 
 
 | operator     | meaning                  | support field type | example                                                          |
@@ -598,7 +598,7 @@ Currently we support following operators:
 <a name="filter-search"></a>
 
 ### A search unit in filter
-You could add a search unit into your filter, the syntax looks like: 
+You could add a search unit into your filter, the syntax looks like:
 
 ```
 {
@@ -609,13 +609,13 @@ You could add a search unit into your filter, the syntax looks like:
 }
 ```
 
-Notice that `keyword` is required. But `fields` is optional, 
-and if not set, guppy will search thru all analyzed text fields that matched the suffix pattern set in `ANALYZED_TEXT_FIELD_SUFFIX` (by default `.analyzed`, which means search thru all `*.analyzed` fields). 
+Notice that `keyword` is required. But `fields` is optional,
+and if not set, guppy will search thru all analyzed text fields that matched the suffix pattern set in `ANALYZED_TEXT_FIELD_SUFFIX` (by default `.analyzed`, which means search thru all `*.analyzed` fields).
 
 #### Matched results and highlights
-Guppy will return matched fields and highlight partial in `_matched` keyword, 
-with the matched field name, and highlighted partial words wrapped inside `<em>` tags. 
-A example search filter: 
+Guppy will return matched fields and highlight partial in `_matched` keyword,
+with the matched field name, and highlighted partial words wrapped inside `<em>` tags.
+A example search filter:
 
 ```
 query ($filter: JSON) {
@@ -743,10 +743,10 @@ In future Guppy will support `SQL` like syntax for filter, like `
 
 <a name="other"></a>
 
-## Some other queries and arguments 
+## Some other queries and arguments
 
 ### Mapping query
-Mapping query simply returns all fields under a doc type. Example: 
+Mapping query simply returns all fields under a doc type. Example:
 ```
 {
   _mapping {
@@ -756,7 +756,7 @@ Mapping query simply returns all fields under a doc type. Example:
 }
 ```
 
-Result: 
+Result:
 
 ```
 {
@@ -789,10 +789,10 @@ Result:
 }
 ```
 
-<a name="accessibility"></a>  
+<a name="accessibility"></a>
 
 ### "accessibility" argument for "regular" tier access level
-When choose "regular" mode for for tier access level, `accessibility` argument will be valid for raw data or aggregation query. It support 3 enum values: `all`, `accessible`, and `unaccessible`. And will return data by those three accessibility types. By default it is set to `all`.  Below are the different behaviors for each enum value. 
+When choose "regular" mode for for tier access level, `accessibility` argument will be valid for raw data or aggregation query. It support 3 enum values: `all`, `accessible`, and `unaccessible`. And will return data by those three accessibility types. By default it is set to `all`.  Below are the different behaviors for each enum value.
 
 | enum         | description                | when query raw data                                                                                                  | when query aggregation                                                                                                                                |
 |--------------|----------------------------|----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -800,7 +800,7 @@ When choose "regular" mode for for tier access level, `accessibility` argument w
 | accessible   | return aggregation for accessible data  | Only returns data that user has access to.                                                                           | Only returns aggregation result that user has access to.                                                                                              |
 | unaccessible | return aggregation for unaccessible data | Always returns 401                                                                                                   | Returns aggregation result.Maximum visible number may apply according to `TIER_ACCESS_LIMIT`                                                          |
 
-Example 1 (trying to get raw data for unaccessible resources is forbidden): 
+Example 1 (trying to get raw data for unaccessible resources is forbidden):
 ```
 query  {
   subject (accessibility: unaccessible) {
@@ -809,7 +809,7 @@ query  {
 }
 ```
 
-Result: 
+Result:
 ```
 {
   "errors": [
@@ -833,7 +833,7 @@ Result:
 }
 ```
 
-Example 2 (trying to get aggregation for unaccessible resources): 
+Example 2 (trying to get aggregation for unaccessible resources):
 
 ```
 query  {
@@ -850,7 +850,7 @@ query  {
 }
 ```
 
-Result: 
+Result:
 ```
 {
 
@@ -871,10 +871,48 @@ Result:
 }
 ```
 
-### `filterSelf`
-In some UI scenarios, there's need that aggregation should skip applying filters on those fields that appear in filter object. For example, in Guppy's filter UI component, when user select `gender=female`, the aggregation (with filter object include `gender=female`) should return all gender values including "female", "male", and "unknown" etc., because filter UI still need to render those options. 
+### Tiered Access Sensitive Record Exclusion
+It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
+The purpose of this is to "hide" information about certain sensitive resources, essentially making this an escape hatch from Tiered Access. Specifically, this feature is used in a Gen3 data commons to hide the existence of some studies from clients who do not have access, while keeping the features of Tiered Access for the non-sensitive studies.
 
-In order to skip applying filters for those fields, simply add `filterSelf=false`. 
+Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
+be counted in the aggregation query whether or not it is sensitive.
+
+To enable Sensitive Record Exclusion, set  `guppy.tier_access_sensitive_record_exclusion_field: "fieldname"` in the commons' `manifest.json`. `"fieldName"` should match a boolean field in the Elasticsearch index that indicates whether or not a record is sensitive.
+(E.g., `"tier_access_sensitive_record_exclusion_field": "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
+
+
+> Example: We have a index called "subject" with `100` records in it. Of those, `55` are inaccessible to this user.
+Of the inaccessible records, `15` records are sensitive. There are also `5` other sensitive records which are accessible to the user.
+>
+> __What will Guppy return when we ask for a total count of all records in the index?__
+> ```
+> query {
+>   _aggregation{
+>     $indexName(accessibility: all) {
+>       _totalCount
+>     }
+>   }
+> }
+>```
+> * Expected output:
+> ```
+> {
+>     "data": {
+>         "_aggregation": {
+>             "$indexName": {
+>                 "_totalCount": 85
+>             }
+>         }
+>     }
+> }
+>```
+> If sensitive study exclusion is enabled, Guppy will return `85`, instead of `100`. This is because Guppy excludes the `15` sensitive records that are not accessible to the user. Importantly, Guppy does not exclude the `5` sensitive records which are accessible to the user.
+>
+### `filterSelf`
+In some UI scenarios, there's need that aggregation should skip applying filters on those fields that appear in filter object. For example, in Guppy's filter UI component, when user select `gender=female`, the aggregation (with filter object include `gender=female`) should return all gender values including "female", "male", and "unknown" etc., because filter UI still need to render those options.
+
+In order to skip applying filters for those fields, simply add `filterSelf=false`.
 
 Example without setting `filterSelf` (default is `true`):
 ```
@@ -892,7 +930,7 @@ query {
 }
 ```
 
-Result: 
+Result:
 
 ```
 {
@@ -913,7 +951,7 @@ Result:
 }
 ```
 
-Example with `filterSelf: false`: 
+Example with `filterSelf: false`:
 
 ```
 query {

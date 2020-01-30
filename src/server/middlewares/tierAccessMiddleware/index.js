@@ -4,7 +4,7 @@ import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
 import CodedError from '../../utils/error';
-import { firstLetterUpperCase, isWhitelisted } from '../../utils/utils';
+import { firstLetterUpperCase, isWhitelisted, addTwoFilters } from '../../utils/utils';
 
 const ENCRYPT_COUNT = -1;
 
@@ -76,13 +76,75 @@ const tierAccessResolver = (
      * For `accessible`, we will apply auth filter on top of filter argument
      * For `unaccessible`, we apply unaccessible filters on top of filter argument
      */
+    const sensitiveRecordExclusionEnabled = !!config.tierAccessSensitiveRecordExclusionField;
     if (accessibility === 'all') {
-      return resolve(root, { ...args, needEncryptAgg: true }, context, info);
+      if (sensitiveRecordExclusionEnabled) {
+        // Sensitive study exclusion is enabled: For all of the projects user does
+        // not have access to, hide the studies marked 'sensitive' from the aggregation.
+        // (See doc/queries.md#Tiered_Access_sensitive_record_exclusion)
+        const projectsUserHasAccessTo = authHelper.getAccessibleResources();
+        const sensitiveStudiesFilter = {
+          OR: [
+            {
+              IN: {
+                [config.esConfig.authFilterField]: projectsUserHasAccessTo,
+              },
+            },
+            {
+              '!=': {
+                [config.tierAccessSensitiveRecordExclusionField]: 'true',
+              },
+            },
+          ],
+        };
+        return resolve(
+          root,
+          {
+            ...args,
+            filter: addTwoFilters(filter, sensitiveStudiesFilter),
+            needEncryptAgg: true,
+          },
+          context,
+          info,
+        );
+      }
+
+      return resolve(
+        root,
+        {
+          ...args,
+          filter,
+          needEncryptAgg: true,
+        },
+        context,
+        info,
+      );
     }
     if (accessibility === 'accessible') {
+      // We do not need to apply sensitive studies filter here, because
+      // user has access to all of these projects.
       log.debug('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
         resolve, root, args, context, info, authHelper, filter,
+      );
+    }
+    // The below code executes if accessibility === 'unaccessible'.
+    if (sensitiveRecordExclusionEnabled) {
+      // Apply sensitive studies filter. Hide the studies marked 'sensitive' from
+      // the aggregation.
+      const sensitiveStudiesFilter = {
+        '!=': {
+          [config.tierAccessSensitiveRecordExclusionField]: 'true',
+        },
+      };
+      return resolverWithUnaccessibleFilterApplied(
+        resolve,
+        root,
+        args,
+        context,
+        info,
+        authHelper,
+        addTwoFilters(filter, sensitiveStudiesFilter),
       );
     }
     return resolverWithUnaccessibleFilterApplied(

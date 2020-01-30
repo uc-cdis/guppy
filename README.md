@@ -2,15 +2,15 @@
 
 [![npm (scoped)](https://img.shields.io/npm/v/@gen3/guppy)](https://www.npmjs.com/package/@gen3/guppy)
 
-Server that support GraphQL queries on data from elasticsearch. 
+Server that support GraphQL queries on data from elasticsearch.
 
 Please see [this doc](https://github.com/uc-cdis/guppy/blob/master/doc/queries.md) for syntax Guppy supports.
 
-Run `npm start` to start server at port 80. 
+Run `npm start` to start server at port 80.
 
-### Configurations: 
-Before launch, we need to write config and tell Guppy which elasticsearch indices and which auth control field to use. 
-You could put following as your config files: 
+### Configurations:
+Before launch, we need to write config and tell Guppy which elasticsearch indices and which auth control field to use.
+You could put following as your config files:
 
 ```
 {
@@ -32,7 +32,7 @@ You could put following as your config files:
 }
 ```
 
-Following script will start server using at port 3000, using config file `example_config.json`: 
+Following script will start server using at port 3000, using config file `example_config.json`:
 
 ```
 export GUPPY_PORT=3000
@@ -41,9 +41,9 @@ npm start
 ```
 
 #### Authorization
-Guppy connects Arborist for authorization. 
-The `auth_filter_field` item in your config file is the field used for authorization. 
-You could set the endpoint by: 
+Guppy connects Arborist for authorization.
+The `auth_filter_field` item in your config file is the field used for authorization.
+You could set the endpoint by:
 
 ```
 export GEN3_ARBORIST_ENDPOINT=${arborist_service}
@@ -55,7 +55,7 @@ behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. P
 look into `/src/server/auth/utils.js` for more details.
 
 #### Tier access
-Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`: 
+Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`:
 - `private` by default: only allows access to authorized resources
 - `regular`: allows all kind of aggregation (with limitation for unauthorized resources), but forbid access to raw data without authorization
 - `libre`: access to all data
@@ -65,7 +65,7 @@ For `regular` level, there's another configuration environment variable `TIER_AC
 `regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
 By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data'].
 Also the whitelist is disabled by default due to security reasons. If you would like to enable whitelist, simply put `enable_encrypt_whitelist: true` in your config.
-For example `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`: 
+For example `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`:
 
 ```
 {
@@ -86,7 +86,7 @@ For example `regular` leveled commons with config looks like this will skip encr
 }
 ```
 
-For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100: 
+For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100:
 
 ```
 export TIER_ACCESS_LEVEL=regular
@@ -94,5 +94,15 @@ export TIER_ACCESS_LIMIT=100
 npm start
 ```
 
+> ##### Tier Access Sensitive Record Exclusion
+> It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
+> The purpose of this is to "hide" information about certain sensitive resources, essentially making this an escape hatch from Tiered Access.
+> Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
+> be counted in the aggregation query whether or not it is sensitive.
+>
+> To enable Sensitive Record Exclusion, set  `guppy.tier_access_sensitive_record_exclusion_field: "fieldname"` in the commons' `manifest.json`. "fieldName" should match a boolean field in the Elasticsearch index that indicates whether or not a record is sensitive.
+>
+> (E.g., `"tier_access_sensitive_record_exclusion_field": "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
+
 #### Download endpoint
-Guppy has another special endpoint `/download` for just fetching raw data from elasticsearch. please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for more details.  
+Guppy has another special endpoint `/download` for just fetching raw data from elasticsearch. please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for more details.
