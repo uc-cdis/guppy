@@ -83,6 +83,7 @@ export const updateCountsInInitialTabsOptions = (
             updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
           )) {
             updatedTabsOptions[fieldName].histogram.splice(k, 1);
+            break;
           }
         }
       }

@@ -166,7 +166,7 @@ class ConnectedFilter extends React.Component {
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
         onFilterChange={e => this.handleFilterChange(e)}
-        hideZero={this.props.hideZeroCountFilterOptions}
+        hideZero={this.props.hideZero}
       />
     );
   }
@@ -197,7 +197,7 @@ ConnectedFilter.propTypes = {
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
-  hideZeroCountFilterOptions: PropTypes.bool,
+  hideZero: PropTypes.bool,
 };
 
 ConnectedFilter.defaultProps = {
@@ -212,7 +212,7 @@ ConnectedFilter.defaultProps = {
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
-  hideZeroCountFilterOptions: false,
+  hideZero: false,
 };
 
 export default ConnectedFilter;
