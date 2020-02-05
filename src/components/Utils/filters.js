@@ -31,3 +31,84 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 
   return filterAB;
 };
+
+function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
+  if (option.count > 0) {
+    return false;
+  }
+
+  if (typeof filtersApplied !== 'undefined'
+      && filtersApplied[fieldName]
+      && filtersApplied[fieldName].selectedValues.includes(option.key)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+   * This function updates the counts in the initial set of tab options
+   * calculated from unfiltered data.
+   * It is used to retain field options in the rendering if
+   * they are still checked but their counts are zero.
+   */
+export const updateCountsInInitialTabsOptions = (
+  initialTabsOptions, processedTabsOptions, filtersApplied,
+) => {
+  const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
+  const initialFields = Object.keys(initialTabsOptions);
+  for (let i = 0; i < initialFields.length; i += 1) {
+    const fieldName = initialFields[i];
+    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
+    let processedFieldOptions = [];
+    if (Object.prototype.hasOwnProperty.call(processedTabsOptions, fieldName)) {
+      processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
+    }
+
+    for (let j = 0; j < initialFieldOptions.length; j += 1) {
+      const optionName = initialFieldOptions[j];
+      let newCount;
+      if (processedFieldOptions.includes(optionName)) {
+        newCount = processedTabsOptions[fieldName].histogram.filter(
+          x => x.key === optionName,
+        )[0].count;
+      } else {
+        newCount = 0;
+      }
+      for (let k = 0; k < updatedTabsOptions[fieldName].histogram.length; k += 1) {
+        const option = updatedTabsOptions[fieldName].histogram[k];
+        if (option.key === optionName) {
+          updatedTabsOptions[fieldName].histogram[k].count = newCount;
+          if (isFilterOptionToBeHidden(
+            updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
+          )) {
+            updatedTabsOptions[fieldName].histogram.splice(k, 1);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return updatedTabsOptions;
+};
+
+function sortCountThenAlpha(a, b) {
+  if (a.count === b.count) {
+    return a.key < b.key ? -1 : 1;
+  }
+  return b.count - a.count;
+}
+
+export const sortTabsOptions = (tabsOptions) => {
+  const fields = Object.keys(tabsOptions);
+  const sortedTabsOptions = Object.assign({}, tabsOptions);
+  for (let x = 0; x < fields.length; x += 1) {
+    const field = fields[x];
+
+    const optionsForThisField = sortedTabsOptions[field].histogram;
+    optionsForThisField.sort(sortCountThenAlpha);
+    sortedTabsOptions[field].histogram = optionsForThisField;
+  }
+  return sortedTabsOptions;
+};

@@ -65,7 +65,6 @@ export const getFilterSections = (
       options: defaultOptions,
     };
   });
-
   return sections;
 };
 
