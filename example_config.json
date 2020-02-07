@@ -10,5 +10,5 @@
     }
   ],
   "config_index": "gen3-dev-config",
-  "auth_filter_field": "gen3_resource_path"
+  "auth_filter_field": "auth_resource_path"
 }

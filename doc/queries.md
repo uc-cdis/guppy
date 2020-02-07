@@ -35,8 +35,11 @@ Example query:
     ethnicity
     vital_status
     file_count
-    experiment {
-        
+    experiments {
+      experimental_description
+      number_experimental_group
+      type_of_sample
+      type_of_data
     }
   }
 }
@@ -53,21 +56,63 @@ Example result:
         "gender": "female",
         "ethnicity": "American Indian",
         "vital_status": "no data",
-        "file_count": 13
+        "file_count": 13,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       {
         "subject_id": "12",
         "gender": "male",
         "ethnicity": "Pacific Islander",
         "vital_status": "Alive",
-        "file_count": 60
+        "file_count": 60,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       {
         "subject_id": "13",
         "gender": "male",
         "ethnicity": "__missing__",
         "vital_status": "Dead",
-        "file_count": 88
+        "file_count": 88,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       ...
     ]

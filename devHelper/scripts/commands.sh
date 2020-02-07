@@ -90,7 +90,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "vital_status": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_type": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_format": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
-          "gen3_resource_path": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "auth_resource_path": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" },
           "some_string_field": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
@@ -116,7 +116,7 @@ curl -iv -X PUT "${ESHOST}/${fileIndexName}" \
       "file": {
         "properties": {
           "file_id": { "type": "keyword" },
-          "gen3_resource_path": { "type": "keyword" },
+          "auth_resource_path": { "type": "keyword" },
           "subject_id": { "type": "keyword" },
           "sensitive": { "type": "keyword" }
         }

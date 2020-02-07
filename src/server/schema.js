@@ -47,8 +47,7 @@ const gqlTypeToAggsHistogramName = {
 
 const getAggsHistogramName = (gqlType) => {
   if (!gqlTypeToAggsHistogramName[gqlType]) {
-    // throw new Error(`Invalid elasticsearch type ${gqlType}`);
-    return '';
+    throw new Error(`Invalid elasticsearch type ${gqlType}`);
   }
   return gqlTypeToAggsHistogramName[gqlType];
 };
@@ -89,12 +88,7 @@ const getArgsByField = (fieldType, props) => {
   return `(${baseProps.map((entry) => `${entry.field}: [${entry.type}]`).join(',')})`;
 };
 
-const getSchemaType = (fieldType, fieldToArgs) => {
-  if (fieldType.esType === 'nested') {
-    return `${fieldType.field} ${fieldToArgs[fieldType.field]}: ${fieldType.type}`;
-  }
-  return `${fieldType.field}: ${fieldType.type}`;
-};
+const getSchemaType = (fieldType) => `${fieldType.field}: ${fieldType.type}`;
 
 const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
@@ -110,13 +104,13 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
       const props = fieldESTypeMap[fieldKey].properties;
       queueTypes.push({ type: fieldKey, props });
       existingFields.add(fieldKey);
-      fieldToArgs[fieldKey] = getArgsByField(fieldKey, props);
+      // fieldToArgs[fieldKey] = getArgsByField(fieldKey, props);
     }
   });
 
   let sTypeSchema = `
     type ${esTypeObjName} {
-      ${fieldGQLTypeMap.map((entry) => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
+      ${fieldGQLTypeMap.map((entry) => `${getSchemaType(entry)},`).join('\n')}
       _matched: [MatchedItem]
     }
   `;
@@ -133,7 +127,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     });
     sTypeSchema += `
       type ${t.type} {
-        ${gqlTypes.map((entry) => `${getSchemaType(entry, fieldToArgs)},`).join('\n')}
+        ${gqlTypes.map((entry) => `${getSchemaType(entry)},`).join('\n')}
       }
     `;
   }
@@ -150,7 +144,7 @@ const getAggregationType = (entry) => {
 const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
-  const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => f.type !== 'Object').map((entry) => ({
+  const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => f.esType !== 'nested').map((entry) => ({
     field: entry.field,
     aggType: getAggsHistogramName(entry.type),
   }));

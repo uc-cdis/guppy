@@ -52,7 +52,7 @@ describe('Schema', () => {
   const expectedTypesSchemas = `
     type Subject {
       gen3_resource_path: String,
-      visits(days_to_visit:[Int],visit_label:[String]):[visits],
+      visits:[visits],
       gender: String,
       file_count: Int,
       name: String,
@@ -64,10 +64,7 @@ describe('Schema', () => {
     type visits {
       days_to_visit:Int,
       visit_label:String,
-      follow_ups (
-        days_to_follow_up:[Int],
-        follow_up_label:[String]
-      ):[follow_ups],
+      follow_ups:[follow_ups],
     }
     type follow_ups {
       days_to_follow_up:Int,
