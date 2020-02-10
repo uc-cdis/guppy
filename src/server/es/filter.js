@@ -2,22 +2,40 @@ import { ApolloError, UserInputError } from 'apollo-server';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
 
+const fromPathToNode = (esInstance, esIndex, path) => {
+  let node = esInstance.fieldTypes[esIndex];
+  if (path !== null && path !== undefined) {
+    const nodes = path.split('.');
+    nodes.forEach((n) => {
+      if (n in node) {
+        node = node[n].properties;
+      } else {
+        throw new UserInputError(`Field ${n} does not exist in ES index`);
+      }
+    });
+  }
+  return node;
+};
+
 const getNumericTextType = (
   esInstance,
   esIndex,
   field,
+  path,
 ) => {
-  if (!esInstance.fieldTypes[esIndex] || !esInstance.fieldTypes[esIndex][field]) {
+  const node = fromPathToNode(esInstance, esIndex, path);
+  if (!esInstance.fieldTypes[esIndex] || !node[field]) {
     throw new UserInputError('Please check your syntax for input "filter" argument');
   }
-  const numericTextType = esFieldNumericTextTypeMapping[esInstance.fieldTypes[esIndex][field]];
+  const numericTextType = esFieldNumericTextTypeMapping[node[field].type];
   if (typeof numericTextType === 'undefined') {
-    throw new ApolloError(`ES type ${esInstance.fieldTypes[esIndex][field]} not supported.`, 500);
+    throw new ApolloError(`ES type ${node[field].type} not supported.`, 500);
   }
   return numericTextType;
 };
 
-const getFilterItemForString = (op, field, value) => {
+const getFilterItemForString = (op, pField, value, path) => {
+  const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
   switch (op) {
     case '=':
     case 'eq':
@@ -38,14 +56,8 @@ const getFilterItemForString = (op, field, value) => {
         };
       }
       return {
-        bool: {
-          must: [
-            {
-              term: {
-                [field]: value,
-              },
-            },
-          ],
+        term: {
+          [field]: value,
         },
       };
     case 'in':
@@ -54,7 +66,7 @@ const getFilterItemForString = (op, field, value) => {
       // and then add a must_not exists bool func to compensate missingDataAlias
       if (config.esConfig.aggregationIncludeMissingData
           && value.includes(config.esConfig.missingDataAlias)) {
-        const newValue = value.filter(element => element !== config.esConfig.missingDataAlias);
+        const newValue = value.filter((element) => element !== config.esConfig.missingDataAlias);
         return {
           bool: {
             should: [
@@ -70,14 +82,8 @@ const getFilterItemForString = (op, field, value) => {
                 },
               },
               {
-                bool: {
-                  must: [
-                    {
-                      terms: {
-                        [field]: newValue,
-                      },
-                    },
-                  ],
+                terms: {
+                  [field]: newValue,
                 },
               },
             ],
@@ -86,14 +92,8 @@ const getFilterItemForString = (op, field, value) => {
       }
       // if not using missingDataAlias or filter doesn't contain missingDataAlias
       return {
-        bool: {
-          must: [
-            {
-              terms: {
-                [field]: value,
-              },
-            },
-          ],
+        terms: {
+          [field]: value,
         },
       };
     case '!=':
@@ -113,7 +113,8 @@ const getFilterItemForString = (op, field, value) => {
   }
 };
 
-const getFilterItemForNumbers = (op, field, value) => {
+const getFilterItemForNumbers = (op, pField, value, path) => {
+  const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
   const rangeOperator = {
     '>': 'gt',
     gt: 'gt',
@@ -137,27 +138,15 @@ const getFilterItemForNumbers = (op, field, value) => {
   }
   if (op === '=' || op === 'eq' || op === 'EQ') {
     return {
-      bool: {
-        must: [
-          {
-            term: {
-              [field]: value,
-            },
-          },
-        ],
+      term: {
+        [field]: value,
       },
     };
   }
   if (op === 'IN' || op === 'in') {
     return {
-      bool: {
-        must: [
-          {
-            terms: {
-              [field]: value,
-            },
-          },
-        ],
+      terms: {
+        [field]: value,
       },
     };
   }
@@ -196,7 +185,7 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
         throw new UserInputError(`invalid field ${f} in "filter" variable`);
       }
     });
-    analyzedFields = fields.map(f => `${f}${config.analyzedTextFieldSuffix}`);
+    analyzedFields = fields.map((f) => `${f}${config.analyzedTextFieldSuffix}`);
   }
   return {
     multi_match: {
@@ -213,29 +202,29 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
  * And finally combines all filter units from down to top.
  * @param {string} esInstance
  * @param {string} esIndex
- * @param {string} esType
  * @param {object} graphqlFilterObj
  * @param {string[]} aggsField - target agg field, only need for agg queries
  * @param {boolean} filterSelf - whether we want to filter this field or not,
  *                               only need for agg queries
  * @param {object} defaultAuthFilter - once graphqlFilterObj is empty,
  *                this function transfers and returns this auth filter as default
+ * @param objPath: path to object
  */
 const getFilterObj = (
   esInstance,
   esIndex,
-  esType,
   graphqlFilterObj,
   aggsField,
   filterSelf = true,
   defaultAuthFilter,
+  objPath = null,
 ) => {
   if (!graphqlFilterObj
     || typeof Object.keys(graphqlFilterObj)[0] === 'undefined') {
     if (!defaultAuthFilter) {
       return null;
     }
-    return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
+    return getFilterObj(esInstance, esIndex, defaultAuthFilter);
   }
   const topLevelOp = Object.keys(graphqlFilterObj)[0];
   let resultFilterObj = {};
@@ -245,7 +234,7 @@ const getFilterObj = (
     const boolItemsList = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
-        esInstance, esIndex, esType, filterItem, aggsField, filterSelf, defaultAuthFilter,
+        esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter, objPath,
       );
       if (filterObj) {
         boolItemsList.push(filterObj);
@@ -277,19 +266,31 @@ const getFilterObj = (
     resultFilterObj = getESSearchFilterFragment(
       esInstance, esIndex, targetSearchFields, targetSearchKeyword,
     );
+  } else if (topLevelOp === 'nested') {
+    const { path } = graphqlFilterObj[topLevelOp];
+    const filterOpObj = Object.keys(graphqlFilterObj[topLevelOp])
+      .filter((key) => key !== 'path')
+      .reduce((o, k) => ({ ...o, [k]: graphqlFilterObj[topLevelOp][k] }), {});
+    resultFilterObj = {
+      nested: {
+        path,
+        query: getFilterObj(esInstance, esIndex, filterOpObj,
+          aggsField, filterSelf, defaultAuthFilter, path),
+      },
+    };
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
       // if `filterSelf` flag is false, should not filter the target field itself,
       // instead, only apply an auth filter if exists
-      return getFilterObj(esInstance, esIndex, esType, defaultAuthFilter);
+      return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    const numericOrTextType = getNumericTextType(esInstance, esIndex, field);
+    const numericOrTextType = getNumericTextType(esInstance, esIndex, field, objPath);
     if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
-      resultFilterObj = getFilterItemForString(topLevelOp, field, value);
+      resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
-      resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value);
+      resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
     } else {
       throw new ApolloError(`Invalid es field type ${numericOrTextType}`, 500);
     }

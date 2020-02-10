@@ -35,6 +35,12 @@ Example query:
     ethnicity
     vital_status
     file_count
+    experiments {
+      experimental_description
+      number_experimental_group
+      type_of_sample
+      type_of_data
+    }
   }
 }
 ```
@@ -50,21 +56,63 @@ Example result:
         "gender": "female",
         "ethnicity": "American Indian",
         "vital_status": "no data",
-        "file_count": 13
+        "file_count": 13,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       {
         "subject_id": "12",
         "gender": "male",
         "ethnicity": "Pacific Islander",
         "vital_status": "Alive",
-        "file_count": 60
+        "file_count": 60,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       {
         "subject_id": "13",
         "gender": "male",
         "ethnicity": "__missing__",
         "vital_status": "Dead",
-        "file_count": 88
+        "file_count": 88,
+        "experiments": [
+          {
+            "experimental_description": "experiment for fun",
+            "number_experimental_group": 1,
+            "type_of_sample": "story",
+            "type_of_data": "text"
+          },
+          {
+            "experimental_description": "experiment for horror",
+            "number_experimental_group": 2,
+            "type_of_sample": "mv",
+            "type_of_data": "text"
+          }
+        ]
       },
       ...
     ]
@@ -743,7 +791,49 @@ In future Guppy will support `SQL` like syntax for filter, like `
 
 <a name="other"></a>
 
-## Some other queries and arguments
+### Nested filter
+Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similar to the ES query.
+Assuming that there is `File` node nested inside `subject`. The nested query will be written as below:
+```
+{
+  "filter": {
+    "AND": [
+      {
+        "OR": [
+          {
+            "=": {
+              "race": "hispanic"
+            }
+          },
+          {
+            "=": {
+              "race": "asian"
+            }
+          }
+        ]
+      },
+      {
+        "nested": {
+          "path": "File",
+          "AND": [
+            {
+              ">=": {"file_count": 15}
+            },
+            {
+              "<=": {"file_count": 75}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+ElasticSearch only support the nested filter on the level of document for returning data. It means that the filter `file_count >=15` and `file_count<=75` will return the whole document having a `file_count` in the range of `[15, 75]`.
+The returned data will not filter the nested `file_count`(s) that are out of that range for that document.
+
+## Some other queries and arguments 
 
 ### Mapping query
 Mapping query simply returns all fields under a doc type. Example:

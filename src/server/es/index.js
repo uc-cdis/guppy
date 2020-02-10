@@ -8,6 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
+import { fromFieldsToSource } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -56,7 +57,7 @@ class ES {
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
-    }).then(resp => resp.body, (err) => {
+    }).then((resp) => resp.body, (err) => {
       log.error('[ES.query] error during querying');
       throw new Error(err.message);
     });
@@ -80,7 +81,8 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const fieldsNotBelong = _.difference(fields, this.getESFields(esIndex).fields);
+    const fieldsNotBelong = _.difference(fields,
+      this.getESFields(esIndex).fields.map((f) => f.name));
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
         400,
@@ -98,7 +100,7 @@ class ES {
     // This is really ridiculous that ES's JS library has it, but we need to
     // convert list of sort obj into comma separated strings to make it work
     // see https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
-    const sortStringList = sort && sort.map(item => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
+    const sortStringList = sort && sort.map((item) => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
 
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
@@ -110,7 +112,7 @@ class ES {
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort: sortStringList,
-        }).then(resp => resp, (err) => {
+        }).then((resp) => resp, (err) => {
           log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
         });
@@ -130,7 +132,7 @@ class ES {
       log.debug('[ES scrollQuery] get batch size = ', batchSize, ' merging...');
 
       // TODO: change it to streaming
-      totalData = totalData.concat(currentBatch.hits.hits.map(item => item._source));
+      totalData = totalData.concat(currentBatch.hits.hits.map((item) => item._source));
     }
 
     log.debug('[ES scrollQuery] end scrolling');
@@ -156,13 +158,7 @@ class ES {
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        const mappingObj = resp.body[esIndexAlias].mappings[esType].properties;
-        const fieldTypes = Object.keys(mappingObj).reduce((acc, field) => {
-          const esFieldType = mappingObj[field].type;
-          acc[field] = esFieldType;
-          return acc;
-        }, {});
-        return fieldTypes;
+        return resp.body[esIndexAlias].mappings[esType].properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -179,8 +175,8 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map(cfg => this._getESFieldsTypes(cfg.index, cfg.type)
-        .then(res => ({ index: cfg.index, fieldTypes: res })));
+      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
+        .then((res) => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
@@ -286,7 +282,10 @@ class ES {
       res[cfg.index] = {
         index: cfg.index,
         type: cfg.type,
-        fields: Object.keys(this.fieldTypes[cfg.index]),
+        fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
+          const r = { name: key, type: value.type };
+          return r;
+        }),
       };
     });
     if (typeof esIndex === 'undefined') {
@@ -301,7 +300,7 @@ class ES {
    * @param {string} esType
    */
   getESIndexByType(esType) {
-    const index = this.config.indices.find(i => i.type === esType);
+    const index = this.config.indices.find((i) => i.type === esType);
     if (index) return index.index;
     throw new CodedError(
       400,
@@ -319,28 +318,28 @@ class ES {
   filterData(
     { esIndex, esType },
     {
-      filter, fields = [], sort, offset = 0, size,
+      filter, fields, sort, offset = 0, size,
     },
   ) {
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, esType, filter);
+      queryBody.query = getFilterObj(this, esIndex, filter);
     }
     queryBody.sort = getESSortBody(sort, this, esIndex);
     if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
-    if (fields && fields.length > 0) {
-      queryBody._source = fields;
+    if (fields) {
+      const esFields = fromFieldsToSource(fields);
+      if (esFields.length > 0) queryBody._source = esFields;
     }
-    const resultPromise = this.query(esIndex, esType, queryBody);
-    return resultPromise;
+    return this.query(esIndex, esType, queryBody);
   }
 
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter, fields: [] },
+      { filter },
     );
     return result.hits.total;
   }
@@ -390,7 +389,7 @@ class ES {
   downloadData({
     esIndex, esType, fields, filter, sort,
   }) {
-    const esFilterObj = filter ? getFilterObj(this, esIndex, esType, filter) : undefined;
+    const esFilterObj = filter ? getFilterObj(this, esIndex, filter) : undefined;
     return this.scrollQuery(esIndex, esType, {
       filter: esFilterObj,
       fields,
