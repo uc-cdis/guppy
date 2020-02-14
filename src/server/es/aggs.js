@@ -548,8 +548,8 @@ export const textAggregation = async (
   // make the missing data bucket to the bottom of the list
   if (config.esConfig.aggregationIncludeMissingData) {
     const missingDataIndex = finalResults
-      .findIndex(b => b.key === config.esConfig.missingDataAlias);
-    const missingDataItem = finalResults.find(b => b.key === config.esConfig.missingDataAlias);
+      .findIndex((b) => b.key === config.esConfig.missingDataAlias);
+    const missingDataItem = finalResults.find((b) => b.key === config.esConfig.missingDataAlias);
     if (missingDataItem) {
       finalResults.splice(missingDataIndex, 1);
       finalResults.splice(finalResults.length, 0, missingDataItem);
