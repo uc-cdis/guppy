@@ -198,7 +198,7 @@ const hideNumberResolver = (isGettingTotalCount) => async (resolve, root, args, 
       return item;
     }
     // we only encrypt if count from no-access item is small
-    const unaccessibleResultItem = _.find(unaccessibleResult, (o) => o.key === item.key);
+    const unaccessibleResultItem = _.find(unaccessibleResult, (e) => e.key === item.key);
     if (unaccessibleResultItem.count < config.tierAccessLimit) {
       return {
         key: item.key,
