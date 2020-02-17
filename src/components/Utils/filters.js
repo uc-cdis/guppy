@@ -32,19 +32,24 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   return filterAB;
 };
 
-function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
+function isFilterOptionToBeHidden(option, filtersApplied, fieldName, accessibleFieldCheckList) {
   if (option.count > 0) {
     return false;
   }
 
-  if (typeof filtersApplied !== 'undefined'
+  if (filtersApplied
   && Object.keys(filtersApplied).length === 0
   && filtersApplied.constructor === Object
   ) {
     return false;
   }
 
-  if (typeof filtersApplied !== 'undefined'
+  // if in tiered access mode, we need not hide 0 filters for accessibleFieldCheckList
+  if (accessibleFieldCheckList.includes(fieldName)) {
+    return false;
+  }
+
+  if (filtersApplied
       && filtersApplied[fieldName]
       && filtersApplied[fieldName].selectedValues.includes(option.key)) {
     return false;
@@ -60,7 +65,7 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied,
+  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
 ) => {
   const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
   const initialFields = Object.keys(initialTabsOptions);
@@ -87,7 +92,10 @@ export const updateCountsInInitialTabsOptions = (
         if (option.key === optionName) {
           updatedTabsOptions[fieldName].histogram[k].count = newCount;
           if (isFilterOptionToBeHidden(
-            updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
+            updatedTabsOptions[fieldName].histogram[k],
+            filtersApplied,
+            fieldName,
+            accessibleFieldCheckList,
           )) {
             updatedTabsOptions[fieldName].histogram.splice(k, 1);
             break;
