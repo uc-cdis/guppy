@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
 import log from '../../logger';
@@ -42,20 +43,24 @@ const tierAccessResolver = (
     assert(config.tierAccessLevel === 'regular', 'Tier access middleware layer only for "regular" tier access level');
     const { authHelper } = context;
     const esIndex = esInstance.getESIndexByType(esType);
-    const { filter, accessibility } = args;
+    const { filter, filterSelf, accessibility } = args;
 
     const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-      esIndex, esType, filter,
+      esIndex, esType, filter, filterSelf,
     );
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
       // unless it's requesting for `unaccessible` data, just resolve this
-      if (accessibility !== 'unaccessible') {
-        return resolve(root, { ...args, needEncryptAgg: false }, context, info);
+      switch (accessibility) {
+        case 'accessible':
+          return resolve(root, { ...args, needEncryptAgg: false }, context, info);
+        case 'unaccessible':
+          return resolverWithUnaccessibleFilterApplied(
+            resolve, root, args, context, info, authHelper, filter,
+          );
+        default:
+          return resolve(root, { ...args, needEncryptAgg: true }, context, info);
       }
-      return resolverWithUnaccessibleFilterApplied(
-        resolve, root, args, context, info, authHelper, filter,
-      );
     }
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
@@ -175,16 +180,26 @@ const hideNumberResolver = (isGettingTotalCount) => async (resolve, root, args, 
   // for aggregations, hide all counts that are greater than limited number
   const { needEncryptAgg } = root;
   const result = await resolve(root, args, context, info);
+  log.debug('[hideNumberResolver] result: ', result);
   if (!needEncryptAgg) return result;
   if (isGettingTotalCount) {
     return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
   }
 
+  const newRoot = root;
+  newRoot.accessibility = 'unaccessible';
+  const { authHelper } = context;
+  newRoot.filter = authHelper.applyUnaccessibleFilter(newRoot.filter);
+  const unaccessibleResult = await resolve(newRoot, args, context, info);
+
   const encryptedResult = result.map((item) => {
-    if (isWhitelisted(item.key)) { // we don't encrypt whitelisted results
+    // we don't encrypt whitelisted results or if result is not found in unaccessibleResult
+    if (isWhitelisted(item.key) || !(unaccessibleResult.some((e) => e.key === item.key))) {
       return item;
     }
-    if (item.count < config.tierAccessLimit) {
+    // we only encrypt if count from no-access item is small
+    const unaccessibleResultItem = _.find(unaccessibleResult, (o) => o.key === item.key);
+    if (unaccessibleResultItem.count < config.tierAccessLimit) {
       return {
         key: item.key,
         count: ENCRYPT_COUNT,

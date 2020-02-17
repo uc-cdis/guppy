@@ -31,9 +31,11 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
   return resources;
 };
 
-export const getRequestResourceListFromFilter = async (esIndex, esType, filter) => textAggregation(
+export const getRequestResourceListFromFilter = async (
+  esIndex, esType, filter, filterSelf,
+) => textAggregation(
   { esInstance, esIndex, esType },
-  { field: config.esConfig.authFilterField, filter },
+  { field: config.esConfig.authFilterField, filter, filterSelf },
 ).then((res) => (res.map((item) => item.key)));
 
 export const buildFilterWithResourceList = (resourceList = []) => {

@@ -10,12 +10,12 @@
    * or keep constant the amount of data shown when combined with a user filter).
   * */
 export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
-  const filterAB = Object.assign({}, userFilter);
+  const filterAB = { ...userFilter };
   Object.keys(adminAppliedPreFilter).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
       const userFilterSubset = userFilter[key].selectedValues.filter(
-        x => adminAppliedPreFilter[key].selectedValues.includes(x),
+        (x) => adminAppliedPreFilter[key].selectedValues.includes(x),
       );
       if (userFilterSubset.length > 0) {
         // The user-applied filter is more exclusive than the admin-applied filter.
@@ -34,6 +34,13 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 
 function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
   if (option.count > 0) {
+    return false;
+  }
+
+  if (typeof filtersApplied !== 'undefined'
+  && Object.keys(filtersApplied).length === 0
+  && filtersApplied.constructor === Object
+  ) {
     return false;
   }
 
@@ -59,10 +66,10 @@ export const updateCountsInInitialTabsOptions = (
   const initialFields = Object.keys(initialTabsOptions);
   for (let i = 0; i < initialFields.length; i += 1) {
     const fieldName = initialFields[i];
-    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
+    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map((x) => x.key);
     let processedFieldOptions = [];
     if (Object.prototype.hasOwnProperty.call(processedTabsOptions, fieldName)) {
-      processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
+      processedFieldOptions = processedTabsOptions[fieldName].histogram.map((x) => x.key);
     }
 
     for (let j = 0; j < initialFieldOptions.length; j += 1) {
@@ -70,7 +77,7 @@ export const updateCountsInInitialTabsOptions = (
       let newCount;
       if (processedFieldOptions.includes(optionName)) {
         newCount = processedTabsOptions[fieldName].histogram.filter(
-          x => x.key === optionName,
+          (x) => x.key === optionName,
         )[0].count;
       } else {
         newCount = 0;
@@ -102,7 +109,7 @@ function sortCountThenAlpha(a, b) {
 
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
-  const sortedTabsOptions = Object.assign({}, tabsOptions);
+  const sortedTabsOptions = { ...tabsOptions };
   for (let x = 0; x < fields.length; x += 1) {
     const field = fields[x];
 
