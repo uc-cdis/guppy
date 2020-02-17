@@ -45,7 +45,7 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName, accessibleF
   }
 
   // if in tiered access mode, we need not hide 0 filters for accessibleFieldCheckList
-  if (accessibleFieldCheckList.includes(fieldName)) {
+  if (accessibleFieldCheckList && accessibleFieldCheckList.includes(fieldName)) {
     return false;
   }
 
