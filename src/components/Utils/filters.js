@@ -56,7 +56,6 @@ export const updateCountsInInitialTabsOptions = (
   initialTabsOptions, processedTabsOptions, filtersApplied,
 ) => {
   const updatedTabsOptions = {};
-  console.time('updateCountsInInitialTabsOptions');
   Object.keys(initialTabsOptions).forEach((field) => {
     const { histogram } = initialTabsOptions[field];
     histogram.forEach((opt) => {
@@ -78,49 +77,6 @@ export const updateCountsInInitialTabsOptions = (
       });
     }
   });
-  console.timeEnd('updateCountsInInitialTabsOptions', 'end');
-  return updatedTabsOptions;
-};
-
-export const _updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied,
-) => {
-  const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
-  const initialFields = Object.keys(initialTabsOptions);
-  console.time('updateCountsInInitialTabsOptions');
-  for (let i = 0; i < initialFields.length; i += 1) {
-    const fieldName = initialFields[i];
-    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
-    let processedFieldOptions = [];
-    if (Object.prototype.hasOwnProperty.call(processedTabsOptions, fieldName)) {
-      processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
-    }
-
-    for (let j = 0; j < initialFieldOptions.length; j += 1) {
-      const optionName = initialFieldOptions[j];
-      let newCount;
-      if (processedFieldOptions.includes(optionName)) {
-        newCount = processedTabsOptions[fieldName].histogram.filter(
-          x => x.key === optionName,
-        )[0].count;
-      } else {
-        newCount = 0;
-      }
-      for (let k = 0; k < updatedTabsOptions[fieldName].histogram.length; k += 1) {
-        const option = updatedTabsOptions[fieldName].histogram[k];
-        if (option.key === optionName) {
-          updatedTabsOptions[fieldName].histogram[k].count = newCount;
-          if (isFilterOptionToBeHidden(
-            updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
-          )) {
-            updatedTabsOptions[fieldName].histogram.splice(k, 1);
-            break;
-          }
-        }
-      }
-    }
-  }
-  console.timeEnd('updateCountsInInitialTabsOptions', 'end');
   return updatedTabsOptions;
 };
 
