@@ -70,6 +70,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
@@ -78,7 +79,6 @@ class ConnectedFilter extends React.Component {
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions, processedTabsOptions, this.state.filtersApplied,
     );
-
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
@@ -155,6 +155,7 @@ class ConnectedFilter extends React.Component {
   }
 
   render() {
+    if (this.props.hidden) return null;
     const filterTabs = this.getFilterTabs();
     if (!filterTabs || filterTabs.length === 0) {
       return null;
@@ -198,6 +199,7 @@ ConnectedFilter.propTypes = {
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
+  hidden: PropTypes.bool,
 };
 
 ConnectedFilter.defaultProps = {
@@ -213,6 +215,7 @@ ConnectedFilter.defaultProps = {
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
   hideZero: false,
+  hidden: false,
 };
 
 export default ConnectedFilter;

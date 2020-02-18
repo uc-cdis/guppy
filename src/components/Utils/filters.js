@@ -55,8 +55,39 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
 export const updateCountsInInitialTabsOptions = (
   initialTabsOptions, processedTabsOptions, filtersApplied,
 ) => {
+  const updatedTabsOptions = {};
+  console.time('updateCountsInInitialTabsOptions');
+  Object.keys(initialTabsOptions).forEach((field) => {
+    const { histogram } = initialTabsOptions[field];
+    histogram.forEach((opt) => {
+      const { key } = opt;
+      const findOpt = processedTabsOptions[field].histogram.find(o => o.key === key);
+      if (findOpt) {
+        const { count } = findOpt;
+        if (!updatedTabsOptions[field]) {
+          updatedTabsOptions[field] = { histogram: [] };
+        }
+        updatedTabsOptions[field].histogram.push({ key, count });
+      }
+    });
+    if (filtersApplied[field]) {
+      filtersApplied[field].selectedValues.forEach((optKey) => {
+        if (!updatedTabsOptions[field].histogram.find(o => o.key === optKey)) {
+          updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
+        }
+      });
+    }
+  });
+  console.timeEnd('updateCountsInInitialTabsOptions', 'end');
+  return updatedTabsOptions;
+};
+
+export const _updateCountsInInitialTabsOptions = (
+  initialTabsOptions, processedTabsOptions, filtersApplied,
+) => {
   const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
   const initialFields = Object.keys(initialTabsOptions);
+  console.time('updateCountsInInitialTabsOptions');
   for (let i = 0; i < initialFields.length; i += 1) {
     const fieldName = initialFields[i];
     const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
@@ -89,7 +120,7 @@ export const updateCountsInInitialTabsOptions = (
       }
     }
   }
-
+  console.timeEnd('updateCountsInInitialTabsOptions', 'end');
   return updatedTabsOptions;
 };
 
