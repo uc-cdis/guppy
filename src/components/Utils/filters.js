@@ -57,21 +57,19 @@ export const updateCountsInInitialTabsOptions = (
 ) => {
   const updatedTabsOptions = {};
   Object.keys(initialTabsOptions).forEach((field) => {
+    updatedTabsOptions[field] = { histogram: [] };
     const { histogram } = initialTabsOptions[field];
     histogram.forEach((opt) => {
       const { key } = opt;
-      const findOpt = processedTabsOptions[field].histogram.find(o => o.key === key);
+      const findOpt = processedTabsOptions[field].histogram.find((o) => o.key === key);
       if (findOpt) {
         const { count } = findOpt;
-        if (!updatedTabsOptions[field]) {
-          updatedTabsOptions[field] = { histogram: [] };
-        }
         updatedTabsOptions[field].histogram.push({ key, count });
       }
     });
     if (filtersApplied[field]) {
       filtersApplied[field].selectedValues.forEach((optKey) => {
-        if (!updatedTabsOptions[field].histogram.find(o => o.key === optKey)) {
+        if (!updatedTabsOptions[field].histogram.find((o) => o.key === optKey)) {
           updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
         }
       });

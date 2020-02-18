@@ -96,8 +96,8 @@ describe('can update a small set of tabs with new counts', () => {
     annotated_sex: {
       histogram: [
         { key: 'yellow', count: 1 },
-        { key: 'silver', count: 0 },
         { key: 'orange', count: 107574 },
+        { key: 'silver', count: 0 },
       ],
     },
     extra_data: {
