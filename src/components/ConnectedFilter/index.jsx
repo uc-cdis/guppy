@@ -31,8 +31,8 @@ class ConnectedFilter extends React.Component {
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
-      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
-      filter: Object.assign({}, this.props.adminAppliedPreFilters),
+      adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
+      filter: { ...this.props.adminAppliedPreFilters },
       filtersApplied: {},
     };
     this.filterGroupRef = React.createRef();
@@ -166,7 +166,7 @@ class ConnectedFilter extends React.Component {
         className={this.props.className}
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
-        onFilterChange={e => this.handleFilterChange(e)}
+        onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
     );
@@ -208,7 +208,7 @@ ConnectedFilter.defaultProps = {
   className: '',
   fieldMapping: [],
   tierAccessLimit: undefined,
-  onProcessFilterAggsData: data => (data),
+  onProcessFilterAggsData: (data) => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
   lockedTooltipMessage: '',

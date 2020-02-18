@@ -10,12 +10,12 @@
    * or keep constant the amount of data shown when combined with a user filter).
   * */
 export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
-  const filterAB = Object.assign({}, userFilter);
+  const filterAB = { ...userFilter };
   Object.keys(adminAppliedPreFilter).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
       const userFilterSubset = userFilter[key].selectedValues.filter(
-        x => adminAppliedPreFilter[key].selectedValues.includes(x),
+        (x) => adminAppliedPreFilter[key].selectedValues.includes(x),
       );
       if (userFilterSubset.length > 0) {
         // The user-applied filter is more exclusive than the admin-applied filter.
@@ -31,20 +31,6 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 
   return filterAB;
 };
-
-function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
-  if (option.count > 0) {
-    return false;
-  }
-
-  if (typeof filtersApplied !== 'undefined'
-      && filtersApplied[fieldName]
-      && filtersApplied[fieldName].selectedValues.includes(option.key)) {
-    return false;
-  }
-
-  return true;
-}
 
 /**
    * This function updates the counts in the initial set of tab options
@@ -87,7 +73,7 @@ function sortCountThenAlpha(a, b) {
 
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
-  const sortedTabsOptions = Object.assign({}, tabsOptions);
+  const sortedTabsOptions = { ...tabsOptions };
   for (let x = 0; x < fields.length; x += 1) {
     const field = fields[x];
 

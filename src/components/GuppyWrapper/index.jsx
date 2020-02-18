@@ -47,12 +47,12 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = Object.assign({}, this.props.adminAppliedPreFilters);
+    this.filter = { ...this.props.adminAppliedPreFilters };
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
-      filter: Object.assign({}, this.props.adminAppliedPreFilters),
+      filter: { ...this.props.adminAppliedPreFilters },
       rawData: [],
       totalCount: 0,
       allFields: [],
@@ -60,7 +60,7 @@ class GuppyWrapper extends React.Component {
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
-      adminAppliedPreFilters: Object.assign({}, this.props.adminAppliedPreFilters),
+      adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
   }
 
@@ -178,7 +178,7 @@ class GuppyWrapper extends React.Component {
 
   handleFilterChange(userFilter, accessibility) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
-    let filter = Object.assign({}, userFilter);
+    let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
     }
@@ -269,7 +269,7 @@ class GuppyWrapper extends React.Component {
       filter,
       this.state.accessibility,
     )
-      .then(count => downloadDataFromGuppy(
+      .then((count) => downloadDataFromGuppy(
         this.props.guppyConfig.path,
         type,
         count,
@@ -286,9 +286,9 @@ class GuppyWrapper extends React.Component {
 
   render() {
     return (
-      <React.Fragment>
+      <>
         {
-          React.Children.map(this.props.children, child => React.cloneElement(child, {
+          React.Children.map(this.props.children, (child) => React.cloneElement(child, {
             // pass data to children
             aggsData: this.state.aggsData,
             aggsDataIsLoading: this.state.gettingDataFromGuppy,
@@ -316,7 +316,7 @@ class GuppyWrapper extends React.Component {
             accessibleFieldCheckList: this.props.accessibleFieldCheckList,
           }))
         }
-      </React.Fragment>
+      </>
     );
   }
 }

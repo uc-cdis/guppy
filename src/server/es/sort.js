@@ -9,7 +9,7 @@ const getESSortBody = (graphqlSort, esInstance, esIndex) => {
   if (typeof graphqlSort !== 'undefined') {
     let graphqlSortObj = graphqlSort;
     if (typeof (graphqlSort.length) === 'undefined') {
-      graphqlSortObj = Object.keys(graphqlSort).map(field => ({ [field]: graphqlSort[field] }));
+      graphqlSortObj = Object.keys(graphqlSort).map((field) => ({ [field]: graphqlSort[field] }));
     }
     // check fields and sort methods are valid
     for (let i = 0; i < graphqlSortObj.length; i += 1) {
