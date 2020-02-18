@@ -29,14 +29,8 @@ const mockNumericAggsGlobalStats = () => {
   const fileCountGlobalStatsAggsQuery1 = {
     size: 0,
     query: {
-      bool: {
-        must: [
-          {
-            term: {
-              gender: 'female',
-            },
-          },
-        ],
+      term: {
+        gender: 'female',
       },
     },
     aggs: {
@@ -108,14 +102,8 @@ const mockNumericAggsGlobalStats = () => {
   const fileCountGlobalStatsAggsQuery3 = {
     size: 0,
     query: {
-      bool: {
-        must: [
-          {
-            terms: {
-              gen3_resource_path: ['internal-project-1', 'internal-project-2'],
-            },
-          },
-        ],
+      terms: {
+        gen3_resource_path: ['internal-project-1', 'internal-project-2'],
       },
     },
     aggs: {

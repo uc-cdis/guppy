@@ -85,14 +85,8 @@ const mockResourcePath = () => {
   const queryResourceWithFilter1 = {
     size: 0,
     query: {
-      bool: {
-        must: [
-          {
-            term: {
-              gen3_resource_path: 'internal-project-1',
-            },
-          },
-        ],
+      term: {
+        gen3_resource_path: 'internal-project-1',
       },
     },
     aggs: {
@@ -150,14 +144,8 @@ const mockResourcePath = () => {
   const queryResourceWithFilter2 = {
     size: 0,
     query: {
-      bool: {
-        must: [
-          {
-            term: {
-              gen3_resource_path: 'external-project-1',
-            },
-          },
-        ],
+      term: {
+        gen3_resource_path: 'external-project-1',
       },
     },
     aggs: {
@@ -232,6 +220,42 @@ const mockESMapping = () => {
           properties: {
             gen3_resource_path: {
               type: 'keyword',
+            },
+            visits: {
+              type: 'nested',
+              properties: {
+                days_to_visit: { type: 'integer' },
+                visit_label: {
+                  type: 'keyword',
+                  fields: {
+                    analyzed: {
+                      type: 'text',
+                      analyzer: 'ngram_analyzer',
+                      search_analyzer: 'search_analyzer',
+                      term_vector: 'with_positions_offsets',
+                    },
+                  },
+                },
+                follow_ups: {
+                  type: 'nested',
+                  properties: {
+                    days_to_follow_up: {
+                      type: 'integer',
+                    },
+                    follow_up_label: {
+                      type: 'keyword',
+                      fields: {
+                        analyzed: {
+                          type: 'text',
+                          analyzer: 'ngram_analyzer',
+                          search_analyzer: 'search_analyzer',
+                          term_vector: 'with_positions_offsets',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
             gender: {
               type: 'keyword',

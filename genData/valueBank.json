@@ -1,0 +1,11 @@
+{
+    "gender": ["male", "female", "unknown"],
+    "ethnicity": ["American Indian", "Pacific Islander", "Black", "Multi-racial", "White", "Haspanic" ],
+    "race": ["white", "black", "hispanic", "asian", "mixed", "not reported" ],
+    "vital": ["Alive", "Dead", "no data" ],
+    "file_type": ["mRNA Array", "Unaligned Reads", "Lipdomic MS", "Protionic MS", "1Gs Ribosomes", "Unknown" ],
+    "file_format": ["BEM", "BAM", "BED", "CSV", "FASTQ", "RAW", "TAR", "TSV", "TXT", "IDAT" ],
+    "auth_resource_path": ["/programs/jnkns/projects/jenkins", "/programs/DEV/projects/test", "/programs/external/projects/test"],
+    "sensitive": [ "true", "false" ],
+    "project": ["jnkns-jenkins", "DEV-test", "external-test" ]
+}

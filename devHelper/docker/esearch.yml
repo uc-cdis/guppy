@@ -3,7 +3,7 @@ version: "3.3"
 services:
   # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.1
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.4
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -23,7 +23,7 @@ services:
         window: 120s
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.2.1
+    image: docker.elastic.co/kibana/kibana-oss:6.5.4
     ports:
       - "5601:5601"
     logging:
