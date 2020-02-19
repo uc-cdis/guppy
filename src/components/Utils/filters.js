@@ -42,25 +42,46 @@ export const updateCountsInInitialTabsOptions = (
   initialTabsOptions, processedTabsOptions, filtersApplied,
 ) => {
   const updatedTabsOptions = {};
-  Object.keys(initialTabsOptions).forEach((field) => {
-    updatedTabsOptions[field] = { histogram: [] };
-    const { histogram } = initialTabsOptions[field];
-    histogram.forEach((opt) => {
-      const { key } = opt;
-      const findOpt = processedTabsOptions[field].histogram.find((o) => o.key === key);
-      if (findOpt) {
-        const { count } = findOpt;
-        updatedTabsOptions[field].histogram.push({ key, count });
-      }
-    });
-    if (filtersApplied[field]) {
-      filtersApplied[field].selectedValues.forEach((optKey) => {
-        if (!updatedTabsOptions[field].histogram.find((o) => o.key === optKey)) {
-          updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
+  try {
+    Object.keys(initialTabsOptions).forEach((field) => {
+      updatedTabsOptions[field] = { histogram: [] };
+      const { histogram } = initialTabsOptions[field];
+      histogram.forEach((opt) => {
+        const { key } = opt;
+        if (typeof (key) !== 'string') { // key is a range, just copy the histogram
+          updatedTabsOptions[field].histogram = initialTabsOptions[field].histogram;
+          return;
+        }
+        const findOpt = processedTabsOptions[field].histogram.find((o) => o.key === key);
+        if (findOpt) {
+          const { count } = findOpt;
+          updatedTabsOptions[field].histogram.push({ key, count });
         }
       });
-    }
-  });
+      if (filtersApplied[field]) {
+        if (filtersApplied[field].selectedValues) {
+          filtersApplied[field].selectedValues.forEach((optKey) => {
+            if (!updatedTabsOptions[field].histogram.find((o) => o.key === optKey)) {
+              updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
+            }
+          });
+        } else if (filtersApplied[field].lowerBound !== undefined) {
+          // copy the lower bound to the option result
+          updatedTabsOptions[field].histogram[0].key[0] = filtersApplied[field].lowerBound;
+        } else if (filtersApplied[field].upperBound !== undefined) {
+          // copy the upper bound to the option result
+          updatedTabsOptions[field].histogram[0].key[1] = filtersApplied[field].upperBound;
+        }
+      }
+    });
+  } catch (err) {
+    /* eslint-disable no-console */
+    // hopefully we won't get here but in case of
+    // out-of-index error or obj undefined error
+    console.err('error when processing filter data', err);
+    console.trace();
+    /* eslint-enable no-console */
+  }
   return updatedTabsOptions;
 };
 
