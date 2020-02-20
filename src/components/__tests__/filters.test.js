@@ -168,7 +168,7 @@ describe('can update a small set of tabs with new counts, test with ranger slide
     },
     field2: {
       histogram: [
-        { key: [4, 39], count: 49 },
+        { key: [0, 100], count: 49 },
       ],
     },
   };

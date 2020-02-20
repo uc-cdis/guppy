@@ -72,15 +72,6 @@ export const updateCountsInInitialTabsOptions = (
               updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
             }
           });
-        } else {
-          if (filtersApplied[field].lowerBound !== undefined) {
-            // copy the lower bound to the option result
-            updatedTabsOptions[field].histogram[0].key[0] = filtersApplied[field].lowerBound;
-          }
-          if (filtersApplied[field].upperBound !== undefined) {
-            // copy the upper bound to the option result
-            updatedTabsOptions[field].histogram[0].key[1] = filtersApplied[field].upperBound;
-          }
         }
       }
     });
