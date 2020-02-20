@@ -3,7 +3,7 @@ import fetch from 'isomorphic-fetch';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
-const histogramQueryStrForEachField = field => (`
+const histogramQueryStrForEachField = (field) => (`
   ${field} {
     histogram {
       key
@@ -20,7 +20,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   const query = `query {
     _aggregation {
       ${type} (accessibility: ${accessibility}) {
-        ${fields.map(field => histogramQueryStrForEachField(field))}
+        ${fields.map((field) => histogramQueryStrForEachField(field))}
       }
     }
   }`;
@@ -29,7 +29,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
-          ${fields.map(field => histogramQueryStrForEachField(field))}
+          ${fields.map((field) => histogramQueryStrForEachField(field))}
         }
       }
     }`;
@@ -42,7 +42,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json());
+  }).then((response) => response.json());
 };
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
@@ -113,7 +113,7 @@ const queryGuppyForNestedAgg = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json())
+  }).then((response) => response.json())
     .catch((err) => {
       throw new Error(`Error during queryGuppyForNestedAgg ${err}`);
     });
@@ -161,7 +161,7 @@ const queryGuppyForRawDataAndTotalCounts = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json())
+  }).then((response) => response.json())
     .catch((err) => {
       throw new Error(`Error during queryGuppyForRawDataAndTotalCounts ${err}`);
     });
@@ -252,7 +252,7 @@ export const askGuppyForRawData = (
   );
 };
 
-export const getAllFieldsFromFilterConfigs = filterTabConfigs => filterTabConfigs
+export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs
   .reduce((acc, cur) => acc.concat(cur.fields), []);
 
 /**
@@ -284,7 +284,7 @@ export const downloadDataFromGuppy = (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(queryBody),
-    }).then(response => response.json());
+    }).then((response) => response.json());
   }
   return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility)
     .then((res) => {
@@ -321,8 +321,8 @@ export const askGuppyForTotalCounts = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json())
-    .then(response => response.data._aggregation[type]._totalCount)
+  }).then((response) => response.json())
+    .then((response) => response.data._aggregation[type]._totalCount)
     .catch((err) => {
       throw new Error(`Error during download ${err}`);
     });
@@ -344,8 +344,8 @@ export const getAllFieldsFromGuppy = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then(response => response.json())
-    .then(response => response.data._mapping[type])
+  }).then((response) => response.json())
+    .then((response) => response.data._mapping[type])
     .catch((err) => {
       throw new Error(`Error when getting fields from guppy: ${err}`);
     });
@@ -381,12 +381,12 @@ export const getAccessibleResources = async (
         },
         body: JSON.stringify(queryBody),
       })
-        .then(response => response.json())
+        .then((response) => response.json())
         .then(
-          response => ({
+          (response) => ({
             field: accessibleField,
             list: (response.data._aggregation[type][accessibleField]
-              .histogram.map(item => item.key)),
+              .histogram.map((item) => item.key)),
           }),
         )
         .catch((err) => {

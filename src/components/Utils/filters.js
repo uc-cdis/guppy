@@ -10,12 +10,12 @@
    * or keep constant the amount of data shown when combined with a user filter).
   * */
 export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
-  const filterAB = Object.assign({}, userFilter);
+  const filterAB = { ...userFilter };
   Object.keys(adminAppliedPreFilter).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(userFilter, key)
           && Object.prototype.hasOwnProperty.call(adminAppliedPreFilter, key)) {
       const userFilterSubset = userFilter[key].selectedValues.filter(
-        x => adminAppliedPreFilter[key].selectedValues.includes(x),
+        (x) => adminAppliedPreFilter[key].selectedValues.includes(x),
       );
       if (userFilterSubset.length > 0) {
         // The user-applied filter is more exclusive than the admin-applied filter.
@@ -32,20 +32,6 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
   return filterAB;
 };
 
-function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
-  if (option.count > 0) {
-    return false;
-  }
-
-  if (typeof filtersApplied !== 'undefined'
-      && filtersApplied[fieldName]
-      && filtersApplied[fieldName].selectedValues.includes(option.key)) {
-    return false;
-  }
-
-  return true;
-}
-
 /**
    * This function updates the counts in the initial set of tab options
    * calculated from unfiltered data.
@@ -55,41 +41,48 @@ function isFilterOptionToBeHidden(option, filtersApplied, fieldName) {
 export const updateCountsInInitialTabsOptions = (
   initialTabsOptions, processedTabsOptions, filtersApplied,
 ) => {
-  const updatedTabsOptions = JSON.parse(JSON.stringify(initialTabsOptions));
-  const initialFields = Object.keys(initialTabsOptions);
-  for (let i = 0; i < initialFields.length; i += 1) {
-    const fieldName = initialFields[i];
-    const initialFieldOptions = initialTabsOptions[fieldName].histogram.map(x => x.key);
-    let processedFieldOptions = [];
-    if (Object.prototype.hasOwnProperty.call(processedTabsOptions, fieldName)) {
-      processedFieldOptions = processedTabsOptions[fieldName].histogram.map(x => x.key);
-    }
-
-    for (let j = 0; j < initialFieldOptions.length; j += 1) {
-      const optionName = initialFieldOptions[j];
-      let newCount;
-      if (processedFieldOptions.includes(optionName)) {
-        newCount = processedTabsOptions[fieldName].histogram.filter(
-          x => x.key === optionName,
-        )[0].count;
-      } else {
-        newCount = 0;
-      }
-      for (let k = 0; k < updatedTabsOptions[fieldName].histogram.length; k += 1) {
-        const option = updatedTabsOptions[fieldName].histogram[k];
-        if (option.key === optionName) {
-          updatedTabsOptions[fieldName].histogram[k].count = newCount;
-          if (isFilterOptionToBeHidden(
-            updatedTabsOptions[fieldName].histogram[k], filtersApplied, fieldName,
-          )) {
-            updatedTabsOptions[fieldName].histogram.splice(k, 1);
-            break;
+  const updatedTabsOptions = {};
+  try {
+    Object.keys(initialTabsOptions).forEach((field) => {
+      updatedTabsOptions[field] = { histogram: [] };
+      const { histogram } = initialTabsOptions[field];
+      histogram.forEach((opt) => {
+        const { key } = opt;
+        if (typeof (key) !== 'string') { // key is a range, just copy the histogram
+          updatedTabsOptions[field].histogram = initialTabsOptions[field].histogram;
+          if (processedTabsOptions[field]
+            && processedTabsOptions[field].histogram
+            && processedTabsOptions[field].histogram.length > 0
+            && updatedTabsOptions[field].histogram) {
+            const newCount = processedTabsOptions[field].histogram[0].count;
+            updatedTabsOptions[field].histogram[0].count = newCount;
           }
+          return;
+        }
+        const findOpt = processedTabsOptions[field].histogram.find((o) => o.key === key);
+        if (findOpt) {
+          const { count } = findOpt;
+          updatedTabsOptions[field].histogram.push({ key, count });
+        }
+      });
+      if (filtersApplied[field]) {
+        if (filtersApplied[field].selectedValues) {
+          filtersApplied[field].selectedValues.forEach((optKey) => {
+            if (!updatedTabsOptions[field].histogram.find((o) => o.key === optKey)) {
+              updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
+            }
+          });
         }
       }
-    }
+    });
+  } catch (err) {
+    /* eslint-disable no-console */
+    // hopefully we won't get here but in case of
+    // out-of-index error or obj undefined error
+    console.err('error when processing filter data', err);
+    console.trace();
+    /* eslint-enable no-console */
   }
-
   return updatedTabsOptions;
 };
 
@@ -102,7 +95,7 @@ function sortCountThenAlpha(a, b) {
 
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
-  const sortedTabsOptions = Object.assign({}, tabsOptions);
+  const sortedTabsOptions = { ...tabsOptions };
   for (let x = 0; x < fields.length; x += 1) {
     const field = fields[x];
 

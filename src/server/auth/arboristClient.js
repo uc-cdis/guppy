@@ -26,7 +26,7 @@ class ArboristClient {
         body: JSON.stringify({ user: { token: jwt } }),
       },
     ).then(
-      response => response.json(),
+      (response) => response.json(),
       (err) => {
         log.error(err);
         throw new CodedError(500, err);
