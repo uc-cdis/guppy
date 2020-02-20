@@ -96,12 +96,80 @@ describe('can update a small set of tabs with new counts', () => {
     annotated_sex: {
       histogram: [
         { key: 'yellow', count: 1 },
-        { key: 'silver', count: 0 },
         { key: 'orange', count: 107574 },
+        { key: 'silver', count: 0 },
       ],
     },
     extra_data: {
       histogram: [],
+    },
+  };
+
+  const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
+    initialTabsOptions, processedTabsOptions, filtersApplied,
+  );
+
+  test('update tab counts', async () => {
+    expect(actualUpdatedTabsOptions)
+      .toEqual(expectedUpdatedTabsOptions);
+  });
+});
+
+describe('can update a small set of tabs with new counts, test with ranger slide', () => {
+  const initialTabsOptions = {
+    field1: {
+      histogram: [
+        { key: 'option1', count: 137675 },
+        { key: 'option2', count: 56270 },
+        { key: 'option3', count: 2020 },
+        { key: 'option4', count: 107574 },
+      ],
+    },
+    field2: {
+      histogram: [
+        { key: [0, 100], count: 100 },
+      ],
+    },
+  };
+
+  const processedTabsOptions = {
+    field1: {
+      histogram: [
+        { key: 'option3', count: 30 },
+      ],
+    },
+    field2: {
+      histogram: [
+        {
+          key: [4, 39],
+          count: 49,
+        },
+      ],
+    },
+  };
+
+  const filtersApplied = {
+    field1: {
+      selectedValues: ['option2'],
+    },
+    field2: {
+      lowerBound: 4,
+      upperBound: 39,
+    },
+  };
+
+  // option2 has a count of zero, but it is in the filter, so it should remain visible
+  const expectedUpdatedTabsOptions = {
+    field1: {
+      histogram: [
+        { key: 'option3', count: 30 },
+        { key: 'option2', count: 0 },
+      ],
+    },
+    field2: {
+      histogram: [
+        { key: [0, 100], count: 49 },
+      ],
     },
   };
 

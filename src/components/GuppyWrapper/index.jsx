@@ -287,7 +287,7 @@ class GuppyWrapper extends React.Component {
 
   render() {
     return (
-      <React.Fragment>
+      <>
         {
           React.Children.map(this.props.children, (child) => React.cloneElement(child, {
             // pass data to children
@@ -317,7 +317,7 @@ class GuppyWrapper extends React.Component {
             accessibleFieldCheckList: this.props.accessibleFieldCheckList,
           }))
         }
-      </React.Fragment>
+      </>
     );
   }
 }
