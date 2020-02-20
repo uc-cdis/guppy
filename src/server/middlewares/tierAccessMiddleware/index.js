@@ -182,15 +182,19 @@ const hideNumberResolver = (isGettingTotalCount) => async (resolve, root, args, 
   const result = await resolve(root, args, context, info);
   log.debug('[hideNumberResolver] result: ', result);
   if (!needEncryptAgg) return result;
-  if (isGettingTotalCount) {
-    return (result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
-  }
 
   const newRoot = root;
   newRoot.accessibility = 'unaccessible';
   const { authHelper } = context;
   newRoot.filter = authHelper.applyUnaccessibleFilter(newRoot.filter);
   const unaccessibleResult = await resolve(newRoot, args, context, info);
+  log.debug('[hideNumberResolver] unaccessibleResult: ', unaccessibleResult);
+
+  // if getting total count, only encrypt if unaccessibleResult is between (0, tierAccessLimit)
+  if (isGettingTotalCount) {
+    return (unaccessibleResult > 0
+      && unaccessibleResult < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+  }
 
   const encryptedResult = result.map((item) => {
     // we don't encrypt whitelisted results or if result is not found in unaccessibleResult

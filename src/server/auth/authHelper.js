@@ -45,6 +45,7 @@ export class AuthHelper {
     const requestResourceList = await getRequestResourceListFromFilter(
       esIndex, esType, filter, filterSelf,
     );
+    log.debug('[AuthHelper] filter:', filter);
     log.debug(`[AuthHelper] request resource list: [${requestResourceList.join(', ')}]`);
     const outOfScopeResourceList = _.difference(requestResourceList, this._accessibleResourceList);
     log.debug(`[AuthHelper] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
