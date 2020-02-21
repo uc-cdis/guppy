@@ -10,7 +10,7 @@ import './guppyWrapper.css';
 
 storiesOf('ConnectedFilter', module)
   .add('Filter', () => {
-    const processFilterAggsData = aggsData => aggsData;
+    const processFilterAggsData = (aggsData) => aggsData;
     return (
       <ConnectedFilter
         filterConfig={filterConfig}
@@ -22,7 +22,7 @@ storiesOf('ConnectedFilter', module)
     );
   })
   .add('Accessible Filter', () => {
-    const processFilterAggsData = aggsData => aggsData;
+    const processFilterAggsData = (aggsData) => aggsData;
     return (
       <AccessibleFilter
         filterConfig={filterConfig}
@@ -34,7 +34,7 @@ storiesOf('ConnectedFilter', module)
     );
   })
   .add('Unaccessible Filter', () => {
-    const processFilterAggsData = aggsData => aggsData;
+    const processFilterAggsData = (aggsData) => aggsData;
     return (
       <UnaccessibleFilter
         filterConfig={filterConfig}
