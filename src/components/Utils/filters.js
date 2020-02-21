@@ -45,9 +45,12 @@ export const updateCountsInInitialTabsOptions = (
   try {
     Object.keys(initialTabsOptions).forEach((field) => {
       updatedTabsOptions[field] = { histogram: [] };
-      // if in tiered access mode, we need not hide 0 filters for accessibleFieldCheckList
-      if (accessibleFieldCheckList && accessibleFieldCheckList.includes(field)) {
-        updatedTabsOptions.field = processedTabsOptions.field;
+      // if in tiered access mode
+      // we need not to process filters for field in accessibleFieldCheckList
+      if (accessibleFieldCheckList
+        && accessibleFieldCheckList.includes(field)
+        && processedTabsOptions[field]) {
+        updatedTabsOptions[field] = processedTabsOptions[field];
         return;
       }
       const { histogram } = initialTabsOptions[field];
