@@ -77,7 +77,11 @@ class ConnectedFilter extends React.Component {
     }
 
     processedTabsOptions = updateCountsInInitialTabsOptions(
-      this.initialTabsOptions, processedTabsOptions, this.state.filtersApplied,
+      this.initialTabsOptions,
+      processedTabsOptions,
+      this.state.filtersApplied,
+      // for tiered access filters
+      this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
 

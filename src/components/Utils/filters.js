@@ -39,12 +39,20 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied,
+  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
 ) => {
   const updatedTabsOptions = {};
   try {
     Object.keys(initialTabsOptions).forEach((field) => {
       updatedTabsOptions[field] = { histogram: [] };
+      // if in tiered access mode
+      // we need not to process filters for field in accessibleFieldCheckList
+      if (accessibleFieldCheckList
+        && accessibleFieldCheckList.includes(field)
+        && processedTabsOptions[field]) {
+        updatedTabsOptions[field] = processedTabsOptions[field];
+        return;
+      }
       const { histogram } = initialTabsOptions[field];
       histogram.forEach((opt) => {
         const { key } = opt;

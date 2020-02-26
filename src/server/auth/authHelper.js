@@ -16,13 +16,13 @@ export class AuthHelper {
   async initialize() {
     try {
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
-      const promistList = [];
+      const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
         const subListPromise = this.getOutOfScopeResourceList(index, type);
-        promistList.push(subListPromise);
+        promiseList.push(subListPromise);
       });
       this._unaccessibleResourceList = [];
-      const listResult = await Promise.all(promistList);
+      const listResult = await Promise.all(promiseList);
       listResult.forEach((list) => {
         this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
       });
@@ -41,10 +41,11 @@ export class AuthHelper {
     return this._unaccessibleResourceList;
   }
 
-  async getOutOfScopeResourceList(esIndex, esType, filter) {
+  async getOutOfScopeResourceList(esIndex, esType, filter, filterSelf) {
     const requestResourceList = await getRequestResourceListFromFilter(
-      esIndex, esType, filter,
+      esIndex, esType, filter, filterSelf,
     );
+    log.debug('[AuthHelper] filter:', filter);
     log.debug(`[AuthHelper] request resource list: [${requestResourceList.join(', ')}]`);
     const outOfScopeResourceList = _.difference(requestResourceList, this._accessibleResourceList);
     log.debug(`[AuthHelper] out-of-scope resource list: [${outOfScopeResourceList.join(', ')}]`);
