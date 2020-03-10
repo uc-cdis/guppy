@@ -12,6 +12,7 @@ function fakerType(value) {
     case 'text':
       fieldType = { type: 'string', faker: 'name.findName' };
       break;
+    case 'float':
     case 'double':
       fieldType = { type: 'number' };
       break;
@@ -32,7 +33,10 @@ function fakerType(value) {
       // console.log(value);
       break;
   }
-  return fieldType;
+  return {
+    ...fieldType,
+    rawType: value.type,
+  };
 }
 
 module.exports = {
