@@ -96,7 +96,6 @@ async function run() {
         const index = getRandomInt(0, fieldValues[key].length - 1);
         dCopy[key] = fieldValues[key][index];
       } else {
-        console.log('vtype: ', schema.items.properties[key].rawType);
         switch (schema.items.properties[key].rawType) {
           case 'integer':
             dCopy[key] = getRandomInt(MIN_INT, MAX_INT);
