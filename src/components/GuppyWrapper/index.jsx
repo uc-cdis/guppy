@@ -76,7 +76,13 @@ class GuppyWrapper extends React.Component {
         allFields: fields,
         rawDataFields,
       }, () => {
-        this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+        this.getDataFromGuppy(
+          this.state.rawDataFields,
+          undefined,
+          true,
+          this.props.guppyConfig.offset,
+          this.props.guppyConfig.size,
+        );
       });
     });
     if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
@@ -270,7 +276,7 @@ class GuppyWrapper extends React.Component {
       filter,
       this.state.accessibility,
     )
-      .then((count) => downloadDataFromGuppy(
+      .then(count => downloadDataFromGuppy(
         this.props.guppyConfig.path,
         type,
         count,
@@ -289,7 +295,7 @@ class GuppyWrapper extends React.Component {
     return (
       <>
         {
-          React.Children.map(this.props.children, (child) => React.cloneElement(child, {
+          React.Children.map(this.props.children, child => React.cloneElement(child, {
             // pass data to children
             aggsData: this.state.aggsData,
             aggsDataIsLoading: this.state.gettingDataFromGuppy,
@@ -329,6 +335,8 @@ GuppyWrapper.propTypes = {
     mainField: PropTypes.string,
     mainFieldIsNumeric: PropTypes.bool,
     aggFields: PropTypes.array,
+    size: PropTypes.number,
+    offset: PropTypes.number,
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),

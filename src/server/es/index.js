@@ -58,7 +58,7 @@ class ES {
       type: esType,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
-      log.error('[ES.query] error during querying');
+      log.error('[ES.query] error during querying: ' + err.message);
       throw new Error(err.message);
     });
   }
