@@ -9,21 +9,15 @@ class ArboristClient {
   }
 
   listAuthorizedResources(jwt) {
-    if (!jwt) {
-      log.error('[ArboristClient] jwt token undefined');
-      throw new CodedError(401, 'not authorized');
-    }
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/resources`;
     log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
+    const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
     return fetch(
       resourcesEndpoint,
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user: { token: jwt } }),
+        method: 'GET',
+        headers,
       },
     ).then(
       (response) => response.json(),

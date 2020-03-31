@@ -203,7 +203,7 @@ const mockResourcePath = () => {
 const mockArborist = () => {
   nock(config.arboristEndpoint)
     .persist()
-    .post('/auth/resources')
+    .get('/auth/resources')
     .reply(200, {
       resources: [
         'internal-project-1',
