@@ -122,9 +122,9 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const fieldAggregationResolverMappings = {};
   const { fields } = esInstance.getESFields(esIndex);
   fields.forEach((field) => {
-    if (field.type !== 'nested') {
-      fieldAggregationResolverMappings[`${field.name}`] = ((parent) => ({ ...parent, field: field.name }));
-    }
+    // if (field.type !== 'nested') {
+    fieldAggregationResolverMappings[`${field.name}`] = ((parent) => ({ ...parent, field: field.name }));
+    // }
   });
   return fieldAggregationResolverMappings;
 };
