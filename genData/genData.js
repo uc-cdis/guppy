@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('array.prototype.flatmap').shim();
 
 const program = require('commander');
