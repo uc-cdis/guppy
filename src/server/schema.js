@@ -200,8 +200,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
         return `
     ${propsKey}: ${getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
-}
-`;
+}`;
     }
   }
   log.debug('[SCHEMA] AggsNestedTypeSchema: ', AggsNestedTypeSchema);

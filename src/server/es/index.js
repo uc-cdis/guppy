@@ -8,7 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
-import { fromFieldsToSource } from '../utils/utils';
+import { fromFieldsToSource, buildNestedField } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -283,7 +283,12 @@ class ES {
         index: cfg.index,
         type: cfg.type,
         fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
-          const r = { name: key, type: value.type };
+          let r;
+          if (value.type !== 'nested') {
+            r = { name: key, type: value.type };
+          } else {
+            r = buildNestedField(key, value, r);
+          }
           return r;
         }),
       };
@@ -324,6 +329,7 @@ class ES {
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
       queryBody.query = getFilterObj(this, esIndex, filter);
+      log.debug('[ES] filterObj: ', queryBody.query);
     }
     queryBody.sort = getESSortBody(sort, this, esIndex);
     if (typeof size !== 'undefined') {

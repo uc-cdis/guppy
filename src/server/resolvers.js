@@ -118,16 +118,22 @@ const textHistogramResolver = async (parent, args, context) => {
   });
 };
 
+const getFieldAggregationResolverMappingsByField = (field) => {
+  if (field.type !== 'nested') {
+    return ((parent) => ({ ...parent, field: field.name }));
+  }
+  return ((parent) => ({ ...parent, field: field.name, path: (parent.path) ? `${parent.path}.${field.name}` : `${field.name}` }));
+};
+
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
-  const fieldAggregationResolverMappings = {};
   const { fields } = esInstance.getESFields(esIndex);
+  const fieldAggregationResolverMappings = {};
   fields.forEach((field) => {
-    // if (field.type !== 'nested') {
-    fieldAggregationResolverMappings[`${field.name}`] = ((parent) => ({ ...parent, field: field.name }));
-    // }
+    fieldAggregationResolverMappings[`${field.name}`] = getFieldAggregationResolverMappingsByField(field);
   });
   return fieldAggregationResolverMappings;
 };
+
 
 /**
  * Tree-structured resolvers pass down arguments.
@@ -188,6 +194,28 @@ const getResolver = (esConfig, esInstance) => {
     return acc;
   }, {});
 
+  const typeNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
+    const { fields } = esInstance.getESFields(cfg.index);
+    const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
+    log.debug('[resolver.typeNestedAggregationResolvers] nestedFieldsArray', nestedFieldsArray);
+
+    while (nestedFieldsArray.length > 0) {
+      const nestedFields = nestedFieldsArray.shift();
+      log.debug('[resolver.typeNestedAggregationResolvers] nestedFields', nestedFields);
+      const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
+      acc[typeNestedAggsName] = {};
+      if (nestedFields.type === 'nested' && nestedFields.nestedProps) {
+        nestedFields.nestedProps.forEach((props) => {
+          if (props.type === 'nested') {
+            nestedFieldsArray.push(props);
+          }
+          acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
+        });
+      }
+    }
+    return acc;
+  }, {});
+
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
     acc[cfg.type] = () => (esInstance.getESFields(cfg.index).fields.map((f) => f.name));
     return acc;
@@ -204,6 +232,7 @@ const getResolver = (esConfig, esInstance) => {
       ...typeAggregationResolverMappings,
     },
     ...typeAggregationResolvers,
+    ...typeNestedAggregationResolvers,
     HistogramForNumber: {
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
