@@ -12,6 +12,7 @@ Table of Contents
    - [Basic Filter Unit](#filter-unit)
    - [Text Search Unit in Filter](#filter-search)
    - [Combined Filters](#filter-comb)
+   - [Nested Filter](#filter-nested)
 - [Some other queries and arguments](#other)
 
 <a name="query"></a>
@@ -398,7 +399,7 @@ Result:
 ### 4. Nested Aggregation
 :bangbang: **This section is for performing aggregations on document which contains nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)**
 
-Guppy supports performing aggregations (both text and numeric aggregations) on nested fields.
+Guppy supports performing aggregations (both text and numeric aggregations) on nested fields. For information about using nested fields inside filters, see [Nested Filter](#filter-nested)
 > Suppose the ES index has a mapping as the following:
 >```
 >   "mappings": {
@@ -927,7 +928,7 @@ In future Guppy will support `SQL` like syntax for filter, like `
 {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
 `.
 
-<a name="other"></a>
+<a name="filter-nested"></a>
 
 ### Nested filter
 Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similar to the ES query.
@@ -971,6 +972,7 @@ Assuming that there is `File` node nested inside `subject`. The nested query wil
 ElasticSearch only support the nested filter on the level of document for returning data. It means that the filter `file_count >=15` and `file_count<=75` will return the whole document having a `file_count` in the range of `[15, 75]`.
 The returned data will not filter the nested `file_count`(s) that are out of that range for that document.
 
+<a name="other"></a>
 ## Some other queries and arguments 
 
 ### Mapping query
