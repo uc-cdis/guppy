@@ -863,7 +863,7 @@ describe('could aggregate for numeric fields, fixed bin count', () => {
   });
 });
 
-// see /src/server/__mocks__/mockESData/mockNestedAggs.js for mock results
+// see /src/server/__mocks__/mockESData/mockNestedTermsAndMissingAggs.js for mock results
 describe('could only aggregate to find missing fields (both existing and non-existing fields)', () => {
   test('nested missing-only aggregation', async () => {
     await esInstance.initialize();

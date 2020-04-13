@@ -4,7 +4,7 @@ import mockTextAggs from './mockESData/mockTextAggs';
 import mockNumericAggsGlobalStats from './mockESData/mockNumericAggsGlobalStats';
 import mockHistogramFixWidth from './mockESData/mockNumericHistogramFixWidth';
 import mockHistogramFixBinCount from './mockESData/mockNumericHistogramFixBinCount';
-import mockNestedAggs from './mockESData/mockNestedAggs';
+import mockNestedTermsAndMissingAggs from './mockESData/mockNestedTermsAndMissingAggs';
 
 const mockPing = () => {
   nock(config.esConfig.host)
@@ -350,7 +350,7 @@ const setup = () => {
   mockNumericAggsGlobalStats();
   mockHistogramFixWidth();
   mockHistogramFixBinCount();
-  mockNestedAggs();
+  mockNestedTermsAndMissingAggs();
 };
 
 export default setup;

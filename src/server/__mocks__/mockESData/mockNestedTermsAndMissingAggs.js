@@ -1,6 +1,6 @@
 import mockSearchEndpoint from './utils';
 
-const mockNestedAggs = () => {
+const mockNestedTermsAndMissingAggs = () => {
   // only missing fields in nestedAggFields variables
   const missingAggsQuery = {
     size: 0,
@@ -290,4 +290,4 @@ const mockNestedAggs = () => {
   mockSearchEndpoint(combinedAggsQuery, combinedTermsAggs);
 };
 
-export default mockNestedAggs;
+export default mockNestedTermsAndMissingAggs;
