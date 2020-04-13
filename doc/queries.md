@@ -495,48 +495,7 @@ Result:
               }
             ]
           },
-          "days_to_visit": {
-            "histogram": [
-              {
-                "key": [
-                  1,
-                  2
-                ],
-                "count": 21
-              },
-              {
-                "key": [
-                  2,
-                  3
-                ],
-                "count": 19
-              },
-              {
-                "key": [
-                  3,
-                  4
-                ],
-                "count": 29
-              }
-            ]
-          },
           "follow_ups": {
-            "follow_up_label": {
-              "histogram": [
-                {
-                  "key": "flup_lbl_3",
-                  "count": 29
-                },
-                {
-                  "key": "flup_lbl_1",
-                  "count": 21
-                },
-                {
-                  "key": "flup_lbl_2",
-                  "count": 19
-                }
-              ]
-            },
             "days_to_follow_up": {
               "histogram": [
                 {
