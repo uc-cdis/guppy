@@ -287,7 +287,7 @@ class ES {
           if (value.type !== 'nested') {
             r = { name: key, type: value.type };
           } else {
-            r = buildNestedField(key, value, r);
+            r = buildNestedField(key, value);
           }
           return r;
         }),
