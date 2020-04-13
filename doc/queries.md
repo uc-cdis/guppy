@@ -7,6 +7,7 @@ Table of Contents
    - [Text Aggregation](#aggs-text)
    - [Numeric Aggregation](#aggs-numeric)
    - [Nested Aggregation](#aggs-nested)
+   - [Sub-aggregations](#aggs-sub)
 - [Filters](#filter)
    - [Basic Filter Unit](#filter-unit)
    - [Text Search Unit in Filter](#filter-search)
@@ -395,11 +396,189 @@ Result:
 <a name="aggs-nested"></a>
 
 ### 4. Nested Aggregation
-Guppy supports nested aggregations (sub-aggregations) for fields. Currently Guppy only supports two-level-sub-aggregations.
+:heavy_exclamation_mark: This section is for performing aggregations on document which contains nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)
 
-There are two types of nested aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+Guppy supports performing aggregations (both text and numeric aggregations) on nested fields.
+> Suppose the ES index has a mapping as the following:
+>```
+>   "mappings": {
+>     "subject": {
+>       "properties": {
+>         "subject_id": { "type": "keyword" },
+>         "visits": {
+>           "type": "nested",
+>           "properties": {
+>             "days_to_visit": { "type": "integer" },
+>             "visit_label": { "type": "keyword" },
+>             "follow_ups": {
+>               "type": "nested",
+>               "properties": {
+>                 "days_to_follow_up": { "type": "integer" },
+>                 "follow_up_label": { "type": "keyword" },
+>               }
+>             }
+>           }
+>         },
+>       }
+>     }
+>    }
+>```
 
-#### 4.1. Terms Aggregation
+An example nested query that Guppy can perform with respect to that ESS index could be:
+```
+query: {
+  _aggregation: {
+    subject: {
+      subject_id: {                    --> normal non-nested aggregation
+        histogram: {
+          key
+          count
+        }
+      }
+      visits: {
+        visit_label: {                 --> one-level nested text aggregation
+          histogram: {
+            key
+            count
+          }
+        }
+        follow_ups: {
+          days_to_follow_up: {         --> two-level nested numeric aggregation
+            histogram(rangeStep: 1) {
+              key
+              count
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Result:
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "subject_id": {
+          "histogram": [
+            {
+              "key": "subject_id_1",
+              "count": 24
+            },
+            {
+              "key": "subject_id_2",
+              "count": 24
+            },
+            {
+              "key": "subject_id_3",
+              "count": 21
+            }
+          ]
+        },
+        "visits": {
+          "visit_label": {
+            "histogram": [
+              {
+                "key": "vst_lbl_3",
+                "count": 29
+              },
+              {
+                "key": "vst_lbl_1",
+                "count": 21
+              },
+              {
+                "key": "vst_lbl_2",
+                "count": 19
+              }
+            ]
+          },
+          "days_to_visit": {
+            "histogram": [
+              {
+                "key": [
+                  1,
+                  2
+                ],
+                "count": 21
+              },
+              {
+                "key": [
+                  2,
+                  3
+                ],
+                "count": 19
+              },
+              {
+                "key": [
+                  3,
+                  4
+                ],
+                "count": 29
+              }
+            ]
+          },
+          "follow_ups": {
+            "follow_up_label": {
+              "histogram": [
+                {
+                  "key": "flup_lbl_3",
+                  "count": 29
+                },
+                {
+                  "key": "flup_lbl_1",
+                  "count": 21
+                },
+                {
+                  "key": "flup_lbl_2",
+                  "count": 19
+                }
+              ]
+            },
+            "days_to_follow_up": {
+              "histogram": [
+                {
+                  "key": [
+                    1,
+                    2
+                  ],
+                  "count": 21
+                },
+                {
+                  "key": [
+                    2,
+                    3
+                  ],
+                  "count": 19
+                },
+                {
+                  "key": [
+                    3,
+                    4
+                  ],
+                  "count": 29
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+<a name="aggs-sub"></a>
+
+### 5. Sub-aggregations
+Guppy supports sub-aggregations for fields. Currently Guppy only supports two-level-sub-aggregations.
+
+There are two types of sub-aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+
+#### 5.1. Terms Aggregation
 Terms aggregation requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, what is the distribution of each element from the array of fields in the sub-aggregations.
 
 Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
@@ -521,7 +700,7 @@ Result:
 }
 ```
 
-#### 4.2. Missing Aggregation
+#### 5.2. Missing Aggregation
 Missing aggregation also requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, how many elements from the array of fields in the sub-aggregation are missing from it.
 
 Results are wrapped by keywords `field` and `count`, example:

@@ -7,11 +7,23 @@ docker-compose -f ./esearch.yml up -d
 ```
 
 ## Step.2 import mock data into elasticsearch index
-Go to the repository's root directory and run the following command.
+Guppy has a helper function to generate mock data for a specific ES index. For example, to generate data for an ES index called `gen3-dev-subject` with document type `subject`, run the following command:
+```
+npm run gendata -- -i gen3-dev-subject -d subject
+```
 
-```
-sh ./generate_data.sh
-```
+Here is a complete list of arguments that `npm run gendata` would take
+| argument                     | description                                            | default           |
+|------------------------------|--------------------------------------------------------|-------------------|
+| -v, --verbose                | verbose output                                         | false             |
+| -h, --hostname `<hostname>`  | elasticsearch hostname                                 | http://localhost  |
+| -p, --port `<port>`          | elasticsearch port                                     | 9200              |
+| -i, --index `<index>`        | elasticsearch index                                    | undefined         |
+| -d, --doc_type `<doc_type>`  | document type                                          | undefined         |
+| -n, --number `<number>`      | number of documents to generate                        | 500               |
+| -r, --random                 | generate random number of document up to `number`      | false             |
+
+Also, there are some predefined values in `/genData/valueBank.json`.
 
 ## Step.3 start server for developing server side code
 Go to repo root directory, and run
