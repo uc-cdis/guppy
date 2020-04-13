@@ -134,6 +134,9 @@ export const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  * @returns {min, max, sum, count, avg, key}
  */
 export const numericGlobalStats = async (
@@ -216,6 +219,9 @@ export const numericGlobalStats = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericHistogramWithFixedRangeStep = async (
   {
@@ -332,6 +338,9 @@ export const numericHistogramWithFixedRangeStep = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericHistogramWithFixedBinCount = async (
   {
@@ -404,6 +413,9 @@ export const numericHistogramWithFixedBinCount = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericAggregation = async (
   {
@@ -507,6 +519,9 @@ export const numericAggregation = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const textAggregation = async (
   {
@@ -558,6 +573,7 @@ export const textAggregation = async (
     aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
   }
 
+  // build up ES query if is nested aggregation
   if (aggsNestedName) {
     queryBody.aggs = {
       [aggsNestedName]: {
@@ -604,11 +620,11 @@ export const textAggregation = async (
       },
     };
   }
-  // log.debug('[textAggregation] queryBody', queryBody);
   let resultSize;
   let finalResults = [];
   /* eslint-disable */
   do {
+    // parse ES query result based on whether is doing nested aggregation or not (if `aggsNestedName` is defined)
     const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
 

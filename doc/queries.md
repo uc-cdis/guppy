@@ -396,7 +396,7 @@ Result:
 <a name="aggs-nested"></a>
 
 ### 4. Nested Aggregation
-:heavy_exclamation_mark: This section is for performing aggregations on document which contains nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)
+:bangbang: **This section is for performing aggregations on document which contains nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)**
 
 Guppy supports performing aggregations (both text and numeric aggregations) on nested fields.
 > Suppose the ES index has a mapping as the following:

@@ -124,6 +124,7 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   if (field.type !== 'nested') {
     return ((parent) => ({ ...parent, field: field.name }));
   }
+  // if field is nested type, update nestedPath info with parent's nestedPath and pass down
   return ((parent) => ({ ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}` }));
 };
 
@@ -147,7 +148,7 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *     race
  *   }
  *   _aggregation {
- *     subject (filter: xx, filterSelf: xx} { ---> `typeAggsQueryResolver`
+ *     subject (filter: xx, filterSelf: xx} {  ---> `typeAggsQueryResolver`
  *       _totalCount  ---> `aggsTotalQueryResolver`
  *       gender {
  *         histogram {  ---> `textHistogramResolver`
@@ -160,6 +161,14 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *         {  ---> `numericHistogramResolver`
  *           key
  *           count
+ *         }
+ *       }
+ *       visits {  ---> `typeNestedAggregationResolver` (fall-through)
+ *         visit_label {
+ *           histogram {  ---> `textHistogramResolver`
+ *             key
+ *             count
+ *           }
  *         }
  *       }
  *     }
@@ -199,11 +208,10 @@ const getResolver = (esConfig, esInstance) => {
   const typeNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
     const { fields } = esInstance.getESFields(cfg.index);
     const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
-    // log.debug('[resolver.typeNestedAggregationResolvers] nestedFieldsArray', nestedFieldsArray);
 
+    // similar level by level "flatten" logic as for schema
     while (nestedFieldsArray.length > 0) {
       const nestedFields = nestedFieldsArray.shift();
-      // log.debug('[resolver.typeNestedAggregationResolvers] nestedFields', nestedFields);
       const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
       acc[typeNestedAggsName] = {};
       if (nestedFields.type === 'nested' && nestedFields.nestedProps) {

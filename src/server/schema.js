@@ -179,6 +179,11 @@ export const getAggregationSchema = (esConfig) => `
     }
   `;
 
+/**
+ * This is the function for getting schemas for a single nested index.
+ * Multi-level nested fields are "flattened" level by level.
+ * For each level of nested field a new type in schema is created.
+ */
 const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
