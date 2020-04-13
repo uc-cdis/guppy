@@ -5,6 +5,7 @@ import {
   AGGS_ITEM_STATS_NAME,
   AGGS_QUERY_NAME,
 } from './const';
+import log from '../logger';
 import config from '../config';
 
 const PAGE_SIZE = 10000;
@@ -472,6 +473,7 @@ export const textAggregation = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -492,6 +494,14 @@ export const textAggregation = async (
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
+  let aggsNestedName;
+  let fieldNestedName;
+  // log.debug('[textAggregation] nestedPath', nestedPath);
+  if (nestedPath) {
+    aggsNestedName = `${field}NestedAggs`;
+    fieldNestedName = `${nestedPath}.${field}`;
+  }
+
   if (nestedAggFields && nestedAggFields.termsFields) {
     missingAlias = {};
     aggsObj.aggs = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj.aggs);
@@ -502,43 +512,76 @@ export const textAggregation = async (
     aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
   }
 
-  queryBody.aggs = {
-    [aggsName]: {
-      composite: {
-        sources: [
-          {
-            [field]: {
-              terms: {
-                field,
-                ...missingAlias,
+  if (aggsNestedName) {
+    queryBody.aggs = {
+      [aggsNestedName]: {
+        nested: {
+          path: nestedPath,
+        },
+        aggs: {
+          [aggsName]: {
+            composite: {
+              sources: [
+                {
+                  [fieldNestedName]: {
+                    terms: {
+                      field: fieldNestedName,
+                      ...missingAlias,
+                    },
+                  },
+                },
+              ],
+              size: PAGE_SIZE,
+            },
+            ...aggsObj,
+          },
+        },
+      },
+    };
+  } else {
+    queryBody.aggs = {
+      [aggsName]: {
+        composite: {
+          sources: [
+            {
+              [field]: {
+                terms: {
+                  field,
+                  ...missingAlias,
+                },
               },
             },
-          },
-        ],
-        size: PAGE_SIZE,
+          ],
+          size: PAGE_SIZE,
+        },
+        ...aggsObj,
       },
-      ...aggsObj,
-    },
-  };
+    };
+  }
+  log.debug('[textAggregation] queryBody', queryBody);
   let resultSize;
   let finalResults = [];
   /* eslint-disable */
   do {
     const result = await esInstance.query(esIndex, esType, queryBody); 
+    log.debug('[textAggregation] result', result);
     resultSize = 0;
-        
-    result.aggregations[aggsName].buckets.forEach((item) => {
+
+    const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+
+    resultBuckets.forEach((item) => {
+      log.debug('[textAggregation] item', item);
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
       finalResults.push({
-        key: item.key[field],
+        key: (fieldNestedName)? item.key[fieldNestedName] : item.key[field],
         count: item.doc_count,
         ...resultObj
       });
       resultSize += 1;
     });
-    const afterKey = result.aggregations[aggsName].after_key;
+    const afterKey = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].after_key : result.aggregations[aggsName].after_key;
     if (typeof afterKey === 'undefined') break;
-    queryBody.aggs[aggsName].composite.after = afterKey;
+    (aggsNestedName) ? queryBody.aggs[aggsNestedName].aggs[aggsName].composite.after = afterKey : queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);
   /* eslint-enable */
 

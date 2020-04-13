@@ -446,6 +446,7 @@ class ES {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) {
     return esAggregator.textAggregation(
       {
@@ -459,6 +460,7 @@ class ES {
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
       },
     );
   }
