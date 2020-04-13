@@ -52,7 +52,7 @@ describe('Schema', () => {
   const expectedTypesSchemas = `
     type Subject {
       gen3_resource_path: String,
-      visits:[visits],
+      visits:[NestedVisits],
       gender: String,
       file_count: Int,
       name: String,
@@ -61,12 +61,12 @@ describe('Schema', () => {
       whatever_lab_result_value: Float,
       _matched:[MatchedItem]
     }
-    type visits {
+    type NestedVisits {
       days_to_visit:Int,
       visit_label:String,
-      follow_ups:[follow_ups],
+      follow_ups:[NestedFollow_ups],
     }
-    type follow_ups {
+    type NestedFollow_ups {
       days_to_follow_up:Int,
       follow_up_label:String,
     }
@@ -115,6 +115,7 @@ describe('Schema', () => {
       some_array_integer_field: HistogramForNumber,
       some_array_string_field: HistogramForString,
       whatever_lab_result_value: HistogramForNumber,
+      visits:NestedHistogramForVisits
     }
     type FileAggregation {
       _totalCount: Int
