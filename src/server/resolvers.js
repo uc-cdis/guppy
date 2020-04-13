@@ -65,7 +65,7 @@ const aggsTotalQueryResolver = (parent) => {
 const numericHistogramResolver = async (parent, args, context) => {
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath,
   } = parent;
   log.debug('[resolver.numericHistogramResolver] parent', parent);
   const {
@@ -87,6 +87,7 @@ const numericHistogramResolver = async (parent, args, context) => {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   });
 };
 
@@ -104,8 +105,7 @@ const textHistogramResolver = async (parent, args, context) => {
     esInstance, esIndex, esType,
     filter, field, nestedAggFields, filterSelf, accessibility, nestedPath,
   } = parent;
-  // log.debug('[resolver.textHistogramResolver] parent', parent);
-  log.debug('[resolver.textHistogramResolver] nestedPath', nestedPath);
+  log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   return esInstance.textAggregation({

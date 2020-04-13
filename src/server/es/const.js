@@ -1,4 +1,5 @@
 export const AGGS_QUERY_NAME = 'numeric_aggs';
+export const AGGS_NESTED_QUERY_NAME = 'numeric_nested_aggs';
 export const AGGS_GLOBAL_STATS_NAME = 'numeric_aggs_stats';
 export const AGGS_ITEM_STATS_NAME = 'numeric_item_aggs_stats';
 

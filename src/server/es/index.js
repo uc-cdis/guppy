@@ -415,6 +415,7 @@ class ES {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) {
     return esAggregator.numericAggregation(
       {
@@ -434,6 +435,7 @@ class ES {
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
       },
     );
   }
