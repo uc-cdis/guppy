@@ -102,9 +102,10 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath,
   } = parent;
-  log.debug('[resolver.textHistogramResolver] parent', parent);
+  // log.debug('[resolver.textHistogramResolver] parent', parent);
+  log.debug('[resolver.textHistogramResolver] nestedPath', nestedPath);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   return esInstance.textAggregation({
@@ -115,6 +116,7 @@ const textHistogramResolver = async (parent, args, context) => {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   });
 };
 
@@ -122,7 +124,7 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   if (field.type !== 'nested') {
     return ((parent) => ({ ...parent, field: field.name }));
   }
-  return ((parent) => ({ ...parent, field: field.name, path: (parent.path) ? `${parent.path}.${field.name}` : `${field.name}` }));
+  return ((parent) => ({ ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}` }));
 };
 
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
@@ -197,11 +199,11 @@ const getResolver = (esConfig, esInstance) => {
   const typeNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
     const { fields } = esInstance.getESFields(cfg.index);
     const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
-    log.debug('[resolver.typeNestedAggregationResolvers] nestedFieldsArray', nestedFieldsArray);
+    // log.debug('[resolver.typeNestedAggregationResolvers] nestedFieldsArray', nestedFieldsArray);
 
     while (nestedFieldsArray.length > 0) {
       const nestedFields = nestedFieldsArray.shift();
-      log.debug('[resolver.typeNestedAggregationResolvers] nestedFields', nestedFields);
+      // log.debug('[resolver.typeNestedAggregationResolvers] nestedFields', nestedFields);
       const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
       acc[typeNestedAggsName] = {};
       if (nestedFields.type === 'nested' && nestedFields.nestedProps) {
