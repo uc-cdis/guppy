@@ -27,7 +27,7 @@ const getGQLType = (esInstance, esIndex, field, esFieldType) => {
     return `[${gqlType}]`;
   }
   if (esFieldType === 'nested') {
-    return `[Nested${firstLetterUpperCase(field)}]`;
+    return `${field}`;
   }
   return gqlType;
 };
@@ -104,7 +104,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     const esFieldType = fieldESTypeMap[fieldKey].type;
     if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
       const { properties } = fieldESTypeMap[fieldKey];
-      queueTypes.push({ type: `Nested${firstLetterUpperCase(fieldKey)}`, properties });
+      queueTypes.push({ type: `${fieldKey}`, properties });
       existingFields.add(fieldKey);
     }
   });
@@ -121,7 +121,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties);
     gqlTypes.forEach((entry) => {
       if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
-        queueTypes.push({ type: `Nested${firstLetterUpperCase(entry.field)}`, properties: entry.properties });
+        queueTypes.push({ type: `${entry.field}`, properties: entry.properties });
         existingFields.add(entry.field);
         fieldToArgs[entry.field] = getArgsByField(entry.field, entry.properties);
       }
