@@ -1,7 +1,7 @@
 # How to generate mock data and start developing in your local 
 
 ## Step.1 start elasticsearch
-
+In this directory `(/devHelper)`, do:
 ```
 docker-compose -f ./esearch.yml up -d
 ```
