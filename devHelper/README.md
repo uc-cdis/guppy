@@ -7,7 +7,16 @@ docker-compose -f ./esearch.yml up -d
 ```
 
 ## Step.2 import mock data into elasticsearch index
-Guppy has a helper function to generate mock data for a specific ES index. For example, to generate data for an ES index called `gen3-dev-subject` with document type `subject`, run the following command:
+Go to the repository's root directory and run the following command.
+
+```
+sh ./generate_data.sh
+```
+
+Doing so will automatically generate 3 ES indices (1 for `subject`, 1 for `file`, and 1 for `config`) and populate 100 records into each index.
+
+### Manually generate more mock data for a specific elasticsearch index (optional)
+In case we want more mock data, Guppy has a helper function to generate mock data for a specific ES index. For example, to generate data for an ES index called `gen3-dev-subject` with document type `subject`, run the following command:
 ```
 npm run gendata -- -i gen3-dev-subject -d subject
 ```
