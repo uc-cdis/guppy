@@ -425,12 +425,12 @@ Guppy supports performing aggregations (both text and numeric aggregations) on n
 >    }
 >```
 
-An example nested query that Guppy can perform with respect to that ESS index could be:
+An example nested query that Guppy can perform with respect to that ES index could be:
 ```
 query: {
   _aggregation: {
     subject: {
-      subject_id: {                    --> normal non-nested aggregation
+      subject_id: {                    --> regular non-nested aggregation
         histogram: {
           key
           count
