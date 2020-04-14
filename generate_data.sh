@@ -14,4 +14,4 @@ npm run gendata -- -i $SUBJECT_INDEX_NAME -d subject -n $DATA_COUNT
 npm run gendata -- -i $FILE_INDEX_NAME -d file -n $DATA_COUNT
 npm run gendata -- -i $CONFIG_INDEX_NAME -d config -n $DATA_COUNT
 
-echo "Successfully generate ${DATA_COUNT} data records"
+echo "Successfully generated ${DATA_COUNT} data records"
