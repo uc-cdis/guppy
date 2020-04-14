@@ -132,7 +132,7 @@ async function run() {
   chunks.forEach((c) => {
     client.bulk({ refresh: true, body: c }).then((res) => {
       res.body.items.forEach((item) => console.log(item));
-      console.log(`Successfully insert ${c.length / 2} items`);
+      console.log(`Successfully inserted ${c.length / 2} items`);
     }).catch((res) => {
       if (res.body.errors) {
         const erroredDocuments = [];
