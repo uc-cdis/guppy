@@ -20,8 +20,6 @@ program
 
 program.parse(process.argv);
 
-// console.log(program);
-
 const esHost = `${program.hostname}:${program.port}`;
 const esIndex = program.index;
 
@@ -118,8 +116,6 @@ async function run() {
     });
     return dCopy;
   });
-
-  console.log('sample: ', sample);
 
   const body = sample.flatMap((d) => [{
     index: {

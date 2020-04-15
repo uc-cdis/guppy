@@ -329,7 +329,6 @@ class ES {
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
       queryBody.query = getFilterObj(this, esIndex, filter);
-      log.debug('[ES] filterObj: ', queryBody.query);
     }
     queryBody.sort = getESSortBody(sort, this, esIndex);
     if (typeof size !== 'undefined') {
