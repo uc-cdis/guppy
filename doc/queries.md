@@ -399,6 +399,8 @@ Result:
 ### 4. Nested Aggregation
 :bangbang: **This section is for performing aggregations on documents which contain nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)**
 
+>The difference between Nested Aggregations and Sub-aggregations is that Nested Aggregations are performed on multi-level nested fields, while the sub-aggregations are preformed on different fields within a same level.
+
 Guppy supports performing aggregations (both text and numeric aggregations) on nested fields. For information about using nested fields inside filters, see [Nested Filter](#filter-nested)
 > Suppose the ES index has a mapping as the following:
 >```
@@ -535,8 +537,6 @@ Result:
 
 ### 5. Sub-aggregations
 :warning: **This section is for performing sub-aggregations (terms and missing aggregations) on documents. This section was incorrectly named as "Nested Aggregation" before Guppy 0.5.0 and has been corrected since then.**
-
->The difference between Nested Aggregations and Sub-aggregations is that Nested Aggregations are performed on multi-level nested fields, while the sub-aggregations are preformed on different fields within a same level.
 
 Guppy supports sub-aggregations for fields. Currently Guppy only supports two-level-sub-aggregations.
 
