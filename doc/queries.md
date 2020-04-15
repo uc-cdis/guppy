@@ -541,6 +541,7 @@ Result:
 Guppy supports sub-aggregations for fields. Currently Guppy only supports two-level-sub-aggregations.
 
 There are two types of sub-aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+
 For more information about ES terms aggregation and missing aggregation, please read: [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) and [Missing Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html)
 
 > For examples in the following sections, assume the ES index has a mapping as the following:
