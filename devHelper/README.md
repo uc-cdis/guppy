@@ -1,13 +1,13 @@
 # How to generate mock data and start developing in your local 
 
 ## Step.1 start elasticsearch
-In this directory `(/devHelper)`, do:
+Go to the repository's root directory, do:
 ```
-docker-compose -f ./esearch.yml up -d
+docker-compose -f ./devHelper/docker/esearch.yml up -d
 ```
 
 ## Step.2 import mock data into elasticsearch index
-Go to the repository's root directory and run the following command.
+In the root directory of this repo, run the following command:
 
 ```
 sh ./generate_data.sh
@@ -35,7 +35,7 @@ Here is a complete list of arguments that `npm run gendata` would take
 Also, there are some predefined values in `/genData/valueBank.json`.
 
 ## Step.3 start server for developing server side code
-Go to repo root directory, and run
+In the root directory of this repo, run:
 
 ```
 GUPPY_PORT=3000 INTERNAL_LOCAL_TEST=true npm start
@@ -45,11 +45,10 @@ The Guppy server will be hosted at [localhost:3000/graphql](http://localhost:300
 We use nodemon to start the server, so all code change will be hot applied to the running server in realtime. 
 
 ## Step.4 start storybook for developing front-end components
-Go to repo root directory, and run
+In the root directory of this repo, run:
 
 ```
 npm run storybook
 ```
 
 [Storybook](https://storybook.js.org/) will be hosted at [localhost:6006](http://localhost:6006). 
-
