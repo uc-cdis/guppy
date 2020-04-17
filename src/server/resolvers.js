@@ -2,6 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
+import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
  * This is for getting raw data, by specific es index and es type
@@ -103,7 +104,7 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, numericField,
   } = parent;
   log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
@@ -117,15 +118,22 @@ const textHistogramResolver = async (parent, args, context) => {
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
+    numericField,
   });
 };
 
 const getFieldAggregationResolverMappingsByField = (field) => {
+  let numericField = false;
+  if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
+    numericField = true;
+  }
   if (field.type !== 'nested') {
-    return ((parent) => ({ ...parent, field: field.name }));
+    return ((parent) => ({ ...parent, field: field.name, numericField }));
   }
   // if field is nested type, update nestedPath info with parent's nestedPath and pass down
-  return ((parent) => ({ ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}` }));
+  return ((parent) => ({
+    ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, numericField,
+  }));
 };
 
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {

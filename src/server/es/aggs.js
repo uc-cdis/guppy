@@ -536,6 +536,7 @@ export const textAggregation = async (
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
+    numericField,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -551,7 +552,9 @@ export const textAggregation = async (
   }
 
   let missingAlias = {};
-  if (config.esConfig.aggregationIncludeMissingData) {
+  // don't add missing alias to numeric field by default
+  // since the value of missing alias is a string
+  if (config.esConfig.aggregationIncludeMissingData && !numericField) {
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
