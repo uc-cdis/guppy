@@ -23,10 +23,13 @@ const getGQLType = (esInstance, esIndex, field, esFieldType) => {
     throw new Error(`Invalid type ${esFieldType} for field ${field} in index ${esIndex}`);
   }
   const isArrayField = esInstance.isArrayField(esIndex, field);
-  if (isArrayField) {
+  if (isArrayField && esFieldType !== 'nested') {
     return `[${gqlType}]`;
   }
   if (esFieldType === 'nested') {
+    if (isArrayField) {
+      return `[${field}]`;
+    }
     return `${field}`;
   }
   return gqlType;
