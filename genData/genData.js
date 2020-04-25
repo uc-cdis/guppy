@@ -15,6 +15,7 @@ program
   .option('-p, --port <port>', 'elasticsearch port', '9200')
   .option('-i, --index <index>', 'elasticsearch index')
   .option('-d, --doc_type <doc_type>', 'document type', null)
+  .option('-c, --config_index <config_index>', 'array config index')
   .option('-n, --number <number>', 'number of documents to generate', 500)
   .option('-r, --random', 'generate random number of document up to "number"', false);
 
@@ -22,6 +23,7 @@ program.parse(process.argv);
 
 const esHost = `${program.hostname}:${program.port}`;
 const esIndex = program.index;
+const configIndex = program.config_index;
 
 const client = new Client({ node: esHost });
 
@@ -47,6 +49,8 @@ const schema = {
   minItems: min,
   maxItems: max,
 };
+
+const arrayFields = [];
 
 const MAX_INT = (2 ** 31) - 1;
 const MIN_INT = -1 * (2 ** 31);
@@ -80,7 +84,7 @@ async function run() {
 
   if (m !== undefined) {
     Object.entries(m.properties).forEach(([key, value]) => {
-      schema.items.properties[key] = fakerType(value);
+      schema.items.properties[key] = fakerType(key, value, arrayFields);
       schema.items.required.push(key);
     });
   }
@@ -155,6 +159,25 @@ async function run() {
   });
   const { body: count } = await client.count({ index: esIndex });
   console.log(count);
+
+  if (configIndex) {
+    const data = [
+      {
+        index: {
+          _index: configIndex,
+          _type: '_doc',
+          _id: esIndex,
+        },
+      },
+      {
+        array: arrayFields,
+      },
+    ];
+    client.bulk({ refresh: true, body: data }).then((res) => {
+      res.body.items.forEach((item) => console.log(item));
+      console.log('Successfully updated config index');
+    });
+  }
 }
 
 run().catch((error) => {
