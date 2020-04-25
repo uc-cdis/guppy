@@ -5,6 +5,7 @@ function fakerType(key, value, arrayFields) {
 
   switch (value.type) {
     case 'boolean':
+      // if a field is an array, say it explicit in the name, since ES does not know
       if (key.includes('array')) {
         fieldType = {
           type: 'array', items: { type: 'boolean', properties, required }, minItems: 0, maxItems: 10,
