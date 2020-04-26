@@ -29,10 +29,19 @@ Here is a complete list of arguments that `npm run gendata` would take
 | -p, --port `<port>`          | elasticsearch port                                     | 9200              |
 | -i, --index `<index>`        | elasticsearch index                                    | undefined         |
 | -d, --doc_type `<doc_type>`  | document type                                          | undefined         |
+| -c, --config_index `<config_index>`  | array config index                             | gen3-dev-config   |
 | -n, --number `<number>`      | number of documents to generate                        | 500               |
 | -r, --random                 | generate random number of document up to `number`      | false             |
 
 Also, there are some predefined values in `/genData/valueBank.json`.
+
+:information_source: **Special handling for generating mock data for array type fields**
+
+In Elasticsearch, arrays do not require a dedicated field datatype. In other words, when defining an ES fields in the mapping object, array fields have no difference than other regular fields in terms of syntax. But GQL does differ array from other data types.
+
+So in order to add an array field to mock data, we require that field to explicitly contains the word `array` in its field name. And it is also required to put some predefined values for that array field in `/genData/valueBank.json`.
+
+Doing so will ensure the array config index be updated with names of all the array fields in an ES index. If you have array fields in any of your ES index, then it is necessary to have a correct array config index in order to successfully generate corresponding GQL schemas and resolvers. To specify the name of the array config index, pass a `-c` or `--config_index` argument to the `npm run gendata` command. The default name of test array config index is `gen3-dev-config`.
 
 ## Step.3 start server for developing server side code
 In the root directory of this repo, run:
