@@ -23,7 +23,7 @@ program.parse(process.argv);
 
 const esHost = `${program.hostname}:${program.port}`;
 const esIndex = program.index;
-const configIndex = program.config_index;
+const configIndex = program.config_index || 'gen3-dev-config';
 
 const client = new Client({ node: esHost });
 
