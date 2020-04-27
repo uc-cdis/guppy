@@ -14,6 +14,7 @@ import headerParser from './utils/headerParser';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
+import statusRouter from './status';
 
 const app = express();
 app.use(cors());
@@ -47,8 +48,13 @@ const startServer = () => {
   });
 
   // simple health check endpoint
-  app.get('/_status', (req, res) => {
-    res.send('hello guppy');
+  // eslint-disable-next-line no-unused-vars
+  app.get('/_status', statusRouter, (req, res, err, next) => {
+    if (err instanceof CodedError) {
+      res.status(err.code).send(err.msg);
+    } else {
+      res.status(500).send(err);
+    }
   });
 
   // download endpoint for fetching data directly from es

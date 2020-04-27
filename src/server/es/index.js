@@ -309,6 +309,32 @@ class ES {
   }
 
   /**
+   * Get all es indices and their alias
+   */
+  getAllESIndices() {
+    const indicesArray = this.config.indices.map((e) => e.index);
+    if (this.config.configIndex) {
+      indicesArray.push(this.config.configIndex);
+    }
+    return this.client.indices.getAlias({
+      index: indicesArray,
+    }).then((resp) => {
+      try {
+        return {
+          statusCode: resp.statusCode,
+          indices: {
+            ...resp.body,
+          },
+        };
+      } catch (err) {
+        throw new Error(err);
+      }
+    }, (err) => {
+      throw new Error(err);
+    });
+  }
+
+  /**
    * Check if the field is array
    */
   isArrayField(esIndex, field) {
