@@ -448,7 +448,7 @@ class ES {
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
-    numericField,
+    isNumericField,
   }) {
     return esAggregator.textAggregation(
       {
@@ -463,7 +463,7 @@ class ES {
         defaultAuthFilter,
         nestedAggFields,
         nestedPath,
-        numericField,
+        isNumericField,
       },
     );
   }

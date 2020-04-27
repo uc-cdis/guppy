@@ -104,7 +104,7 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, numericField,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, isNumericField,
   } = parent;
   log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
@@ -118,21 +118,21 @@ const textHistogramResolver = async (parent, args, context) => {
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
-    numericField,
+    isNumericField,
   });
 };
 
 const getFieldAggregationResolverMappingsByField = (field) => {
-  let numericField = false;
+  let isNumericField = false;
   if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
-    numericField = true;
+    isNumericField = true;
   }
   if (field.type !== 'nested') {
-    return ((parent) => ({ ...parent, field: field.name, numericField }));
+    return ((parent) => ({ ...parent, field: field.name, isNumericField }));
   }
   // if field is nested type, update nestedPath info with parent's nestedPath and pass down
   return ((parent) => ({
-    ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, numericField,
+    ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, isNumericField,
   }));
 };
 
