@@ -93,7 +93,13 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "auth_resource_path": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" },
-          "some_string_field": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "some_nested_array_field": {
+            "type": "nested",
+            "properties": {
+              "some_integer_inside_nested": { "type": "integer" },
+              "some_string_inside_nested": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } }
+            }
+          },
           "some_integer_field": { "type": "integer" },
           "some_long_field": { "type": "long" },
           "sensitive": { "type": "keyword" }
@@ -133,7 +139,13 @@ curl -iv -X PUT "${ESHOST}/${configIndexName}" \
             "number_of_shards" : 1,
             "number_of_replicas" : 0
         }
-    }
+    },
+    "mappings": {
+      "_doc": {
+        "properties": {
+          "array": { "type": "keyword" }
+        }
+      }
     }
 }
 '

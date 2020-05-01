@@ -23,11 +23,14 @@ const getGQLType = (esInstance, esIndex, field, esFieldType) => {
     throw new Error(`Invalid type ${esFieldType} for field ${field} in index ${esIndex}`);
   }
   const isArrayField = esInstance.isArrayField(esIndex, field);
-  if (isArrayField) {
+  if (isArrayField && esFieldType !== 'nested') {
     return `[${gqlType}]`;
   }
   if (esFieldType === 'nested') {
-    return `[${field}]`;
+    if (isArrayField) {
+      return `[${field}]`;
+    }
+    return `${field}`;
   }
   return gqlType;
 };
@@ -65,10 +68,12 @@ const getQuerySchemaForType = (esType) => {
 
 const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {
   const result = Object.keys(properties).map((field) => {
-    const esFieldType = properties[field].type;
+    const esFieldType = (properties[field].esType)
+      ? properties[field].esType : properties[field].type;
     const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
+
     return {
-      field, type: gqlType, esType: esFieldType, props: properties[field].properties,
+      field, type: gqlType, esType: esFieldType, properties: properties[field].properties,
     };
   });
   return result;
@@ -101,10 +106,9 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   Object.keys(fieldESTypeMap).forEach((fieldKey) => {
     const esFieldType = fieldESTypeMap[fieldKey].type;
     if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
-      const props = fieldESTypeMap[fieldKey].properties;
-      queueTypes.push({ type: fieldKey, props });
+      const { properties } = fieldESTypeMap[fieldKey];
+      queueTypes.push({ type: `${fieldKey}`, properties });
       existingFields.add(fieldKey);
-      // fieldToArgs[fieldKey] = getArgsByField(fieldKey, props);
     }
   });
 
@@ -117,12 +121,12 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
 
   while (queueTypes.length > 0) {
     const t = queueTypes.shift();
-    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.props);
+    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties);
     gqlTypes.forEach((entry) => {
       if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
-        queueTypes.push({ type: entry.field, props: entry.props });
+        queueTypes.push({ type: `${entry.field}`, properties: entry.properties });
         existingFields.add(entry.field);
-        fieldToArgs[entry.field] = getArgsByField(entry.field, entry.props);
+        fieldToArgs[entry.field] = getArgsByField(entry.field, entry.properties);
       }
     });
     sTypeSchema += `
@@ -148,9 +152,11 @@ const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
     field: entry.field,
     aggType: getAggsHistogramName(entry.type),
   }));
+  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   return `type ${esTypeObjName}Aggregation {
     _totalCount: Int
     ${fieldAggsTypeMap.map((entry) => `${getAggregationType(entry)}`).join('\n')}
+    ${fieldAggsNestedTypeMap.map((entry) => `${entry.field}: NestedHistogramFor${firstLetterUpperCase(entry.field)}`).join('\n')}
   }`;
 };
 
@@ -176,7 +182,42 @@ export const getAggregationSchema = (esConfig) => `
     }
   `;
 
+/**
+ * This is the function for getting schemas for a single nested index.
+ * Multi-level nested fields are "flattened" level by level.
+ * For each level of nested field a new type in schema is created.
+ */
+const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
+  const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
+  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
+
+  let AggsNestedTypeSchema = '';
+  while (fieldAggsNestedTypeMap.length > 0) {
+    const entry = fieldAggsNestedTypeMap.shift();
+    if (entry.field && entry.properties) {
+      AggsNestedTypeSchema += `type NestedHistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(entry.properties).map((propsKey) => {
+        const entryType = entry.properties[propsKey].type;
+        if (entryType === 'nested') {
+          fieldAggsNestedTypeMap.push({
+            field: propsKey,
+            properties: entry.properties[propsKey].properties,
+          });
+          return `
+      ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
+        }
+        return `
+    ${propsKey}: ${getAggsHistogramName(esgqlTypeMapping[entryType])}`;
+      })}
+}`;
+    }
+  }
+  log.debug('[SCHEMA] AggsNestedTypeSchema: ', AggsNestedTypeSchema);
+  return AggsNestedTypeSchema;
+};
+
 export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+
+export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg.index)).join('\n');
 
 export const getMappingSchema = (esConfig) => `
     type Mapping {
@@ -207,6 +248,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const aggregationSchema = getAggregationSchema(esConfig);
 
   const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
+
+  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
+    esInstance);
 
   const textHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
@@ -280,6 +324,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${typesSchemas}
   ${aggregationSchema}
   ${aggregationSchemasForEachType}
+  ${aggregationSchemasForEachNestedType}
   ${textHistogramSchema}
   ${numberHistogramSchema}
   ${textHistogramBucketSchema}
