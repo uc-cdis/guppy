@@ -55,9 +55,8 @@ class ConnectedFilter extends React.Component {
     )
       .then((res) => {
         if (!res.data) {
-          const msg = res.errors ? res.errors[0].message : 'error querying guppy';
-          console.error(msg);
-          return;
+          const msg = `error querying guppy${res.errors ? `: ${res.errors[0].message}` : ''}`;
+          console.error(msg); // eslint-disable-line no-console
         }
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
@@ -175,7 +174,7 @@ class ConnectedFilter extends React.Component {
         className={this.props.className}
         tabs={filterTabs}
         filterConfig={this.props.filterConfig}
-        onFilterChange={(e) => this.handleFilterChange(e)}
+        onFilterChange={e => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
     );
@@ -217,7 +216,7 @@ ConnectedFilter.defaultProps = {
   className: '',
   fieldMapping: [],
   tierAccessLimit: undefined,
-  onProcessFilterAggsData: (data) => (data),
+  onProcessFilterAggsData: data => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
   lockedTooltipMessage: '',
