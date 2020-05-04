@@ -43,7 +43,6 @@ export const updateCountsInInitialTabsOptions = (
 ) => {
   const updatedTabsOptions = {};
   try {
-    console.log('initialTabsOptions', initialTabsOptions)
     Object.keys(initialTabsOptions).forEach((field) => {
       updatedTabsOptions[field] = { histogram: [] };
       // if in tiered access mode
@@ -55,6 +54,9 @@ export const updateCountsInInitialTabsOptions = (
         return;
       }
       const { histogram } = initialTabsOptions[field];
+      if (!histogram) {
+        console.error(`Guppy did not return histogram data for filter field ${field}`); // eslint-disable-line no-console
+      }
       histogram.forEach((opt) => {
         const { key } = opt;
         if (typeof (key) !== 'string') { // key is a range, just copy the histogram

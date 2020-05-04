@@ -76,13 +76,7 @@ class GuppyWrapper extends React.Component {
         allFields: fields,
         rawDataFields,
       }, () => {
-        this.getDataFromGuppy(
-          this.state.rawDataFields,
-          undefined,
-          true,
-          this.props.guppyConfig.offset,
-          this.props.guppyConfig.size,
-        );
+        this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
       });
     });
     if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
@@ -335,8 +329,6 @@ GuppyWrapper.propTypes = {
     mainField: PropTypes.string,
     mainFieldIsNumeric: PropTypes.bool,
     aggFields: PropTypes.array,
-    size: PropTypes.number,
-    offset: PropTypes.number,
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
