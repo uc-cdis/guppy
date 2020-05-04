@@ -43,6 +43,7 @@ export const updateCountsInInitialTabsOptions = (
 ) => {
   const updatedTabsOptions = {};
   try {
+    console.log('initialTabsOptions', initialTabsOptions)
     Object.keys(initialTabsOptions).forEach((field) => {
       updatedTabsOptions[field] = { histogram: [] };
       // if in tiered access mode
