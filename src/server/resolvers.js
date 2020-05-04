@@ -2,6 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
+import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
  * This is for getting raw data, by specific es index and es type
@@ -65,7 +66,7 @@ const aggsTotalQueryResolver = (parent) => {
 const numericHistogramResolver = async (parent, args, context) => {
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath,
   } = parent;
   log.debug('[resolver.numericHistogramResolver] parent', parent);
   const {
@@ -87,6 +88,7 @@ const numericHistogramResolver = async (parent, args, context) => {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   });
 };
 
@@ -102,7 +104,7 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
-    filter, field, nestedAggFields, filterSelf, accessibility,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, isNumericField,
   } = parent;
   log.debug('[resolver.textHistogramResolver] parent', parent);
   const { authHelper } = context;
@@ -115,19 +117,34 @@ const textHistogramResolver = async (parent, args, context) => {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
+    isNumericField,
   });
 };
 
+const getFieldAggregationResolverMappingsByField = (field) => {
+  let isNumericField = false;
+  if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
+    isNumericField = true;
+  }
+  if (field.type !== 'nested') {
+    return ((parent) => ({ ...parent, field: field.name, isNumericField }));
+  }
+  // if field is nested type, update nestedPath info with parent's nestedPath and pass down
+  return ((parent) => ({
+    ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, isNumericField,
+  }));
+};
+
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
-  const fieldAggregationResolverMappings = {};
   const { fields } = esInstance.getESFields(esIndex);
+  const fieldAggregationResolverMappings = {};
   fields.forEach((field) => {
-    if (field.type !== 'nested') {
-      fieldAggregationResolverMappings[`${field.name}`] = ((parent) => ({ ...parent, field: field.name }));
-    }
+    fieldAggregationResolverMappings[`${field.name}`] = getFieldAggregationResolverMappingsByField(field);
   });
   return fieldAggregationResolverMappings;
 };
+
 
 /**
  * Tree-structured resolvers pass down arguments.
@@ -139,7 +156,7 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *     race
  *   }
  *   _aggregation {
- *     subject (filter: xx, filterSelf: xx} { ---> `typeAggsQueryResolver`
+ *     subject (filter: xx, filterSelf: xx} {  ---> `typeAggsQueryResolver`
  *       _totalCount  ---> `aggsTotalQueryResolver`
  *       gender {
  *         histogram {  ---> `textHistogramResolver`
@@ -152,6 +169,14 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *         {  ---> `numericHistogramResolver`
  *           key
  *           count
+ *         }
+ *       }
+ *       visits {  ---> `typeNestedAggregationResolver` (fall-through)
+ *         visit_label {
+ *           histogram {  ---> `textHistogramResolver`
+ *             key
+ *             count
+ *           }
  *         }
  *       }
  *     }
@@ -188,6 +213,27 @@ const getResolver = (esConfig, esInstance) => {
     return acc;
   }, {});
 
+  const typeNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
+    const { fields } = esInstance.getESFields(cfg.index);
+    const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
+
+    // similar level by level "flatten" logic as for schema
+    while (nestedFieldsArray.length > 0) {
+      const nestedFields = nestedFieldsArray.shift();
+      const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
+      acc[typeNestedAggsName] = {};
+      if (nestedFields.type === 'nested' && nestedFields.nestedProps) {
+        nestedFields.nestedProps.forEach((props) => {
+          if (props.type === 'nested') {
+            nestedFieldsArray.push(props);
+          }
+          acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
+        });
+      }
+    }
+    return acc;
+  }, {});
+
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
     acc[cfg.type] = () => (esInstance.getESFields(cfg.index).fields.map((f) => f.name));
     return acc;
@@ -204,6 +250,7 @@ const getResolver = (esConfig, esInstance) => {
       ...typeAggregationResolverMappings,
     },
     ...typeAggregationResolvers,
+    ...typeNestedAggregationResolvers,
     HistogramForNumber: {
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,

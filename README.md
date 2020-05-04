@@ -8,6 +8,9 @@ Please see [this doc](https://github.com/uc-cdis/guppy/blob/master/doc/queries.m
 
 Run `npm start` to start server at port 80.
 
+### Local Deployment and Development:
+Guppy has some helper script to help a developer to set up a local ES service using Docker, generate some example ES indices for testing, and pop mock data into these example ES indices. Please refer to [the DEV Helper doc](https://github.com/uc-cdis/guppy/blob/master/devHelper/README.md) for more information.
+
 ### Configurations:
 Before launch, we need to write config and tell Guppy which elasticsearch indices and which auth control field to use.
 You could put following as your config files:
@@ -40,7 +43,7 @@ export GUPPY_CONFIG_FILEPATH=./example_config.json
 npm start
 ```
 
-#### Authorization
+### Authorization:
 Guppy connects Arborist for authorization.
 The `auth_filter_field` item in your config file is the field used for authorization.
 You could set the endpoint by:
@@ -54,7 +57,7 @@ skip all authorization steps. But if you just want to mock your own authorizatio
 behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. Please
 look into `/src/server/auth/utils.js` for more details.
 
-#### Tier access
+### Tiered Access:
 Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`:
 - `private` by default: only allows access to authorized resources
 - `regular`: allows all kind of aggregation (with limitation for unauthorized resources), but forbid access to raw data without authorization
@@ -94,7 +97,7 @@ export TIER_ACCESS_LIMIT=100
 npm start
 ```
 
-> ##### Tier Access Sensitive Record Exclusion
+> #### Tier Access Sensitive Record Exclusion
 > It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
 > The purpose of this is to "hide" information about certain sensitive resources, essentially making this an escape hatch from Tiered Access.
 > Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
@@ -104,5 +107,5 @@ npm start
 >
 > (E.g., `"tier_access_sensitive_record_exclusion_field": "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
 
-#### Download endpoint
+### Download Endpoint:
 Guppy has another special endpoint `/download` for just fetching raw data from elasticsearch. please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for more details.

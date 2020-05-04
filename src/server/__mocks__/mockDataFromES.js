@@ -4,6 +4,7 @@ import mockTextAggs from './mockESData/mockTextAggs';
 import mockNumericAggsGlobalStats from './mockESData/mockNumericAggsGlobalStats';
 import mockHistogramFixWidth from './mockESData/mockNumericHistogramFixWidth';
 import mockHistogramFixBinCount from './mockESData/mockNumericHistogramFixBinCount';
+import mockNestedTermsAndMissingAggs from './mockESData/mockNestedTermsAndMissingAggs';
 import mockNestedAggs from './mockESData/mockNestedAggs';
 
 const mockPing = () => {
@@ -203,7 +204,7 @@ const mockResourcePath = () => {
 const mockArborist = () => {
   nock(config.arboristEndpoint)
     .persist()
-    .post('/auth/resources')
+    .get('/auth/resources')
     .reply(200, {
       resources: [
         'internal-project-1',
@@ -350,6 +351,7 @@ const setup = () => {
   mockNumericAggsGlobalStats();
   mockHistogramFixWidth();
   mockHistogramFixBinCount();
+  mockNestedTermsAndMissingAggs();
   mockNestedAggs();
 };
 

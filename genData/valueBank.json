@@ -2,10 +2,71 @@
     "gender": ["male", "female", "unknown"],
     "ethnicity": ["American Indian", "Pacific Islander", "Black", "Multi-racial", "White", "Haspanic" ],
     "race": ["white", "black", "hispanic", "asian", "mixed", "not reported" ],
-    "vital": ["Alive", "Dead", "no data" ],
+    "vital_status": ["Alive", "Dead", "no data" ],
     "file_type": ["mRNA Array", "Unaligned Reads", "Lipdomic MS", "Protionic MS", "1Gs Ribosomes", "Unknown" ],
     "file_format": ["BEM", "BAM", "BED", "CSV", "FASTQ", "RAW", "TAR", "TSV", "TXT", "IDAT" ],
     "auth_resource_path": ["/programs/jnkns/projects/jenkins", "/programs/DEV/projects/test", "/programs/external/projects/test"],
     "sensitive": [ "true", "false" ],
-    "project": ["jnkns-jenkins", "DEV-test", "external-test" ]
+    "study": ["study_1", "study_2", "study_3"],
+    "file_id": ["file_id_1", "file_id_2", "file_id_3"],
+    "subject_id": ["subject_id_1", "subject_id_2", "subject_id_3"],
+    "project": ["jnkns-jenkins", "DEV-test", "external-test" ],
+    "visits": [
+        {
+            "days_to_visit": 1,
+            "visit_label": "vst_lbl_1",
+            "follow_ups": {
+                "days_to_follow_up": 1,
+                "follow_up_label": "flup_lbl_1"
+            }
+        },
+        {
+            "days_to_visit": 2,
+            "visit_label": "vst_lbl_2",
+            "follow_ups": {
+                "days_to_follow_up": 2,
+                "follow_up_label": "flup_lbl_2"
+            }
+        },
+        {
+            "days_to_visit": 3,
+            "visit_label": "vst_lbl_3",
+            "follow_ups": {
+                "days_to_follow_up": 3,
+                "follow_up_label": "flup_lbl_3"
+            }
+        }
+    ],
+    "some_nested_array_field": [
+        [
+            {
+              "some_integer_inside_nested": 1,
+              "some_string_inside_nested": "first"
+            },
+            {
+                "some_integer_inside_nested": 2,
+                "some_string_inside_nested": "second"
+              }
+        ],
+        [
+            {
+              "some_integer_inside_nested": 3,
+              "some_string_inside_nested": "third"
+            },
+            {
+                "some_integer_inside_nested": 4,
+                "some_string_inside_nested": "forth"
+              }
+        ],
+        [
+            {
+              "some_integer_inside_nested": 5,
+              "some_string_inside_nested": "fifth"
+            },
+            {
+                "some_integer_inside_nested": 6,
+                "some_string_inside_nested": "sixth"
+              }
+        ]
+    ]
 }
