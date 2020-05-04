@@ -55,7 +55,7 @@ class ConnectedFilter extends React.Component {
     )
       .then((res) => {
         if (!res.data) {
-          const msg = `error querying guppy${res.errors ? `: ${res.errors[0].message}` : ''}`;
+          const msg = `error querying guppy${res.errors && res.errors.length > 0 ? `: ${res.errors[0].message}` : ''}`;
           console.error(msg); // eslint-disable-line no-console
         }
         this.handleReceiveNewAggsData(
