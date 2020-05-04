@@ -87,7 +87,7 @@ export const updateCountsInInitialTabsOptions = (
     /* eslint-disable no-console */
     // hopefully we won't get here but in case of
     // out-of-index error or obj undefined error
-    console.err('error when processing filter data', err);
+    console.error('error when processing filter data', err);
     console.trace();
     /* eslint-enable no-console */
   }

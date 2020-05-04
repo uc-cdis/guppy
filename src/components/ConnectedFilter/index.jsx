@@ -55,8 +55,9 @@ class ConnectedFilter extends React.Component {
     )
       .then((res) => {
         if (!res.data) {
-          console.log('ConnectedFilter props', this.props);
-          console.log('ConnectedFilter res', res);
+          const msg = res.errors ? res.errors[0].message : 'error querying guppy';
+          console.error(msg);
+          return;
         }
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
