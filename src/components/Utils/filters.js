@@ -54,6 +54,9 @@ export const updateCountsInInitialTabsOptions = (
         return;
       }
       const { histogram } = initialTabsOptions[field];
+      if (!histogram) {
+        console.error(`Guppy did not return histogram data for filter field ${field}`); // eslint-disable-line no-console
+      }
       histogram.forEach((opt) => {
         const { key } = opt;
         if (typeof (key) !== 'string') { // key is a range, just copy the histogram
@@ -87,7 +90,7 @@ export const updateCountsInInitialTabsOptions = (
     /* eslint-disable no-console */
     // hopefully we won't get here but in case of
     // out-of-index error or obj undefined error
-    console.err('error when processing filter data', err);
+    console.error('error when processing filter data: ', err);
     console.trace();
     /* eslint-enable no-console */
   }
