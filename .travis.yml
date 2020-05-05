@@ -5,11 +5,15 @@ node_js:
   - "10"
 
 services:
-    - docker
+  - docker
+
+before_install:
+  - COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >versions.js
+  - VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>versions.js
 
 install:
-    - npm install
+  - npm install
 
 script:
-    - npm run eslint
-    - npm run test
+  - npm run eslint
+  - npm run test
