@@ -276,7 +276,7 @@ class GuppyWrapper extends React.Component {
       filter,
       this.state.accessibility,
     )
-      .then(count => downloadDataFromGuppy(
+      .then((count) => downloadDataFromGuppy(
         this.props.guppyConfig.path,
         type,
         count,
@@ -295,7 +295,7 @@ class GuppyWrapper extends React.Component {
     return (
       <>
         {
-          React.Children.map(this.props.children, child => React.cloneElement(child, {
+          React.Children.map(this.props.children, (child) => React.cloneElement(child, {
             // pass data to children
             aggsData: this.state.aggsData,
             aggsDataIsLoading: this.state.gettingDataFromGuppy,
