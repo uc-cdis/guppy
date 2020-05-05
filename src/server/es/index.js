@@ -327,16 +327,17 @@ class ES {
       try {
         return {
           statusCode: resp.statusCode,
+          warnings: resp.warnings,
           indices: {
             ...resp.body,
           },
         };
       } catch (err) {
-        throw new Error(err);
+        return {
+          ...err,
+        };
       }
-    }, (err) => {
-      throw new Error(err);
-    });
+    }, (err) => err);
   }
 
   /**
