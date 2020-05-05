@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('array.prototype.flatmap').shim();
 
 const program = require('commander');
@@ -14,15 +15,15 @@ program
   .option('-p, --port <port>', 'elasticsearch port', '9200')
   .option('-i, --index <index>', 'elasticsearch index')
   .option('-d, --doc_type <doc_type>', 'document type', null)
+  .option('-c, --config_index <config_index>', 'array config index')
   .option('-n, --number <number>', 'number of documents to generate', 500)
   .option('-r, --random', 'generate random number of document up to "number"', false);
 
 program.parse(process.argv);
 
-// console.log(program);
-
 const esHost = `${program.hostname}:${program.port}`;
 const esIndex = program.index;
+const configIndex = program.config_index || 'gen3-dev-config';
 
 const client = new Client({ node: esHost });
 
@@ -49,7 +50,28 @@ const schema = {
   maxItems: max,
 };
 
-const getRandomInt = (maxValue) => Math.floor(Math.random() * Math.floor(maxValue));
+const arrayFields = [];
+
+const MAX_INT = (2 ** 31) - 1;
+const MIN_INT = -1 * (2 ** 31);
+const MAX_LONG = (2 ** 63) - 1;
+const MIN_LONG = -1 * (2 ** 63);
+
+const getRandomNumber = (
+  minValue = 0,
+  maxValue = 1,
+) => Math.random() * (maxValue - minValue + 1) + minValue;
+
+const getRandomInt = (
+  minValue = 0,
+  maxValue = 1,
+) => {
+  min = Math.ceil(minValue);
+  max = Math.floor(maxValue);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const getRandomString = () => (Math.random() + 1).toString(36).substring(7);
 
 async function run() {
   const mapping = await client.indices.getMapping({ index: esIndex });
@@ -62,7 +84,7 @@ async function run() {
 
   if (m !== undefined) {
     Object.entries(m.properties).forEach(([key, value]) => {
-      schema.items.properties[key] = fakerType(value);
+      schema.items.properties[key] = fakerType(key, value, arrayFields);
       schema.items.required.push(key);
     });
   }
@@ -70,12 +92,33 @@ async function run() {
   let sample = await resolve(schema);
 
   const fieldValues = JSON.parse(readFileSync('./genData/valueBank.json').toString());
-  Object.entries(fieldValues).forEach(([k, values]) => {
-    sample = sample.map((d) => {
-      const id = getRandomInt(values.length - 1);
-      // eslint-disable-next-line no-param-reassign
-      d[k] = fieldValues[k][id]; return d;
+  sample = sample.map((d) => {
+    const dCopy = { ...d };
+    Object.keys(dCopy).forEach((key) => {
+      if (fieldValues[key]) {
+        const index = getRandomInt(0, fieldValues[key].length - 1);
+        dCopy[key] = fieldValues[key][index];
+      } else {
+        switch (schema.items.properties[key].rawType) {
+          case 'integer':
+            dCopy[key] = getRandomInt(MIN_INT, MAX_INT);
+            break;
+          case 'long':
+            dCopy[key] = getRandomInt(MIN_LONG, MAX_LONG);
+            break;
+          case 'float':
+            dCopy[key] = getRandomNumber(MIN_INT, MAX_INT);
+            break;
+          case 'text':
+          case 'keyword':
+            dCopy[key] = getRandomString();
+            break;
+          default:
+            break;
+        }
+      }
     });
+    return dCopy;
   });
 
   const body = sample.flatMap((d) => [{
@@ -89,7 +132,7 @@ async function run() {
   chunks.forEach((c) => {
     client.bulk({ refresh: true, body: c }).then((res) => {
       res.body.items.forEach((item) => console.log(item));
-      console.log(`Successfully insert ${c.length} items`);
+      console.log(`Successfully inserted ${c.length / 2} items`);
     }).catch((res) => {
       if (res.body.errors) {
         const erroredDocuments = [];
@@ -116,6 +159,25 @@ async function run() {
   });
   const { body: count } = await client.count({ index: esIndex });
   console.log(count);
+
+  if (configIndex) {
+    const data = [
+      {
+        index: {
+          _index: configIndex,
+          _type: '_doc',
+          _id: esIndex,
+        },
+      },
+      {
+        array: arrayFields,
+      },
+    ];
+    client.bulk({ refresh: true, body: data }).then((res) => {
+      res.body.items.forEach((item) => console.log(item));
+      console.log('Successfully updated config index');
+    });
+  }
 }
 
 run().catch((error) => {

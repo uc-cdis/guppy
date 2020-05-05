@@ -7,10 +7,12 @@ Table of Contents
    - [Text Aggregation](#aggs-text)
    - [Numeric Aggregation](#aggs-numeric)
    - [Nested Aggregation](#aggs-nested)
+   - [Sub-aggregations](#aggs-sub)
 - [Filters](#filter)
    - [Basic Filter Unit](#filter-unit)
    - [Text Search Unit in Filter](#filter-search)
    - [Combined Filters](#filter-comb)
+   - [Nested Filter](#filter-nested)
 - [Some other queries and arguments](#other)
 
 <a name="query"></a>
@@ -395,11 +397,166 @@ Result:
 <a name="aggs-nested"></a>
 
 ### 4. Nested Aggregation
-Guppy supports nested aggregations (sub-aggregations) for fields. Currently Guppy only supports two-level-sub-aggregations.
+:bangbang: **This section is for performing aggregations on documents which contain nested fields. For information about Guppy supporting nested sub-aggregations such as terms aggregation and missing aggregation, please refer to [Sub-aggregations](#aggs-sub)**
 
-There are two types of nested aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+>The difference between Nested Aggregations and Sub-aggregations is that Nested Aggregations are performed on multi-level nested fields, while the sub-aggregations are performed on different fields within a same level.
 
-#### 4.1. Terms Aggregation
+Guppy supports performing aggregations (both text and numeric aggregations) on nested fields. For information about using nested fields inside filters, see [Nested Filter](#filter-nested)
+> Suppose the ES index has a mapping as the following:
+>```
+>   "mappings": {
+>     "subject": {
+>       "properties": {
+>         "subject_id": { "type": "keyword" },
+>         "visits": {
+>           "type": "nested",
+>           "properties": {
+>             "days_to_visit": { "type": "integer" },
+>             "visit_label": { "type": "keyword" },
+>             "follow_ups": {
+>               "type": "nested",
+>               "properties": {
+>                 "days_to_follow_up": { "type": "integer" },
+>                 "follow_up_label": { "type": "keyword" },
+>               }
+>             }
+>           }
+>         },
+>       }
+>     }
+>    }
+>```
+
+An example nested query that Guppy can perform with respect to that ES index could be:
+```
+query: {
+  _aggregation: {
+    subject: {
+      subject_id: {                    --> regular non-nested aggregation
+        histogram: {
+          key
+          count
+        }
+      }
+      visits: {
+        visit_label: {                 --> one-level nested text aggregation
+          histogram: {
+            key
+            count
+          }
+        }
+        follow_ups: {
+          days_to_follow_up: {         --> two-level nested numeric aggregation
+            histogram(rangeStep: 1) {
+              key
+              count
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Result:
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "subject_id": {
+          "histogram": [
+            {
+              "key": "subject_id_1",
+              "count": 24
+            },
+            {
+              "key": "subject_id_2",
+              "count": 24
+            },
+            {
+              "key": "subject_id_3",
+              "count": 21
+            }
+          ]
+        },
+        "visits": {
+          "visit_label": {
+            "histogram": [
+              {
+                "key": "vst_lbl_3",
+                "count": 29
+              },
+              {
+                "key": "vst_lbl_1",
+                "count": 21
+              },
+              {
+                "key": "vst_lbl_2",
+                "count": 19
+              }
+            ]
+          },
+          "follow_ups": {
+            "days_to_follow_up": {
+              "histogram": [
+                {
+                  "key": [
+                    1,
+                    2
+                  ],
+                  "count": 21
+                },
+                {
+                  "key": [
+                    2,
+                    3
+                  ],
+                  "count": 19
+                },
+                {
+                  "key": [
+                    3,
+                    4
+                  ],
+                  "count": 29
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+
+<a name="aggs-sub"></a>
+
+### 5. Sub-aggregations
+:warning: **This section is for performing sub-aggregations (terms and missing aggregations) on documents. This section was incorrectly named as "Nested Aggregation" before Guppy 0.5.0 and has been corrected since then.**
+
+Guppy supports sub-aggregations for fields. Currently Guppy only supports two-level-sub-aggregations.
+
+There are two types of sub-aggregations that is supported by Guppy: terms aggregation and missing aggregation, user can mix-and-match the using of both aggregations.
+
+For more information about ES terms aggregation and missing aggregation, please read: [Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html) and [Missing Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-missing-aggregation.html)
+
+> For examples in the following sections, assume the ES index has a mapping as the following:
+>```
+>   "mappings": {
+>     "subject": {
+>       "properties": {
+>         "project": { "type": "keyword" },
+>         "gender": { "type": "keyword" },
+>         },
+>       }
+>    }
+>```
+
+#### 5.1. Terms Aggregation
 Terms aggregation requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, what is the distribution of each element from the array of fields in the sub-aggregations.
 
 Results are wrapped by keywords `field` and also `key` and `count` for that `field`, example:
@@ -521,7 +678,7 @@ Result:
 }
 ```
 
-#### 4.2. Missing Aggregation
+#### 5.2. Missing Aggregation
 Missing aggregation also requires a single `field` for parent aggregation and an array of fields for the nested sub-aggregations. The sub-aggregations will be computed for the buckets which their parent aggregation generates. It is intended to show for each of the `key` of the single `field` in the parent aggregation, how many elements from the array of fields in the sub-aggregation are missing from it.
 
 Results are wrapped by keywords `field` and `count`, example:
@@ -789,7 +946,7 @@ In future Guppy will support `SQL` like syntax for filter, like `
 {"filter": "(race = 'hispanic' OR race='asian') AND (file_count >= 15 AND file_count <= 75) AND project = 'Proj-1' AND gender = 'female'"}
 `.
 
-<a name="other"></a>
+<a name="filter-nested"></a>
 
 ### Nested filter
 Guppy now supports query on nested ElasticSearch schema. The way to query and filter the nested index is similar to the ES query.
@@ -833,6 +990,7 @@ Assuming that there is `File` node nested inside `subject`. The nested query wil
 ElasticSearch only support the nested filter on the level of document for returning data. It means that the filter `file_count >=15` and `file_count<=75` will return the whole document having a `file_count` in the range of `[15, 75]`.
 The returned data will not filter the nested `file_count`(s) that are out of that range for that document.
 
+<a name="other"></a>
 ## Some other queries and arguments 
 
 ### Mapping query
@@ -1086,4 +1244,3 @@ Result:
   }
 }
 ```
-
