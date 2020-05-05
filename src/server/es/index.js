@@ -8,7 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
-import { fromFieldsToSource } from '../utils/utils';
+import { fromFieldsToSource, buildNestedField } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -58,7 +58,7 @@ class ES {
       type: esType,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
-      log.error('[ES.query] error during querying');
+      log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
     });
   }
@@ -283,7 +283,12 @@ class ES {
         index: cfg.index,
         type: cfg.type,
         fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
-          const r = { name: key, type: value.type };
+          let r;
+          if (value.type !== 'nested') {
+            r = { name: key, type: value.type };
+          } else {
+            r = buildNestedField(key, value);
+          }
           return r;
         }),
       };
@@ -435,6 +440,7 @@ class ES {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) {
     return esAggregator.numericAggregation(
       {
@@ -454,6 +460,7 @@ class ES {
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
       },
     );
   }
@@ -466,6 +473,8 @@ class ES {
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
+    isNumericField,
   }) {
     return esAggregator.textAggregation(
       {
@@ -479,6 +488,8 @@ class ES {
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
+        isNumericField,
       },
     );
   }

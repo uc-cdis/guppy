@@ -13,7 +13,7 @@ storiesOf('Guppy Wrapper', module)
       <GuppyWrapper
         filterConfig={filterConfig}
         guppyConfig={guppyConfig}
-        rawDataFields={tableConfig.map(e => e.field)}
+        rawDataFields={tableConfig.map((e) => e.field)}
         onFilterChange={action('wrapper receive filter change')}
         onReceiveNewAggsData={action('wrapper receive aggs data')}
       >

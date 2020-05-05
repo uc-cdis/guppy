@@ -3,6 +3,7 @@ import getFilterObj from './filter';
 import {
   AGGS_GLOBAL_STATS_NAME,
   AGGS_ITEM_STATS_NAME,
+  AGGS_NESTED_QUERY_NAME,
   AGGS_QUERY_NAME,
 } from './const';
 import config from '../config';
@@ -133,6 +134,9 @@ export const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  * @returns {min, max, sum, count, avg, key}
  */
 export const numericGlobalStats = async (
@@ -149,6 +153,7 @@ export const numericGlobalStats = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
@@ -159,7 +164,9 @@ export const numericGlobalStats = async (
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   let aggsObj = {
     [AGGS_GLOBAL_STATS_NAME]: {
-      stats: { field },
+      stats: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+      },
     },
   };
   if (nestedAggFields && nestedAggFields.termsFields) {
@@ -168,9 +175,25 @@ export const numericGlobalStats = async (
   if (nestedAggFields && nestedAggFields.missingFields) {
     aggsObj = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj);
   }
-  queryBody.aggs = aggsObj;
+  if (nestedPath) {
+    queryBody.aggs = {
+      [AGGS_NESTED_QUERY_NAME]: {
+        nested: {
+          path: nestedPath,
+        },
+        aggs: {
+          ...aggsObj,
+        },
+      },
+    };
+  } else {
+    queryBody.aggs = aggsObj;
+  }
+
   const result = await esInstance.query(esIndex, esType, queryBody);
-  let resultStats = result.aggregations[AGGS_GLOBAL_STATS_NAME];
+  let resultStats = (nestedPath)
+    ? result.aggregations[AGGS_NESTED_QUERY_NAME][AGGS_GLOBAL_STATS_NAME]
+    : result.aggregations[AGGS_GLOBAL_STATS_NAME];
   const range = [
     typeof rangeStart === 'undefined' ? resultStats.min : rangeStart,
     typeof rangeEnd === 'undefined' ? resultStats.max : rangeEnd,
@@ -196,6 +219,9 @@ export const numericGlobalStats = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericHistogramWithFixedRangeStep = async (
   {
@@ -212,6 +238,7 @@ export const numericHistogramWithFixedRangeStep = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
@@ -228,18 +255,20 @@ export const numericHistogramWithFixedRangeStep = async (
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
     [AGGS_GLOBAL_STATS_NAME]: {
-      stats: { field },
+      stats: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+      },
     },
   };
   aggsObj[AGGS_QUERY_NAME] = {
     histogram: {
-      field,
+      field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
       interval: rangeStep,
     },
     aggs: {
       [AGGS_ITEM_STATS_NAME]: {
         stats: {
-          field,
+          field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
         },
       },
     },
@@ -263,11 +292,29 @@ export const numericHistogramWithFixedRangeStep = async (
       aggsObj[AGGS_QUERY_NAME].aggs,
     );
   }
-  queryBody.aggs = aggsObj;
+
+  if (nestedPath) {
+    queryBody.aggs = {
+      [AGGS_NESTED_QUERY_NAME]: {
+        nested: {
+          path: nestedPath,
+        },
+        aggs: {
+          ...aggsObj,
+        },
+      },
+    };
+  } else {
+    queryBody.aggs = aggsObj;
+  }
+
   const result = await esInstance.query(esIndex, esType, queryBody);
   const finalResults = [];
   let resultObj;
-  result.aggregations[AGGS_QUERY_NAME].buckets.forEach((item) => {
+  const resultBuckets = (nestedPath)
+    ? result.aggregations[AGGS_NESTED_QUERY_NAME][AGGS_QUERY_NAME].buckets
+    : result.aggregations[AGGS_QUERY_NAME].buckets;
+  resultBuckets.forEach((item) => {
     resultObj = processResultsForNestedAgg(nestedAggFields, item, resultObj);
     finalResults.push({
       key: [item.key, item.key + rangeStep],
@@ -291,6 +338,9 @@ export const numericHistogramWithFixedRangeStep = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericHistogramWithFixedBinCount = async (
   {
@@ -307,6 +357,7 @@ export const numericHistogramWithFixedBinCount = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   }) => {
   const globalStats = await numericGlobalStats(
     {
@@ -322,6 +373,7 @@ export const numericHistogramWithFixedBinCount = async (
       filterSelf,
       defaultAuthFilter,
       nestedAggFields,
+      nestedPath,
     },
   );
   const { min, max } = globalStats;
@@ -343,6 +395,7 @@ export const numericHistogramWithFixedBinCount = async (
       filterSelf,
       defaultAuthFilter,
       nestedAggFields,
+      nestedPath,
     },
   );
 };
@@ -360,6 +413,9 @@ export const numericHistogramWithFixedBinCount = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const numericAggregation = async (
   {
@@ -377,6 +433,7 @@ export const numericAggregation = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
   },
 ) => {
   if (rangeStep <= 0) {
@@ -409,6 +466,7 @@ export const numericAggregation = async (
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
       },
     );
   }
@@ -428,6 +486,7 @@ export const numericAggregation = async (
         filterSelf,
         defaultAuthFilter,
         nestedAggFields,
+        nestedPath,
       },
     );
   }
@@ -445,6 +504,7 @@ export const numericAggregation = async (
       filterSelf,
       defaultAuthFilter,
       nestedAggFields,
+      nestedPath,
     },
   );
   return [result];
@@ -459,6 +519,9 @@ export const numericAggregation = async (
  * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
  * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
  *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
  */
 export const textAggregation = async (
   {
@@ -472,6 +535,8 @@ export const textAggregation = async (
     filterSelf,
     defaultAuthFilter,
     nestedAggFields,
+    nestedPath,
+    isNumericField,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -487,11 +552,20 @@ export const textAggregation = async (
   }
 
   let missingAlias = {};
-  if (config.esConfig.aggregationIncludeMissingData) {
+  // don't add missing alias to numeric field by default
+  // since the value of missing alias is a string
+  if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
+  let aggsNestedName;
+  let fieldNestedName;
+  if (nestedPath) {
+    aggsNestedName = `${field}NestedAggs`;
+    fieldNestedName = `${nestedPath}.${field}`;
+  }
+
   if (nestedAggFields && nestedAggFields.termsFields) {
     missingAlias = {};
     aggsObj.aggs = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj.aggs);
@@ -502,43 +576,75 @@ export const textAggregation = async (
     aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
   }
 
-  queryBody.aggs = {
-    [aggsName]: {
-      composite: {
-        sources: [
-          {
-            [field]: {
-              terms: {
-                field,
-                ...missingAlias,
+  // build up ES query if is nested aggregation
+  if (aggsNestedName) {
+    queryBody.aggs = {
+      [aggsNestedName]: {
+        nested: {
+          path: nestedPath,
+        },
+        aggs: {
+          [aggsName]: {
+            composite: {
+              sources: [
+                {
+                  [fieldNestedName]: {
+                    terms: {
+                      field: fieldNestedName,
+                      ...missingAlias,
+                    },
+                  },
+                },
+              ],
+              size: PAGE_SIZE,
+            },
+            ...aggsObj,
+          },
+        },
+      },
+    };
+  } else {
+    queryBody.aggs = {
+      [aggsName]: {
+        composite: {
+          sources: [
+            {
+              [field]: {
+                terms: {
+                  field,
+                  ...missingAlias,
+                },
               },
             },
-          },
-        ],
-        size: PAGE_SIZE,
+          ],
+          size: PAGE_SIZE,
+        },
+        ...aggsObj,
       },
-      ...aggsObj,
-    },
-  };
+    };
+  }
   let resultSize;
   let finalResults = [];
   /* eslint-disable */
   do {
+    // parse ES query result based on whether is doing nested aggregation or not (if `aggsNestedName` is defined)
     const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
-        
-    result.aggregations[aggsName].buckets.forEach((item) => {
+
+    const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+
+    resultBuckets.forEach((item) => {
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
       finalResults.push({
-        key: item.key[field],
+        key: (fieldNestedName)? item.key[fieldNestedName] : item.key[field],
         count: item.doc_count,
         ...resultObj
       });
       resultSize += 1;
     });
-    const afterKey = result.aggregations[aggsName].after_key;
+    const afterKey = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].after_key : result.aggregations[aggsName].after_key;
     if (typeof afterKey === 'undefined') break;
-    queryBody.aggs[aggsName].composite.after = afterKey;
+    (aggsNestedName) ? queryBody.aggs[aggsNestedName].aggs[aggsName].composite.after = afterKey : queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);
   /* eslint-enable */
 

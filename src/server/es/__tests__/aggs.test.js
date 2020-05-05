@@ -863,7 +863,7 @@ describe('could aggregate for numeric fields, fixed bin count', () => {
   });
 });
 
-// see /src/server/__mocks__/mockESData/mockNestedAggs.js for mock results
+// see /src/server/__mocks__/mockESData/mockNestedTermsAndMissingAggs.js for mock results
 describe('could only aggregate to find missing fields (both existing and non-existing fields)', () => {
   test('nested missing-only aggregation', async () => {
     await esInstance.initialize();
@@ -1094,6 +1094,106 @@ describe('could only aggregate to find missing fields (both existing and non-exi
             ],
           },
         ],
+      },
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+});
+
+// see /src/server/__mocks__/mockESData/mockNestedAggs.js for mock results
+describe('could aggregate for one-level nested text fields', () => {
+  test('one-level nested text aggregation', async () => {
+    await esInstance.initialize();
+    const field = 'visit_label';
+    const nestedPath = 'visits';
+    const result = await textAggregation(
+      { esInstance, esIndex, esType },
+      { field, nestedPath },
+    );
+    const expectedResults = [
+      {
+        key: 'vst_lbl_3',
+        count: 29,
+      },
+      {
+        key: 'vst_lbl_1',
+        count: 21,
+      },
+      {
+        key: 'vst_lbl_2',
+        count: 19,
+      },
+      {
+        key: 'no data',
+        count: 40,
+      }, // missing data always at end
+    ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('two-level nested numeric aggregation -- global stats', async () => {
+    await esInstance.initialize();
+    const field = 'days_to_follow_up';
+    const nestedPath = 'visits.follow_ups';
+    const result = await numericGlobalStats(
+      { esInstance, esIndex, esType },
+      { field, nestedPath },
+    );
+    const expectedResults = {
+      key: [
+        1,
+        3,
+      ],
+      count: 69,
+      min: 1.0,
+      max: 3.0,
+      avg: 2.1159420289855073,
+      sum: 146.0,
+    };
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('two-level nested numeric aggregation -- fixed bin width', async () => {
+    await esInstance.initialize();
+    const field = 'days_to_follow_up';
+    const nestedPath = 'visits.follow_ups';
+    const result = await numericHistogramWithFixedRangeStep(
+      { esInstance, esIndex, esType },
+      { field, rangeStep: 1, nestedPath },
+    );
+    const expectedResults = [
+      {
+        key: [
+          1,
+          2,
+        ],
+        count: 21,
+        max: 1,
+        min: 1,
+        sum: 21,
+        avg: 1,
+      },
+      {
+        key: [
+          2,
+          3,
+        ],
+        count: 19,
+        max: 2,
+        min: 2,
+        sum: 38,
+        avg: 2,
+      },
+      {
+        key: [
+          3,
+          4,
+        ],
+        count: 29,
+        max: 3,
+        min: 3,
+        sum: 87,
+        avg: 3,
       },
     ];
     expect(result).toEqual(expectedResults);

@@ -76,3 +76,25 @@ export const fromFieldsToSource = (parsedInfo) => {
   }
   return fields;
 };
+
+export const buildNestedField = (key, value) => {
+  let builtObj = {};
+  if (value.type === 'nested') {
+    const nestedProps = [];
+    Object.keys(value.properties).forEach((propsKey) => {
+      nestedProps.push(buildNestedField(propsKey, value.properties[propsKey]));
+    });
+    builtObj = {
+      name: key,
+      type: value.type,
+      nestedProps,
+    };
+  } else {
+    builtObj = {
+      name: key,
+      type: value.type,
+    };
+  }
+
+  return builtObj;
+};
