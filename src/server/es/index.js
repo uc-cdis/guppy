@@ -333,11 +333,11 @@ class ES {
           },
         };
       } catch (err) {
-        return {
-          ...err,
-        };
+        throw new Error(err);
       }
-    }, (err) => err);
+    }, (err) => {
+      throw new Error(err);
+    });
   }
 
   /**
