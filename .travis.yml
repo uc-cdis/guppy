@@ -8,8 +8,8 @@ services:
   - docker
 
 before_install:
-  - COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >version.js
-  - VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>version.js
+  - COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js
+  - VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js
 
 install:
   - npm install

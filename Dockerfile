@@ -16,8 +16,8 @@ RUN apt-get update \
 COPY . /guppy/
 WORKDIR /guppy
 
-RUN COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >version.js
-RUN VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>version.js
+RUN COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js
+RUN VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js
 RUN /bin/rm -rf .git
 RUN /bin/rm -rf node_modules
 
