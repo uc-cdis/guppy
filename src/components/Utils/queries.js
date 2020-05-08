@@ -3,13 +3,23 @@ import fetch from 'isomorphic-fetch';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
-const histogramQueryStrForEachField = (field) => (`
-  ${field} {
-    histogram {
-      key
-      count
-    }
+const histogramQueryStrForEachField = (field) => {
+  const splittedFieldArray = field.split('.');
+  const splittedField = splittedFieldArray.shift();
+  if (splittedFieldArray.length === 0) {
+    return (`
+    ${splittedField} {
+      histogram {
+        key
+        count
+      }
+    }`);
+  }
+  return (`
+  ${splittedField} {
+    ${histogramQueryStrForEachField(splittedFieldArray.join('.'))}
   }`);
+};
 
 const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   let accessibility = acc;
@@ -64,7 +74,7 @@ const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
     }
   }`);
 
-const queryGuppyForNestedAgg = (
+const queryGuppyForSubAgg = (
   path,
   type,
   mainField,
@@ -115,7 +125,7 @@ const queryGuppyForNestedAgg = (
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .catch((err) => {
-      throw new Error(`Error during queryGuppyForNestedAgg ${err}`);
+      throw new Error(`Error during queryGuppyForSubAgg ${err}`);
     });
 };
 
@@ -206,7 +216,7 @@ export const askGuppyForAggregationData = (path, type, fields, filter, accessibi
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-export const askGuppyForNestedAggregationData = (
+export const askGuppyForSubAggregationData = (
   path,
   type,
   mainField,
@@ -217,7 +227,7 @@ export const askGuppyForNestedAggregationData = (
   accessibility,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForNestedAgg(
+  return queryGuppyForSubAgg(
     path,
     type,
     mainField,
