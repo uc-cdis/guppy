@@ -266,7 +266,7 @@ const getFilterObj = (
     resultFilterObj = getESSearchFilterFragment(
       esInstance, esIndex, targetSearchFields, targetSearchKeyword,
     );
-  } else if (topLevelOp === 'nested') {
+  } else if (topLevelOpLowerCase === 'nested') {
     const { path } = graphqlFilterObj[topLevelOp];
     const filterOpObj = Object.keys(graphqlFilterObj[topLevelOp])
       .filter((key) => key !== 'path')
@@ -278,6 +278,12 @@ const getFilterObj = (
           aggsField, filterSelf, defaultAuthFilter, path),
       },
     };
+    // resultFilterObj.nested.query == null means nested filter contains target field
+    // AND `filterSelf` flag is false
+    // in this case, just apply an auth filter if exists
+    if (!resultFilterObj.nested.query) {
+      resultFilterObj = getFilterObj(esInstance, esIndex, defaultAuthFilter);
+    }
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
