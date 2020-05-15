@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ApolloError, UserInputError } from 'apollo-server';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
@@ -255,7 +256,7 @@ const getFilterObj = (
     }
     Object.keys(graphqlFilterObj[topLevelOp]).forEach((o) => { // check filter syntax
       if (o !== 'keyword' && o !== 'fields') {
-        throw new UserInputError(`Invalid search filter syntax: unrecognize field '${o}'`);
+        throw new UserInputError(`Invalid search filter syntax: unrecognized field '${o}'`);
       }
     });
     const targetSearchKeyword = graphqlFilterObj[topLevelOp].keyword;
@@ -271,6 +272,12 @@ const getFilterObj = (
     const filterOpObj = Object.keys(graphqlFilterObj[topLevelOp])
       .filter((key) => key !== 'path')
       .reduce((o, k) => ({ ...o, [k]: graphqlFilterObj[topLevelOp][k] }), {});
+    if (_.findKey(filterOpObj, aggsField) && !filterSelf) {
+      // if `aggsField` is in the nested filter object AND `filterSelf` flag is false,
+      // should not filter the target field itself,
+      // instead, only apply an auth filter if exists
+      return getFilterObj(esInstance, esIndex, defaultAuthFilter);
+    }
     resultFilterObj = {
       nested: {
         path,
@@ -278,12 +285,6 @@ const getFilterObj = (
           aggsField, filterSelf, defaultAuthFilter, path),
       },
     };
-    // resultFilterObj.nested.query == null means nested filter contains target field
-    // AND `filterSelf` flag is false
-    // in this case, just apply an auth filter if exists
-    if (!resultFilterObj.nested.query) {
-      resultFilterObj = getFilterObj(esInstance, esIndex, defaultAuthFilter);
-    }
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
