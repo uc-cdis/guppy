@@ -38,7 +38,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
 };
 
 const capitalizeFirstLetter = (str) => {
-  const res = str.replace(/_/gi, ' ');
+  const res = str.replace(/_|\./gi, ' ');
   return res.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
