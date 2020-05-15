@@ -107,6 +107,5 @@ export const buildNestedFieldMapping = (field, parent) => {
     nestedFields,
     newParent,
   ));
-  // const result = resultArray.reduce((res, fieldName) => res.concat(fieldName).concat('\n'), '');
   return resultArray;
 };
