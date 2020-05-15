@@ -181,22 +181,35 @@ export const getGQLFilter = (filterObj) => {
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     const filterValues = filterObj[field];
+    const fieldSplitted = field.split('.');
+    const fieldName = fieldSplitted[fieldSplitted.length - 1];
+    let facetsPiece = {};
     if (filterValues.selectedValues) {
-      facetsList.push({
+      facetsPiece = {
         IN: {
-          [field]: filterValues.selectedValues,
+          [fieldName]: filterValues.selectedValues,
         },
-      });
+      };
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      facetsList.push({
+      facetsPiece = {
         AND: [
-          { '>=': { [field]: filterValues.lowerBound } },
-          { '<=': { [field]: filterValues.upperBound } },
+          { '>=': { [fieldName]: filterValues.lowerBound } },
+          { '<=': { [fieldName]: filterValues.upperBound } },
         ],
-      });
+      };
     } else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
+    if (fieldSplitted.length > 1) { // nested field
+      fieldSplitted.pop();
+      facetsPiece = {
+        nested: {
+          path: fieldSplitted.join('.'), // parent path
+          ...facetsPiece,
+        },
+      };
+    }
+    facetsList.push(facetsPiece);
   });
   const gqlFilter = {
     AND: facetsList,
