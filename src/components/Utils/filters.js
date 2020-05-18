@@ -1,4 +1,5 @@
 import flat from 'flat';
+import _ from 'lodash';
 
 /**
    * This function takes two objects containing filters to be applied
@@ -124,4 +125,32 @@ export const sortTabsOptions = (tabsOptions) => {
     sortedTabsOptions[field].histogram = optionsForThisField;
   }
   return sortedTabsOptions;
+};
+
+/**
+   * This function takes two TabsOptions object and merge them together
+   * The order of merged histogram array is preserved by firstHistogram.concat(secondHistogram)
+   */
+export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
+  if (!firstTabsOptions || !Object.keys(firstTabsOptions).length) {
+    return secondTabsOptions;
+  }
+  if (!secondTabsOptions || !Object.keys(secondTabsOptions).length) {
+    return firstTabsOptions;
+  }
+
+  const allOptionKeys = _.union(Object.keys(firstTabsOptions), Object.keys(secondTabsOptions));
+  const mergedTabOptions = {};
+  allOptionKeys.forEach((optKey) => {
+    if (!mergedTabOptions[`${optKey}`]) {
+      mergedTabOptions[`${optKey}`] = {};
+    }
+    if (!mergedTabOptions[`${optKey}`].histogram) {
+      mergedTabOptions[`${optKey}`].histogram = [];
+    }
+    const firstHistogram = (firstTabsOptions[`${optKey}`] && firstTabsOptions[`${optKey}`].histogram) ? firstTabsOptions[`${optKey}`].histogram : [];
+    const secondHistogram = (secondTabsOptions[`${optKey}`] && secondTabsOptions[`${optKey}`].histogram) ? secondTabsOptions[`${optKey}`].histogram : [];
+    mergedTabOptions[`${optKey}`].histogram = firstHistogram.concat(secondHistogram);
+  });
+  return mergedTabOptions;
 };
