@@ -97,6 +97,13 @@ class ConnectedFilter extends React.Component {
       const selectedTabsOptions = {};
       const unselectedTabsOptions = {};
       Object.keys(processedTabsOptions).forEach((opt) => {
+        if (!processedTabsOptions[`${opt}`].histogram.length) {
+          if (!unselectedTabsOptions[`${opt}`]) {
+            unselectedTabsOptions[`${opt}`] = {};
+          }
+          unselectedTabsOptions[`${opt}`].histogram = [];
+          return;
+        }
         processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
           if (this.state.filtersApplied[`${opt}`]
           && this.state.filtersApplied[`${opt}`].selectedValues
@@ -157,7 +164,6 @@ class ConnectedFilter extends React.Component {
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      console.log('resultAggsData: ', resultAggsData);
       this.props.onReceiveNewAggsData(resultAggsData);
     }
   }
