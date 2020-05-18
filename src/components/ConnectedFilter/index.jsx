@@ -98,7 +98,9 @@ class ConnectedFilter extends React.Component {
       const unselectedTabsOptions = {};
       Object.keys(processedTabsOptions).forEach((opt) => {
         processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
-          if (this.state.filtersApplied[`${opt}`] && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
+          if (this.state.filtersApplied[`${opt}`]
+          && this.state.filtersApplied[`${opt}`].selectedValues
+          && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
             if (!selectedTabsOptions[`${opt}`]) {
               selectedTabsOptions[`${opt}`] = {};
             }
@@ -109,6 +111,10 @@ class ConnectedFilter extends React.Component {
           } else {
             if (!unselectedTabsOptions[`${opt}`]) {
               unselectedTabsOptions[`${opt}`] = {};
+            }
+            if (typeof (entry.key) !== 'string') { // if it is a range filter, just copy and return
+              unselectedTabsOptions[`${opt}`].histogram = processedTabsOptions[`${opt}`].histogram;
+              return;
             }
             if (!unselectedTabsOptions[`${opt}`].histogram) {
               unselectedTabsOptions[`${opt}`].histogram = [];
@@ -151,6 +157,7 @@ class ConnectedFilter extends React.Component {
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
+      console.log('resultAggsData: ', resultAggsData);
       this.props.onReceiveNewAggsData(resultAggsData);
     }
   }
