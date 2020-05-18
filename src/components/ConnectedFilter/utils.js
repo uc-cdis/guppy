@@ -85,7 +85,7 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
       }
       resultAggsData[`${actualFieldName}`] = { histogram: resultHistogram };
     } else {
-      resultAggsData[`${actualFieldName}`] = receivedAggsData[`${actualFieldName}`];
+      resultAggsData[`${actualFieldName}`] = { histogram: flattenAggsData[`${field}`] };
     }
   });
   return resultAggsData;
