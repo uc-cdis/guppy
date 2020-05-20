@@ -23,7 +23,8 @@ Example request body:
 		"gender", 
 		"race",
 		"file_count",
-		"subject_id"
+		"subject_id",
+    "visit.visit_label"
 	],
 	"sort": [
 		{ "file_count": "asc" },
@@ -40,25 +41,51 @@ Example result:
     "subject_id": "78",
     "file_count": 1,
     "gender": "female",
-    "race": "hispanic"
+    "race": "hispanic",
+    "visit": [
+      {
+        "visit_label": "label_1"
+      },
+      {
+        "visit_label": "label_2"
+      }
+    ]
   },
   {
     "subject_id": "45",
     "file_count": 3,
     "gender": "female",
-    "race": "hispanic"
+    "race": "hispanic",
+    "visit": [
+      {
+        "visit_label": "label_3"
+      },
+      ...
+    ]
   },
   {
     "subject_id": "60",
     "file_count": 5,
     "gender": "female",
-    "race": "asian"
+    "race": "asian",
+    "visit": [
+      {
+        "visit_label": "label_X"
+      },
+      ...
+    ]
   },
   {
     "subject_id": "58",
     "file_count": 13,
     "gender": "male",
-    "race": "white"
+    "race": "white",
+    "visit": [
+      {
+        "visit_label": "label_Y"
+      },
+      ...
+    ]
   },
   ...
 ]
