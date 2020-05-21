@@ -119,6 +119,20 @@ const queryGuppyForNestedAgg = (
     });
 };
 
+const rawDataQueryStrForEachField = (field) => {
+  const splittedFieldArray = field.split('.');
+  const splittedField = splittedFieldArray.shift();
+  if (splittedFieldArray.length === 0) {
+    return (`
+    ${splittedField}
+    `);
+  }
+  return (`
+  ${splittedField} {
+    ${rawDataQueryStrForEachField(splittedFieldArray.join('.'))}
+  }`);
+};
+
 const queryGuppyForRawDataAndTotalCounts = (
   path,
   type,
@@ -141,9 +155,10 @@ const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter) {
     typeAggsLine = `${type} (filter: $filter, accessibility: ${accessibility}) {`;
   }
+  const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
   const query = `${queryLine}
     ${dataTypeLine} 
-      ${fields.join('\n')}
+      ${processedFields.join('\n')}
     }
     _aggregation {
       ${typeAggsLine} 
