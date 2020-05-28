@@ -3,13 +3,23 @@ import fetch from 'isomorphic-fetch';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 
-const histogramQueryStrForEachField = (field) => (`
-  ${field} {
-    histogram {
-      key
-      count
-    }
+const histogramQueryStrForEachField = (field) => {
+  const splittedFieldArray = field.split('.');
+  const splittedField = splittedFieldArray.shift();
+  if (splittedFieldArray.length === 0) {
+    return (`
+    ${splittedField} {
+      histogram {
+        key
+        count
+      }
+    }`);
+  }
+  return (`
+  ${splittedField} {
+    ${histogramQueryStrForEachField(splittedFieldArray.join('.'))}
   }`);
+};
 
 const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   let accessibility = acc;
@@ -64,7 +74,7 @@ const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
     }
   }`);
 
-const queryGuppyForNestedAgg = (
+const queryGuppyForSubAgg = (
   path,
   type,
   mainField,
@@ -115,7 +125,7 @@ const queryGuppyForNestedAgg = (
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .catch((err) => {
-      throw new Error(`Error during queryGuppyForNestedAgg ${err}`);
+      throw new Error(`Error during queryGuppyForSubAgg ${err}`);
     });
 };
 
@@ -186,22 +196,35 @@ export const getGQLFilter = (filterObj) => {
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
     const filterValues = filterObj[field];
+    const fieldSplitted = field.split('.');
+    const fieldName = fieldSplitted[fieldSplitted.length - 1];
+    let facetsPiece = {};
     if (filterValues.selectedValues) {
-      facetsList.push({
+      facetsPiece = {
         IN: {
-          [field]: filterValues.selectedValues,
+          [fieldName]: filterValues.selectedValues,
         },
-      });
+      };
     } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
-      facetsList.push({
+      facetsPiece = {
         AND: [
-          { '>=': { [field]: filterValues.lowerBound } },
-          { '<=': { [field]: filterValues.upperBound } },
+          { '>=': { [fieldName]: filterValues.lowerBound } },
+          { '<=': { [fieldName]: filterValues.upperBound } },
         ],
-      });
+      };
     } else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
+    if (fieldSplitted.length > 1) { // nested field
+      fieldSplitted.pop();
+      facetsPiece = {
+        nested: {
+          path: fieldSplitted.join('.'), // parent path
+          ...facetsPiece,
+        },
+      };
+    }
+    facetsList.push(facetsPiece);
   });
   const gqlFilter = {
     AND: facetsList,
@@ -221,7 +244,7 @@ export const askGuppyForAggregationData = (path, type, fields, filter, accessibi
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-export const askGuppyForNestedAggregationData = (
+export const askGuppyForSubAggregationData = (
   path,
   type,
   mainField,
@@ -232,7 +255,7 @@ export const askGuppyForNestedAggregationData = (
   accessibility,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForNestedAgg(
+  return queryGuppyForSubAgg(
     path,
     type,
     mainField,

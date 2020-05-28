@@ -1,4 +1,5 @@
-/* eslint import/prefer-default-export: 0 */
+import flat from 'flat';
+import _ from 'lodash';
 
 /**
    * This function takes two objects containing filters to be applied
@@ -43,44 +44,53 @@ export const updateCountsInInitialTabsOptions = (
 ) => {
   const updatedTabsOptions = {};
   try {
-    Object.keys(initialTabsOptions).forEach((field) => {
-      updatedTabsOptions[field] = { histogram: [] };
+    // flatten the tab options first
+    // {
+    //   project_id.histogram: ...
+    //   visit.visit_label.histogram: ...
+    // }
+    const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
+    const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
+    Object.keys(flattenInitialTabsOptions).forEach((field) => {
+      // in flattened tab options, to get actual field name, strip off the last '.histogram'
+      const actualFieldName = field.replace('.histogram', '');
+      // possible to have '.' in actualFieldName, so use it as a string
+      updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
       // if in tiered access mode
       // we need not to process filters for field in accessibleFieldCheckList
       if (accessibleFieldCheckList
-        && accessibleFieldCheckList.includes(field)
-        && processedTabsOptions[field]) {
-        updatedTabsOptions[field] = processedTabsOptions[field];
+        && accessibleFieldCheckList.includes(actualFieldName)
+        && flattenProcessedTabsOptions[`${field}`]) {
+        updatedTabsOptions[`${actualFieldName}`].histogram = flattenProcessedTabsOptions[`${field}`];
         return;
       }
-      const { histogram } = initialTabsOptions[field];
+      const histogram = flattenInitialTabsOptions[`${field}`];
       if (!histogram) {
-        console.error(`Guppy did not return histogram data for filter field ${field}`); // eslint-disable-line no-console
+        console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
       }
       histogram.forEach((opt) => {
         const { key } = opt;
         if (typeof (key) !== 'string') { // key is a range, just copy the histogram
-          updatedTabsOptions[field].histogram = initialTabsOptions[field].histogram;
-          if (processedTabsOptions[field]
-            && processedTabsOptions[field].histogram
-            && processedTabsOptions[field].histogram.length > 0
-            && updatedTabsOptions[field].histogram) {
-            const newCount = processedTabsOptions[field].histogram[0].count;
-            updatedTabsOptions[field].histogram[0].count = newCount;
+          updatedTabsOptions[`${actualFieldName}`].histogram = flattenInitialTabsOptions[`${field}`];
+          if (flattenProcessedTabsOptions[`${field}`]
+            && flattenProcessedTabsOptions[`${field}`].length > 0
+            && updatedTabsOptions[`${actualFieldName}`].histogram) {
+            const newCount = flattenProcessedTabsOptions[`${field}`][0].count;
+            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = newCount;
           }
           return;
         }
-        const findOpt = processedTabsOptions[field].histogram.find((o) => o.key === key);
+        const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
         if (findOpt) {
           const { count } = findOpt;
-          updatedTabsOptions[field].histogram.push({ key, count });
+          updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
         }
       });
-      if (filtersApplied[field]) {
-        if (filtersApplied[field].selectedValues) {
-          filtersApplied[field].selectedValues.forEach((optKey) => {
-            if (!updatedTabsOptions[field].histogram.find((o) => o.key === optKey)) {
-              updatedTabsOptions[field].histogram.push({ key: optKey, count: 0 });
+      if (filtersApplied[`${actualFieldName}`]) {
+        if (filtersApplied[`${actualFieldName}`].selectedValues) {
+          filtersApplied[`${actualFieldName}`].selectedValues.forEach((optKey) => {
+            if (!updatedTabsOptions[`${actualFieldName}`].histogram.find((o) => o.key === optKey)) {
+              updatedTabsOptions[`${actualFieldName}`].histogram.push({ key: optKey, count: 0 });
             }
           });
         }
@@ -115,4 +125,32 @@ export const sortTabsOptions = (tabsOptions) => {
     sortedTabsOptions[field].histogram = optionsForThisField;
   }
   return sortedTabsOptions;
+};
+
+/**
+   * This function takes two TabsOptions object and merge them together
+   * The order of merged histogram array is preserved by firstHistogram.concat(secondHistogram)
+   */
+export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
+  if (!firstTabsOptions || !Object.keys(firstTabsOptions).length) {
+    return secondTabsOptions;
+  }
+  if (!secondTabsOptions || !Object.keys(secondTabsOptions).length) {
+    return firstTabsOptions;
+  }
+
+  const allOptionKeys = _.union(Object.keys(firstTabsOptions), Object.keys(secondTabsOptions));
+  const mergedTabOptions = {};
+  allOptionKeys.forEach((optKey) => {
+    if (!mergedTabOptions[`${optKey}`]) {
+      mergedTabOptions[`${optKey}`] = {};
+    }
+    if (!mergedTabOptions[`${optKey}`].histogram) {
+      mergedTabOptions[`${optKey}`].histogram = [];
+    }
+    const firstHistogram = (firstTabsOptions[`${optKey}`] && firstTabsOptions[`${optKey}`].histogram) ? firstTabsOptions[`${optKey}`].histogram : [];
+    const secondHistogram = (secondTabsOptions[`${optKey}`] && secondTabsOptions[`${optKey}`].histogram) ? secondTabsOptions[`${optKey}`].histogram : [];
+    mergedTabOptions[`${optKey}`].histogram = firstHistogram.concat(secondHistogram);
+  });
+  return mergedTabOptions;
 };

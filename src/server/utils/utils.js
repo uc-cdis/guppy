@@ -117,3 +117,15 @@ export const processNestedFieldNames = (field) => {
   });
   return resultArray;
 };
+
+export const buildNestedFieldMapping = (field, parent) => {
+  if (!field.nestedProps) {
+    return (parent) ? `${parent}.${field.name}` : field.name;
+  }
+  const newParent = (parent) ? `${parent}.${field.name}` : field.name;
+  const resultArray = field.nestedProps.map((nestedFields) => buildNestedFieldMapping(
+    nestedFields,
+    newParent,
+  ));
+  return resultArray;
+};

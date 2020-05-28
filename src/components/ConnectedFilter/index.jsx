@@ -14,7 +14,12 @@ import {
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
-import { mergeFilters, updateCountsInInitialTabsOptions, sortTabsOptions } from '../Utils/filters';
+import {
+  mergeFilters,
+  updateCountsInInitialTabsOptions,
+  sortTabsOptions,
+  mergeTabOptions,
+} from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
@@ -87,7 +92,49 @@ class ConnectedFilter extends React.Component {
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
-    processedTabsOptions = sortTabsOptions(processedTabsOptions);
+    if (Object.keys(this.state.filtersApplied).length) {
+      // if has applied filters, sort tab options as selected/unselected separately
+      const selectedTabsOptions = {};
+      const unselectedTabsOptions = {};
+      Object.keys(processedTabsOptions).forEach((opt) => {
+        if (!processedTabsOptions[`${opt}`].histogram.length) {
+          if (!unselectedTabsOptions[`${opt}`]) {
+            unselectedTabsOptions[`${opt}`] = {};
+          }
+          unselectedTabsOptions[`${opt}`].histogram = [];
+          return;
+        }
+        processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
+          if (this.state.filtersApplied[`${opt}`]
+          && this.state.filtersApplied[`${opt}`].selectedValues
+          && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
+            if (!selectedTabsOptions[`${opt}`]) {
+              selectedTabsOptions[`${opt}`] = {};
+            }
+            if (!selectedTabsOptions[`${opt}`].histogram) {
+              selectedTabsOptions[`${opt}`].histogram = [];
+            }
+            selectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
+          } else {
+            if (!unselectedTabsOptions[`${opt}`]) {
+              unselectedTabsOptions[`${opt}`] = {};
+            }
+            if (typeof (entry.key) !== 'string') { // if it is a range filter, just copy and return
+              unselectedTabsOptions[`${opt}`].histogram = processedTabsOptions[`${opt}`].histogram;
+              return;
+            }
+            if (!unselectedTabsOptions[`${opt}`].histogram) {
+              unselectedTabsOptions[`${opt}`].histogram = [];
+            }
+            unselectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
+          }
+        });
+      });
+      processedTabsOptions = mergeTabOptions(sortTabsOptions(selectedTabsOptions),
+        sortTabsOptions(unselectedTabsOptions));
+    } else {
+      processedTabsOptions = sortTabsOptions(processedTabsOptions);
+    }
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;

@@ -1,3 +1,4 @@
+import flat from 'flat';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
@@ -37,7 +38,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
 };
 
 const capitalizeFirstLetter = (str) => {
-  const res = str.replace(/_/gi, ' ');
+  const res = str.replace(/_|\./gi, ' ');
   return res.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
@@ -71,18 +72,20 @@ export const getFilterSections = (
 export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) => {
   if (!filterResults) return receivedAggsData;
   const resultAggsData = {};
-  Object.keys(receivedAggsData).forEach((field) => {
-    const { histogram } = receivedAggsData[field];
+  const flattenAggsData = flat(receivedAggsData, { safe: true });
+  Object.keys(flattenAggsData).forEach((field) => {
+    const actualFieldName = field.replace('.histogram', '');
+    const histogram = flattenAggsData[`${field}`];
     if (!histogram) return;
-    if (field in filterResults) {
+    if (actualFieldName in filterResults) {
       let resultHistogram = [];
-      if (typeof filterResults[field].selectedValues !== 'undefined') {
-        const { selectedValues } = filterResults[field];
+      if (typeof filterResults[`${actualFieldName}`].selectedValues !== 'undefined') {
+        const { selectedValues } = filterResults[`${actualFieldName}`];
         resultHistogram = histogram.filter((bucket) => selectedValues.includes(bucket.key));
       }
-      resultAggsData[field] = { histogram: resultHistogram };
+      resultAggsData[`${actualFieldName}`] = { histogram: resultHistogram };
     } else {
-      resultAggsData[field] = receivedAggsData[field];
+      resultAggsData[`${actualFieldName}`] = { histogram: flattenAggsData[`${field}`] };
     }
   });
   return resultAggsData;

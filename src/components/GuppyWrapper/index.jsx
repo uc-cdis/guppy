@@ -8,7 +8,7 @@ import {
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
   getAccessibleResources,
-  askGuppyForNestedAggregationData,
+  askGuppyForSubAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
@@ -109,10 +109,10 @@ class GuppyWrapper extends React.Component {
       return Promise.resolve({ data: [], totalCount: 0 });
     }
 
-    // nested aggregation
+    // sub aggregations -- for DAT
     if (this.props.guppyConfig.mainField) {
       const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
-      return askGuppyForNestedAggregationData(
+      return askGuppyForSubAggregationData(
         this.props.guppyConfig.path,
         this.props.guppyConfig.type,
         this.props.guppyConfig.mainField,
