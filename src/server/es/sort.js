@@ -1,5 +1,4 @@
 import { UserInputError } from 'apollo-server';
-import log from '../logger';
 
 /**
  * Transfer graphql sort arg to ES sort object
@@ -59,7 +58,6 @@ const getESSortBody = (graphqlSort, esInstance, esIndex) => {
       }
     }
   }
-  log.debug('[getESSortBody] ', sortBody);
   return sortBody;
 };
 
