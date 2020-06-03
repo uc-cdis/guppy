@@ -2,7 +2,26 @@ import { UserInputError } from 'apollo-server';
 
 /**
  * Transfer graphql sort arg to ES sort object
+ * e.g.: input graphql sort arg
+ * [{ gender: 'asc' }, { 'visits.visit_label': 'asc' }]
+ * output ES sort object
+ * [
+ *     {
+ *      gender: {
+ *         order: 'asc',
+ *       },
+ *     },
+ *     {
+ *       'visits.visit_label': {
+ *         nested: {
+ *           path: 'visits',
+ *         },
+ *         order: 'asc',
+ *       },
+ *     }
+ * ]
  * @param {object} graphqlSort
+ * @returns a ES sort object
  */
 const getESSortBody = (graphqlSort, esInstance, esIndex) => {
   const sortBody = [];
