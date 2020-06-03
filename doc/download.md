@@ -28,7 +28,8 @@ Example request body:
 	],
 	"sort": [
 		{ "file_count": "asc" },
-		{ "gender": "desc" }
+		{ "gender": "desc" },
+    { "visit.visit_label": "asc" }
 	]
 }
 ```
