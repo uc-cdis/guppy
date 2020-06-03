@@ -15,12 +15,29 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
   test('object format sort arg', async () => {
     await esInstance.initialize();
     const graphQLSort1 = { gender: 'asc' };
-    const expectedESSort1 = [{ gender: 'asc' }];
+    const expectedESSort1 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+    ];
     const resultESSort1 = getESSortBody(graphQLSort1, esInstance, esIndex);
     expect(resultESSort1).toEqual(expectedESSort1);
 
     const graphQLSort2 = { gender: 'asc', file_count: 'desc' };
-    const expectedESSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
+    const expectedESSort2 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+    ];
     const resultESSort2 = getESSortBody(graphQLSort2, esInstance, esIndex);
     expect(resultESSort2).toEqual(expectedESSort2);
   });
@@ -28,12 +45,29 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
   test('array format sort arg', async () => {
     await esInstance.initialize();
     const graphQLSort1 = [{ gender: 'asc' }];
-    const expectedESSort1 = [{ gender: 'asc' }];
+    const expectedESSort1 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+    ];
     const resultESSort1 = getESSortBody(graphQLSort1, esInstance, esIndex);
     expect(resultESSort1).toEqual(expectedESSort1);
 
     const graphQLSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
-    const expectedESSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
+    const expectedESSort2 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+    ];
     const resultESSort2 = getESSortBody(graphQLSort2, esInstance, esIndex);
     expect(resultESSort2).toEqual(expectedESSort2);
   });

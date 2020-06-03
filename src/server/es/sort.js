@@ -1,11 +1,12 @@
 import { UserInputError } from 'apollo-server';
+import log from '../logger';
 
 /**
  * Transfer graphql sort arg to ES sort object
  * @param {object} graphqlSort
  */
 const getESSortBody = (graphqlSort, esInstance, esIndex) => {
-  let sortBody;
+  const sortBody = [];
   if (typeof graphqlSort !== 'undefined') {
     let graphqlSortObj = graphqlSort;
     if (typeof (graphqlSort.length) === 'undefined') {
@@ -17,16 +18,48 @@ const getESSortBody = (graphqlSort, esInstance, esIndex) => {
         throw new UserInputError('Invalid sort argument');
       }
       const field = Object.keys(graphqlSortObj[i])[0];
-      if (typeof esInstance.fieldTypes[esIndex][field] === 'undefined') {
-        throw new UserInputError('Invalid sort argument');
-      }
       const method = graphqlSortObj[i][field];
       if (method !== 'asc' && method !== 'desc') {
         throw new UserInputError('Invalid sort argument');
       }
+      if (!field.includes('.')) {
+        // non-nested field name, normal check logic
+        if (typeof esInstance.fieldTypes[esIndex][field] === 'undefined') {
+          throw new UserInputError('Invalid sort argument');
+        } else {
+          sortBody.push({
+            [field]: {
+              order: method,
+            },
+          });
+        }
+      } else {
+        // nested field name, check for each parts of name
+        let nestedFieldNameArray = field.split('.');
+        let fieldTypesToCheck = esInstance.fieldTypes[esIndex];
+        while (nestedFieldNameArray.length > 0) {
+          const FieldNameToCheck = nestedFieldNameArray.shift();
+          if (fieldTypesToCheck && fieldTypesToCheck[FieldNameToCheck]) {
+            fieldTypesToCheck = fieldTypesToCheck[FieldNameToCheck].properties;
+          } else {
+            throw new UserInputError('Invalid sort argument');
+          }
+        }
+        // if we got here, everything looks good
+        nestedFieldNameArray = field.split('.');
+        const nestedPath = nestedFieldNameArray.slice(0, nestedFieldNameArray.length - 1).join('.');
+        sortBody.push({
+          [field]: {
+            order: method,
+            nested: {
+              path: nestedPath,
+            },
+          },
+        });
+      }
     }
-    sortBody = graphqlSortObj;
   }
+  log.debug('[getESSortBody] ', sortBody);
   return sortBody;
 };
 
