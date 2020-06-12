@@ -30,6 +30,9 @@ Example query:
     },
     {
       "gender": asc
+    },
+    {
+      "experiments.experimental_description": asc
     }
   ], filter: $filter) {
     subject_id
