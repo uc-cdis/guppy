@@ -138,9 +138,9 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const tabs = this.props.filterConfig.tabs.map(({ fields }) => (
+    const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
       <FilterList
-        key={Math.random().toString(36).substring(7)} // to trigger rerendering of the filter list
+        key={index}
         sections={
           getFilterSections(fields, fieldMapping, processedTabsOptions,
             this.state.initialAggsData, this.state.adminAppliedPreFilters)
