@@ -95,6 +95,37 @@ export const buildNestedField = (key, value) => {
       type: value.type,
     };
   }
-
   return builtObj;
+};
+
+/**
+ * This function takes a nested field object and parses names of each field
+ * by concatenating `.` to parent and child field names recursively.
+ * The returned object is a nested array, which will be deeply flattened later.
+ * @param field: a nested field object (with `nestedProps`)
+ */
+export const processNestedFieldNames = (field) => {
+  const resultArray = [];
+  field.nestedProps.forEach((prop) => {
+    if (prop.nestedProps) {
+      const newField = { ...prop };
+      newField.name = `${field.name}.${prop.name}`;
+      resultArray.push(processNestedFieldNames(newField));
+    } else {
+      resultArray.push(`${field.name}.${prop.name}`);
+    }
+  });
+  return resultArray;
+};
+
+export const buildNestedFieldMapping = (field, parent) => {
+  if (!field.nestedProps) {
+    return (parent) ? `${parent}.${field.name}` : field.name;
+  }
+  const newParent = (parent) ? `${parent}.${field.name}` : field.name;
+  const resultArray = field.nestedProps.map((nestedFields) => buildNestedFieldMapping(
+    nestedFields,
+    newParent,
+  ));
+  return resultArray;
 };

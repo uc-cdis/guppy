@@ -30,6 +30,9 @@ Example query:
     },
     {
       "gender": asc
+    },
+    {
+      "experiments.experimental_description": asc
     }
   ], filter: $filter) {
     subject_id
@@ -989,6 +992,27 @@ Assuming that there is `File` node nested inside `subject`. The nested query wil
 
 ElasticSearch only support the nested filter on the level of document for returning data. It means that the filter `file_count >=15` and `file_count<=75` will return the whole document having a `file_count` in the range of `[15, 75]`.
 The returned data will not filter the nested `file_count`(s) that are out of that range for that document.
+If the ES document has multi-level nested field, just update the `path` value.
+Example:
+```
+{
+  "filter": {
+    "AND": [
+      ...
+      {
+        "nested": {
+          "path": "visits.follow_ups",
+          "AND": [
+            {
+              ">=": {"days_to_follow_up": 15}
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
 
 <a name="other"></a>
 ## Some other queries and arguments 

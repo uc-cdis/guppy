@@ -8,7 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
-import { fromFieldsToSource, buildNestedField } from '../utils/utils';
+import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -81,8 +81,13 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const fieldsNotBelong = _.difference(fields,
-      this.getESFields(esIndex).fields.map((f) => f.name));
+    const allESFields = _.flattenDeep(this.getESFields(esIndex).fields.map((f) => {
+      if (f.nestedProps) {
+        return processNestedFieldNames(f);
+      }
+      return f.name;
+    }));
+    const fieldsNotBelong = _.difference(fields, allESFields);
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
         400,

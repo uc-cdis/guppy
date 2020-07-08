@@ -18,6 +18,7 @@ storiesOf('ConnectedFilter', module)
         onFilterChange={action('filter change')}
         fieldMapping={fieldMapping}
         onProcessFilterAggsData={processFilterAggsData}
+        tierAccessLimit={guppyConfig.tierAccessLimit}
       />
     );
   })
@@ -30,6 +31,7 @@ storiesOf('ConnectedFilter', module)
         onFilterChange={action('filter change')}
         fieldMapping={fieldMapping}
         onProcessFilterAggsData={processFilterAggsData}
+        tierAccessLimit={guppyConfig.tierAccessLimit}
       />
     );
   })
@@ -42,6 +44,7 @@ storiesOf('ConnectedFilter', module)
         onFilterChange={action('filter change')}
         fieldMapping={fieldMapping}
         onProcessFilterAggsData={processFilterAggsData}
+        tierAccessLimit={guppyConfig.tierAccessLimit}
       />
     );
   })
