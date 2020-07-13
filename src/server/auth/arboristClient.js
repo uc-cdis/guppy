@@ -20,24 +20,23 @@ class ArboristClient {
         headers,
       },
     ).then(
-      (response) => {
-        const responseJSON = response.json();
-        const data = {
-          resources: [],
-        };
-        Object.keys(responseJSON).forEach((key) => {
-          if (responseJSON[key] && responseJSON[key].some((x) => x.method === 'read')) {
-            data.resources.push(key);
-          }
-        });
-        log.debug('[ArboristClient] data: ', data);
-        return data;
-      },
-      (err) => {
-        log.error(err);
-        throw new CodedError(500, err);
-      },
-    );
+      (response) => response.json(),
+    ).then((result) => {
+      const data = {
+        resources: [],
+      };
+      Object.keys(result).forEach((key) => {
+        if (result[key] && result[key].some((x) => x.method === 'read')) {
+          data.resources.push(key);
+        }
+      });
+      log.debug('[ArboristClient] data: ', data);
+      return data;
+    },
+    (err) => {
+      log.error(err);
+      throw new CodedError(500, err);
+    });
   }
 }
 

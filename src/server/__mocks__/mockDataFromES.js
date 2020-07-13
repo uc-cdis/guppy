@@ -204,11 +204,53 @@ const mockResourcePath = () => {
 const mockArborist = () => {
   nock(config.arboristEndpoint)
     .persist()
-    .get('/auth/resources')
+    .get('/auth/mapping')
     .reply(200, {
-      resources: [
-        'internal-project-1',
-        'internal-project-2',
+      'internal-project-1': [
+        {
+          service: '*',
+          method: 'create',
+        },
+        {
+          service: '*',
+          method: 'delete',
+        },
+        {
+          service: '*',
+          method: 'read',
+        },
+        {
+          service: '*',
+          method: 'read-storage',
+        },
+        {
+          service: '*',
+          method: 'update',
+        },
+      ],
+      'internal-project-2': [
+        {
+          service: '*',
+          method: 'read',
+        },
+      ],
+      'internal-project-3': [
+        {
+          service: '*',
+          method: 'create',
+        },
+        {
+          service: '*',
+          method: 'delete',
+        },
+        {
+          service: '*',
+          method: 'read-storage',
+        },
+        {
+          service: '*',
+          method: 'update',
+        },
       ],
     });
 };
