@@ -10,7 +10,7 @@ class ArboristClient {
 
   listAuthorizedResources(jwt) {
     // Make request to arborist for list of resources with access
-    const resourcesEndpoint = `${this.baseEndpoint}/auth/resources`;
+    const resourcesEndpoint = `${this.baseEndpoint}/auth/mapping`;
     log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
     const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
     return fetch(
@@ -20,7 +20,19 @@ class ArboristClient {
         headers,
       },
     ).then(
-      (response) => response.json(),
+      (response) => {
+        const responseJSON = response.json();
+        const data = {
+          resources: [],
+        };
+        Object.keys(responseJSON).forEach((key) => {
+          if (responseJSON[key] && responseJSON[key].some((x) => x.method === 'read')) {
+            data.resources.push(key);
+          }
+        });
+        log.debug('[ArboristClient] data: ', data);
+        return data;
+      },
       (err) => {
         log.error(err);
         throw new CodedError(500, err);
