@@ -19,7 +19,6 @@ const config = {
 
   port: 3000,
   path: '/graphql',
-  logLevel: 'DEBUG',
   tierAccessLevel: 'regular',
   tierAccessLimit: 20,
   arboristEndpoint: 'http://mock-arborist',
