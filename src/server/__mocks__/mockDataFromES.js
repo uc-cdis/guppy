@@ -252,6 +252,12 @@ const mockArborist = () => {
           method: 'update',
         },
       ],
+      'internal-project-4': [
+        {
+          service: '*',
+          method: '*',
+        },
+      ],
     });
 };
 

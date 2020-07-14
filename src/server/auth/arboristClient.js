@@ -26,7 +26,7 @@ class ArboristClient {
         resources: [],
       };
       Object.keys(result).forEach((key) => {
-        if (result[key] && result[key].some((x) => x.method === 'read')) {
+        if (result[key] && result[key].some((x) => x.method === 'read' || x.method === '*')) {
           data.resources.push(key);
         }
       });
