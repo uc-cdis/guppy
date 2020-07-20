@@ -12,8 +12,8 @@ setupMockDataEndpoint();
 describe('AuthHelper', () => {
   test('could create auth helper instance', async () => {
     const authHelper = await getAuthHelperInstance('fake-jwt');
-    expect(authHelper.getAccessibleResources()).toEqual(['internal-project-1', 'internal-project-2', 'internal-project-4']);
-    expect(authHelper.getAccessibleResources()).not.toContain(['internal-project-3']);
+    expect(authHelper.getAccessibleResources()).toEqual(['internal-project-1', 'internal-project-2', 'internal-project-4', 'internal-project-5']);
+    expect(authHelper.getAccessibleResources()).not.toContain(['internal-project-3', 'internal-project-6']);
     expect(authHelper.getUnaccessibleResources()).toEqual(['external-project-1', 'external-project-2']);
   });
 
@@ -53,6 +53,7 @@ describe('AuthHelper', () => {
           'internal-project-1',
           'internal-project-2',
           'internal-project-4',
+          'internal-project-5',
         ],
       },
     };
@@ -73,6 +74,7 @@ describe('AuthHelper', () => {
               'internal-project-1',
               'internal-project-2',
               'internal-project-4',
+              'internal-project-5',
             ],
           },
         },
@@ -112,6 +114,7 @@ describe('AuthHelper', () => {
           'internal-project-1',
           'internal-project-2',
           'internal-project-4',
+          'internal-project-5',
         ],
       },
     };

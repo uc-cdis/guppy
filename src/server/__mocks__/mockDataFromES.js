@@ -206,7 +206,7 @@ const mockArborist = () => {
     .persist()
     .get('/auth/mapping')
     .reply(200, {
-      'internal-project-1': [
+      'internal-project-1': [ // accessible
         {
           service: '*',
           method: 'create',
@@ -228,13 +228,13 @@ const mockArborist = () => {
           method: 'update',
         },
       ],
-      'internal-project-2': [
+      'internal-project-2': [ // accessible
         {
           service: '*',
           method: 'read',
         },
       ],
-      'internal-project-3': [
+      'internal-project-3': [ // not accessible since method does not match
         {
           service: '*',
           method: 'create',
@@ -252,9 +252,21 @@ const mockArborist = () => {
           method: 'update',
         },
       ],
-      'internal-project-4': [
+      'internal-project-4': [ // accessible
         {
           service: '*',
+          method: '*',
+        },
+      ],
+      'internal-project-5': [ // accessible
+        {
+          service: 'guppy',
+          method: '*',
+        },
+      ],
+      'internal-project-6': [ // not accessible since service does not match
+        {
+          service: 'indexd',
           method: '*',
         },
       ],
