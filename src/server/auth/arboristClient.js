@@ -26,13 +26,13 @@ class ArboristClient {
         resources: [],
       };
       Object.keys(result).forEach((key) => {
-        // logic: you have access to a project if you either
-        // 1. have 'read' access to a project resource
-        // or
-        // 2. have '*' access to service 'guppy' or service '*'
-        if (result[key] && result[key].some((x) => x.method === 'read'
-          || (x.method === '*' && (x.service === 'guppy' || x.service === '*')))
-        ) {
+        // logic: you have access to a project if you have the following access:
+        // method 'read' (or '*' - all methods) to service 'guppy' (or '*' - all services)
+        // on the project resource.
+        if (result[key] && result[key].some((x) => (
+          (x.method === 'read' || x.method === '*')
+          && (x.service === 'guppy' || x.service === '*')
+        ))) {
           data.resources.push(key);
         }
       });
