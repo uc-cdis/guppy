@@ -146,7 +146,6 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   return fieldAggregationResolverMappings;
 };
 
-
 /**
  * Tree-structured resolvers pass down arguments.
  * For better understanding, following is an example query, and related resolvers for each level:
