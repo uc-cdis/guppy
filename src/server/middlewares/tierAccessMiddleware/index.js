@@ -69,9 +69,9 @@ const tierAccessResolver = (
           resolve, root, args, context, info, authHelper, filter,
         );
       }
-      log.debug('[tierAccessResolver] requesting out-of-scope resources, return 401');
-      throw new ApolloError(`You don't have access to following resources: \
-        [${outOfScopeResourceList.join(', ')}]`, 401);
+      log.info('[tierAccessResolver] requesting out-of-scope resources, return 401');
+      log.info(`[tierAccessResolver] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
+      throw new ApolloError('You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query', 401);
     }
 
     /**
