@@ -70,7 +70,7 @@ const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
           key
           count
         }
-      } 
+      }
     }
   }`);
 
@@ -167,11 +167,11 @@ const queryGuppyForRawDataAndTotalCounts = (
   }
   const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
   const query = `${queryLine}
-    ${dataTypeLine} 
+    ${dataTypeLine}
       ${processedFields.join('\n')}
     }
     _aggregation {
-      ${typeAggsLine} 
+      ${typeAggsLine}
         _totalCount
       }
     }
@@ -332,7 +332,6 @@ export const downloadDataFromGuppy = (
       throw Error('Error downloading data from Guppy');
     });
 };
-
 
 export const askGuppyForTotalCounts = (
   path,
