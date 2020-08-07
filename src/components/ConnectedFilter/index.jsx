@@ -130,6 +130,31 @@ class ConnectedFilter extends React.Component {
           }
         });
       });
+
+      // For search filters: If there are any search filters present, include
+      // the selected options in the `selectedTabsOptions` array.
+      // ------
+      let allSearchFields = [];
+      this.props.filterConfig.tabs.forEach((tab) => {
+        allSearchFields = allSearchFields.concat(tab.searchFields);
+      });
+      allSearchFields.forEach((field) => {
+        if (this.state.filtersApplied[`${field}`]) {
+          const { selectedValues } = this.state.filtersApplied[`${field}`];
+          if (selectedValues) {
+            this.state.filtersApplied[`${field}`].selectedValues.forEach((val) => {
+              if (!selectedTabsOptions[`${field}`]) {
+                selectedTabsOptions[`${field}`] = {};
+              }
+              if (!selectedTabsOptions[`${field}`].histogram) {
+                selectedTabsOptions[`${field}`].histogram = [];
+              }
+              selectedTabsOptions[`${field}`].histogram.push({ key: val });
+            });
+          }
+        }
+      });
+      // -------
       processedTabsOptions = mergeTabOptions(sortTabsOptions(selectedTabsOptions),
         sortTabsOptions(unselectedTabsOptions));
     } else {
@@ -138,12 +163,12 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
+    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList
         key={index}
         sections={
-          getFilterSections(fields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters)
+          getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
+            this.state.initialAggsData, this.state.adminAppliedPreFilters, this.props.guppyConfig)
         }
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
@@ -215,12 +240,21 @@ class ConnectedFilter extends React.Component {
     if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
+    // If there are any search fields, insert them at the top of each tab's fields.
+    const filterConfig = {
+      tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+        if (searchFields) {
+          return { title, fields: searchFields.concat(fields) };
+        }
+        return { title, fields };
+      }),
+    };
     return (
       <FilterGroup
         ref={this.filterGroupRef}
         className={this.props.className}
         tabs={filterTabs}
-        filterConfig={this.props.filterConfig}
+        filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />
@@ -233,6 +267,7 @@ ConnectedFilter.propTypes = {
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
       fields: PropTypes.arrayOf(PropTypes.string),
+      searchFields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
   guppyConfig: PropTypes.shape({

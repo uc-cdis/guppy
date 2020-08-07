@@ -1,4 +1,5 @@
 import flat from 'flat';
+import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
@@ -42,9 +43,87 @@ const capitalizeFirstLetter = (str) => {
   return res.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };
 
+// createSearchFilterLoadOptionsFn creates a handler function that loads the search filter's
+// autosuggest options as the user types in the search filter.
+const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, offset) => {
+  const NUM_SEARCH_OPTIONS = 20;
+  return new Promise((resolve, reject) => {
+    // If searchString is empty return all options
+    let filter = {};
+    if (searchString) {
+      filter = {
+        search: {
+          keyword: searchString,
+          fields: [field],
+        },
+      };
+    }
+    queryGuppyForRawDataAndTotalCounts(
+      guppyConfig.path,
+      guppyConfig.type,
+      [field],
+      filter,
+      undefined,
+      offset,
+      NUM_SEARCH_OPTIONS,
+      'accessible',
+    )
+      .then((res) => {
+        if (!res.data || !res.data[guppyConfig.type]) {
+          resolve({
+            options: [],
+            hasMore: false,
+          });
+        } else {
+          const results = res.data[guppyConfig.type];
+          const hasMore = res.data._aggregation[guppyConfig.type]._totalCount !== offset + results.length;
+          resolve({
+            options: results.map((result) => ({ value: result[field], label: result[field] })),
+            hasMore,
+          });
+        }
+      }).catch((err) => {
+        console.error(err);
+        reject(err);
+      });
+  });
+};
+
 export const getFilterSections = (
-  fields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters,
+  fields, searchFields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters, guppyConfig,
 ) => {
+  // searchFields are all of the fields that use Guppy's search feature to search
+  // over a specific field, e.g. file GUID / subject ID.
+  let searchFieldSections = [];
+  if (searchFields) {
+    searchFieldSections = searchFields.map((field) => {
+      const overrideName = fieldMapping.find((entry) => (entry.field === field));
+      const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
+
+      const tabsOptionsFiltered = { ...tabsOptions[field] };
+      if (Object.keys(adminAppliedPreFilters).includes(field)) {
+        tabsOptionsFiltered.histogram = tabsOptionsFiltered.histogram.filter(
+          (x) => adminAppliedPreFilters[field].selectedValues.includes(x.key),
+        );
+      }
+
+      let selectedOptions = [];
+      if (tabsOptionsFiltered && tabsOptionsFiltered.histogram) {
+        selectedOptions = getSingleFilterOption(
+          tabsOptionsFiltered,
+          initialTabsOptions ? initialTabsOptions[field] : undefined,
+        );
+      }
+
+      return {
+        title: label,
+        options: selectedOptions,
+        isSearchFilter: true,
+        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
+      };
+    });
+  }
+
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find((entry) => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
@@ -66,7 +145,7 @@ export const getFilterSections = (
       options: defaultOptions,
     };
   });
-  return sections;
+  return searchFieldSections.concat(sections);
 };
 
 export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) => {
