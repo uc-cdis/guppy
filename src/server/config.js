@@ -8,13 +8,6 @@ if (process.env.GUPPY_CONFIG_FILEPATH) {
   log.info('[config] read guppy config from', configFilepath, JSON.stringify(inputConfig, null, 4));
 }
 
-let configIndex = inputConfig.config_index;
-// if running in local testing mode AND no indices in input config, get configIndex a default value
-// otherwise, stick to whatever input config has
-if (process.env.INTERNAL_LOCAL_TEST && !inputConfig.indices) {
-  configIndex = 'gen3-dev-config';
-}
-
 const config = {
   esConfig: {
     host: 'localhost:9200',
@@ -28,7 +21,7 @@ const config = {
         type: 'file',
       },
     ],
-    configIndex,
+    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
