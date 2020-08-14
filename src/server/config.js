@@ -21,7 +21,7 @@ const config = {
         type: 'file',
       },
     ],
-    configIndex: inputConfig.config_index || 'gen3-dev-config',
+    configIndex: (process.env.INTERNAL_LOCAL_TEST && !inputConfig.config_index) ? 'gen3-dev-config' : inputConfig.config_index,
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
