@@ -1015,7 +1015,7 @@ Example:
 ```
 
 <a name="other"></a>
-## Some other queries and arguments 
+## Some other queries and arguments
 
 ### Mapping query
 Mapping query simply returns all fields under a doc type. Example:
@@ -1086,7 +1086,7 @@ Result:
 {
   "errors": [
     {
-      "message": "You don't have access to following resources:         [/programs/external/projects/test]",
+      "message": "You don't have access to all the data you are querying. Try using 'accessibility: accessible' in your query",
       "locations": [
         {
           "line": 2,
@@ -1100,7 +1100,7 @@ Result:
         "code": 401,
         "exception": {
           "stacktrace": [
-            "Error: You don't have access to following resources:         [/programs/external/projects/test]",
+            "Error: You don't have access to all the data you are querying. Try using 'accessibility: accessible' in your query",
       ...
 }
 ```
