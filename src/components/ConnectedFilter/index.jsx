@@ -178,7 +178,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    console.log(filterResults);
+    console.log('inside handleFilterChange with: ', filterResults);
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
