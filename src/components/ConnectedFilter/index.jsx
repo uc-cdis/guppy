@@ -177,10 +177,9 @@ class ConnectedFilter extends React.Component {
    * 3. If there's `onFilterChange` callback function from parent, call it
    * @param {object} filterResults
    */
-  handleFilterChange(filterResults, accessibility, filterConfig) {
-    console.log('inside handleFilterChange with filterResults: ', filterResults);
-    console.log('inside handleFilterChange with accessibility: ', accessibility);
-    console.log('inside handleFilterChange with filterConfig: ', filterConfig);
+  handleFilterChange(filterResults, accessibility) {
+    console.log('(ConnectedFilter) handleFilterChange with filterResults: ', filterResults);
+    console.log('(ConnectedFilter) handleFilterChange with accessibility: ', accessibility);
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
