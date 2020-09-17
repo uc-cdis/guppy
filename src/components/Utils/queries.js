@@ -231,6 +231,10 @@ export const getGQLFilter = (filterObj) => {
         ],
       };
     }
+    else if (filterValues.selectedValues && filterValues.selectedValues.length == 0) {
+      // No filter needs to be applied for this field. We can continue.
+      return;
+    }
     else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
