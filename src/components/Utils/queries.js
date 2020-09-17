@@ -203,14 +203,18 @@ export const getGQLFilter = (filterObj) => {
     const fieldName = fieldSplitted[fieldSplitted.length - 1];
     // The combine mode defaults to OR when not set.
     const combineMode = filterValues.__combineMode ? filterValues.__combineMode : 'OR';
+    
+    const hasSelectedValues = filterValues.selectedValues && filterValues.selectedValues.length > 0;
+    const hasRangeFilter = typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined';
+
     let facetsPiece = {};
-    if (filterValues.selectedValues && filterValues.selectedValues.length > 0 && combineMode == 'OR') {
+    if (hasSelectedValues && combineMode == 'OR') {
       facetsPiece = {
         IN: {
           [fieldName]: filterValues.selectedValues,
         },
       };
-    } else if (filterValues.selectedValues && filterValues.selectedValues.length > 0 && combineMode == 'AND') { 
+    } else if (hasSelectedValues && combineMode == 'AND') { 
       console.log('(queries.js) in AND block with', filterValues.selectedValues);
       facetsPiece = { AND : [] }
       for(let i = 0; i < filterValues.selectedValues.length; i++) {
@@ -223,7 +227,7 @@ export const getGQLFilter = (filterObj) => {
       }
       console.log('(queries.js) facetsPiece = ', facetsPiece);
     } 
-    else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
+    else if (hasRangeFilter) {
       facetsPiece = {
         AND: [
           { '>=': { [fieldName]: filterValues.lowerBound } },
@@ -231,8 +235,8 @@ export const getGQLFilter = (filterObj) => {
         ],
       };
     }
-    else if (filterValues.selectedValues && filterValues.selectedValues.length == 0) {
-      // No filter needs to be applied for this field. We can continue.
+    else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
+      // This filter only has a combine setting so far. We can ignore it.
       return;
     }
     else {
