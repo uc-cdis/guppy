@@ -230,8 +230,6 @@ export const getGQLFilter = (filterObj) => {
           { '<=': { [fieldName]: filterValues.upperBound } },
         ],
       };
-    } else if () { 
-
     }
     else {
       throw new Error(`Invalid filter object ${filterValues}`);
