@@ -194,26 +194,46 @@ const queryGuppyForRawDataAndTotalCounts = (
 };
 
 export const getGQLFilter = (filterObj) => {
+  console.log('(queries.js) getGQLFilter filterObj: ', filterObj );
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
+    console.log('(queries.js) field: ', field);
     const filterValues = filterObj[field];
     const fieldSplitted = field.split('.');
     const fieldName = fieldSplitted[fieldSplitted.length - 1];
+    // The combine mode defaults to OR when not set.
+    const combineMode = filterValues.__combineMode ? filterValues.__combineMode : 'OR';
     let facetsPiece = {};
-    if (filterValues.selectedValues) {
+    if (filterValues.selectedValues && filterValues.selectedValues.length > 0 && combineMode == 'OR') {
       facetsPiece = {
         IN: {
           [fieldName]: filterValues.selectedValues,
         },
       };
-    } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
+    } else if (filterValues.selectedValues && filterValues.selectedValues.length > 0 && combineMode == 'AND') { 
+      console.log('(queries.js) in AND block with', filterValues.selectedValues);
+      facetsPiece = { AND : [] }
+      for(let i = 0; i < filterValues.selectedValues.length; i++) {
+        console.log('(queries.js) i = ', i);
+        facetsPiece.AND.push({
+          IN: {
+            [fieldName]: filterValues.selectedValues[i],
+          },
+        });
+      }
+      console.log('(queries.js) facetsPiece = ', facetsPiece);
+    } 
+    else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
       facetsPiece = {
         AND: [
           { '>=': { [fieldName]: filterValues.lowerBound } },
           { '<=': { [fieldName]: filterValues.upperBound } },
         ],
       };
-    } else {
+    } else if () { 
+
+    }
+    else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
     if (fieldSplitted.length > 1) { // nested field
