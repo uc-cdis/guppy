@@ -84,7 +84,8 @@ class ConnectedFilter extends React.Component {
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
     }
-
+    console.log('(ConnectedFilter) getFilterTabs this.state.receivedAggsData: ', this.state.receivedAggsData);
+    console.log('(ConnectedFilter) getFilterTabs processedTabsOptions: ', processedTabsOptions);
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
       processedTabsOptions,
