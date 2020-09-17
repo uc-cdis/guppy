@@ -49,8 +49,14 @@ export const updateCountsInInitialTabsOptions = (
     //   project_id.histogram: ...
     //   visit.visit_label.histogram: ...
     // }
+    console.log('(filters.js) updateCountsInInitialTabOptions initialTabsOptions: ', initialTabsOptions);
+    console.log('(filters.js) updateCountsInInitialTabOptions processedTabsOptions: ', processedTabsOptions);
+    console.log('(filters.js) updateCountsInInitialTabOptions filtersApplied: ', filtersApplied);
+    console.log('(filters.js) updateCountsInInitialTabOptions accessibleFieldCheckList: ', accessibleFieldCheckList);
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
+    console.log('57');
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
+    console.log('59');
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
       // in flattened tab options, to get actual field name, strip off the last '.histogram'
       const actualFieldName = field.replace('.histogram', '');
