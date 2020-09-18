@@ -184,8 +184,6 @@ class ConnectedFilter extends React.Component {
   handleFilterChange(filterResults, accessibility) {
     console.log('(ConnectedFilter) handleFilterChange with filterResults: ', filterResults);
     console.log('(ConnectedFilter) handleFilterChange with accessibility: ', accessibility);
-    console.log('(ConnectedFilter) handleFilterChange res.data._aggregation: ', res.data._aggregation);
-    console.log('(ConnectedFilter) handleFilterChange res.data._aggregation[this.props.guppyConfig.type]: ', res.data._aggregation[this.props.guppyConfig.type]);
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
@@ -197,6 +195,8 @@ class ConnectedFilter extends React.Component {
       this.state.accessibility,
     )
       .then((res) => {
+        console.log('(ConnectedFilter) handleFilterChange res.data._aggregation: ', res.data._aggregation);
+        console.log('(ConnectedFilter) handleFilterChange res.data._aggregation[this.props.guppyConfig.type]: ', res.data._aggregation[this.props.guppyConfig.type]);
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
           mergedFilterResults,
