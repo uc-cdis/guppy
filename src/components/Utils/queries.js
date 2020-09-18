@@ -54,7 +54,13 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then((response) => response.json());
+  }).then((response) => { 
+    console.log('(queries.js) RESPONSE::: ', response);
+    if (response.errors) {
+      console.error('Error querying aggregation data:', response.errors);
+    }
+    return response.json();
+  });
 };
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
@@ -217,12 +223,12 @@ export const getGQLFilter = (filterObj) => {
       };
     } else if (hasSelectedValues && combineMode == 'AND') { 
       console.log('(queries.js) in AND block with', filterValues.selectedValues);
-      facetsPiece = { AND : [] }
+      facetsPiece = {  }
       for(let i = 0; i < filterValues.selectedValues.length; i++) {
         console.log('(queries.js) i = ', i);
         facetsPiece.AND.push({
           IN: {
-            [fieldName]: filterValues.selectedValues[i],
+            [fieldName]: [filterValues.selectedValues[i]],
           },
         });
       }
