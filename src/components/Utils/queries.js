@@ -223,7 +223,7 @@ export const getGQLFilter = (filterObj) => {
       };
     } else if (hasSelectedValues && combineMode == 'AND') { 
       console.log('(queries.js) in AND block with', filterValues.selectedValues);
-      facetsPiece = {  }
+      facetsPiece = { "AND": [] }
       for(let i = 0; i < filterValues.selectedValues.length; i++) {
         console.log('(queries.js) i = ', i);
         facetsPiece.AND.push({
