@@ -47,6 +47,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     queryBody.variables = { filter: gqlFilter };
     queryBody.query = queryWithFilter;
   }
+  console.log('(queries.js) yo !!!!! queryBody: ', JSON.stringify(queryBody));
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
