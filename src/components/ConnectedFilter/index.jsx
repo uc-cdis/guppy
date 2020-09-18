@@ -63,7 +63,6 @@ class ConnectedFilter extends React.Component {
           const msg = `error querying guppy${res.errors && res.errors.length > 0 ? `: ${res.errors[0].message}` : ''}`;
           console.error(msg); // eslint-disable-line no-console
         }
-        console.log('(ConnectedFilter) componentDidMount res.data._aggregation[this.props.guppyConfig.type]: ', res.data._aggregation[this.props.guppyConfig.type]);
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
           this.state.adminAppliedPreFilters,
@@ -85,8 +84,6 @@ class ConnectedFilter extends React.Component {
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
     }
-    console.log('(ConnectedFilter) getFilterTabs this.state.receivedAggsData: ', this.state.receivedAggsData);
-    console.log('(ConnectedFilter) getFilterTabs processedTabsOptions: ', processedTabsOptions);
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
       processedTabsOptions,
@@ -163,8 +160,6 @@ class ConnectedFilter extends React.Component {
   }
 
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
-    console.log('(ConnectedFilter) handleReceiveNewAggsData receivedAggsData: ', receivedAggsData);
-    console.log('(ConnectedFilter) handleReceiveNewAggsData filterResults: ', filterResults);
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
@@ -182,12 +177,9 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults, accessibility) {
-    console.log('(ConnectedFilter) handleFilterChange with filterResults: ', filterResults);
-    console.log('(ConnectedFilter) handleFilterChange with accessibility: ', accessibility);
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
-    console.log('(ConnectedFilter) hey! mergedFilterResults: ', mergedFilterResults);
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -196,8 +188,6 @@ class ConnectedFilter extends React.Component {
       this.state.accessibility,
     )
       .then((res) => {
-        console.log('(ConnectedFilter) handleFilterChange res.data._aggregation: ', res.data._aggregation);
-        console.log('(ConnectedFilter) handleFilterChange res.data._aggregation[this.props.guppyConfig.type]: ', res.data._aggregation[this.props.guppyConfig.type]);
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
           mergedFilterResults,

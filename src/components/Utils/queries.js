@@ -22,7 +22,6 @@ const histogramQueryStrForEachField = (field) => {
 };
 
 const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
-  console.log('inside queryGuppyForAggs with ', gqlFilter);
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -47,7 +46,6 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     queryBody.variables = { filter: gqlFilter };
     queryBody.query = queryWithFilter;
   }
-  console.log('(queries.js) yo !!!!! queryBody: ', JSON.stringify(queryBody));
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
@@ -55,7 +53,6 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     },
     body: JSON.stringify(queryBody),
   }).then((response) => { 
-    console.log('(queries.js) RESPONSE::: ', response);
     if (response.errors) {
       console.error('Error querying aggregation data:', response.errors);
     }
@@ -201,10 +198,8 @@ const queryGuppyForRawDataAndTotalCounts = (
 };
 
 export const getGQLFilter = (filterObj) => {
-  console.log('(queries.js) getGQLFilter filterObj: ', filterObj );
   const facetsList = [];
   Object.keys(filterObj).forEach((field) => {
-    console.log('(queries.js) field: ', field);
     const filterValues = filterObj[field];
     const fieldSplitted = field.split('.');
     const fieldName = fieldSplitted[fieldSplitted.length - 1];
@@ -222,17 +217,14 @@ export const getGQLFilter = (filterObj) => {
         },
       };
     } else if (hasSelectedValues && combineMode == 'AND') { 
-      console.log('(queries.js) in AND block with', filterValues.selectedValues);
       facetsPiece = { "AND": [] }
       for(let i = 0; i < filterValues.selectedValues.length; i++) {
-        console.log('(queries.js) i = ', i);
         facetsPiece.AND.push({
           IN: {
             [fieldName]: [filterValues.selectedValues[i]],
           },
         });
       }
-      console.log('(queries.js) facetsPiece = ', facetsPiece);
     } 
     else if (hasRangeFilter) {
       facetsPiece = {

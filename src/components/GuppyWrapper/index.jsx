@@ -154,9 +154,6 @@ class GuppyWrapper extends React.Component {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
-      console.log('(GuppyWrapper) res: ', res);
-      console.log('(GuppyWrapper) res.data._aggregation: ', res.data._aggregation);
-      console.log('(GuppyWrapper) this.props.guppyConfig.type: ', this.props.guppyConfig.type);
       const parsedData = res.data[this.props.guppyConfig.type];
       const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
       if (updateDataWhenReceive) {
@@ -174,7 +171,6 @@ class GuppyWrapper extends React.Component {
   }
 
   handleReceiveNewAggsData(aggsData) {
-    console.log('(GuppyWrapper) aggsData: ', aggsData);
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
@@ -182,9 +178,6 @@ class GuppyWrapper extends React.Component {
   }
 
   handleFilterChange(userFilter, accessibility, filterConfig) {
-    console.log('guppy handleFilterChange #2 with ', userFilter);
-    console.log('guppy handleFilterChange #2 with ', accessibility);
-    console.log('guppy handleFilterChange #2 with ', filterConfig);
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
