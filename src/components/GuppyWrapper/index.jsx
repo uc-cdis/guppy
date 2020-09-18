@@ -177,7 +177,7 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(userFilter, accessibility, filterConfig) {
+  handleFilterChange(userFilter, accessibility) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
