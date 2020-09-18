@@ -52,12 +52,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
-  }).then((response) => { 
-    if (response.errors) {
-      console.error('Error querying aggregation data:', response.errors);
-    }
-    return response.json();
-  });
+  }).then((response) => response.json());
 };
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
@@ -205,40 +200,37 @@ export const getGQLFilter = (filterObj) => {
     const fieldName = fieldSplitted[fieldSplitted.length - 1];
     // The combine mode defaults to OR when not set.
     const combineMode = filterValues.__combineMode ? filterValues.__combineMode : 'OR';
-    
+
     const hasSelectedValues = filterValues.selectedValues && filterValues.selectedValues.length > 0;
     const hasRangeFilter = typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined';
 
     let facetsPiece = {};
-    if (hasSelectedValues && combineMode == 'OR') {
+    if (hasSelectedValues && combineMode === 'OR') {
       facetsPiece = {
         IN: {
           [fieldName]: filterValues.selectedValues,
         },
       };
-    } else if (hasSelectedValues && combineMode == 'AND') { 
-      facetsPiece = { "AND": [] }
-      for(let i = 0; i < filterValues.selectedValues.length; i++) {
+    } else if (hasSelectedValues && combineMode === 'AND') {
+      facetsPiece = { AND: [] };
+      for (let i = 0; i < filterValues.selectedValues.length; i += 1) {
         facetsPiece.AND.push({
           IN: {
             [fieldName]: [filterValues.selectedValues[i]],
           },
         });
       }
-    } 
-    else if (hasRangeFilter) {
+    } else if (hasRangeFilter) {
       facetsPiece = {
         AND: [
           { '>=': { [fieldName]: filterValues.lowerBound } },
           { '<=': { [fieldName]: filterValues.upperBound } },
         ],
       };
-    }
-    else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
+    } else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
       // This filter only has a combine setting so far. We can ignore it.
       return;
-    }
-    else {
+    } else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
     if (fieldSplitted.length > 1) { // nested field
