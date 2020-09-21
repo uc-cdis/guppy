@@ -78,26 +78,27 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
           });
         } else {
           const results = res.data[guppyConfig.type];
-          const hasMore = res.data._aggregation[guppyConfig.type]._totalCount !== offset + results.length;
+          const totalCount = res.data._aggregation[guppyConfig.type]._totalCount;
           resolve({
             options: results.map((result) => ({ value: result[field], label: result[field] })),
-            hasMore,
+            hasMore: totalCount > offset + results.length,
           });
         }
       }).catch((err) => {
-        console.error(err);
         reject(err);
       });
   });
 };
 
 export const getFilterSections = (
-  fields, searchFields, fieldMapping, tabsOptions, initialTabsOptions, adminAppliedPreFilters, guppyConfig,
+  fields, searchFields, fieldMapping, tabsOptions,
+  initialTabsOptions, adminAppliedPreFilters, guppyConfig,
 ) => {
-  // searchFields are all of the fields that use Guppy's search feature to search
-  // over a specific field, e.g. file GUID / subject ID.
   let searchFieldSections = [];
   if (searchFields) {
+    // Process searchFields first -- searchFields are special filters that allow the user
+    // to search over all options, instead of displaying all options in a list. This allows
+    // guppy/portal to support filters that have too many options to be displayed in a list.
     searchFieldSections = searchFields.map((field) => {
       const overrideName = fieldMapping.find((entry) => (entry.field === field));
       const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
@@ -109,6 +110,8 @@ export const getFilterSections = (
         );
       }
 
+      // For searchFields, don't pass all options to the component, only the selected ones.
+      // This allows selected options to appear below the search box once they are selected.
       let selectedOptions = [];
       if (tabsOptionsFiltered && tabsOptionsFiltered.histogram) {
         selectedOptions = getSingleFilterOption(
