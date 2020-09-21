@@ -291,7 +291,6 @@ export const askGuppyForRawData = (
 };
 
 export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs
-  // TODO modify to include searchFields?? Or not... figure out if we need this for auth or sth
   .reduce((acc, cur) => acc.concat(cur.fields), []);
 
 /**
