@@ -31,6 +31,7 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   const textOptions = histogramResult.histogram.map((item) => ({
     text: item.key,
     filterType: 'singleSelect',
+    isArrayType: item.hasOwnProperty('isArrayType') ? item.isArrayType : false,
     count: item.count,
     accessible: item.accessible,
   }));
