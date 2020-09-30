@@ -305,4 +305,41 @@ const getFilterObj = (
   return resultFilterObj;
 };
 
+/**
+ * Takes in preexisting filter and combines with match filter.
+ *
+ * TODO: should we target particular fields?
+ * TODO: evaluate performance and how satisfactory the results are
+ *
+ * @param {*} filterObj
+ * @param {*} searchInput
+ */
+export const buildMatchQuery = (filterObj, searchInput) => {
+  const multiMatch = {
+    multi_match:
+    {
+      query: searchInput,
+      analyzer: 'whitespace',
+      operator: 'and',
+      type: 'best_fields',
+    },
+  };
+
+  // contains at minimum authorization terms
+  const query = JSON.parse(JSON.stringify(filterObj));
+
+  const combinedQuery = {
+    bool: {
+      must: [
+        {
+          ...query,
+        },
+        multiMatch,
+      ],
+    },
+  };
+
+  return combinedQuery;
+};
+
 export default getFilterObj;

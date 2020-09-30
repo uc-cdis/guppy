@@ -2,7 +2,7 @@ import { Client } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { UserInputError } from 'apollo-server';
 import config from '../config';
-import getFilterObj from './filter';
+import getFilterObj, { buildMatchQuery } from './filter';
 import getESSortBody from './sort';
 import * as esAggregator from './aggs';
 import log from '../logger';
@@ -41,6 +41,7 @@ class ES {
         validatedQueryBody[key] = queryBody[key];
       }
     });
+
     validatedQueryBody.highlight = {
       pre_tags: [
         `<${config.matchedTextHighlightTagName}>`,
@@ -52,7 +53,9 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
+
     log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
+
     return this.client.search({
       index: esIndex,
       type: esType,
@@ -328,21 +331,31 @@ class ES {
   filterData(
     { esIndex, esType },
     {
-      filter, fields, sort, offset = 0, size,
+      filter, fields, sort, offset = 0, size, searchInput,
     },
   ) {
     const queryBody = { from: offset };
+
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, filter);
+      const filterObj = getFilterObj(this, esIndex, filter);
+
+      let combinedQuery = filterObj;
+      if (typeof searchInput !== 'undefined') {
+        combinedQuery = buildMatchQuery(filterObj, searchInput);
+      }
+      queryBody.query = combinedQuery;
     }
+
     queryBody.sort = getESSortBody(sort, this, esIndex);
     if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
+
     if (fields) {
       const esFields = fromFieldsToSource(fields);
       if (esFields.length > 0) queryBody._source = esFields;
     }
+
     return this.query(esIndex, esType, queryBody);
   }
 
@@ -355,17 +368,17 @@ class ES {
   }
 
   async getData({
-    esIndex, esType, fields, filter, sort, offset, size,
+    esIndex, esType, fields, filter, sort, offset, size, searchInput,
   }) {
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE}, 
+      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
       please use download endpoint for large data queries instead.`);
     }
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
       {
-        filter, fields, sort, offset, size,
+        filter, fields, sort, offset, size, searchInput,
       },
     );
     const { hits } = result.hits;

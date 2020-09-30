@@ -2,7 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
-import { firstLetterUpperCase, buildNestedFieldMapping } from './utils/utils';
+import { firstLetterUpperCase, buildNestedFieldMapping, fromFieldsToSource } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
@@ -13,11 +13,12 @@ import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/con
  */
 const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, context, resolveInfo) => {
   const {
-    offset, first, filter, sort,
+    offset, first, filter, sort, searchInput,
   } = args;
   const fields = parseResolveInfo(resolveInfo);
+
   return esInstance.getData({
-    esIndex, esType, fields, filter, sort, offset, size: first,
+    esIndex, esType, fields, filter, sort, offset, size: first, searchInput,
   });
 };
 
