@@ -2,7 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
-import { firstLetterUpperCase, buildNestedFieldMapping, fromFieldsToSource } from './utils/utils';
+import { firstLetterUpperCase, buildNestedFieldMapping } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
