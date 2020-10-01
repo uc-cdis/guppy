@@ -143,7 +143,7 @@ class ConnectedFilter extends React.Component {
       console.log('(ConnectedFilter) getFilterTabs() fieldMapping: ', fieldMapping);
       console.log('(ConnectedFilter) getFilterTabs() fields: ', fields);
       console.log('(ConnectedFilter) getFilterTabs() processedTabsOptions: ', processedTabsOptions);
-      console.log('(ConnectedFilter) getFilterTabs() this.state.initialAggsData: ', this.state.initialAggsData);
+      
       return <FilterList
         key={index}
         sections={
