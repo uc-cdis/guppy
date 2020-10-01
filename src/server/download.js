@@ -4,6 +4,8 @@ import esInstance from './es/index';
 import log from './logger';
 import config from './config';
 import CodedError from './utils/error';
+import rs from 'jsrsasign';
+
 
 const downloadRouter = async (req, res, next) => {
   const {
@@ -13,7 +15,24 @@ const downloadRouter = async (req, res, next) => {
   log.debug('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexByType(type);
   const jwt = headerParser.parseJWT(req);
+  const signature = headerParser.parseSignature(req);
   const authHelper = await getAuthHelperInstance(jwt);
+
+
+  var data = req.body;
+  data = JSON.stringify(data);
+
+  const public_key_text = config.public_key;
+  const hashmessage = signature
+  var public_key = rs.KEYUTIL.getKey(public_key_text);
+  var isValid = public_key.verify(data, hashmessage)  
+
+  if (isValid) {
+    log.info("VALID")
+  }
+  else {
+    log.info("NOT VALID")
+  }
 
   try {
     let appliedFilter;
@@ -27,13 +46,13 @@ const downloadRouter = async (req, res, next) => {
      */
     switch (config.tierAccessLevel) {
       case 'private': {
-        appliedFilter = authHelper.applyAccessibleFilter(filter);
+        appliedFilter = authHelper.applyAccessibleFilter(filter=filter, skipUserAuthz=isValid);
         break;
       }
       case 'regular': {
         log.debug('[download] regular commons');
         if (accessibility === 'accessible') {
-          appliedFilter = authHelper.applyAccessibleFilter(filter);
+          appliedFilter = authHelper.applyAccessibleFilter(filter=filter, skipUserAuthz=isValid);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
             esIndex, type, filter,
