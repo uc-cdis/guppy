@@ -26,13 +26,8 @@ const downloadRouter = async (req, res, next) => {
   const hashmessage = signature
   var public_key = rs.KEYUTIL.getKey(public_key_text);
   var isValid = public_key.verify(data, hashmessage)  
+  log.debug('The body signature has been decoded: ', isValid);
 
-  if (isValid) {
-    log.info("VALID")
-  }
-  else {
-    log.info("NOT VALID")
-  }
 
   try {
     let appliedFilter;
@@ -46,13 +41,12 @@ const downloadRouter = async (req, res, next) => {
      */
     switch (config.tierAccessLevel) {
       case 'private': {
-        appliedFilter = authHelper.applyAccessibleFilter(filter=filter, skipUserAuthz=isValid);
+        appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         break;
       }
       case 'regular': {
-        log.debug('[download] regular commons');
         if (accessibility === 'accessible') {
-          appliedFilter = authHelper.applyAccessibleFilter(filter=filter, skipUserAuthz=isValid);
+          appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
             esIndex, type, filter,
