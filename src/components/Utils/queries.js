@@ -446,31 +446,3 @@ export const getAccessibleResources = async (
   });
   return { accessibleFieldObject, unaccessibleFieldObject };
 };
-
-export const guppySinglefieldSearch = (path, type, keyword, field, numResults) => {
-  const query = `query ($filter: JSON) {
-    ${type} (filter: $filter, first: ${numResults}) {
-      ${field}
-      _matched {
-        field
-        highlights
-      }
-    }
-  }`;
-  const filter = `{
-    "search": {
-      "keyword": "${keyword}",
-      "fields":  "${field}",
-    }
-  }`;
-  const queryBody = { query };
-  queryBody.variables.filter = filter;
-
-  return fetch(`${path}${graphqlEndpoint}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(queryBody),
-  }).then((response) => response.json());
-};
