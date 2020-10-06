@@ -377,7 +377,11 @@ export const askGuppyForTotalCounts = (
     },
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
-    .then((response) => response.data._aggregation[type]._totalCount)
+    .then((response) => { 
+      console.log('queries.js type: ', type);
+      console.log('queries.js response.data._aggregation: ', response.data._aggregation);
+      return response.data._aggregation[type]._totalCount;
+    })
     .catch((err) => {
       throw new Error(`Error during download ${err}`);
     });
