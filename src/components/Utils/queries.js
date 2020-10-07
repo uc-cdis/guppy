@@ -370,6 +370,9 @@ export const askGuppyForTotalCounts = (
   const queryBody = { query };
   queryBody.variables = {};
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
+
+  console.log('sending this query to ', graphqlEndpoint, ': ', JSON.stringify(queryBody));
+
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
