@@ -138,13 +138,8 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-
-    const tabs = this.props.filterConfig.tabs.map(function({ fields }, index) {
-      console.log('(ConnectedFilter) getFilterTabs() fieldMapping: ', fieldMapping);
-      console.log('(ConnectedFilter) getFilterTabs() fields: ', fields);
-      console.log('(ConnectedFilter) getFilterTabs() processedTabsOptions: ', processedTabsOptions);
-      
-      return <FilterList
+    const tabs = this.props.filterConfig.tabs.map(({ fields }, index) => (
+      <FilterList
         key={index}
         sections={
           getFilterSections(fields, fieldMapping, processedTabsOptions,
@@ -154,7 +149,7 @@ class ConnectedFilter extends React.Component {
         lockedTooltipMessage={this.props.lockedTooltipMessage}
         disabledTooltipMessage={this.props.disabledTooltipMessage}
       />
-      });
+    ));
     return tabs;
   }
 
