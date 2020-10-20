@@ -1,4 +1,5 @@
 import config from '../config';
+import log from '../logger';
 
 export const firstLetterUpperCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -127,5 +128,13 @@ export const buildNestedFieldMapping = (field, parent) => {
     nestedFields,
     newParent,
   ));
+  return resultArray;
+};
+
+export const filterFieldMapping = (fieldArray) => (parent, args) => {
+  const { searchInput } = args;
+  const regEx = new RegExp(searchInput);
+  log.debug('utils [filterFieldMapping] searchInput', searchInput);
+  const resultArray = fieldArray.filter((field) => regEx.test(field));
   return resultArray;
 };

@@ -2,7 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
-import { firstLetterUpperCase, buildNestedFieldMapping } from './utils/utils';
+import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
@@ -16,7 +16,6 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
     offset, first, filter, sort, searchInput,
   } = args;
   const fields = parseResolveInfo(resolveInfo);
-
   return esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size: first, searchInput,
   });
@@ -236,10 +235,13 @@ const getResolver = (esConfig, esInstance) => {
   }, {});
 
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
-    log.debug(`${cfg.index} `, esInstance.getESFields(cfg.index));
-    acc[cfg.type] = () => (_.flattenDeep(
-      esInstance.getESFields(cfg.index).fields.map((f) => buildNestedFieldMapping(f)),
-    ));
+    acc[cfg.type] = filterFieldMapping(
+      _.flattenDeep(
+        esInstance.getESFields(cfg.index).fields.map(
+          (f) => buildNestedFieldMapping(f),
+        ),
+      ),
+    );
     return acc;
   }, {});
 
