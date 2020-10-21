@@ -222,7 +222,9 @@ export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => e
 
 export const getMappingSchema = (esConfig) => `
     type Mapping {
-      ${esConfig.indices.map((cfg) => `${cfg.type}: [String]`).join('\n')}
+      ${esConfig.indices.map((cfg) => `${cfg.type} (
+        searchInput: String,
+      ): [String]`).join('\n')}
     }
   `;
 
