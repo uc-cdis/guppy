@@ -15,27 +15,109 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
   test('object format sort arg', async () => {
     await esInstance.initialize();
     const graphQLSort1 = { gender: 'asc' };
-    const expectedESSort1 = [{ gender: 'asc' }];
+    const expectedESSort1 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+    ];
     const resultESSort1 = getESSortBody(graphQLSort1, esInstance, esIndex);
     expect(resultESSort1).toEqual(expectedESSort1);
 
     const graphQLSort2 = { gender: 'asc', file_count: 'desc' };
-    const expectedESSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
+    const expectedESSort2 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+    ];
     const resultESSort2 = getESSortBody(graphQLSort2, esInstance, esIndex);
     expect(resultESSort2).toEqual(expectedESSort2);
+
+    const graphQLSort3 = { gender: 'asc', file_count: 'desc', 'visits.visit_label': 'asc' };
+    const expectedESSort3 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+      {
+        'visits.visit_label': {
+          nested: {
+            path: 'visits',
+          },
+          order: 'asc',
+        },
+      },
+    ];
+    const resultESSort3 = getESSortBody(graphQLSort3, esInstance, esIndex);
+    expect(resultESSort3).toEqual(expectedESSort3);
   });
 
   test('array format sort arg', async () => {
     await esInstance.initialize();
     const graphQLSort1 = [{ gender: 'asc' }];
-    const expectedESSort1 = [{ gender: 'asc' }];
+    const expectedESSort1 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+    ];
     const resultESSort1 = getESSortBody(graphQLSort1, esInstance, esIndex);
     expect(resultESSort1).toEqual(expectedESSort1);
 
     const graphQLSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
-    const expectedESSort2 = [{ gender: 'asc' }, { file_count: 'desc' }];
+    const expectedESSort2 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+    ];
     const resultESSort2 = getESSortBody(graphQLSort2, esInstance, esIndex);
     expect(resultESSort2).toEqual(expectedESSort2);
+
+    const graphQLSort3 = [{ gender: 'asc' }, { file_count: 'desc' }, { 'visits.visit_label': 'asc' }];
+    const expectedESSort3 = [
+      {
+        gender: {
+          order: 'asc',
+        },
+      },
+      {
+        file_count: {
+          order: 'desc',
+        },
+      },
+      {
+        'visits.visit_label': {
+          nested: {
+            path: 'visits',
+          },
+          order: 'asc',
+        },
+      },
+    ];
+    const resultESSort3 = getESSortBody(graphQLSort3, esInstance, esIndex);
+    expect(resultESSort3).toEqual(expectedESSort3);
   });
 
   test('array format sort arg with nonexisting field', async () => {
@@ -54,6 +136,11 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
       const graphQLSort = { gender: 'female', invalid_field: 'asc' };
       getESSortBody(graphQLSort, esInstance, esIndex);
     }).toThrow(UserInputError);
+
+    expect(() => {
+      const graphQLSort = [{ gender: 'female', 'visits.invalid_field': 'asc' }];
+      getESSortBody(graphQLSort, esInstance, esIndex);
+    }).toThrow(UserInputError);
   });
 
   test('array format sort arg with invalid method', async () => {
@@ -70,6 +157,11 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
 
     expect(() => {
       const graphQLSort = { gender: 'asc', file_count: 'invalid_method' };
+      getESSortBody(graphQLSort, esInstance, esIndex);
+    }).toThrow(UserInputError);
+
+    expect(() => {
+      const graphQLSort = { gender: 'asc', 'visits.visit_label': 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
     }).toThrow(UserInputError);
   });
