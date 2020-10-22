@@ -235,6 +235,7 @@ const getResolver = (esConfig, esInstance) => {
   }, {});
 
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
+    log.debug(`${cfg.index} `, esInstance.getESFields(cfg.index));
     acc[cfg.type] = filterFieldMapping(
       _.flattenDeep(
         esInstance.getESFields(cfg.index).fields.map(
