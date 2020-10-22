@@ -133,8 +133,8 @@ describe('Schema', () => {
 
   const expectedMappingSchema = `
     type Mapping {
-      subject: [String]
-      file: [String]
+      subject(searchInput: String): [String]
+      file(searchInput: String): [String]
     }`;
   test('could create mapping schema', async () => {
     const mappingSchema = getMappingSchema(config.esConfig);
