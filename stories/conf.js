@@ -39,9 +39,10 @@ export const tableConfig = [
 ];
 
 export const guppyConfig = {
-  path: 'http://localhost:80',
+  path: 'http://localhost:3000',
   type: 'subject',
   fileType: 'file',
+  tierAccessLimit: 20,
 };
 
 export const fieldMapping = [

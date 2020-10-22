@@ -61,7 +61,6 @@ describe('will select user-applied filter for a given key if it is more exclusiv
   });
 });
 
-
 describe('can update a small set of tabs with new counts', () => {
   const initialTabsOptions = {
     annotated_sex: {
@@ -168,7 +167,7 @@ describe('can update a small set of tabs with new counts, test with ranger slide
     },
     field2: {
       histogram: [
-        { key: [0, 100], count: 49 },
+        { key: [4, 39], count: 49 },
       ],
     },
   };
@@ -182,7 +181,6 @@ describe('can update a small set of tabs with new counts, test with ranger slide
       .toEqual(expectedUpdatedTabsOptions);
   });
 });
-
 
 describe('can sort tabs options', () => {
   const tabsOptionsOne = {
