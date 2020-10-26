@@ -340,6 +340,7 @@ GuppyWrapper.propTypes = {
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
       fields: PropTypes.arrayOf(PropTypes.string),
+      searchFields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
   rawDataFields: PropTypes.arrayOf(PropTypes.string),

@@ -143,7 +143,7 @@ const rawDataQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForRawDataAndTotalCounts = (
+export const queryGuppyForRawDataAndTotalCounts = (
   path,
   type,
   fields,
