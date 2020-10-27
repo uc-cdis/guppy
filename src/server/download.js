@@ -18,15 +18,19 @@ const downloadRouter = async (req, res, next) => {
   const signature = headerParser.parseSignature(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
+  var isValid = false;
+  try {
+    var data = req.body;
+    data = JSON.stringify(data);
 
-  var data = req.body;
-  data = JSON.stringify(data);
-
-  const public_key_text = config.public_key;
-  const hashmessage = signature
-  var public_key = rs.KEYUTIL.getKey(public_key_text);
-  var isValid = public_key.verify(data, hashmessage)  
-  log.debug('The body signature has been decoded: ', isValid);
+    const hashmessage = signature
+    var public_key = req.app.locals.publicKey;
+    isValid = public_key.verify(data, hashmessage) 
+  } catch (err) {
+      log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
+      isValid = false;
+  }
+  log.info('The body signature has been decoded: ', isValid);
 
 
   try {

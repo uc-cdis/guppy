@@ -11,6 +11,7 @@ import config from './config';
 import log from './logger';
 import middlewares from './middlewares';
 import headerParser from './utils/headerParser';
+import { loadPublicKey } from './utils/utils';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
@@ -18,6 +19,12 @@ import CodedError from './utils/error';
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
+
+//Load public key
+app.locals.publicKey = loadPublicKey();
+if (app.locals.publicKey == null) {
+  log.error("[PUBLIC KEY] Failed loading public key.");
+}
 
 const startServer = () => {
   // build schema and resolvers by parsing elastic search fields and types,
