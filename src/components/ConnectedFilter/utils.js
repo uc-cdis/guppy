@@ -1,7 +1,7 @@
 import flat from 'flat';
 import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
-import esInstance from './es/index';
-import config from './config';
+import esInstance from '../../server/es/index';
+import config from '../../server/config';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
