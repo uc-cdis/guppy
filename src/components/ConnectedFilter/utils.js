@@ -1,5 +1,7 @@
 import flat from 'flat';
 import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
+import esInstance from './es/index';
+import config from './config';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
@@ -121,10 +123,17 @@ export const getFilterSections = (
         );
       }
 
+      console.log('guppy is now checking whether this is an array field: ', field);
+      let indices = config.esConfig.indices;
+      console.log('indices: ', indices);
+      let isArrayField = esInstance.isArrayField(esIndex, field);
+      console.log('got: ', isArrayField);
+
       return {
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
+        isArrayFilter: isArrayField,
         onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
       };
     });
