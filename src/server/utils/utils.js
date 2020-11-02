@@ -1,5 +1,6 @@
 import config from '../config';
 import log from '../logger';
+import rs from 'jsrsasign';
 
 export const firstLetterUpperCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -39,6 +40,23 @@ export const isWhitelisted = (key) => {
   const lowerCasedKey = (typeof key === 'string') ? key.toLowerCase() : key;
   return lowerCasedWhitelist.includes(lowerCasedKey);
 };
+
+export const loadPublicKey = () => {
+  const publicKeyText = config.public_key;
+
+  if (!publicKeyText || 0 === publicKeyText.length) {
+    return null
+  }
+
+  try {
+    var publicKey = rs.KEYUTIL.getKey(publicKeyText);
+    return publicKey;
+  } catch (err) {
+      log.error('[KEY LOAD] error when loading the public key', err);
+  }
+  
+  return null;
+}
 
 /**
  * Convert from fields of graphql query produced by graphql library to list of querying fields
