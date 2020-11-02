@@ -1,4 +1,5 @@
 import config from '../config';
+import log from '../logger';
 import rs from 'jsrsasign';
 
 export const firstLetterUpperCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -116,6 +117,26 @@ export const buildNestedField = (key, value) => {
   return builtObj;
 };
 
+/**
+ * This function takes a nested field object and parses names of each field
+ * by concatenating `.` to parent and child field names recursively.
+ * The returned object is a nested array, which will be deeply flattened later.
+ * @param field: a nested field object (with `nestedProps`)
+ */
+export const processNestedFieldNames = (field) => {
+  const resultArray = [];
+  field.nestedProps.forEach((prop) => {
+    if (prop.nestedProps) {
+      const newField = { ...prop };
+      newField.name = `${field.name}.${prop.name}`;
+      resultArray.push(processNestedFieldNames(newField));
+    } else {
+      resultArray.push(`${field.name}.${prop.name}`);
+    }
+  });
+  return resultArray;
+};
+
 export const buildNestedFieldMapping = (field, parent) => {
   if (!field.nestedProps) {
     return (parent) ? `${parent}.${field.name}` : field.name;
@@ -125,5 +146,13 @@ export const buildNestedFieldMapping = (field, parent) => {
     nestedFields,
     newParent,
   ));
+  return resultArray;
+};
+
+export const filterFieldMapping = (fieldArray) => (parent, args) => {
+  const { searchInput } = args;
+  const regEx = new RegExp(searchInput);
+  log.debug('utils [filterFieldMapping] searchInput', searchInput);
+  const resultArray = fieldArray.filter((field) => regEx.test(field));
   return resultArray;
 };

@@ -2,7 +2,7 @@ import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
-import { firstLetterUpperCase, buildNestedFieldMapping } from './utils/utils';
+import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 
 /**
@@ -146,7 +146,6 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   return fieldAggregationResolverMappings;
 };
 
-
 /**
  * Tree-structured resolvers pass down arguments.
  * For better understanding, following is an example query, and related resolvers for each level:
@@ -237,9 +236,13 @@ const getResolver = (esConfig, esInstance) => {
 
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
     log.debug(`${cfg.index} `, esInstance.getESFields(cfg.index));
-    acc[cfg.type] = () => (_.flattenDeep(
-      esInstance.getESFields(cfg.index).fields.map((f) => buildNestedFieldMapping(f)),
-    ));
+    acc[cfg.type] = filterFieldMapping(
+      _.flattenDeep(
+        esInstance.getESFields(cfg.index).fields.map(
+          (f) => buildNestedFieldMapping(f),
+        ),
+      ),
+    );
     return acc;
   }, {});
 

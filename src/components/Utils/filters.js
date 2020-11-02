@@ -75,8 +75,18 @@ export const updateCountsInInitialTabsOptions = (
           if (flattenProcessedTabsOptions[`${field}`]
             && flattenProcessedTabsOptions[`${field}`].length > 0
             && updatedTabsOptions[`${actualFieldName}`].histogram) {
-            const newCount = flattenProcessedTabsOptions[`${field}`][0].count;
-            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = newCount;
+            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = flattenProcessedTabsOptions[`${field}`][0].count;
+            const newKey = [0, 0];
+            if (flattenProcessedTabsOptions[`${field}`][0].key[0]) {
+              // because of the prefer-destructuring eslint rule
+              const newLowerBound = flattenProcessedTabsOptions[`${field}`][0].key[0];
+              newKey[0] = newLowerBound;
+            }
+            if (flattenProcessedTabsOptions[`${field}`][0].key[1]) {
+              const newHigherBound = flattenProcessedTabsOptions[`${field}`][0].key[1];
+              newKey[1] = newHigherBound;
+            }
+            updatedTabsOptions[`${actualFieldName}`].histogram[0].key = newKey;
           }
           return;
         }

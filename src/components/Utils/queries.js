@@ -70,7 +70,7 @@ const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
           key
           count
         }
-      } 
+      }
     }
   }`);
 
@@ -129,7 +129,21 @@ const queryGuppyForSubAgg = (
     });
 };
 
-const queryGuppyForRawDataAndTotalCounts = (
+const rawDataQueryStrForEachField = (field) => {
+  const splittedFieldArray = field.split('.');
+  const splittedField = splittedFieldArray.shift();
+  if (splittedFieldArray.length === 0) {
+    return (`
+    ${splittedField}
+    `);
+  }
+  return (`
+  ${splittedField} {
+    ${rawDataQueryStrForEachField(splittedFieldArray.join('.'))}
+  }`);
+};
+
+export const queryGuppyForRawDataAndTotalCounts = (
   path,
   type,
   fields,
@@ -151,12 +165,13 @@ const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter) {
     typeAggsLine = `${type} (filter: $filter, accessibility: ${accessibility}) {`;
   }
+  const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
   const query = `${queryLine}
-    ${dataTypeLine} 
-      ${fields.join('\n')}
+    ${dataTypeLine}
+      ${processedFields.join('\n')}
     }
     _aggregation {
-      ${typeAggsLine} 
+      ${typeAggsLine}
         _totalCount
       }
     }
@@ -317,7 +332,6 @@ export const downloadDataFromGuppy = (
       throw Error('Error downloading data from Guppy');
     });
 };
-
 
 export const askGuppyForTotalCounts = (
   path,
