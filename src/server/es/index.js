@@ -239,6 +239,7 @@ class ES {
       } catch (err) {
         throw new Error(err);
       }
+      console.log('\n\nguppy got array fields: ', arrayFields, '\n\n');
       return arrayFields;
     }, (err) => {
       throw new Error(err.message);
