@@ -322,6 +322,12 @@ class ES {
    * Get all es indices and their alias
    */
   getAllESIndices() {
+    // this.fieldTypes = await this._getMappingsForAllIndices();
+    // this.arrayFields = await this._getArrayFieldsFromConfigIndex();
+
+    console.log('inside getAllESIndices with this.arrayFields ', this.arrayFields);
+    console.log('inside getAllESIndices with this.config.configIndex ', this.config.configIndex);
+    
     const indicesArray = this.config.indices.map((e) => e.index);
     if (this.config.configIndex) {
       indicesArray.push(this.config.configIndex);
@@ -330,11 +336,13 @@ class ES {
       index: indicesArray,
     }).then((resp) => {
       try {
+        let indicesMetadata = resp.body;
+        indicesMetadata[this.config.configIndex]["arrayFields"] = this.arrayFields;
         return {
           statusCode: resp.statusCode,
           warnings: resp.warnings,
           indices: {
-            ...resp.body,
+            ...indicesMetadata,
           },
         };
       } catch (err) {
