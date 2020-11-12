@@ -337,7 +337,10 @@ class ES {
     }).then((resp) => {
       try {
         let indicesMetadata = resp.body;
-        indicesMetadata[this.config.configIndex]["arrayFields"] = this.arrayFields;
+        for (var key in this.arrayFields) {
+          indicesMetadata[key]["arrayFields"] = this.arrayFields[key];
+        }
+        
         return {
           statusCode: resp.statusCode,
           warnings: resp.warnings,
@@ -346,6 +349,7 @@ class ES {
           },
         };
       } catch (err) {
+        console.log('error: ', err);
         throw new Error(err);
       }
     }, (err) => {
