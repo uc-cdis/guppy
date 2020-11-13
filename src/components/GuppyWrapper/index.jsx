@@ -9,6 +9,7 @@ import {
   getAllFieldsFromGuppy,
   getAccessibleResources,
   askGuppyForSubAggregationData,
+  queryGuppyForRawDataAndTotalCounts,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
@@ -285,6 +286,48 @@ class GuppyWrapper extends React.Component {
     this.setState({ accessibility: accessLevel });
   }
 
+  searchInFiltersAndValues(searchString) {
+    const NUM_SEARCH_OPTIONS = 20;
+    return new Promise((resolve, reject) => {
+      // If searchString is empty return just the first NUM_SEARCH_OPTIONS options.
+      // This allows the client to show default options in the search filter before
+      // the user has started searching.
+      let filter = {};
+      if (searchString) {
+        filter = {
+          search: {
+            keyword: searchString,
+            fields: this.state.allFields,
+          },
+        };
+      }
+      queryGuppyForRawDataAndTotalCounts(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.state.allFields,
+        filter,
+        undefined,
+        0, // offset, FIXME may want to take another look at this
+        NUM_SEARCH_OPTIONS,
+        'accessible',
+      )
+        .then((res) => {
+          if (!res.data || !res.data[this.props.guppyConfig.type]) {
+            resolve([]);
+          } else {
+            const results = res.data[this.props.guppyConfig.type];
+            if (results) {
+              resolve(results);
+            } else {
+              reject(new Error(`Could not parse search query results from Guppy: ${JSON.stringify(res, null, 2)}`));
+            }
+          }
+        }).catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
   render() {
     return (
       <>
@@ -303,6 +346,9 @@ class GuppyWrapper extends React.Component {
             allFields: this.state.allFields,
             accessibleFieldObject: this.state.accessibleFieldObject,
             unaccessibleFieldObject: this.state.unaccessibleFieldObject,
+
+            // handle search queries
+            searchInFiltersAndValues: this.searchInFiltersAndValues.bind(this),
 
             // a callback function which return total counts for any type, with any filter
             getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
@@ -349,8 +395,8 @@ GuppyWrapper.propTypes = {
 };
 
 GuppyWrapper.defaultProps = {
-  onReceiveNewAggsData: () => {},
-  onFilterChange: () => {},
+  onReceiveNewAggsData: () => { },
+  onFilterChange: () => { },
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},

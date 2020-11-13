@@ -169,6 +169,10 @@ export const queryGuppyForRawDataAndTotalCounts = (
   const query = `${queryLine}
     ${dataTypeLine}
       ${processedFields.join('\n')}
+      _matched {
+        field
+        highlights
+      }
     }
     _aggregation {
       ${typeAggsLine}
