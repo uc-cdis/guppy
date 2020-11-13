@@ -338,6 +338,9 @@ class ES {
       try {
         let indicesMetadata = resp.body;
         for (var key in this.arrayFields) {
+          if(!indicesMetadata[key]) {
+            indicesMetadata[key] = {};
+          }
           indicesMetadata[key]["arrayFields"] = this.arrayFields[key];
         }
         
