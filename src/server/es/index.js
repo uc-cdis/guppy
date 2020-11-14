@@ -326,7 +326,6 @@ class ES {
     if (this.config.configIndex) {
       indicesArray.push(this.config.configIndex);
     }
-    indicesArray['fieldTypes'] = this.fieldTypes;
     return this.client.indices.getAlias({
       index: indicesArray,
     }).then((resp) => {
@@ -338,6 +337,7 @@ class ES {
           }
           indicesMetadata[key]["arrayFields"] = this.arrayFields[key];
         }
+        indicesMetadata['fieldTypes'] = this.fieldTypes;
         
         return {
           statusCode: resp.statusCode,
