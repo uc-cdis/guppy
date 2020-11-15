@@ -331,12 +331,13 @@ class ES {
     }).then((resp) => {
       try {
         const indicesMetadata = resp.body;
-        const keys = Object.keys(this.arrayFields);
-        for (let i = 0; i < keys.length; i += 1) {
-          if (!indicesMetadata[keys[i]]) {
-            indicesMetadata[keys[i]] = {};
+        const indicesWithArrayFields = Object.keys(this.arrayFields);
+        for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
+          const indexName = indicesWithArrayFields[i];
+          if (!indicesMetadata[indexName]) {
+            indicesMetadata[indexName] = {};
           }
-          indicesMetadata[keys[i]].arrayFields = this.arrayFields[keys[i]];
+          indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
         }
         indicesMetadata.fieldTypes = this.fieldTypes;
 
