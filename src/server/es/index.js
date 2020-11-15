@@ -330,15 +330,16 @@ class ES {
       index: indicesArray,
     }).then((resp) => {
       try {
-        let indicesMetadata = resp.body;
-        for (var key in this.arrayFields) {
-          if(!indicesMetadata[key]) {
-            indicesMetadata[key] = {};
+        const indicesMetadata = resp.body;
+        const keys = Object.keys(this.arrayFields);
+        for (let i = 0; i < keys.length; i += 1) {
+          if (!indicesMetadata[keys[i]]) {
+            indicesMetadata[keys[i]] = {};
           }
-          indicesMetadata[key]["arrayFields"] = this.arrayFields[key];
+          indicesMetadata[keys[i]].arrayFields = this.arrayFields[keys[i]];
         }
-        indicesMetadata['fieldTypes'] = this.fieldTypes;
-        
+        indicesMetadata.fieldTypes = this.fieldTypes;
+
         return {
           statusCode: resp.statusCode,
           warnings: resp.warnings,
@@ -347,7 +348,6 @@ class ES {
           },
         };
       } catch (err) {
-        console.log('error: ', err);
         throw new Error(err);
       }
     }, (err) => {

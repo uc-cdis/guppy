@@ -1,4 +1,3 @@
-
 import esInstance from './es/index';
 import { gitVersion, gitCommit } from './version';
 
