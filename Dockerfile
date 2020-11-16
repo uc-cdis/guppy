@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM quay.io/cdis/ubuntu:16.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -16,8 +16,8 @@ RUN apt-get update \
 COPY . /guppy/
 WORKDIR /guppy
 
-RUN COMMIT=`git rev-parse HEAD` && echo "export const guppyCommit = \"${COMMIT}\";" >versions.js
-RUN VERSION=`git describe --always --tags` && echo "export const guppyVersion =\"${VERSION}\";" >>versions.js
+RUN COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js
+RUN VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js
 RUN /bin/rm -rf .git
 RUN /bin/rm -rf node_modules
 
