@@ -330,11 +330,20 @@ class ES {
       index: indicesArray,
     }).then((resp) => {
       try {
+        const indicesMetadata = resp.body;
+        const indicesWithArrayFields = Object.keys(this.arrayFields);
+        for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
+          const indexName = indicesWithArrayFields[i];
+          if (!indicesMetadata[indexName]) {
+            indicesMetadata[indexName] = {};
+          }
+          indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
+        }
         return {
           statusCode: resp.statusCode,
           warnings: resp.warnings,
           indices: {
-            ...resp.body,
+            ...indicesMetadata,
           },
         };
       } catch (err) {
