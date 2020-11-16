@@ -339,7 +339,6 @@ class ES {
           }
           indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
         }
-        indicesMetadata.fieldTypes = this.fieldTypes;
 
         return {
           statusCode: resp.statusCode,
