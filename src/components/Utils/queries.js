@@ -56,14 +56,12 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   }).then((response) => response.json());
 };
 
-const queryGuppyForStatus = () => {
-  return fetch(`${path}${statusEndpoint}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }).then((response) => response.json());
-};
+const queryGuppyForStatus = (path) => fetch(`${path}${statusEndpoint}`, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+}).then((response) => response.json());
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
   ${mainField} {
@@ -267,15 +265,11 @@ export const askGuppyAboutAllFieldsAndOptions = (
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-export const askGuppyAboutArrayTypes = (
-  path, type,
-) => {
-  return queryGuppyForStatus(path, type, fields, gqlFilter, accessibility).then((res) => {
-    const resJSON = res.json();
-    console.log('274 resJSON: ', resJSON);
-    return resJSON['indices'];
-  });
-};
+export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => {
+  const resJSON = res.json();
+  console.log('274 resJSON: ', resJSON);
+  return resJSON.indices;
+});
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
@@ -400,7 +394,7 @@ export const askGuppyForTotalCounts = (
     },
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
-    .then((response) => { 
+    .then((response) => {
       console.log('queries.js type: ', type);
       console.log('queries.js response.data._aggregation: ', response.data._aggregation);
       return response.data._aggregation[type]._totalCount;

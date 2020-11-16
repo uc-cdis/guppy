@@ -11,6 +11,7 @@ import {
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
   askGuppyAboutAllFieldsAndOptions,
+  askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
@@ -70,11 +71,11 @@ class ConnectedFilter extends React.Component {
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
-    
-      askGuppyAboutArrayTypes().then((res) => {
-        console.log('74 res: ', res);
-        this.arrayFields = res;
-      });
+
+    askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
+      console.log('74 res: ', res);
+      this.arrayFields = res;
+    });
   }
 
   /**
