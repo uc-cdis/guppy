@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM quay.io/cdis/ubuntu:16.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
