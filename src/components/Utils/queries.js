@@ -2,6 +2,7 @@ import fetch from 'isomorphic-fetch';
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
+const statusEndpoint = '/_status';
 
 const histogramQueryStrForEachField = (field) => {
   const splittedFieldArray = field.split('.');
@@ -52,6 +53,15 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
+  }).then((response) => response.json());
+};
+
+const queryGuppyForStatus = () => {
+  return fetch(`${path}${statusEndpoint}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   }).then((response) => response.json());
 };
 
@@ -255,6 +265,16 @@ export const askGuppyAboutAllFieldsAndOptions = (
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+};
+
+export const askGuppyAboutArrayTypes = (
+  path, type,
+) => {
+  return queryGuppyForStatus(path, type, fields, gqlFilter, accessibility).then((res) => {
+    const resJSON = res.json();
+    console.log('274 resJSON: ', resJSON);
+    return resJSON['indices'];
+  });
 };
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {

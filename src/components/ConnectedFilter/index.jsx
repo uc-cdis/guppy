@@ -42,6 +42,7 @@ class ConnectedFilter extends React.Component {
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
+    this.arrayFields = null;
   }
 
   componentDidMount() {
@@ -68,6 +69,11 @@ class ConnectedFilter extends React.Component {
           this.state.adminAppliedPreFilters,
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
+      });
+    
+      askGuppyAboutArrayTypes().then((res) => {
+        console.log('74 res: ', res);
+        this.arrayFields = res;
       });
   }
 
@@ -257,6 +263,7 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        arrayFields={this.arrayFields}
       />
     );
   }
