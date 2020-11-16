@@ -266,9 +266,8 @@ export const askGuppyAboutAllFieldsAndOptions = (
 };
 
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => {
-  const resJSON = res.json();
-  console.log('274 resJSON: ', resJSON);
-  return resJSON.indices;
+  console.log('274 res: ', res);
+  return res.indices;
 });
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
