@@ -73,8 +73,15 @@ class ConnectedFilter extends React.Component {
       });
 
     askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
-      console.log('74 res: ', res);
-      this.arrayFields = res;
+      this.arrayFields = [];
+      let indices = Object.keys(res);
+      // Exclude indices without arrayFields
+      for (let i = 0; i < indices; i += 1) {
+        if(res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
+          this.arrayFields.push(res[keys[i]]);
+        }
+      }
+      console.log(this.props.filterConfig);
     });
   }
 
