@@ -182,11 +182,12 @@ class ConnectedFilter extends React.Component {
         key={index}
         sections={
           getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters, this.props.guppyConfig)
+            this.state.initialAggsData, this.state.adminAppliedPreFilters, this.props.guppyConfig, this.arrayFields)
         }
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
         disabledTooltipMessage={this.props.disabledTooltipMessage}
+        arrayFields={this.arrayFields}
       />
     ));
     return tabs;
@@ -271,7 +272,6 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
-        arrayFields={this.arrayFields}
       />
     );
   }

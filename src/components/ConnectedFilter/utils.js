@@ -95,7 +95,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
 
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig,
+  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields
 ) => {
   let searchFieldSections = [];
   if (searchFields) {
@@ -124,16 +124,21 @@ export const getFilterSections = (
       }
 
       console.log('guppy is now checking whether this is an array field: ', field);
-      // let indices = config.esConfig.indices;
-      // console.log('indices: ', indices);
-      // let isArrayField = esInstance.isArrayField(esIndex, field);
-      // console.log('got: ', isArrayField);
+      console.log('guppyConfig: ', guppyConfig);
+      let isArrayField = false;
+      let keys = Object.keys(this.props.arrayFields);
+      for(let i = 0; i < keys.length; i += 1) {
+        if(this.props.arrayFields[keys[i]].includes(field)) {
+          isArrayField = true;
+        }
+      }
+      console.log('135 isArrayField: ', isArrayField);
 
       return {
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        // isArrayFilter: isArrayField,
+        isArrayField: isArrayField,
         onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
       };
     });
