@@ -107,5 +107,15 @@ npm start
 >
 > (E.g., `"tier_access_sensitive_record_exclusion_field": "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
 
-### Download Endpoint:
-Guppy has another special endpoint `/download` for just fetching raw data from elasticsearch. please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for more details.
+### Additional Guppy Endpoints:
+Guppy has a special endpoint `/download` for just fetching raw data from elasticsearch. This endpoint can be used to overcome Elastic Search's 10k record limit. Please see [here](https://github.com/uc-cdis/guppy/blob/master/doc/download.md) for details.
+
+Guppy's `/_status` endpoint yields health check and array field information. This endpoint is publicly accessible and returns output of the form
+```
+{"statusCode":200,"warnings":null,"indices":{"<index-name>":{"aliases":{"alias-name":{}},"arrayFields":["<name-of-array-field>"]}}}
+```
+
+The `/_version` endpoint yields version and commit information. This endpoint is publicly accessible and returns output of the form
+```
+{"version":"<version-string>","commit":"<commit-hash>"}
+```
