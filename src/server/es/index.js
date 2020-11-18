@@ -319,6 +319,42 @@ class ES {
   }
 
   /**
+   * Get all es indices and their alias
+   */
+  getAllESIndices() {
+    const indicesArray = this.config.indices.map((e) => e.index);
+    if (this.config.configIndex) {
+      indicesArray.push(this.config.configIndex);
+    }
+    return this.client.indices.getAlias({
+      index: indicesArray,
+    }).then((resp) => {
+      try {
+        const indicesMetadata = resp.body;
+        const indicesWithArrayFields = Object.keys(this.arrayFields);
+        for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
+          const indexName = indicesWithArrayFields[i];
+          if (!indicesMetadata[indexName]) {
+            indicesMetadata[indexName] = {};
+          }
+          indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
+        }
+        return {
+          statusCode: resp.statusCode,
+          warnings: resp.warnings,
+          indices: {
+            ...indicesMetadata,
+          },
+        };
+      } catch (err) {
+        throw new Error(err);
+      }
+    }, (err) => {
+      throw new Error(err);
+    });
+  }
+
+  /**
    * Check if the field is array
    */
   isArrayField(esIndex, field) {
