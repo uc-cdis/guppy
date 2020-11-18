@@ -93,6 +93,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    console.log('getFilterTabs was called');
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -106,6 +107,7 @@ class ConnectedFilter extends React.Component {
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
+    console.log('getFilterTabs 110');
     if (Object.keys(this.state.filtersApplied).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
@@ -174,8 +176,10 @@ class ConnectedFilter extends React.Component {
     } else {
       processedTabsOptions = sortTabsOptions(processedTabsOptions);
     }
+    console.log('getFilterTabs 179');
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
+    console.log('getFilterTabs 182');
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList
