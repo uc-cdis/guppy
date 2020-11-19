@@ -13,6 +13,7 @@ import {
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
+import { capitalizeFirstLetter } from '../ConnectedFilter/utils';
 
 /**
  * Wrapper that connects to Guppy server,
@@ -287,45 +288,115 @@ class GuppyWrapper extends React.Component {
   }
 
   searchInFiltersAndValues(searchString) {
-    const NUM_SEARCH_OPTIONS = 20;
+    // First, search in local filters and values that match this search term.
     return new Promise((resolve, reject) => {
-      // If searchString is empty return just the first NUM_SEARCH_OPTIONS options.
-      // This allows the client to show default options in the search filter before
-      // the user has started searching.
-      let filter = {};
-      if (searchString) {
-        filter = {
-          search: {
-            keyword: searchString,
-            fields: this.state.allFields,
-          },
-        };
+      // all we need to do is search over aggsData (?)
+
+      const HIGHLIGHT_START = '<em>';
+      const HIGHLIGHT_END = '</em>';
+      const matches = {
+        filters: [], // format: [highlighted filters]
+        values: {}, // format: { [filter]: [{value: string, matched: string, count: number}] }
+      };
+      if (searchString.trim() === '') {
+        resolve(matches);
+        return;
       }
-      queryGuppyForRawDataAndTotalCounts(
-        this.props.guppyConfig.path,
-        this.props.guppyConfig.type,
-        this.state.allFields,
-        filter,
-        undefined,
-        0, // offset, FIXME may want to take another look at this
-        NUM_SEARCH_OPTIONS,
-        'accessible',
-      )
-        .then((res) => {
-          if (!res.data || !res.data[this.props.guppyConfig.type]) {
-            resolve([]);
-          } else {
-            const results = res.data[this.props.guppyConfig.type];
-            if (results) {
-              resolve(results);
-            } else {
-              reject(new Error(`Could not parse search query results from Guppy: ${JSON.stringify(res, null, 2)}`));
+      const keyword = searchString.toLowerCase();
+      // search over filters; add highlights to filters
+      // Find the visible titles of the filters -- search over the filters that are configured
+      // and apply the mapping from actual filter name to display name if present
+      let visibleFilters = [];
+      this.props.filterConfig.tabs.forEach((tab) => {
+        visibleFilters = visibleFilters.concat(tab.fields);
+        visibleFilters = visibleFilters.concat(tab.searchFields);
+      });
+
+      const fieldMapping = {};
+      this.props.guppyConfig.fieldMapping.forEach(({ field, name }) => {
+        fieldMapping[field] = name;
+      });
+      visibleFilters = visibleFilters.map((filter) => {
+        // FIXME temporary -- copied over from utils.js
+        // Consider making into a getDisplayName fn or something
+        const overrideName = fieldMapping[filter];
+        const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
+        return label;
+      });
+      for (let i = 0; i < visibleFilters.length; i += 1) {
+        const filter = visibleFilters[i];
+        const filterLower = filter.toLowerCase();
+        const matchIdx = filterLower.indexOf(keyword);
+        if (matchIdx >= 0) {
+          // add highlight tags where searchString matches
+          let highlightedFilter = filter;
+          highlightedFilter = filter.slice(0, matchIdx) + HIGHLIGHT_START + filter.slice(matchIdx, matchIdx + keyword.length) + HIGHLIGHT_END + filter.slice(matchIdx + keyword.length);
+          matches.filters.push(highlightedFilter);
+        }
+      }
+
+      // search over local values in aggsData
+      const { aggsData } = this.state;
+      Object.entries(aggsData).forEach(([filter, { histogram }]) => {
+        histogram.forEach(({ count, key }) => {
+          const value = key;
+          const matchIdx = value.toLowerCase().indexOf(keyword);
+          if (matchIdx >= 0) {
+            // add highlight tags where searchString matches
+            let highlightedValue = value;
+            highlightedValue = value.slice(0, matchIdx) + HIGHLIGHT_START + value.slice(matchIdx, matchIdx + keyword.length) + HIGHLIGHT_END + value.slice(matchIdx + keyword.length);
+            if (!matches.values[filter]) {
+              matches.values[filter] = [];
             }
+            matches.values[filter].push({ value, matched: highlightedValue, count });
           }
-        }).catch((err) => {
-          reject(err);
         });
+      });
+
+      console.log('matches', matches);
+      // search over searchFields
+
+      resolve(matches);
     });
+    // Then, search for values in searchFilters that match this search term.
+    // const NUM_SEARCH_OPTIONS = 20;
+    //   // If searchString is empty return just the first NUM_SEARCH_OPTIONS options.
+    //   // This allows the client to show default options in the search filter before
+    //   // the user has started searching.
+    //   let filter = {};
+    //   if (searchString) {
+    //     filter = {
+    //       search: {
+    //         keyword: searchString,
+    //         fields: this.state.allFields,
+    //       },
+    //     };
+    //   }
+    //   queryGuppyForRawDataAndTotalCounts(
+    //     this.props.guppyConfig.path,
+    //     this.props.guppyConfig.type,
+    //     this.state.allFields,
+    //     filter,
+    //     undefined,
+    //     0, // offset, FIXME may want to take another look at this
+    //     NUM_SEARCH_OPTIONS,
+    //     'accessible',
+    //   )
+    //     .then((res) => {
+    //       if (!res.data || !res.data[this.props.guppyConfig.type]) {
+    //         resolve([]);
+    //       } else {
+    //         const results = res.data[this.props.guppyConfig.type];
+    //         if (results) {
+    //           resolve(results);
+    //         } else {
+    //           reject(new Error(`Could not parse search query results from Guppy: ${JSON.stringify(res, null, 2)}`));
+    //         }
+    //       }
+    //     }).catch((err) => {
+    //       reject(err);
+    //     });
+    // });
   }
 
   render() {
@@ -375,6 +446,10 @@ GuppyWrapper.propTypes = {
     mainField: PropTypes.string,
     mainFieldIsNumeric: PropTypes.bool,
     aggFields: PropTypes.array,
+    fieldMapping: PropTypes.arrayOf(PropTypes.shape({
+      field: PropTypes.string,
+      name: PropTypes.string,
+    })),
   }).isRequired,
   children: PropTypes.oneOfType([
     PropTypes.arrayOf(PropTypes.node),
