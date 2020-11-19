@@ -172,11 +172,22 @@ export const getFilterSections = (
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
+    let fieldIsArrayField = checkIsArrayField(field, arrayFields);
+    console.log('176 field: ', field);
+    console.log('177 default options: ', defaultOptions);
+    console.log('178 fieldIsArrayField: ', fieldIsArrayField);
+
+
+
     return {
       title: label,
       options: defaultOptions,
     };
   });
+  
+  console.log('yee default options: ', sections);
+  //console.log('yee fields: ', fields);
+  //console.log('yee arrayFields: ', arrayFields);
   return searchFieldSections.concat(sections);
 };
 
