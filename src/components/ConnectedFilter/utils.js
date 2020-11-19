@@ -93,11 +93,27 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
   });
 };
 
+export const checkIsArrayField = (field, arrayFields) => {
+  console.log('guppy is now checking whether this is an array field: ', field);
+  console.log('guppyConfig: ', guppyConfig);
+  let isArrayField = false;
+  let keys = Object.keys(arrayFields);
+  for(let i = 0; i < keys.length; i += 1) {
+    if(this.props.arrayFields[keys[i]].includes(field)) {
+      isArrayField = true;
+    }
+  }
+  console.log('106 ay ay isArrayField: ', isArrayField);
+  return isArrayField;
+}
+
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields
 ) => {
   let searchFieldSections = [];
+  console.log('1115 YEEEEEE');
+
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
     // to search over all options, instead of displaying all options in a list. This allows
@@ -123,22 +139,18 @@ export const getFilterSections = (
         );
       }
 
-      console.log('guppy is now checking whether this is an array field: ', field);
-      console.log('guppyConfig: ', guppyConfig);
-      let isArrayField = false;
-      let keys = Object.keys(this.props.arrayFields);
-      for(let i = 0; i < keys.length; i += 1) {
-        if(this.props.arrayFields[keys[i]].includes(field)) {
-          isArrayField = true;
-        }
-      }
-      console.log('135 isArrayField: ', isArrayField);
+      console.log('made it to the search fields block');
+      console.log('142 field: ', field);
+      console.log('143 label: ', label);
+      console.log('144 arrayFields: ', arrayFields);
+      let fieldIsArrayField = checkIsArrayField(field, arrayFields);
 
+      
       return {
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        isArrayField: isArrayField,
+        isArrayField: fieldIsArrayField,
         onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
       };
     });
