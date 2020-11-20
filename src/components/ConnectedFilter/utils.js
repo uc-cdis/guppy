@@ -95,7 +95,6 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
 
 export const checkIsArrayField = (field, arrayFields) => {
   console.log('guppy is now checking whether this is an array field: ', field);
-  console.log('guppyConfig: ', guppyConfig);
   let isArrayField = false;
   let keys = Object.keys(arrayFields);
   for(let i = 0; i < keys.length; i += 1) {
@@ -112,7 +111,7 @@ export const getFilterSections = (
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields
 ) => {
   let searchFieldSections = [];
-  console.log('1115 YEEEEEE');
+  console.log('1115 YEEEEEE guppyConfig: ', guppyConfig);
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
