@@ -171,7 +171,6 @@ export const getFilterSections = (
     );
 
     let fieldIsArrayField = checkIsArrayField(field, arrayFields);
-    defaultOptions.isArrayField = fieldIsArrayField;
     console.log('176 field: ', field);
     console.log('177 default options: ', defaultOptions);
     console.log('178 fieldIsArrayField: ', fieldIsArrayField);
@@ -182,6 +181,7 @@ export const getFilterSections = (
     return {
       title: label,
       options: defaultOptions,
+      isArrayField: fieldIsArrayField,
     };
   });
   
