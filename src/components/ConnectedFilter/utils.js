@@ -34,7 +34,6 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   const textOptions = histogramResult.histogram.map((item) => ({
     text: item.key,
     filterType: 'singleSelect',
-    isArrayType: item.hasOwnProperty('isArrayType') ? item.isArrayType : false,
     count: item.count,
     accessible: item.accessible,
   }));
@@ -94,15 +93,15 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
 };
 
 export const checkIsArrayField = (field, arrayFields) => {
-  console.log('guppy is now checking whether this is an array field: ', field);
   let isArrayField = false;
   let keys = Object.keys(arrayFields);
   for(let i = 0; i < keys.length; i += 1) {
-    if(this.props.arrayFields[keys[i]].includes(field)) {
+    console.log('comparing to ', arrayFields[keys[i]]);
+    if(arrayFields[keys[i]].includes(field)) {
       isArrayField = true;
     }
   }
-  console.log('106 ay ay isArrayField: ', isArrayField);
+  console.log('is ', field, ' is an array field? ', isArrayField);
   return isArrayField;
 }
 
@@ -172,9 +171,11 @@ export const getFilterSections = (
     );
 
     let fieldIsArrayField = checkIsArrayField(field, arrayFields);
+    defaultOptions.isArrayField = fieldIsArrayField;
     console.log('176 field: ', field);
     console.log('177 default options: ', defaultOptions);
     console.log('178 fieldIsArrayField: ', fieldIsArrayField);
+    console.log('179 arrayFields: ', arrayFields);
 
 
 
