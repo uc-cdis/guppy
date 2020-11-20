@@ -15,6 +15,12 @@ import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 import { capitalizeFirstLetter } from '../ConnectedFilter/utils';
 
+const getFilterDisplayName = (filter, fieldMapping) => {
+  const overrideName = fieldMapping.find((entry) => (entry.field === filter));
+  const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
+  return label;
+};
+
 /**
  * Wrapper that connects to Guppy server,
  * and pass filter, aggs, and data to children components
@@ -311,18 +317,7 @@ class GuppyWrapper extends React.Component {
         visibleFilters = visibleFilters.concat(tab.fields);
         visibleFilters = visibleFilters.concat(tab.searchFields);
       });
-
-      const fieldMapping = {};
-      this.props.guppyConfig.fieldMapping.forEach(({ field, name }) => {
-        fieldMapping[field] = name;
-      });
-      visibleFilters = visibleFilters.map((filter) => {
-        // FIXME temporary -- copied over from utils.js
-        // Consider making into a getDisplayName fn or something
-        const overrideName = fieldMapping[filter];
-        const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
-        return label;
-      });
+      visibleFilters = visibleFilters.map((filter) => getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping));
       for (let i = 0; i < visibleFilters.length; i += 1) {
         const filter = visibleFilters[i];
         const filterLower = filter.toLowerCase();
@@ -345,58 +340,73 @@ class GuppyWrapper extends React.Component {
             // add highlight tags where searchString matches
             let highlightedValue = value;
             highlightedValue = value.slice(0, matchIdx) + HIGHLIGHT_START + value.slice(matchIdx, matchIdx + keyword.length) + HIGHLIGHT_END + value.slice(matchIdx + keyword.length);
-            if (!matches.values[filter]) {
-              matches.values[filter] = [];
+            const filterDisplayName = getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping);
+            if (!matches.values[filterDisplayName]) {
+              matches.values[filterDisplayName] = [];
             }
-            matches.values[filter].push({ value, matched: highlightedValue, count });
+            matches.values[filterDisplayName].push({ value, matched: highlightedValue, count });
           }
         });
       });
 
-      console.log('matches', matches);
       // search over searchFields
-
-      resolve(matches);
+      const NUM_SEARCH_OPTIONS = 20;
+      const allSearchFields = [];
+      this.props.filterConfig.tabs.forEach((tab) => {
+        allSearchFields.push(...tab.searchFields);
+      });
+      const filter = {
+        search: {
+          keyword: searchString,
+          fields: allSearchFields,
+        },
+      };
+      queryGuppyForRawDataAndTotalCounts(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        allSearchFields,
+        filter,
+        undefined,
+        0, // offset, FIXME may want to take another look at this
+        NUM_SEARCH_OPTIONS,
+        'accessible',
+      )
+        .then((res) => {
+          if (!res.data || !res.data[this.props.guppyConfig.type]) {
+            resolve([]);
+          } else {
+            const results = res.data[this.props.guppyConfig.type];
+            // Add the results we got from Guppy into matches
+            // NOTE @mpingram possibility of race conditions here if this callback
+            // modifies matches at the same time as code above?
+            if (results) {
+              results.forEach((entry) => {
+                // eslint-disable-next-line no-underscore-dangle
+                if (!entry._matched) {
+                  throw new Error(`Failed to find _matched in entry ${entry}`);
+                }
+                // eslint-disable-next-line no-underscore-dangle
+                entry._matched.forEach((match) => {
+                  match.highlights.forEach((highlight) => {
+                    const { field } = match;
+                    const filterDisplayName = getFilterDisplayName(field, this.props.guppyConfig.fieldMapping);
+                    if (!matches.values[filterDisplayName]) {
+                      matches.values[filterDisplayName] = [];
+                    }
+                    // FIXME -- figure out how to deal with highlight and count here
+                    matches.values[filterDisplayName].push({ value: highlight, matched: highlight, count: 1 });
+                  });
+                });
+              });
+              resolve(matches);
+            } else {
+              reject(new Error(`Could not parse search query results from Guppy: ${JSON.stringify(res, null, 2)}`));
+            }
+          }
+        }).catch((err) => {
+          reject(err);
+        });
     });
-    // Then, search for values in searchFilters that match this search term.
-    // const NUM_SEARCH_OPTIONS = 20;
-    //   // If searchString is empty return just the first NUM_SEARCH_OPTIONS options.
-    //   // This allows the client to show default options in the search filter before
-    //   // the user has started searching.
-    //   let filter = {};
-    //   if (searchString) {
-    //     filter = {
-    //       search: {
-    //         keyword: searchString,
-    //         fields: this.state.allFields,
-    //       },
-    //     };
-    //   }
-    //   queryGuppyForRawDataAndTotalCounts(
-    //     this.props.guppyConfig.path,
-    //     this.props.guppyConfig.type,
-    //     this.state.allFields,
-    //     filter,
-    //     undefined,
-    //     0, // offset, FIXME may want to take another look at this
-    //     NUM_SEARCH_OPTIONS,
-    //     'accessible',
-    //   )
-    //     .then((res) => {
-    //       if (!res.data || !res.data[this.props.guppyConfig.type]) {
-    //         resolve([]);
-    //       } else {
-    //         const results = res.data[this.props.guppyConfig.type];
-    //         if (results) {
-    //           resolve(results);
-    //         } else {
-    //           reject(new Error(`Could not parse search query results from Guppy: ${JSON.stringify(res, null, 2)}`));
-    //         }
-    //       }
-    //     }).catch((err) => {
-    //       reject(err);
-    //     });
-    // });
   }
 
   render() {
