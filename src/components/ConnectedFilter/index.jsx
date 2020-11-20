@@ -77,7 +77,7 @@ class ConnectedFilter extends React.Component {
       let indices = Object.keys(res);
       console.log('inside askGuppyAboutArrayTypes with: ', indices);
 
-      for (let i = 0; i < indices; i += 1) {
+      for (let i = 0; i < indices.length; i += 1) {
         console.log('res[keys[i]].arrayFields: ', res[keys[i]].arrayFields);
         if(res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
           this.arrayFields.push(res[keys[i]]);
