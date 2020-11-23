@@ -317,7 +317,9 @@ class GuppyWrapper extends React.Component {
         visibleFilters = visibleFilters.concat(tab.fields);
         visibleFilters = visibleFilters.concat(tab.searchFields);
       });
-      visibleFilters = visibleFilters.map((filter) => getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping));
+      visibleFilters = visibleFilters.map(
+        (filter) => getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping),
+      );
       for (let i = 0; i < visibleFilters.length; i += 1) {
         const filter = visibleFilters[i];
         const filterLower = filter.toLowerCase();
@@ -325,7 +327,11 @@ class GuppyWrapper extends React.Component {
         if (matchIdx >= 0) {
           // add highlight tags where searchString matches
           let highlightedFilter = filter;
-          highlightedFilter = filter.slice(0, matchIdx) + HIGHLIGHT_START + filter.slice(matchIdx, matchIdx + keyword.length) + HIGHLIGHT_END + filter.slice(matchIdx + keyword.length);
+          highlightedFilter = filter.slice(0, matchIdx)
+            + HIGHLIGHT_START
+            + filter.slice(matchIdx, matchIdx + keyword.length)
+            + HIGHLIGHT_END
+            + filter.slice(matchIdx + keyword.length);
           matches.filters.push(highlightedFilter);
         }
       }
@@ -339,8 +345,15 @@ class GuppyWrapper extends React.Component {
           if (matchIdx >= 0) {
             // add highlight tags where searchString matches
             let highlightedValue = value;
-            highlightedValue = value.slice(0, matchIdx) + HIGHLIGHT_START + value.slice(matchIdx, matchIdx + keyword.length) + HIGHLIGHT_END + value.slice(matchIdx + keyword.length);
-            const filterDisplayName = getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping);
+            highlightedValue = value.slice(0, matchIdx)
+              + HIGHLIGHT_START
+              + value.slice(matchIdx, matchIdx + keyword.length)
+              + HIGHLIGHT_END
+              + value.slice(matchIdx + keyword.length);
+            const filterDisplayName = getFilterDisplayName(
+              filter,
+              this.props.guppyConfig.fieldMapping,
+            );
             if (!matches.values[filterDisplayName]) {
               matches.values[filterDisplayName] = [];
             }
@@ -389,12 +402,17 @@ class GuppyWrapper extends React.Component {
                 entry._matched.forEach((match) => {
                   match.highlights.forEach((highlight) => {
                     const { field } = match;
-                    const filterDisplayName = getFilterDisplayName(field, this.props.guppyConfig.fieldMapping);
+                    const filterDisplayName = getFilterDisplayName(
+                      field,
+                      this.props.guppyConfig.fieldMapping,
+                    );
                     if (!matches.values[filterDisplayName]) {
                       matches.values[filterDisplayName] = [];
                     }
                     // FIXME -- figure out how to deal with highlight and count here
-                    matches.values[filterDisplayName].push({ value: highlight, matched: highlight, count: 1 });
+                    matches.values[filterDisplayName].push(
+                      { value: highlight, matched: highlight, count: 1 },
+                    );
                   });
                 });
               });
