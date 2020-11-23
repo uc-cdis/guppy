@@ -43,7 +43,7 @@ class ConnectedFilter extends React.Component {
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
-    this.arrayFields = null;
+    this.arrayFields = [];
   }
 
   componentDidMount() {
