@@ -15,11 +15,17 @@ import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 import { capitalizeFirstLetter } from '../ConnectedFilter/utils';
 
-const getFilterDisplayName = (filter, fieldMapping) => {
-  const overrideName = fieldMapping.find((entry) => (entry.field === filter));
-  const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
-  return label;
-};
+// const getFilterDisplayName = (filter, fieldMapping) => {
+//   const overrideName = fieldMapping.find((entry) => (entry.field === filter));
+//   const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
+//   return label;
+// };
+
+// removeHighlightTags takes a string which has tags embedded in it indicating the start
+// and end of a highlight. It removes these tags, leaving the original value.
+const removeHighlightTags = (highlight, tagOpen = '<em>', tagClose = '</em>') => highlight
+  .replace(tagOpen, '')
+  .replace(tagClose, '');
 
 /**
  * Wrapper that connects to Guppy server,
@@ -317,9 +323,9 @@ class GuppyWrapper extends React.Component {
         visibleFilters = visibleFilters.concat(tab.fields);
         visibleFilters = visibleFilters.concat(tab.searchFields);
       });
-      visibleFilters = visibleFilters.map(
-        (filter) => getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping),
-      );
+      // visibleFilters = visibleFilters.map(
+      //   (filter) => getFilterDisplayName(filter, this.props.guppyConfig.fieldMapping),
+      // );
       for (let i = 0; i < visibleFilters.length; i += 1) {
         const filter = visibleFilters[i];
         const filterLower = filter.toLowerCase();
@@ -350,14 +356,14 @@ class GuppyWrapper extends React.Component {
               + value.slice(matchIdx, matchIdx + keyword.length)
               + HIGHLIGHT_END
               + value.slice(matchIdx + keyword.length);
-            const filterDisplayName = getFilterDisplayName(
-              filter,
-              this.props.guppyConfig.fieldMapping,
-            );
-            if (!matches.values[filterDisplayName]) {
-              matches.values[filterDisplayName] = [];
+            // const filterDisplayName = getFilterDisplayName(
+            //   filter,
+            //   this.props.guppyConfig.fieldMapping,
+            // );
+            if (!matches.values[filter]) {
+              matches.values[filter] = [];
             }
-            matches.values[filterDisplayName].push({ value, matched: highlightedValue, count });
+            matches.values[filter].push({ value, matched: highlightedValue, count });
           }
         });
       });
@@ -402,16 +408,19 @@ class GuppyWrapper extends React.Component {
                 entry._matched.forEach((match) => {
                   match.highlights.forEach((highlight) => {
                     const { field } = match;
-                    const filterDisplayName = getFilterDisplayName(
-                      field,
-                      this.props.guppyConfig.fieldMapping,
-                    );
-                    if (!matches.values[filterDisplayName]) {
-                      matches.values[filterDisplayName] = [];
+                    // const filterDisplayName = getFilterDisplayName(
+                    //   field,
+                    //   this.props.guppyConfig.fieldMapping,
+                    // );
+                    if (!matches.values[field]) {
+                      matches.values[field] = [];
                     }
                     // FIXME -- figure out how to deal with highlight and count here
-                    matches.values[filterDisplayName].push(
-                      { value: highlight, matched: highlight, count: 1 },
+                    // The backend doesn't tell us what the original value was, it
+                    // only gives us the highlight, so we need to reverse-engineer it
+                    // by stripping out the highlight tags.
+                    matches.values[field].push(
+                      { value: removeHighlightTags(highlight), matched: highlight, count: 1 },
                     );
                   });
                 });

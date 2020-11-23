@@ -39,6 +39,7 @@ class ConnectedFilter extends React.Component {
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...this.props.adminAppliedPreFilters },
       filtersApplied: {},
+      filterGroupFilterStatus: {}, // copy of filterStatus from FilterGroup; used for selected values override (see componentDidUpdate method)
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -69,6 +70,20 @@ class ConnectedFilter extends React.Component {
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
+  }
+
+  componentDidUpdate(prevProps) {
+    // Trigger filter change if props.selectedValuesOverride has changed.
+    // Allows parent components to select values in ConnectedFilter.
+    if (this.props.selectedValuesOverride !== prevProps.selectedValuesOverride) {
+      // Merge the new filter status with the existing filter status
+      const newFilterStatus = mergeFilters(
+        this.state.filterGroupFilterStatus,
+        this.props.selectedValuesOverride,
+      );
+      // Trigger a filter change, as though user selected a filter.
+      this.handleFilterChange(newFilterStatus);
+    }
   }
 
   /**
@@ -203,7 +218,11 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    console.log('filterResults', filterResults);
+    this.setState({
+      adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen),
+      filterGroupFilterStatus: filterResults,
+    });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
     askGuppyForAggregationData(
@@ -285,6 +304,7 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  selectedValuesOverride: PropTypes.object, // FIXME specify shape
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
