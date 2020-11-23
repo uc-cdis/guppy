@@ -80,10 +80,9 @@ class ConnectedFilter extends React.Component {
       for (let i = 0; i < keys.length; i += 1) {
         console.log('res[keys[i]].arrayFields: ', res[keys[i]].arrayFields);
         if(res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
-          this.arrayFields.concat(res[keys[i]]);
+          this.arrayFields.concat(res[keys[i]].arrayFields);
         }
       }
-      console.log(this.props.filterConfig);
       console.log('askGuppyAboutArrayTypes set arrayFields to ', this.arrayFields);
       
       
