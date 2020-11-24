@@ -265,7 +265,6 @@ export const askGuppyAboutAllFieldsAndOptions = (
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-// eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => {
   return res.indices;
 });
