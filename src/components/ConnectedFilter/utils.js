@@ -134,13 +134,10 @@ export const getFilterSections = (
         );
       }
 
-      const fieldIsArrayField = checkIsArrayField(field, arrayFields);
-
       return {
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        isArrayField: fieldIsArrayField,
         onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
       };
     });
