@@ -265,9 +265,8 @@ export const askGuppyAboutAllFieldsAndOptions = (
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
-export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => {
-  return res.indices;
-});
+// eslint-disable-next-line max-len
+export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
@@ -390,9 +389,7 @@ export const askGuppyForTotalCounts = (
     },
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
-    .then((response) => {
-      return response.data._aggregation[type]._totalCount;
-    })
+    .then((response) => response.data._aggregation[type]._totalCount)
     .catch((err) => {
       throw new Error(`Error during download ${err}`);
     });

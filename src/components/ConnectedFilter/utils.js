@@ -94,18 +94,18 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
 
 export const checkIsArrayField = (field, arrayFields) => {
   let isArrayField = false;
-  let keys = Object.keys(arrayFields);
-  for(let i = 0; i < keys.length; i += 1) {
-    if(arrayFields[keys[i]].includes(field)) {
+  const keys = Object.keys(arrayFields);
+  for (let i = 0; i < keys.length; i += 1) {
+    if (arrayFields[keys[i]].includes(field)) {
       isArrayField = true;
     }
   }
   return isArrayField;
-}
+};
 
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields
+  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
 
@@ -134,7 +134,7 @@ export const getFilterSections = (
         );
       }
 
-      let fieldIsArrayField = checkIsArrayField(field, arrayFields);
+      const fieldIsArrayField = checkIsArrayField(field, arrayFields);
 
       return {
         title: label,
@@ -162,8 +162,8 @@ export const getFilterSections = (
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
-    let fieldIsArrayField = checkIsArrayField(field, arrayFields);
-    
+    const fieldIsArrayField = checkIsArrayField(field, arrayFields);
+
     return {
       title: label,
       options: defaultOptions,

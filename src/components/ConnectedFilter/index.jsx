@@ -74,14 +74,61 @@ class ConnectedFilter extends React.Component {
 
     askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
       this.arrayFields = [];
-      let keys = Object.keys(res);
+      const keys = Object.keys(res);
 
       for (let i = 0; i < keys.length; i += 1) {
-        if(res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
+        if (res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
           this.arrayFields = this.arrayFields.concat(res[keys[i]].arrayFields);
         }
-      }      
+      }
     });
+  }
+
+  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+    this.setState({ receivedAggsData });
+    if (this.props.onReceiveNewAggsData) {
+      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
+      this.props.onReceiveNewAggsData(resultAggsData);
+    }
+  }
+
+  /**
+   * Handler function that is called everytime filter changes
+   * What this function does:
+   * 1. Ask guppy for aggregation data using (processed) filter
+   * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
+   *    to process new received agg data
+   * 3. If there's `onFilterChange` callback function from parent, call it
+   * @param {object} filterResults
+   */
+  handleFilterChange(filterResults) {
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
+    this.setState({ filtersApplied: mergedFilterResults });
+    askGuppyForAggregationData(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.allFields,
+      mergedFilterResults,
+      this.state.accessibility,
+    )
+      .then((res) => {
+        this.handleReceiveNewAggsData(
+          res.data._aggregation[this.props.guppyConfig.type],
+          mergedFilterResults,
+        );
+      });
+
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
+    }
+  }
+
+  setFilter(filter) {
+    if (this.filterGroupRef.current) {
+      this.filterGroupRef.current.resetFilter();
+    }
+    this.handleFilterChange(filter);
   }
 
   /**
@@ -92,7 +139,6 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -183,7 +229,8 @@ class ConnectedFilter extends React.Component {
         key={index}
         sections={
           getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters, this.props.guppyConfig, this.arrayFields)
+            this.state.initialAggsData, this.state.adminAppliedPreFilters,
+            this.props.guppyConfig, this.arrayFields)
         }
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
@@ -192,53 +239,6 @@ class ConnectedFilter extends React.Component {
       />
     ));
     return tabs;
-  }
-
-  setFilter(filter) {
-    if (this.filterGroupRef.current) {
-      this.filterGroupRef.current.resetFilter();
-    }
-    this.handleFilterChange(filter);
-  }
-
-  handleReceiveNewAggsData(receivedAggsData, filterResults) {
-    this.setState({ receivedAggsData });
-    if (this.props.onReceiveNewAggsData) {
-      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData);
-    }
-  }
-
-  /**
-   * Handler function that is called everytime filter changes
-   * What this function does:
-   * 1. Ask guppy for aggregation data using (processed) filter
-   * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
-   *    to process new received agg data
-   * 3. If there's `onFilterChange` callback function from parent, call it
-   * @param {object} filterResults
-   */
-  handleFilterChange(filterResults) {
-    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
-    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
-    this.setState({ filtersApplied: mergedFilterResults });
-    askGuppyForAggregationData(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      this.state.allFields,
-      mergedFilterResults,
-      this.state.accessibility,
-    )
-      .then((res) => {
-        this.handleReceiveNewAggsData(
-          res.data._aggregation[this.props.guppyConfig.type],
-          mergedFilterResults,
-        );
-      });
-
-    if (this.props.onFilterChange) {
-      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
-    }
   }
 
   /**
