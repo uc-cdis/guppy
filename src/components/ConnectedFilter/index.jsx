@@ -75,19 +75,12 @@ class ConnectedFilter extends React.Component {
     askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
       this.arrayFields = [];
       let keys = Object.keys(res);
-      console.log('inside askGuppyAboutArrayTypes with: ', keys);
 
       for (let i = 0; i < keys.length; i += 1) {
-        console.log('res[keys[i]].arrayFields: ', res[keys[i]].arrayFields);
         if(res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
           this.arrayFields = this.arrayFields.concat(res[keys[i]].arrayFields);
-          console.log('84!!!!!!!!! ', this.arrayFields.concat(res[keys[i]].arrayFields));
         }
-      }
-      console.log('askGuppyAboutArrayTypes set arrayFields to ', this.arrayFields);
-      
-      
-      
+      }      
     });
   }
 
@@ -99,7 +92,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    console.log('getFilterTabs was called');
+    
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -113,7 +106,7 @@ class ConnectedFilter extends React.Component {
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
-    console.log('getFilterTabs 110');
+
     if (Object.keys(this.state.filtersApplied).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
@@ -182,10 +175,8 @@ class ConnectedFilter extends React.Component {
     } else {
       processedTabsOptions = sortTabsOptions(processedTabsOptions);
     }
-    console.log('getFilterTabs 179');
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
-    console.log('getFilterTabs 182');
     const { fieldMapping } = this.props;
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList

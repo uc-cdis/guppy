@@ -266,7 +266,6 @@ export const askGuppyAboutAllFieldsAndOptions = (
 };
 
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => {
-  console.log('274 res: ', res);
   return res.indices;
 });
 
@@ -384,8 +383,6 @@ export const askGuppyForTotalCounts = (
   queryBody.variables = {};
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
 
-  console.log('sending this query to ', graphqlEndpoint, ': ', JSON.stringify(queryBody));
-
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
@@ -394,8 +391,6 @@ export const askGuppyForTotalCounts = (
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .then((response) => {
-      console.log('queries.js type: ', type);
-      console.log('queries.js response.data._aggregation: ', response.data._aggregation);
       return response.data._aggregation[type]._totalCount;
     })
     .catch((err) => {

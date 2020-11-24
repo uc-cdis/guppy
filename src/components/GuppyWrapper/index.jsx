@@ -70,7 +70,6 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
     ).then((fields) => {
-      console.log('return value of getAllFieldsFromGuppy: ', fields);
       const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
         ? this.props.rawDataFields : fields;
       this.setState({

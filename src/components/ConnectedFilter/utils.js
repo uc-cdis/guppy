@@ -96,12 +96,10 @@ export const checkIsArrayField = (field, arrayFields) => {
   let isArrayField = false;
   let keys = Object.keys(arrayFields);
   for(let i = 0; i < keys.length; i += 1) {
-    console.log('comparing to ', arrayFields[keys[i]]);
     if(arrayFields[keys[i]].includes(field)) {
       isArrayField = true;
     }
   }
-  console.log('is ', field, ' is an array field? ', isArrayField);
   return isArrayField;
 }
 
@@ -110,7 +108,6 @@ export const getFilterSections = (
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields
 ) => {
   let searchFieldSections = [];
-  console.log('1115 YEEEEEE guppyConfig: ', guppyConfig);
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
@@ -137,13 +134,8 @@ export const getFilterSections = (
         );
       }
 
-      console.log('made it to the search fields block');
-      console.log('142 field: ', field);
-      console.log('143 label: ', label);
-      console.log('144 arrayFields: ', arrayFields);
       let fieldIsArrayField = checkIsArrayField(field, arrayFields);
 
-      
       return {
         title: label,
         options: selectedOptions,
@@ -171,23 +163,13 @@ export const getFilterSections = (
     );
 
     let fieldIsArrayField = checkIsArrayField(field, arrayFields);
-    console.log('176 field: ', field);
-    console.log('177 default options: ', defaultOptions);
-    console.log('178 fieldIsArrayField: ', fieldIsArrayField);
-    console.log('179 arrayFields: ', arrayFields);
-
-
-
+    
     return {
       title: label,
       options: defaultOptions,
       isArrayField: fieldIsArrayField,
     };
   });
-  
-  console.log('yee default options: ', sections);
-  //console.log('yee fields: ', fields);
-  //console.log('yee arrayFields: ', arrayFields);
   return searchFieldSections.concat(sections);
 };
 
