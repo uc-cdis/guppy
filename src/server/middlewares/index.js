@@ -1,8 +1,12 @@
 import authMiddleware from './authMiddleware';
 import tierAccessMiddleware from './tierAccessMiddleware';
+import perIndexTierAccessMiddleware from './perIndexTierAccessMiddleware';
 import config from '../config';
 
 const middlewares = [];
+
+// If a universal tierAccessLevel has not been applied in the manifest, 
+// we apply ES-index-specific tiered access settings.
 switch (config.tierAccessLevel) {
   case 'libre':
     break;
@@ -13,6 +17,7 @@ switch (config.tierAccessLevel) {
     middlewares.push(authMiddleware);
     break;
   default:
-    throw new Error(`Invalid tier access level ${config.tierAccessLevel}`);
+    middlewares.push(perIndexTierAccessMiddleware);
+    break;
 }
 export default middlewares;

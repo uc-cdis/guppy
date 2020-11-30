@@ -15,10 +15,12 @@ const config = {
       {
         index: 'gen3-dev-subject',
         type: 'subject',
+        tier_access_level: 'private',
       },
       {
         index: 'gen3-dev-file',
         type: 'file',
+        tier_access_level: 'private',
       },
     ],
     configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
@@ -30,7 +32,6 @@ const config = {
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
-  tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   tierAccessSensitiveRecordExclusionField: inputConfig.tier_access_sensitive_record_exclusion_field,
   logLevel: inputConfig.log_level || 'INFO',
@@ -72,7 +73,9 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
   config.analyzedTextFieldSuffix = process.env.ANALYZED_TEXT_FIELD_SUFFIX;
 }
 
-// only three options for tier access level: 'private' (default), 'regular', and 'libre'
+// If the manifest provides a single TIER_ACCESS_LEVEL value (as opposed to index-specific values)
+// we ignore the index-specific tiered-access settings.
+// This allows for backwards-compatibility and flexibility between commons' use cases.
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
   && process.env.TIER_ACCESS_LEVEL !== 'regular'
