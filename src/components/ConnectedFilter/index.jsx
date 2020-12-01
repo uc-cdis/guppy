@@ -40,6 +40,7 @@ class ConnectedFilter extends React.Component {
       filter: { ...this.props.adminAppliedPreFilters },
       filtersApplied: {},
       filterGroupFilterStatus: {}, // copy of filterStatus from FilterGroup; used for selected values override (see componentDidUpdate method)
+      filterStatusOverride: {},
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -83,6 +84,11 @@ class ConnectedFilter extends React.Component {
       );
       // Trigger a filter change, as though user selected a filter.
       this.handleFilterChange(newFilterStatus);
+      // manually select the filter using filterStatusOverride
+      // find the tabIndex and sectionIndex of the targeted
+      if (this.filterGroupRef.current) {
+        this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
+      }
     }
   }
 
@@ -195,7 +201,9 @@ class ConnectedFilter extends React.Component {
 
   setFilter(filter) {
     if (this.filterGroupRef.current) {
-      this.filterGroupRef.current.resetFilter();
+      // this.filterGroupRef.current.resetFilter();
+      // find the tabIndex and sectionIndex of the targeted
+      this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
     }
     this.handleFilterChange(filter);
   }
@@ -260,6 +268,10 @@ class ConnectedFilter extends React.Component {
       return null;
     }
     // If there are any search fields, insert them at the top of each tab's fields.
+    // Why? We need to have a way to configure which fields are search fields, so
+    // `searchFields` and `fields` are separate in this.props.filterConfig, but
+    // FilterGroup doesn't distinguish between searchFields and fields, so we need
+    // to combine searchFields and fields together when passing a filterConfig down to FilterGroup.
     const filterConfig = {
       tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
         if (searchFields) {
@@ -274,6 +286,7 @@ class ConnectedFilter extends React.Component {
         className={this.props.className}
         tabs={filterTabs}
         filterConfig={filterConfig}
+        filterStatusOverride={this.state.filterStatusOverride}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
       />

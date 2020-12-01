@@ -15,11 +15,11 @@ import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 import { capitalizeFirstLetter } from '../ConnectedFilter/utils';
 
-// const getFilterDisplayName = (filter, fieldMapping) => {
-//   const overrideName = fieldMapping.find((entry) => (entry.field === filter));
-//   const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
-//   return label;
-// };
+const getFilterDisplayName = (filter, fieldMapping) => {
+  const overrideName = fieldMapping.find((entry) => (entry.field === filter));
+  const label = overrideName ? overrideName.name : capitalizeFirstLetter(filter);
+  return label;
+};
 
 // removeHighlightTags takes a string which has tags embedded in it indicating the start
 // and end of a highlight. It removes these tags, leaving the original value.
@@ -307,7 +307,7 @@ class GuppyWrapper extends React.Component {
       const HIGHLIGHT_START = '<em>';
       const HIGHLIGHT_END = '</em>';
       const matches = {
-        filters: [], // format: [highlighted filters]
+        filters: [], // format: [{value: string, matched: string}]
         values: {}, // format: { [filter]: [{value: string, matched: string, count: number}] }
       };
       if (searchString.trim() === '') {
@@ -328,17 +328,24 @@ class GuppyWrapper extends React.Component {
       // );
       for (let i = 0; i < visibleFilters.length; i += 1) {
         const filter = visibleFilters[i];
-        const filterLower = filter.toLowerCase();
-        const matchIdx = filterLower.indexOf(keyword);
+        const filterDisplayName = getFilterDisplayName(
+          filter,
+          this.props.guppyConfig.fieldMapping,
+        );
+        const filterDisplayNameLower = filterDisplayName.toLowerCase();
+        // Search over the display name of a filter, not the actual filter name.
+        // For example, a filter named 'bp_sys' might be displayed as 'Blood Pressure (Systolic)'
+        const matchIdx = filterDisplayNameLower.indexOf(keyword);
         if (matchIdx >= 0) {
           // add highlight tags where searchString matches
-          let highlightedFilter = filter;
-          highlightedFilter = filter.slice(0, matchIdx)
+          // let highlightedFilter = filterDisplayName;
+          const f = filterDisplayName;
+          const highlightedFilter = f.slice(0, matchIdx)
             + HIGHLIGHT_START
-            + filter.slice(matchIdx, matchIdx + keyword.length)
+            + f.slice(matchIdx, matchIdx + keyword.length)
             + HIGHLIGHT_END
-            + filter.slice(matchIdx + keyword.length);
-          matches.filters.push(highlightedFilter);
+            + f.slice(matchIdx + keyword.length);
+          matches.filters.push({ value: filter, matched: highlightedFilter });
         }
       }
 
