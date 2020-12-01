@@ -39,7 +39,6 @@ class ConnectedFilter extends React.Component {
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...this.props.adminAppliedPreFilters },
       filtersApplied: {},
-      filterGroupFilterStatus: {}, // copy of filterStatus from FilterGroup; used for selected values override (see componentDidUpdate method)
       filterStatusOverride: {},
     };
     this.filterGroupRef = React.createRef();
@@ -74,20 +73,26 @@ class ConnectedFilter extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    // Trigger filter change if props.selectedValuesOverride has changed.
+    // Trigger filter change if props.valueToSelect has changed.
     // Allows parent components to select values in ConnectedFilter.
-    if (this.props.selectedValuesOverride !== prevProps.selectedValuesOverride) {
+    if (this.props.valueToSelect !== prevProps.valueToSelect) {
       // Merge the new filter status with the existing filter status
       const newFilterStatus = mergeFilters(
-        this.state.filterGroupFilterStatus,
+        this.state.filtersApplied,
         this.props.selectedValuesOverride,
       );
       // Trigger a filter change, as though user selected a filter.
       this.handleFilterChange(newFilterStatus);
       // manually select the filter using filterStatusOverride
-      // find the tabIndex and sectionIndex of the targeted
+      // find the tabIndex and sectionIndex of the targeted filter hemmmmmmm hem
       if (this.filterGroupRef.current) {
-        this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
+        Object.entries(this.props.selectedValuesOverride).forEach(([filter, values]) => {
+          // find the tabIndex of the filter
+          // find the sectionIndex of the filter
+          values.forEach((value) => {
+            this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
+          });
+        });
       }
     }
   }
@@ -208,6 +213,43 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
+  selectValue(filter, value) {
+    const newFilterStatus = { ...this.state.filtersApplied };
+    if (!newFilterStatus[filter]) {
+      newFilterStatus[filter] = { selectedValues: [] };
+    }
+    const valueAlreadySelected = newFilterStatus[filter].selectedValues.includes(value);
+    if (valueAlreadySelected) {
+      return;
+    }
+    newFilterStatus[filter].selectedValues.push(value);
+    // Trigger a filter change, as though user selected a filter. This will refresh
+    // the aggregations from Guppy.
+    this.handleFilterChange(newFilterStatus);
+    // Manually select the new value in FilterGroup -- this is required in order
+    // for the value to appear to be selected in FilterGroup.
+    if (this.filterGroupRef.current) {
+      // find the tabIndex and sectionIndex of the filter
+      let tabIndex;
+      let sectionIndex;
+      this.props.filterConfig.tabs.forEach(({ fields, searchFields }, tabIdx) => {
+        // sectionIndex
+        let filters = [];
+        if (searchFields) {
+          filters = searchFields.concat(fields);
+        } else {
+          filters = fields;
+        }
+        if (filters.indexOf(filter) !== -1) {
+          tabIndex = tabIdx;
+          sectionIndex = filters.indexOf(filter);
+        }
+      });
+      // find the sectionIndex of the filter
+      this.filterGroupRef.current.handleSelect(tabIndex, sectionIndex, value);
+    }
+  }
+
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
@@ -229,7 +271,6 @@ class ConnectedFilter extends React.Component {
     console.log('filterResults', filterResults);
     this.setState({
       adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen),
-      filterGroupFilterStatus: filterResults,
     });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
