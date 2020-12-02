@@ -72,31 +72,6 @@ class ConnectedFilter extends React.Component {
       });
   }
 
-  componentDidUpdate(prevProps) {
-    // Trigger filter change if props.valueToSelect has changed.
-    // Allows parent components to select values in ConnectedFilter.
-    if (this.props.valueToSelect !== prevProps.valueToSelect) {
-      // Merge the new filter status with the existing filter status
-      const newFilterStatus = mergeFilters(
-        this.state.filtersApplied,
-        this.props.selectedValuesOverride,
-      );
-      // Trigger a filter change, as though user selected a filter.
-      this.handleFilterChange(newFilterStatus);
-      // manually select the filter using filterStatusOverride
-      // find the tabIndex and sectionIndex of the targeted filter hemmmmmmm hem
-      if (this.filterGroupRef.current) {
-        Object.entries(this.props.selectedValuesOverride).forEach(([filter, values]) => {
-          // find the tabIndex of the filter
-          // find the sectionIndex of the filter
-          values.forEach((value) => {
-            this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
-          });
-        });
-      }
-    }
-  }
-
   /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
@@ -358,7 +333,6 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
-  selectedValuesOverride: PropTypes.object, // FIXME specify shape
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
