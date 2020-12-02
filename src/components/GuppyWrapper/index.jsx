@@ -93,83 +93,6 @@ class GuppyWrapper extends React.Component {
     }
   }
 
-  /**
-   * This function get data with current filter (if any),
-   * and update this.state.rawData and this.state.totalCount
-   * @param {string[]} fields
-   * @param {object} sort
-   * @param {bool} updateDataWhenReceive
-   * @param {number} offset
-   * @param {number} size
-   */
-  getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
-    this.setState({ gettingDataFromGuppy: true });
-    if (!fields || fields.length === 0) {
-      this.setState({ gettingDataFromGuppy: false });
-      return Promise.resolve({ data: [], totalCount: 0 });
-    }
-
-    // sub aggregations -- for DAT
-    if (this.props.guppyConfig.mainField) {
-      const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
-      return askGuppyForSubAggregationData(
-        this.props.guppyConfig.path,
-        this.props.guppyConfig.type,
-        this.props.guppyConfig.mainField,
-        numericAggregation,
-        this.props.guppyConfig.aggFields,
-        [],
-        this.filter,
-        this.state.accessibility,
-      ).then((res) => {
-        if (!res || !res.data) {
-          throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
-        }
-        const data = res.data._aggregation[this.props.guppyConfig.type];
-        const field = numericAggregation ? 'asTextHistogram' : 'histogram';
-        const parsedData = data[this.props.guppyConfig.mainField][field];
-        if (updateDataWhenReceive) {
-          this.setState({
-            rawData: parsedData,
-          });
-        }
-        this.setState({ gettingDataFromGuppy: false });
-        return {
-          data: res.data,
-        };
-      });
-    }
-
-    // non-nested aggregation
-    return askGuppyForRawData(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      fields,
-      this.filter,
-      sort,
-      offset,
-      size,
-      this.state.accessibility,
-    ).then((res) => {
-      if (!res || !res.data) {
-        throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
-      }
-      const parsedData = res.data[this.props.guppyConfig.type];
-      const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
-      if (updateDataWhenReceive) {
-        this.setState({
-          rawData: parsedData,
-          totalCount,
-        });
-      }
-      this.setState({ gettingDataFromGuppy: false });
-      return {
-        data: parsedData,
-        totalCount,
-      };
-    });
-  }
-
   handleReceiveNewAggsData(aggsData) {
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
@@ -283,6 +206,83 @@ class GuppyWrapper extends React.Component {
 
   handleAccessLevelUpdate(accessLevel) {
     this.setState({ accessibility: accessLevel });
+  }
+
+  /**
+   * This function get data with current filter (if any),
+   * and update this.state.rawData and this.state.totalCount
+   * @param {string[]} fields
+   * @param {object} sort
+   * @param {bool} updateDataWhenReceive
+   * @param {number} offset
+   * @param {number} size
+   */
+  getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
+    this.setState({ gettingDataFromGuppy: true });
+    if (!fields || fields.length === 0) {
+      this.setState({ gettingDataFromGuppy: false });
+      return Promise.resolve({ data: [], totalCount: 0 });
+    }
+
+    // sub aggregations -- for DAT
+    if (this.props.guppyConfig.mainField) {
+      const numericAggregation = this.props.guppyConfig.mainFieldIsNumeric;
+      return askGuppyForSubAggregationData(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.props.guppyConfig.mainField,
+        numericAggregation,
+        this.props.guppyConfig.aggFields,
+        [],
+        this.filter,
+        this.state.accessibility,
+      ).then((res) => {
+        if (!res || !res.data) {
+          throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
+        }
+        const data = res.data._aggregation[this.props.guppyConfig.type];
+        const field = numericAggregation ? 'asTextHistogram' : 'histogram';
+        const parsedData = data[this.props.guppyConfig.mainField][field];
+        if (updateDataWhenReceive) {
+          this.setState({
+            rawData: parsedData,
+          });
+        }
+        this.setState({ gettingDataFromGuppy: false });
+        return {
+          data: res.data,
+        };
+      });
+    }
+
+    // non-nested aggregation
+    return askGuppyForRawData(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      fields,
+      this.filter,
+      sort,
+      offset,
+      size,
+      this.state.accessibility,
+    ).then((res) => {
+      if (!res || !res.data) {
+        throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
+      }
+      const parsedData = res.data[this.props.guppyConfig.type];
+      const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
+      if (updateDataWhenReceive) {
+        this.setState({
+          rawData: parsedData,
+          totalCount,
+        });
+      }
+      this.setState({ gettingDataFromGuppy: false });
+      return {
+        data: parsedData,
+        totalCount,
+      };
+    });
   }
 
   render() {

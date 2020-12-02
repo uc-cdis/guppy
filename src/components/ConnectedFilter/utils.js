@@ -90,11 +90,23 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
   });
 };
 
+export const checkIsArrayField = (field, arrayFields) => {
+  let isArrayField = false;
+  const keys = Object.keys(arrayFields);
+  for (let i = 0; i < keys.length; i += 1) {
+    if (arrayFields[keys[i]].includes(field)) {
+      isArrayField = true;
+    }
+  }
+  return isArrayField;
+};
+
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig,
+  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
+
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
     // to search over all options, instead of displaying all options in a list. This allows
@@ -145,9 +157,12 @@ export const getFilterSections = (
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
 
+    const fieldIsArrayField = checkIsArrayField(field, arrayFields);
+
     return {
       title: label,
       options: defaultOptions,
+      isArrayField: fieldIsArrayField,
     };
   });
   return searchFieldSections.concat(sections);
