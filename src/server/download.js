@@ -1,10 +1,10 @@
 import getAuthHelperInstance from './auth/authHelper';
 import headerParser from './utils/headerParser';
+import { validSignature } from './utils/utils';
 import esInstance from './es/index';
 import log from './logger';
 import config from './config';
 import CodedError from './utils/error';
-import rs from 'jsrsasign';
 
 
 const downloadRouter = async (req, res, next) => {
@@ -15,23 +15,9 @@ const downloadRouter = async (req, res, next) => {
   log.debug('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexByType(type);
   const jwt = headerParser.parseJWT(req);
-  const signature = headerParser.parseSignature(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
-  var isValid = false;
-  try {
-    var data = req.body;
-    data = JSON.stringify(data);
-
-    const hashmessage = signature
-    var public_key = req.app.locals.publicKey;
-    isValid = public_key.verify(data, hashmessage) 
-  } catch (err) {
-      log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
-      isValid = false;
-  }
-  log.info('The body signature has been decoded: ', isValid);
-
+  var isValid = validSignature(req);
 
   try {
     let appliedFilter;
