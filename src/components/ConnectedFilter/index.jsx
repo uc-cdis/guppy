@@ -181,9 +181,7 @@ class ConnectedFilter extends React.Component {
 
   setFilter(filter) {
     if (this.filterGroupRef.current) {
-      // this.filterGroupRef.current.resetFilter();
-      // find the tabIndex and sectionIndex of the targeted
-      this.filterGroupRef.current.handleSelect(0, 2, 'Unknown');
+      this.filterGroupRef.current.resetFilter();
     }
     this.handleFilterChange(filter);
   }
