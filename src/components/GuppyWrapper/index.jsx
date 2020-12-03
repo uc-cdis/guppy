@@ -186,7 +186,6 @@ class GuppyWrapper extends React.Component {
   }
 
   handleReceiveNewAggsData(aggsData, unfilteredAggsData) {
-    console.log('receiving new aggsData!', aggsData);
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }

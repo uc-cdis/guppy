@@ -264,7 +264,6 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    console.log('filterResults', filterResults);
     this.setState({
       adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen),
     });
