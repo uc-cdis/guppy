@@ -186,6 +186,27 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
+  scrollToFilter(filter) {
+    if (this.filterGroupRef.current) {
+      // find the tabIndex and sectionIndex of the filter
+      let tabIndex;
+      let sectionIndex;
+      this.props.filterConfig.tabs.forEach(({ fields, searchFields }, tabIdx) => {
+        let filters = [];
+        if (searchFields) {
+          filters = searchFields.concat(fields);
+        } else {
+          filters = fields;
+        }
+        if (filters.indexOf(filter) !== -1) {
+          tabIndex = tabIdx;
+          sectionIndex = filters.indexOf(filter);
+        }
+      });
+      this.filterGroupRef.current.scrollToSection(tabIndex, sectionIndex);
+    }
+  }
+
   selectValue(filter, value) {
     const newFilterStatus = { ...this.state.filtersApplied };
     if (!newFilterStatus[filter]) {
@@ -218,7 +239,6 @@ class ConnectedFilter extends React.Component {
           sectionIndex = filters.indexOf(filter);
         }
       });
-      // find the sectionIndex of the filter
       this.filterGroupRef.current.handleSelect(tabIndex, sectionIndex, value);
     }
   }
