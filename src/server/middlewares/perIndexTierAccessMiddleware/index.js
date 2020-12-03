@@ -9,7 +9,7 @@ const histogramIndexMapping = {};
 const histogramForStringIndexMapping = {};
 const totalCountIndexMapping = {};
 
-config.esConfig.indices.reduce((acc, item) => {
+config.esConfig.indices.forEach((item) => {
   if (item.tier_access_level === 'private') {
     queryIndexMapping[item.index] = authMWResolver;
     aggsIndexMapping[item.index] = authMWResolver;
@@ -29,9 +29,8 @@ config.esConfig.indices.reduce((acc, item) => {
   } else if (item.tier_access_level === 'libre') {
     // No additional resolvers necessary
   } else {
-    throw new Error(`tier_access_level invalid for index ${item.index}. Please set index-scoped or site-wide tiered-access levels.`);
+    throw new Error(`tier_access_level invalid for index ${item.index}. Either set all index-scoped tiered-access levels or a site-wide tiered-access level.`);
   }
-  return acc;
 }, {});
 
 const perIndexTierAccessMiddleware = {

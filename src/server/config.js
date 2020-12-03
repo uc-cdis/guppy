@@ -73,9 +73,15 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
   config.analyzedTextFieldSuffix = process.env.ANALYZED_TEXT_FIELD_SUFFIX;
 }
 
-// In cases where index-scoped tiered-access settings are not provided,
-// we fall back on the manifest-provided TIER_ACCESS_LEVEL value.
-// This allows for backwards-compatibility and flexibility between commons' use cases.
+// Either all indices should have explicit index-scoped tiered-access values or
+// the manifest should have a site-wide TIER_ACCESS_LEVEL value.
+// This approach is backwards-compatible with commons configured for past versions of tiered-access.
+config.esConfig.indices.forEach((item) => {
+  if (!item.tier_access_level && !process.env.TIER_ACCESS_LEVEL) {
+    throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
+  }
+});
+
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
   && process.env.TIER_ACCESS_LEVEL !== 'regular'
