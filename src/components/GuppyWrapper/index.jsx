@@ -67,6 +67,7 @@ class GuppyWrapper extends React.Component {
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
+      unfilteredAggsData: {},
       filter: { ...this.props.adminAppliedPreFilters },
       rawData: [],
       totalCount: 0,
@@ -184,11 +185,12 @@ class GuppyWrapper extends React.Component {
     });
   }
 
-  handleReceiveNewAggsData(aggsData) {
+  handleReceiveNewAggsData(aggsData, unfilteredAggsData) {
+    console.log('receiving new aggsData!', aggsData);
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
-    this.setState({ aggsData });
+    this.setState({ aggsData, unfilteredAggsData });
   }
 
   handleFilterChange(userFilter, accessibility) {
@@ -303,6 +305,7 @@ class GuppyWrapper extends React.Component {
     // First, search in local filters and values that match this search term.
     return new Promise((resolve, reject) => {
       // all we need to do is search over aggsData (?)
+      // NOTE not exactly, we need to get the unfiltered aggs data from ConnectedFilter.
 
       const HIGHLIGHT_START = '<em>';
       const HIGHLIGHT_END = '</em>';
@@ -350,8 +353,8 @@ class GuppyWrapper extends React.Component {
       }
 
       // search over local values in aggsData
-      const { aggsData } = this.state;
-      Object.entries(aggsData).forEach(([filter, { histogram }]) => {
+      const { unfilteredAggsData } = this.state;
+      Object.entries(unfilteredAggsData).forEach(([filter, { histogram }]) => {
         histogram.forEach(({ count, key }) => {
           const value = key;
           const matchIdx = value.toLowerCase().indexOf(keyword);

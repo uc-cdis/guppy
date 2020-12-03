@@ -247,7 +247,10 @@ class ConnectedFilter extends React.Component {
     this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData);
+      // Also pass parent component the raw aggs data without self filter removed.
+      // GuppyWrapper needs this raw data to do fulltext search over fields.
+      const unfilteredAggsData = receivedAggsData;
+      this.props.onReceiveNewAggsData(resultAggsData, unfilteredAggsData);
     }
   }
 
@@ -306,6 +309,7 @@ class ConnectedFilter extends React.Component {
     // `searchFields` and `fields` are separate in this.props.filterConfig, but
     // FilterGroup doesn't distinguish between searchFields and fields, so we need
     // to combine searchFields and fields together when passing a filterConfig down to FilterGroup.
+    // For the moment, search fields are always sorted above standard fields.
     const filterConfig = {
       tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
         if (searchFields) {
