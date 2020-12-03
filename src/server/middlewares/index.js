@@ -17,7 +17,7 @@ switch (config.tierAccessLevel) {
     middlewares.push(authMiddleware);
     break;
   default:
-    // middlewares.push(perIndexTierAccessMiddleware);
+    middlewares.push(perIndexTierAccessMiddleware);
     break;
 }
 export default middlewares;

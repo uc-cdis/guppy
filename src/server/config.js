@@ -23,6 +23,7 @@ const config = {
         tier_access_level: 'private',
       },
     ],
+    tierAccessLevel: 'private',
     configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
@@ -73,8 +74,8 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
   config.analyzedTextFieldSuffix = process.env.ANALYZED_TEXT_FIELD_SUFFIX;
 }
 
-// If the manifest provides a single TIER_ACCESS_LEVEL value (as opposed to index-specific values)
-// we ignore the index-specific tiered-access settings.
+// In cases where index-scoped tiered-access settings are not provided,
+// we fall back on the manifest-provided TIER_ACCESS_LEVEL value.
 // This allows for backwards-compatibility and flexibility between commons' use cases.
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
