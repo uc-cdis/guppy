@@ -1,6 +1,6 @@
 import authMiddleware from './authMiddleware';
 import tierAccessMiddleware from './tierAccessMiddleware';
-// import perIndexTierAccessMiddleware from './perIndexTierAccessMiddleware';
+import perIndexTierAccessMiddleware from './perIndexTierAccessMiddleware';
 import config from '../config';
 
 const middlewares = [];
@@ -17,7 +17,7 @@ switch (config.tierAccessLevel) {
     middlewares.push(authMiddleware);
     break;
   default:
-    // middlewares.push(perIndexTierAccessMiddleware);
+    middlewares.push(perIndexTierAccessMiddleware);
     break;
 }
 export default middlewares;
