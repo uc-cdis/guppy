@@ -319,6 +319,20 @@ class ES {
   }
 
   /**
+   * Get es index config by es index name
+   * Throw 400 error if there's no existing es index of that name
+   * @param {string} esIndexName
+   */
+  getESIndexConfigByName(esIndexName) {
+    const indexConfig = this.config.indices.find((i) => i.index === esIndexName);
+    if (indexConfig) return indexConfig;
+    throw new CodedError(
+      400,
+      `Invalid es index name: "${esIndexName}"`,
+    );
+  }
+
+  /**
    * Get all es indices and their alias
    */
   getAllESIndices() {

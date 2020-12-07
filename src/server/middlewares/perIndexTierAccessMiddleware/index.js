@@ -7,7 +7,7 @@ const queryIndexMapping = {};
 const aggsIndexMapping = {};
 const histogramIndexMapping = {};
 const histogramForStringIndexMapping = {};
-const totalCountIndexMapping = {};
+const totalCountTypeMapping = {};
 
 config.esConfig.indices.forEach((item) => {
   if (item.tier_access_level === 'private') {
@@ -21,7 +21,7 @@ config.esConfig.indices.forEach((item) => {
     });
     aggsIndexMapping[item.index] = tierAccessResolver({ esType: item.type, esIndex: item.index });
     const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
-    totalCountIndexMapping[aggregationName] = {
+    totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
     };
     histogramIndexMapping[item.index] = { histogram: hideNumberResolver(false) };
@@ -40,7 +40,7 @@ const perIndexTierAccessMiddleware = {
   Aggregation: {
     ...aggsIndexMapping,
   },
-  ...totalCountIndexMapping,
+  ...totalCountTypeMapping,
   HistogramForNumber: {
     ...histogramIndexMapping,
   },
