@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import { jsonToFormat } from './conversion';
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
@@ -160,14 +161,15 @@ export const queryGuppyForRawDataAndTotalCounts = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  format,
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort) {
     queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON' : ''}) {`;
   }
-  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}) {`;
+  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: ${format}) {`;
   if (gqlFilter || sort) {
-    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
+    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''} format: ${format}) {`;
   }
   let typeAggsLine = `${type} accessibility: ${accessibility} {`;
   if (gqlFilter) {
@@ -305,6 +307,7 @@ export const askGuppyForRawData = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  format,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
@@ -316,6 +319,7 @@ export const askGuppyForRawData = (
     offset,
     size,
     accessibility,
+    format,
   );
 };
 
@@ -336,11 +340,14 @@ export const downloadDataFromGuppy = (
     filter,
     sort,
     accessibility,
+    format = 'JSON',
   },
 ) => {
   const SCROLL_SIZE = 10000;
+  const JSON_FORMAT = format === 'JSON';
   if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };
+    queryBody.format = format;
     if (fields) queryBody.fields = fields;
     if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
@@ -353,10 +360,10 @@ export const downloadDataFromGuppy = (
       body: JSON.stringify(queryBody),
     }).then((response) => response.json());
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility)
+  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility, format)
     .then((res) => {
       if (res && res.data && res.data[type]) {
-        return res.data[type];
+        return JSON_FORMAT ? res.data[type] : jsonToFormat(res.data[type], format);
       }
       throw Error('Error downloading data from Guppy');
     });

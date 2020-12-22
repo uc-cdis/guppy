@@ -10,7 +10,7 @@ import {
   getAccessibleResources,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
-import { ENUM_ACCESSIBILITY } from '../Utils/const';
+import { ENUM_ACCESSIBILITY, FILE_FORMAT } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 
 /**
@@ -61,6 +61,7 @@ class GuppyWrapper extends React.Component {
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
+      fileFormat: FILE_FORMAT,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
   }
@@ -130,7 +131,7 @@ class GuppyWrapper extends React.Component {
    * Download all data from Guppy server and return raw data
    * This function uses current filter argument
    */
-  handleDownloadRawData(sort) {
+  handleDownloadRawData({ sort, format }) {
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -140,6 +141,7 @@ class GuppyWrapper extends React.Component {
         sort: sort || [],
         filter: this.state.filter,
         accessibility: this.state.accessibility,
+        format: format in this.state.fileFormat ? format : this.state.fileFormat.JSON,
       },
     );
   }
