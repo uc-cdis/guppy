@@ -2,8 +2,6 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
-import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
@@ -224,6 +222,7 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
+    const { FilterList } = this.props.uiComponents;
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList
         key={index}
@@ -265,6 +264,7 @@ class ConnectedFilter extends React.Component {
         return { title, fields };
       }),
     };
+    const { FilterGroup } = this.props.uiComponents;
     return (
       <FilterGroup
         ref={this.filterGroupRef}
@@ -306,6 +306,10 @@ ConnectedFilter.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
+  uiComponents: PropTypes.shape({
+    FilterGroup: PropTypes.elementType.isRequired,
+    FilterList: PropTypes.elementType.isRequired,
+  }).isRequired,
 };
 
 ConnectedFilter.defaultProps = {
