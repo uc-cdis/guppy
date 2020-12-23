@@ -222,7 +222,7 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const { FilterList } = this.props.uiComponents;
+    const { FilterList } = this.props.filterComponents;
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList
         key={index}
@@ -264,7 +264,7 @@ class ConnectedFilter extends React.Component {
         return { title, fields };
       }),
     };
-    const { FilterGroup } = this.props.uiComponents;
+    const { FilterGroup } = this.props.filterComponents;
     return (
       <FilterGroup
         ref={this.filterGroupRef}
@@ -306,7 +306,7 @@ ConnectedFilter.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
-  uiComponents: PropTypes.shape({
+  filterComponents: PropTypes.shape({
     FilterGroup: PropTypes.elementType.isRequired,
     FilterList: PropTypes.elementType.isRequired,
   }).isRequired,
