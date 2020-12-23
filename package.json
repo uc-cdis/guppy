@@ -28,7 +28,6 @@
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
     "@elastic/elasticsearch": "^7.9.1",
-    "@gen3/ui-component": "^0.6.2",
     "apollo-server": "^2.18.1",
     "apollo-server-express": "^2.18.1",
     "array.prototype.flat": "^1.2.2",
@@ -58,6 +57,7 @@
     "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
+    "@gen3/ui-component": "^0.6.2",
     "@storybook/addon-actions": "^5.3.21",
     "@storybook/addon-links": "^5.3.21",
     "@storybook/addons": "^5.3.21",
