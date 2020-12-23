@@ -1,5 +1,5 @@
 {
-  "name": "@gen3/guppy",
+  "name": "@pcdc/guppy",
   "version": "0.9.1",
   "description": "Server that support GraphQL queries on data from elasticsearch",
   "main": "src/server/server.js",
