@@ -164,12 +164,12 @@ export const queryGuppyForRawDataAndTotalCounts = (
   format,
 ) => {
   let queryLine = 'query {';
-  if (gqlFilter || sort) {
-    queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON' : ''}${format ? '$format: Format' : ''}) {`;
+  if (gqlFilter || sort || format) {
+    queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON,' : ''}${format ? '$format: Format' : ''}) {`;
   }
-  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}${format ? ', format: $format' : ''}) {`;
-  if (gqlFilter || sort) {
-    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''} ${format ? ' format: $format' : ''}) {`;
+  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}) {`;
+  if (gqlFilter || sort || format) {
+    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}${format ? 'format: $format' : ''}) {`;
   }
   let typeAggsLine = `${type} accessibility: ${accessibility} {`;
   if (gqlFilter) {
