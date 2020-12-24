@@ -1,6 +1,6 @@
 {
   "name": "@pcdc/guppy",
-  "version": "0.9.1",
+  "version": "0.1.2",
   "description": "Server that support GraphQL queries on data from elasticsearch",
   "main": "src/server/server.js",
   "directories": {
