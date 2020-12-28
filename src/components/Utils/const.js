@@ -1,11 +1,16 @@
-export const ENUM_ACCESSIBILITY = { // eslint-disable-line import/prefer-default-export
+export const ENUM_ACCESSIBILITY = {
   ACCESSIBLE: 'accessible',
   UNACCESSIBLE: 'unaccessible',
   ALL: 'all',
 };
 
-export const FILE_FORMAT = { // File format types downloadable from portal.
+export const FILE_FORMAT = {
   JSON: 'JSON',
   TSV: 'TSV',
   CSV: 'CSV',
+};
+
+export const FILE_DELIMITERS = {
+  TSV: '\t',
+  CSV: ',',
 };

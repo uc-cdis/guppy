@@ -1,20 +1,42 @@
+import { FILE_DELIMITERS } from './const';
+
 const papaparse = require('papaparse');
 const flatten = require('flat');
 
 /**
-   * This function converts JSON to specified format, JSON by default.
-   * @param {JSON} json
-   * @param {string} format
-   */
-export const jsonToFormat = (json, format) => { // eslint-disable-line import/prefer-default-export
-  const flattenedJson = flatten(json);
-  if (format === 'TSV') {
-    const config = { delimiter: '\t' };
-    return papaparse.unparse(flattenedJson, config);
-  }
-  if (format === 'CSV') {
-    const config = { delimiter: ',' };
-    return papaparse.unparse(flattenedJson, config);
+ * Flattens a deep nested JSON object skipping
+ * the first level to avoid potentially flattening
+ * non-nested data.
+ * @param {JSON} json
+ */
+export async function flattenJson(json) {
+  const flattenedJson = [];
+  Object.keys(json).forEach((key) => {
+    flattenedJson.push(flatten(json[key], { delimiter: '_' }));
+  });
+  return flattenedJson;
+}
+
+/**
+ * Converts JSON based on a config.
+ * @param {JSON} json
+ * @param {Object} config
+ */
+export async function conversion(json, config) {
+  return papaparse.unparse(json, config);
+}
+
+/**
+ * Converts JSON to a specified file format.
+ * Defaultes to JSON if file format is not supported.
+ * @param {JSON} json
+ * @param {string} format
+ */
+export async function jsonToFormat(json, format) {
+  if (format in FILE_DELIMITERS) {
+    const flatJson = await flattenJson(json);
+    const data = await conversion(flatJson, { delimiter: FILE_DELIMITERS[format] });
+    return data;
   }
   return json;
-};
+}
