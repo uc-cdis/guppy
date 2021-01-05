@@ -63,7 +63,7 @@ const getQuerySchemaForType = (esType) => {
     filter: JSON,
     sort: JSON,
     accessibility: Accessibility=all,
-    format: Format=JSON,
+    format: Format=json,
     ): [${esTypeObjName}]`;
 };
 
@@ -250,9 +250,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const formatEnum = `
     enum Format {
-      JSON
-      TSV
-      CSV
+      json
+      tsv
+      csv
     }
   `;
 

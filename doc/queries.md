@@ -132,7 +132,7 @@ Arguments:
 | offset        | starting position of query result                               | integer                             | 0       |
 | first         | return rows of query result                                     | integer                             | 10      |
 | sort          | sort method for query result                                    | JSON                                | {}      |
-| format        | return downloadable file format type for query result           | ENUM: JSON, CSV, TSV                | JSON    |
+| format        | return downloadable file format type for query result           | ENUM: json, csv, tsv                | json    |
 | [accessibility](#accessibility) | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
 | [filter](#filter)        | filter object to apply for query                                | JSON                                | {}      |
 

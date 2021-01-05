@@ -5,9 +5,9 @@ export const ENUM_ACCESSIBILITY = {
 };
 
 export const FILE_FORMAT = {
-  JSON: 'JSON',
-  TSV: 'TSV',
-  CSV: 'CSV',
+  JSON: 'json',
+  TSV: 'tsv',
+  CSV: 'csv',
 };
 
 export const FILE_DELIMITERS = {

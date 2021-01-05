@@ -32,7 +32,7 @@ describe('Schema', () => {
         filter: JSON,
         sort: JSON,
         accessibility: Accessibility=all,
-        format: Format=JSON,
+        format: Format=json,
       ): [Subject]
       file (
         offset: Int,
@@ -40,7 +40,7 @@ describe('Schema', () => {
         filter: JSON,
         sort: JSON,
         accessibility: Accessibility=all,
-        format: Format=JSON,
+        format: Format=json,
       ): [File]
       _aggregation: Aggregation
       _mapping: Mapping
