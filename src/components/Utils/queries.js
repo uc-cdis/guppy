@@ -167,9 +167,9 @@ export const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter || sort) {
     queryLine = `query ($format: Format, ${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON,' : ''}) {`;
   }
-  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: ${format}) {`;
+  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: $format) {`;
   if (gqlFilter || sort) {
-    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: ${format}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
+    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: $format, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
   }
   let typeAggsLine = `${type} accessibility: ${accessibility} {`;
   if (gqlFilter) {
