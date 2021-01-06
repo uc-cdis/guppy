@@ -4,13 +4,13 @@ export const ENUM_ACCESSIBILITY = {
   ALL: 'all',
 };
 
-export const FILE_FORMAT = {
+export const FILE_FORMATS = {
   JSON: 'json',
   TSV: 'tsv',
   CSV: 'csv',
 };
 
 export const FILE_DELIMITERS = {
-  TSV: '\t',
-  CSV: ',',
+  tsv: '\t',
+  csv: ',',
 };
