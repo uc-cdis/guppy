@@ -273,6 +273,7 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        initialAppliedFilters={this.props.initialAppliedFilters}
       />
     );
   }
@@ -301,6 +302,7 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
@@ -321,6 +323,7 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: (data) => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
