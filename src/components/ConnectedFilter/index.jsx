@@ -28,6 +28,10 @@ class ConnectedFilter extends React.Component {
     const allFields = props.accessibleFieldCheckList
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
+    const initialFilter = mergeFilters(
+      props.initialAppliedFilters,
+      props.adminAppliedPreFilters,
+    );
 
     this.initialTabsOptions = {};
     this.state = {
@@ -36,8 +40,8 @@ class ConnectedFilter extends React.Component {
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      filter: { ...this.props.adminAppliedPreFilters },
-      filtersApplied: {},
+      filter: { ...initialFilter },
+      filtersApplied: { ...initialFilter },
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -49,7 +53,7 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
+      this.props.onFilterChange(this.state.filter, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
@@ -273,6 +277,7 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        initialAppliedFilters={this.props.initialAppliedFilters}
       />
     );
   }
@@ -301,6 +306,7 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
@@ -321,6 +327,7 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: (data) => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,
