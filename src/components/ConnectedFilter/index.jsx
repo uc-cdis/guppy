@@ -28,6 +28,10 @@ class ConnectedFilter extends React.Component {
     const allFields = props.accessibleFieldCheckList
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
+    const initialFilter = mergeFilters(
+      props.initialAppliedFilters,
+      props.adminAppliedPreFilters,
+    );
 
     this.initialTabsOptions = {};
     this.state = {
@@ -36,7 +40,7 @@ class ConnectedFilter extends React.Component {
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      filter: { ...this.props.adminAppliedPreFilters },
+      filter: { ...initialFilter },
       filtersApplied: {},
     };
     this.filterGroupRef = React.createRef();
