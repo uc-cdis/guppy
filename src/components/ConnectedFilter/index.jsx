@@ -41,7 +41,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...initialFilter },
-      filtersApplied: {},
+      filtersApplied: { ...initialFilter },
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
