@@ -34,7 +34,7 @@ Example query:
     {
       "experiments.experimental_description": asc
     }
-  ], filter: $filter) {
+  ], filter: $filter, format: JSON) {
     subject_id
     gender
     ethnicity
@@ -132,7 +132,7 @@ Arguments:
 | offset        | starting position of query result                               | integer                             | 0       |
 | first         | return rows of query result                                     | integer                             | 10      |
 | sort          | sort method for query result                                    | JSON                                | {}      |
-| format        | downloadable file format type for query result           | ENUM: json, csv, tsv                | json    |
+| format        | downloadable file format type for query result (see [format](#format) section) | ENUM: json, csv, tsv   | json    |
 | [accessibility](#accessibility) | only valid for "regular" mode, return result by accessible type | ENUM: all, accessible, unaccessible | all     |
 | [filter](#filter)        | filter object to apply for query                                | JSON                                | {}      |
 
@@ -1269,3 +1269,11 @@ Result:
   }
 }
 ```
+
+<a name="format"></a>
+
+## Format
+To support multiple downloadable file formats for Explorer, there is a `format` arg (see [Queries](#queries) above)
+where a file type is passed into Guppy. Currently, there is support for downloads to TSV, CSV, and JSON. Due to current Graphql
+restrictions, the `format` arg is used to supply the file type to the Conversion Service, the service then converts the JSON returned
+from Guppy. The Query Page *only* returns JSON. See `TECHDEBT.md` for more details.
