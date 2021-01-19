@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import nock from 'nock'; // must import this to enable mock data by nock 
+import nock from 'nock'; // must import this to enable mock data by nock
 import {
   getQuerySchema,
   getTypesSchemas,
@@ -27,18 +27,20 @@ describe('Schema', () => {
   const expectedQuerySchemas = `
     type Query {
       subject (
-        offset: Int, 
+        offset: Int,
         first: Int,
         filter: JSON,
         sort: JSON,
         accessibility: Accessibility=all,
+        format: Format=json,
       ): [Subject]
       file (
-        offset: Int, 
+        offset: Int,
         first: Int,
         filter: JSON,
         sort: JSON,
         accessibility: Accessibility=all,
+        format: Format=json,
       ): [File]
       _aggregation: Aggregation
       _mapping: Mapping
@@ -87,14 +89,14 @@ describe('Schema', () => {
   const expectedAggregationSchema = `
     type Aggregation {
       subject (
-        filter: JSON, 
-        filterSelf: Boolean=true, 
+        filter: JSON,
+        filterSelf: Boolean=true,
         nestedAggFields:JSON,
         accessibility: Accessibility=all
       ): SubjectAggregation
       file (
-        filter: JSON, 
-        filterSelf: Boolean=true, 
+        filter: JSON,
+        filterSelf: Boolean=true,
         nestedAggFields:JSON,
         accessibility: Accessibility=all
       ): FileAggregation

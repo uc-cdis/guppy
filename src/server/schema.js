@@ -69,11 +69,12 @@ const getQuerySchemaForType = (esType) => {
   // index-scoped query schema.
   const esTypeObjName = firstLetterUpperCase(esType);
   return `${esType} (
-    offset: Int, 
+    offset: Int,
     first: Int,
     filter: JSON,
     sort: JSON,
     accessibility: Accessibility=all,
+    format: Format=json,
     ): [${esTypeObjName}]`;
 };
 
@@ -197,8 +198,8 @@ export const getTypesSchemas = (esConfig, esInstance) => esConfig.indices.map((c
 export const getAggregationSchema = (esConfig) => `
     type Aggregation {
       ${esConfig.indices.map((cfg) => `${cfg.type} (
-        filter: JSON, 
-        filterSelf: Boolean=true, 
+        filter: JSON,
+        filterSelf: Boolean=true,
         nestedAggFields: JSON,
         """Only used when it's regular level data commons, if set, returns aggregation data within given accessibility"""
         accessibility: Accessibility=all
@@ -271,6 +272,14 @@ export const buildSchemaString = (esConfig, esInstance) => {
     }
   `;
 
+  const formatEnum = `
+    enum Format {
+      json
+      tsv
+      csv
+    }
+  `;
+
   const aggregationSchema = getAggregationSchema(esConfig);
 
   const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
@@ -317,8 +326,8 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const numberHistogramSchema = `
     type ${EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
       histogram(
-        rangeStart: Int, 
-        rangeEnd: Int, 
+        rangeStart: Int,
+        rangeEnd: Int,
         rangeStep: Int,
         binCount: Int,
       ): [BucketsForNestedNumberAgg],
@@ -347,6 +356,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${matchedItemSchema}
   ${querySchema}
   ${accessibilityEnum}
+  ${formatEnum}
   ${typesSchemas}
   ${aggregationSchema}
   ${aggregationSchemasForEachType}
