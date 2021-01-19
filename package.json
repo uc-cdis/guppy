@@ -1,6 +1,6 @@
 {
   "name": "@gen3/guppy",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "Server that support GraphQL queries on data from elasticsearch",
   "main": "src/server/server.js",
   "directories": {
@@ -47,6 +47,7 @@
     "lodash": "^4.17.15",
     "loglevel": "^1.6.1",
     "node-fetch": "^2.3.0",
+    "papaparse": "^5.3.0",
     "prop-types": "^15.7.2",
     "react": "^16.8.4"
   },
