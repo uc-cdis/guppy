@@ -55,9 +55,33 @@ const getAggsHistogramName = (gqlType) => {
   return gqlTypeToAggsHistogramName[gqlType];
 };
 
+const getObjNameFromESIndex = (esIndex) => {
+  let esTypeObjName = firstLetterUpperCase(esIndex);
+  // Choosing to replace hyphens with the string "_DASH_".
+  // It's self-documenting, lends well to readability, and the 
+  // likelihood of a user naming an ES index with the string _DASH_ is low. 
+  esTypeObjName = esTypeObjName.replaceAll('-', '_DASH_');
+  return esTypeObjName;
+};
+
 const getQuerySchemaForType = (esType) => {
+  // This function is now unused in favor of an 
+  // index-scoped query schema.
   const esTypeObjName = firstLetterUpperCase(esType);
   return `${esType} (
+    offset: Int, 
+    first: Int,
+    filter: JSON,
+    sort: JSON,
+    accessibility: Accessibility=all,
+    ): [${esTypeObjName}]`;
+};
+
+const getQuerySchemaForIndex = (esIndex) => {
+  // This function helps build an index-scoped query schema
+  // so as to scope middleware by index rather than type.
+  const esIndexObjName = getObjNameFromESIndex(esIndex);
+  return `${esIndexObjName} (
     offset: Int, 
     first: Int,
     filter: JSON,
@@ -162,7 +186,7 @@ const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
 
 export const getQuerySchema = (esConfig) => `
     type Query {
-      ${esConfig.indices.map((cfg) => getQuerySchemaForType(cfg.type)).join('\n')}
+      ${esConfig.indices.map((cfg) => getQuerySchemaForIndex(cfg.index)).join('\n')}
       _aggregation: Aggregation
       _mapping: Mapping
     }
