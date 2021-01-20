@@ -58,14 +58,15 @@ const getAggsHistogramName = (gqlType) => {
 const getObjNameFromESIndex = (esIndex) => {
   let esTypeObjName = firstLetterUpperCase(esIndex);
   // Choosing to replace hyphens with the string "_DASH_".
-  // It's self-documenting, lends well to readability, and the 
-  // likelihood of a user naming an ES index with the string _DASH_ is low. 
+  // It's self-documenting, lends well to readability, and the
+  // likelihood of a user naming an ES index with the string _DASH_ is low.
   esTypeObjName = esTypeObjName.replaceAll('-', '_DASH_');
   return esTypeObjName;
 };
 
+/* eslint-disable no-unused-vars */
 const getQuerySchemaForType = (esType) => {
-  // This function is now unused in favor of an 
+  // This function is now unused in favor of an
   // index-scoped query schema.
   const esTypeObjName = firstLetterUpperCase(esType);
   return `${esType} (
@@ -88,7 +89,7 @@ const getQuerySchemaForIndex = (esIndex) => {
     filter: JSON,
     sort: JSON,
     accessibility: Accessibility=all,
-    ): [${esTypeObjName}]`;
+    ): [${esIndexObjName}]`;
 };
 
 const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {

@@ -2,6 +2,7 @@ import authMiddleware from './authMiddleware';
 import tierAccessMiddleware from './tierAccessMiddleware';
 import perIndexTierAccessMiddleware from './perIndexTierAccessMiddleware';
 import config from '../config';
+import log from '../logger';
 
 const middlewares = [];
 
@@ -9,18 +10,18 @@ const middlewares = [];
 // we apply ES-index-specific tiered access settings.
 switch (config.tierAccessLevel) {
   case 'libre':
-    console.log('[Server] applying libre middleware.');
+    log.info('[Server] applying libre middleware across indices.');
     break;
   case 'regular':
-    console.log('[Server] applying site-wide regular middleware.');
+    log.info('[Server] applying regular middleware across indices.');
     middlewares.push(tierAccessMiddleware);
     break;
   case 'private':
-    console.log('[Server] applying site-wide private middleware.');
+    log.info('[Server] applying private middleware across indices.');
     middlewares.push(authMiddleware);
     break;
   default:
-    console.log('[Server] applying index-scoped middleware.');
+    log.info('[Server] applying index-scoped middleware.');
     middlewares.push(perIndexTierAccessMiddleware);
     break;
 }
