@@ -60,7 +60,7 @@ const getObjNameFromESIndex = (esIndex) => {
   // Choosing to replace hyphens with the string "_DASH_".
   // It's self-documenting, lends well to readability, and the
   // likelihood of a user naming an ES index with the string _DASH_ is low.
-  esTypeObjName = esTypeObjName.replaceAll('-', '_DASH_');
+  esTypeObjName = esTypeObjName.replace(/-/g, '_DASH_');
   return esTypeObjName;
 };
 
