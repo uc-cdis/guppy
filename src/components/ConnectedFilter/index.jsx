@@ -2,8 +2,6 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
-import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
@@ -11,6 +9,7 @@ import {
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
   askGuppyAboutAllFieldsAndOptions,
+  askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
 } from '../Utils/queries';
@@ -29,6 +28,10 @@ class ConnectedFilter extends React.Component {
     const allFields = props.accessibleFieldCheckList
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
+    const initialFilter = mergeFilters(
+      props.initialAppliedFilters,
+      props.adminAppliedPreFilters,
+    );
 
     this.initialTabsOptions = {};
     this.state = {
@@ -37,11 +40,12 @@ class ConnectedFilter extends React.Component {
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      filter: { ...this.props.adminAppliedPreFilters },
-      filtersApplied: {},
+      filter: { ...initialFilter },
+      filtersApplied: { ...initialFilter },
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
+    this.arrayFields = [];
   }
 
   componentDidMount() {
@@ -49,7 +53,7 @@ class ConnectedFilter extends React.Component {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
+      this.props.onFilterChange(this.state.filter, this.state.accessibility);
     }
     askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
@@ -69,6 +73,64 @@ class ConnectedFilter extends React.Component {
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
       });
+
+    askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
+      this.arrayFields = [];
+      const keys = Object.keys(res);
+
+      for (let i = 0; i < keys.length; i += 1) {
+        if (res[keys[i]].arrayFields && res[keys[i]].arrayFields.length > 0) {
+          this.arrayFields = this.arrayFields.concat(res[keys[i]].arrayFields);
+        }
+      }
+    });
+  }
+
+  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+    this.setState({ receivedAggsData });
+    if (this.props.onReceiveNewAggsData) {
+      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
+      this.props.onReceiveNewAggsData(resultAggsData);
+    }
+  }
+
+  /**
+   * Handler function that is called everytime filter changes
+   * What this function does:
+   * 1. Ask guppy for aggregation data using (processed) filter
+   * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
+   *    to process new received agg data
+   * 3. If there's `onFilterChange` callback function from parent, call it
+   * @param {object} filterResults
+   */
+  handleFilterChange(filterResults) {
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
+    this.setState({ filtersApplied: mergedFilterResults });
+    askGuppyForAggregationData(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      this.state.allFields,
+      mergedFilterResults,
+      this.state.accessibility,
+    )
+      .then((res) => {
+        this.handleReceiveNewAggsData(
+          res.data._aggregation[this.props.guppyConfig.type],
+          mergedFilterResults,
+        );
+      });
+
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
+    }
+  }
+
+  setFilter(filter) {
+    if (this.filterGroupRef.current) {
+      this.filterGroupRef.current.resetFilter();
+    }
+    this.handleFilterChange(filter);
   }
 
   /**
@@ -92,6 +154,7 @@ class ConnectedFilter extends React.Component {
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
+
     if (Object.keys(this.state.filtersApplied).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
@@ -163,66 +226,22 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
+    const { FilterList } = this.props.filterComponents;
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
       <FilterList
         key={index}
         sections={
           getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters, this.props.guppyConfig)
+            this.state.initialAggsData, this.state.adminAppliedPreFilters,
+            this.props.guppyConfig, this.arrayFields)
         }
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
         disabledTooltipMessage={this.props.disabledTooltipMessage}
+        arrayFields={this.arrayFields}
       />
     ));
     return tabs;
-  }
-
-  setFilter(filter) {
-    if (this.filterGroupRef.current) {
-      this.filterGroupRef.current.resetFilter();
-    }
-    this.handleFilterChange(filter);
-  }
-
-  handleReceiveNewAggsData(receivedAggsData, filterResults) {
-    this.setState({ receivedAggsData });
-    if (this.props.onReceiveNewAggsData) {
-      const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData);
-    }
-  }
-
-  /**
-   * Handler function that is called everytime filter changes
-   * What this function does:
-   * 1. Ask guppy for aggregation data using (processed) filter
-   * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
-   *    to process new received agg data
-   * 3. If there's `onFilterChange` callback function from parent, call it
-   * @param {object} filterResults
-   */
-  handleFilterChange(filterResults) {
-    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
-    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
-    this.setState({ filtersApplied: mergedFilterResults });
-    askGuppyForAggregationData(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      this.state.allFields,
-      mergedFilterResults,
-      this.state.accessibility,
-    )
-      .then((res) => {
-        this.handleReceiveNewAggsData(
-          res.data._aggregation[this.props.guppyConfig.type],
-          mergedFilterResults,
-        );
-      });
-
-    if (this.props.onFilterChange) {
-      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
-    }
   }
 
   /**
@@ -249,6 +268,7 @@ class ConnectedFilter extends React.Component {
         return { title, fields };
       }),
     };
+    const { FilterGroup } = this.props.filterComponents;
     return (
       <FilterGroup
         ref={this.filterGroupRef}
@@ -257,6 +277,7 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        initialAppliedFilters={this.props.initialAppliedFilters}
       />
     );
   }
@@ -285,11 +306,16 @@ ConnectedFilter.propTypes = {
   onProcessFilterAggsData: PropTypes.func,
   onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
+  initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
+  filterComponents: PropTypes.shape({
+    FilterGroup: PropTypes.elementType.isRequired,
+    FilterList: PropTypes.elementType.isRequired,
+  }).isRequired,
 };
 
 ConnectedFilter.defaultProps = {
@@ -301,6 +327,7 @@ ConnectedFilter.defaultProps = {
   onProcessFilterAggsData: (data) => (data),
   onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
+  initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
   accessibleFieldCheckList: undefined,

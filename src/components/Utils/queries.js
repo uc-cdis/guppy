@@ -2,6 +2,7 @@ import fetch from 'isomorphic-fetch';
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
+const statusEndpoint = '/_status';
 
 const histogramQueryStrForEachField = (field) => {
   const splittedFieldArray = field.split('.');
@@ -54,6 +55,13 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     body: JSON.stringify(queryBody),
   }).then((response) => response.json());
 };
+
+const queryGuppyForStatus = (path) => fetch(`${path}${statusEndpoint}`, {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+}).then((response) => response.json());
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
   ${mainField} {
@@ -198,20 +206,38 @@ export const getGQLFilter = (filterObj) => {
     const filterValues = filterObj[field];
     const fieldSplitted = field.split('.');
     const fieldName = fieldSplitted[fieldSplitted.length - 1];
+    // The combine mode defaults to OR when not set.
+    const combineMode = filterValues.__combineMode ? filterValues.__combineMode : 'OR';
+
+    const hasSelectedValues = filterValues.selectedValues && filterValues.selectedValues.length > 0;
+    const hasRangeFilter = typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined';
+
     let facetsPiece = {};
-    if (filterValues.selectedValues) {
+    if (hasSelectedValues && combineMode === 'OR') {
       facetsPiece = {
         IN: {
           [fieldName]: filterValues.selectedValues,
         },
       };
-    } else if (typeof filterValues.lowerBound !== 'undefined' && typeof filterValues.upperBound !== 'undefined') {
+    } else if (hasSelectedValues && combineMode === 'AND') {
+      facetsPiece = { AND: [] };
+      for (let i = 0; i < filterValues.selectedValues.length; i += 1) {
+        facetsPiece.AND.push({
+          IN: {
+            [fieldName]: [filterValues.selectedValues[i]],
+          },
+        });
+      }
+    } else if (hasRangeFilter) {
       facetsPiece = {
         AND: [
           { '>=': { [fieldName]: filterValues.lowerBound } },
           { '<=': { [fieldName]: filterValues.upperBound } },
         ],
       };
+    } else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
+      // This filter only has a combine setting so far. We can ignore it.
+      return;
     } else {
       throw new Error(`Invalid filter object ${filterValues}`);
     }
@@ -238,6 +264,9 @@ export const askGuppyAboutAllFieldsAndOptions = (
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
+
+// eslint-disable-next-line max-len
+export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
   const gqlFilter = getGQLFilter(filter);
@@ -352,6 +381,7 @@ export const askGuppyForTotalCounts = (
   const queryBody = { query };
   queryBody.variables = {};
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
+
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
