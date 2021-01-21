@@ -3,12 +3,6 @@ import { firstLetterUpperCase } from '../../utils/utils';
 import authMWResolver from '../authMiddleware/resolvers';
 import { tierAccessResolver, hideNumberResolver } from '../tierAccessMiddleware/resolvers';
 
-const isPrivate = (index) => index.tier_access_level === 'private';
-const isRegular = (index) => index.tier_access_level === 'regular';
-const isLibre = (index) => index.tier_access_level === 'libre';
-const atLeastOneIndexIsPrivate = config.esConfig.indices.some(isPrivate);
-const atLeastOneIndexIsRegular = config.esConfig.indices.some(isRegular);
-
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
 const histogramTypeMapping = {};
