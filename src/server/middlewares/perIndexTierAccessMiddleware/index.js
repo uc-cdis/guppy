@@ -3,49 +3,49 @@ import { firstLetterUpperCase } from '../../utils/utils';
 import authMWResolver from '../authMiddleware/resolvers';
 import { tierAccessResolver, hideNumberResolver } from '../tierAccessMiddleware/resolvers';
 
-const queryIndexMapping = {};
-const aggsIndexMapping = {};
-const histogramIndexMapping = {};
-const histogramForStringIndexMapping = {};
+const queryTypeMapping = {};
+const aggsTypeMapping = {};
+const histogramTypeMapping = {};
+const histogramForStringTypeMapping = {};
 const totalCountTypeMapping = {};
 
 config.esConfig.indices.forEach((item) => {
   if (item.tier_access_level === 'private') {
-    queryIndexMapping[item.index] = authMWResolver;
-    aggsIndexMapping[item.index] = authMWResolver;
+    queryTypeMapping[item.type] = authMWResolver;
+    aggsTypeMapping[item.type] = authMWResolver;
   } else if (item.tier_access_level === 'regular') {
-    queryIndexMapping[item.index] = tierAccessResolver({
+    queryTypeMapping[item.type] = tierAccessResolver({
       isRawDataQuery: true,
       esType: item.type,
-      esIndex: item.index,
+      esIndex: item.type,
     });
-    aggsIndexMapping[item.index] = tierAccessResolver({ esType: item.type, esIndex: item.index });
+    aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type, esIndex: item.type });
     const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
     };
-    histogramIndexMapping[item.index] = { histogram: hideNumberResolver(false) };
-    histogramForStringIndexMapping[item.index] = { histogram: hideNumberResolver(false) };
+    histogramTypeMapping[item.type] = { histogram: hideNumberResolver(false) };
+    histogramForStringTypeMapping[item.type] = { histogram: hideNumberResolver(false) };
   } else if (item.tier_access_level === 'libre') {
     // No additional resolvers necessary
   } else {
-    throw new Error(`tier_access_level invalid for index ${item.index}. Either set all index-scoped tiered-access levels or a site-wide tiered-access level.`);
+    throw new Error(`tier_access_level invalid for index ${item.type}. Either set all index-scoped tiered-access levels or a site-wide tiered-access level.`);
   }
 }, {});
 
 const perIndexTierAccessMiddleware = {
   Query: {
-    ...queryIndexMapping,
+    ...queryTypeMapping,
   },
   Aggregation: {
-    ...aggsIndexMapping,
+    ...aggsTypeMapping,
   },
   ...totalCountTypeMapping,
   HistogramForNumber: {
-    ...histogramIndexMapping,
+    ...histogramTypeMapping,
   },
   HistogramForString: {
-    ...histogramForStringIndexMapping,
+    ...histogramForStringTypeMapping,
   },
 };
 

@@ -3,16 +3,16 @@ import { firstLetterUpperCase } from '../../utils/utils';
 import { tierAccessResolver, hideNumberResolver } from './resolvers';
 
 // apply this middleware to all es types' data/aggregation resolvers
-const queryIndexMapping = {};
-const aggsIndexMapping = {};
+const queryTypeMapping = {};
+const aggsTypeMapping = {};
 const totalCountTypeMapping = {};
 config.esConfig.indices.forEach((item) => {
-  queryIndexMapping[item.index] = tierAccessResolver({
+  queryTypeMapping[item.type] = tierAccessResolver({
     isRawDataQuery: true,
     esType: item.type,
     esIndex: item.index,
   });
-  aggsIndexMapping[item.index] = tierAccessResolver({ esType: item.type, esIndex: item.index });
+  aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type, esIndex: item.index });
   const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
   totalCountTypeMapping[aggregationName] = {
     _totalCount: hideNumberResolver(true),
@@ -20,10 +20,10 @@ config.esConfig.indices.forEach((item) => {
 });
 const tierAccessMiddleware = {
   Query: {
-    ...queryIndexMapping,
+    ...queryTypeMapping,
   },
   Aggregation: {
-    ...aggsIndexMapping,
+    ...aggsTypeMapping,
   },
   ...totalCountTypeMapping,
   HistogramForNumber: {
