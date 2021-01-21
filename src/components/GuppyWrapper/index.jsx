@@ -10,7 +10,7 @@ import {
   getAccessibleResources,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
-import { ENUM_ACCESSIBILITY, FILE_FORMATS } from '../Utils/const';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 
 /**
@@ -20,9 +20,9 @@ import { mergeFilters } from '../Utils/filters';
  *   - filterConfig: configuration for ConnectedFilter component
  *   - guppyConfig: Guppy server config
  *   - onFilterChange: callback that takes filter as argument, will be
- * called everytime filter changes
+ * called every time filter changes
  *   - onReceiveNewAggsData: callback that takes aggregation results
- * as argument, will be called everytime aggregation results updated
+ * as argument, will be called every time aggregation results updated
  *
  * This wrapper will pass following data (filters, aggs, configs) to children components via prop:
  *   - aggsData: the aggregation results, format:
@@ -140,7 +140,7 @@ class GuppyWrapper extends React.Component {
         sort: sort || [],
         filter: this.state.filter,
         accessibility: this.state.accessibility,
-        format: format in FILE_FORMATS ? FILE_FORMATS[format] : FILE_FORMATS.JSON,
+        format,
       },
     );
   }
