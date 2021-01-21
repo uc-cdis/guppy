@@ -1,7 +1,16 @@
 import log from '../../logger';
 import config from '../../config';
+import esInstance from '../../es/index';
 
 const authMWResolver = async (resolve, root, args, context, info) => {
+  // Assert that either this index is "private" access or
+  // that the index has no setting and site-wide config is "private".
+  const indexConfig = esInstance.getESIndexConfigByName(esIndex);
+  const indexIsPrivateAccess = indexConfig.tier_access_level === 'private';
+  const tierAccessPrivateAndNotIndexScoped = !indexConfig.tier_access_level && config.tierAccessLevel === 'private';
+  assert(indexIsPrivateAccess || tierAccessPrivateAndNotIndexScoped, 'Auth middleware layer only for "private" tier access level');
+
+
   const { authHelper } = context;
 
   // if mock arborist endpoint, just skip auth middleware
