@@ -10,7 +10,7 @@ import {
   getAccessibleResources,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
-import { ENUM_ACCESSIBILITY } from '../Utils/const';
+import { ENUM_ACCESSIBILITY, FILE_FORMATS } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 
 /**
@@ -131,6 +131,11 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawData({ sort, format }) {
+    // error handling for misconfigured format types
+    if (format && !(format in FILE_FORMATS)) {
+      // eslint-disable-next-line no-console
+      console.error(`Invalid value ${format} found for arg format!`);
+    }
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
