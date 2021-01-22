@@ -96,7 +96,7 @@ config.esConfig.indices.forEach((item) => {
 // If there is no site-wide TIER_ACCESS_LEVEL value and the indices all have settings,
 // empty out the default TIER_ACCESS_LEVEL from the config.
 if (allIndicesHaveTierAccessSettings && !process.env.TIER_ACCESS_LIMIT) {
-  delete config.tierAccessLimit;
+  delete config.tierAccessLevel;
 }
 
 // check whitelist is enabled
