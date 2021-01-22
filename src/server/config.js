@@ -55,6 +55,15 @@ if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
 
+if (process.env.TIER_ACCESS_LEVEL) {
+  if (process.env.TIER_ACCESS_LEVEL !== 'private'
+  && process.env.TIER_ACCESS_LEVEL !== 'regular'
+  && process.env.TIER_ACCESS_LEVEL !== 'libre') {
+    throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
+  }
+  config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
+}
+
 if (process.env.TIER_ACCESS_LIMIT) {
   config.tierAccessLimit = process.env.TIER_ACCESS_LIMIT;
 }
@@ -76,7 +85,7 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
 // This approach is backwards-compatible with commons configured for past versions of tiered-access.
 let allIndicesHaveTierAccessSettings = true;
 config.esConfig.indices.forEach((item) => {
-  if (!item.tier_access_level && !process.env.TIER_ACCESS_LEVEL) {
+  if (!item.tier_access_level && !config.tierAccessLevel) {
     throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
   }
   if (!item.tier_access_level) {
@@ -86,17 +95,8 @@ config.esConfig.indices.forEach((item) => {
 
 // If there is no site-wide TIER_ACCESS_LEVEL value and the indices all have settings,
 // empty out the default TIER_ACCESS_LEVEL from the config.
-if (!process.env.TIER_ACCESS_LIMIT && allIndicesHaveTierAccessSettings) {
-  config.tierAccessLimit = process.env.TIER_ACCESS_LIMIT;
-}
-
-if (process.env.TIER_ACCESS_LEVEL) {
-  if (process.env.TIER_ACCESS_LEVEL !== 'private'
-  && process.env.TIER_ACCESS_LEVEL !== 'regular'
-  && process.env.TIER_ACCESS_LEVEL !== 'libre') {
-    throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
-  }
-  config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
+if (allIndicesHaveTierAccessSettings && !process.env.TIER_ACCESS_LIMIT) {
+  delete config.tierAccessLimit;
 }
 
 // check whitelist is enabled
