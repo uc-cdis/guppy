@@ -20,9 +20,9 @@ import { mergeFilters } from '../Utils/filters';
  *   - filterConfig: configuration for ConnectedFilter component
  *   - guppyConfig: Guppy server config
  *   - onFilterChange: callback that takes filter as argument, will be
- * called everytime filter changes
+ * called every time filter changes
  *   - onReceiveNewAggsData: callback that takes aggregation results
- * as argument, will be called everytime aggregation results updated
+ * as argument, will be called every time aggregation results updated
  *
  * This wrapper will pass following data (filters, aggs, configs) to children components via prop:
  *   - aggsData: the aggregation results, format:
@@ -131,6 +131,11 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawData({ sort, format }) {
+    // error handling for misconfigured format types
+    if (format && !(format in FILE_FORMATS)) {
+      // eslint-disable-next-line no-console
+      console.error(`Invalid value ${format} found for arg format!`);
+    }
     return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -140,7 +145,7 @@ class GuppyWrapper extends React.Component {
         sort: sort || [],
         filter: this.state.filter,
         accessibility: this.state.accessibility,
-        format: format in FILE_FORMATS ? FILE_FORMATS[format] : FILE_FORMATS.JSON,
+        format,
       },
     );
   }
