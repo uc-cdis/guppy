@@ -15,12 +15,10 @@ const config = {
       {
         index: 'gen3-dev-subject',
         type: 'subject',
-        tier_access_level: 'private',
       },
       {
         index: 'gen3-dev-file',
         type: 'file',
-        tier_access_level: 'private',
       },
     ],
     configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
@@ -76,11 +74,21 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
 // Either all indices should have explicit index-scoped tiered-access values or
 // the manifest should have a site-wide TIER_ACCESS_LEVEL value.
 // This approach is backwards-compatible with commons configured for past versions of tiered-access.
+let allIndicesHaveTierAccessSettings = true;
 config.esConfig.indices.forEach((item) => {
   if (!item.tier_access_level && !process.env.TIER_ACCESS_LEVEL) {
     throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
   }
+  if (!item.tier_access_level) {
+    allIndicesHaveTierAccessSettings = false;
+  }
 });
+
+// If there is no site-wide TIER_ACCESS_LEVEL value and the indices all have settings,
+// empty out the default TIER_ACCESS_LEVEL from the config.
+if (!process.env.TIER_ACCESS_LIMIT && allIndicesHaveTierAccessSettings) {
+  config.tierAccessLimit = process.env.TIER_ACCESS_LIMIT;
+}
 
 if (process.env.TIER_ACCESS_LEVEL) {
   if (process.env.TIER_ACCESS_LEVEL !== 'private'
