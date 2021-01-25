@@ -146,9 +146,13 @@ const getAggregationType = (entry) => {
   return '';
 };
 
-const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
+const getAggregationSchemaForOneIndex = (esInstance, esDict) => {
+  const esIndex = esDict.type;
+  const esType = esDict.type;
   let histogramTypePrefix = '';
-  if (esIndex.tier_access_level === 'regular') {
+  // eslint-disable-next-line no-console
+  console.log('>>>>> inside getAggregationSchemaForOneIndex; esIndex: ', esIndex);
+  if (Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular') {
     histogramTypePrefix = 'RegularAccess';
   }
   const esTypeObjName = firstLetterUpperCase(esType);
@@ -192,11 +196,12 @@ export const getAggregationSchema = (esConfig) => `
  * Multi-level nested fields are "flattened" level by level.
  * For each level of nested field a new type in schema is created.
  */
-const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
+const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
+  const esIndex = esDict.type;
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   let histogramTypePrefix = '';
-  if (esIndex.tier_access_level === 'regular') {
+  if (Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular') {
     histogramTypePrefix = 'RegularAccess';
   }
 
@@ -224,9 +229,9 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
   return AggsNestedTypeSchema;
 };
 
-export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneIndex(esInstance, cfg)).join('\n');
 
-export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg.index)).join('\n');
+export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
 
 export const getMappingSchema = (esConfig) => `
     type Mapping {
