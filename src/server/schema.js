@@ -147,11 +147,11 @@ const getAggregationType = (entry) => {
 };
 
 const getAggregationSchemaForOneIndex = (esInstance, esDict) => {
-  const esIndex = esDict.type;
+  const esIndex = esDict.index;
   const esType = esDict.type;
   let histogramTypePrefix = '';
   // eslint-disable-next-line no-console
-  console.log('>>>>> inside getAggregationSchemaForOneIndex; esIndex: ', esIndex);
+  console.log('>>>>> inside getAggregationSchemaForOneIndex; esIndex: ', esDict);
   if (Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular') {
     histogramTypePrefix = 'RegularAccess';
   }
@@ -197,7 +197,7 @@ export const getAggregationSchema = (esConfig) => `
  * For each level of nested field a new type in schema is created.
  */
 const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
-  const esIndex = esDict.type;
+  const esIndex = esDict.index;
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   let histogramTypePrefix = '';
