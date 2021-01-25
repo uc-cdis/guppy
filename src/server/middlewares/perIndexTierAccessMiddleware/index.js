@@ -5,7 +5,7 @@ import { tierAccessResolver, hideNumberResolver } from '../tierAccessMiddleware/
 
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
-const histogramTypeMapping = {};
+const histogramForNumberTypeMapping = {};
 const histogramForStringTypeMapping = {};
 const totalCountTypeMapping = {};
 
@@ -24,8 +24,8 @@ config.esConfig.indices.forEach((item) => {
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
     };
-    histogramTypeMapping[item.type] = { histogram: hideNumberResolver(false) };
-    histogramForStringTypeMapping[item.type] = { histogram: hideNumberResolver(false) };
+    histogramForNumberTypeMapping[item.type] = hideNumberResolver(false);
+    histogramForStringTypeMapping[item.type] = hideNumberResolver(false);
   } else if (item.tier_access_level === 'libre') {
     // No additional resolvers necessary
   } else {
@@ -41,10 +41,10 @@ const perIndexTierAccessMiddleware = {
     ...aggsTypeMapping,
   },
   ...totalCountTypeMapping,
-  HistogramForNumber: {
-    ...histogramTypeMapping,
+  RegularAccessHistogramForNumber: {
+    ...histogramForNumberTypeMapping,
   },
-  HistogramForString: {
+  RegularAccessHistogramForString: {
     ...histogramForStringTypeMapping,
   },
 };

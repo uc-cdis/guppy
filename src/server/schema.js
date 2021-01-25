@@ -147,11 +147,15 @@ const getAggregationType = (entry) => {
 };
 
 const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
+  let histogramTypePrefix = '';
+  if (esIndex.tier_access_level === 'regular') {
+    histogramTypePrefix = 'RegularAccess';
+  }
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => f.esType !== 'nested').map((entry) => ({
     field: entry.field,
-    aggType: getAggsHistogramName(entry.type),
+    aggType: histogramTypePrefix + getAggsHistogramName(entry.type),
   }));
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   return `type ${esTypeObjName}Aggregation {
@@ -191,6 +195,10 @@ export const getAggregationSchema = (esConfig) => `
 const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
+  let histogramTypePrefix = '';
+  if (esIndex.tier_access_level === 'regular') {
+    histogramTypePrefix = 'RegularAccess';
+  }
 
   let AggsNestedTypeSchema = '';
   while (fieldAggsNestedTypeMap.length > 0) {
@@ -207,7 +215,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
         }
         return `
-    ${propsKey}: ${getAggsHistogramName(esgqlTypeMapping[entryType])}`;
+    ${propsKey}: ${histogramTypePrefix + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
 }`;
     }
