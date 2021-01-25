@@ -233,6 +233,36 @@ export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfi
 
 export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
 
+const getNumberHistogramSchema = (isRegularAccess) => {
+  let histogramTypePrefix = '';
+  if (isRegularAccess) {
+    histogramTypePrefix = 'RegularAccess';
+  }
+  return `
+    type ${histogramTypePrefix + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+      histogram(
+        rangeStart: Int,
+        rangeEnd: Int,
+        rangeStep: Int,
+        binCount: Int,
+      ): [BucketsForNestedNumberAgg],
+      asTextHistogram: [BucketsForNestedStringAgg]
+    }
+  `;
+};
+
+const getTextHistogramSchema = (isRegularAccess) => {
+  let histogramTypePrefix = '';
+  if (isRegularAccess) {
+    histogramTypePrefix = 'RegularAccess';
+  }
+  return `
+    type ${histogramTypePrefix + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+      histogram: [BucketsForNestedStringAgg]
+    }
+  `;
+};
+
 export const getMappingSchema = (esConfig) => `
     type Mapping {
       ${esConfig.indices.map((cfg) => `${cfg.type} (
@@ -276,11 +306,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
     esInstance);
 
-  const textHistogramSchema = `
-    type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
-      histogram: [BucketsForNestedStringAgg]
-    }
-  `;
+  const textHistogramSchema = getTextHistogramSchema(false);
+
+  const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
 
   const textHistogramBucketSchema = `
     type BucketsForNestedStringAgg {
@@ -312,17 +340,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
     }
   `;
 
-  const numberHistogramSchema = `
-    type ${EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
-      histogram(
-        rangeStart: Int,
-        rangeEnd: Int,
-        rangeStep: Int,
-        binCount: Int,
-      ): [BucketsForNestedNumberAgg],
-      asTextHistogram: [BucketsForNestedStringAgg]
-    }
-  `;
+  const numberHistogramSchema = getNumberHistogramSchema(false);
+
+  const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
 
   const numberHistogramBucketSchema = `
     type BucketsForNestedNumberAgg {
@@ -351,7 +371,9 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${aggregationSchemasForEachType}
   ${aggregationSchemasForEachNestedType}
   ${textHistogramSchema}
+  ${regularAccessTextHistogramSchema}
   ${numberHistogramSchema}
+  ${regularAccessNumberHistogramSchema}
   ${textHistogramBucketSchema}
   ${nestedMissingFieldsBucketSchema}
   ${nestedTermsFieldsBucketSchema}
