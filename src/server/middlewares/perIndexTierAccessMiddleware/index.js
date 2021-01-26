@@ -15,9 +15,9 @@ config.esConfig.indices.forEach((item) => {
     queryTypeMapping[item.type] = tierAccessResolver({
       isRawDataQuery: true,
       esType: item.type,
-      esIndex: item.type,
+      esIndex: item.index,
     });
-    aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type, esIndex: item.type });
+    aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type, esIndex: item.index });
     const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
