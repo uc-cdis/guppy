@@ -93,7 +93,8 @@ config.esConfig.indices.forEach((item) => {
   }
 });
 
-// If the indices all have settings, empty out the default site-wide TIER_ACCESS_LEVEL from the config.
+// If the indices all have settings, empty out the default
+// site-wide TIER_ACCESS_LEVEL from the config.
 if (allIndicesHaveTierAccessSettings) {
   delete config.tierAccessLevel;
 }
