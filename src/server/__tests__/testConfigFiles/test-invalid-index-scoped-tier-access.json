@@ -1,0 +1,14 @@
+{
+    "indices": [
+      {
+        "index": "subject_regular",
+        "type": "subject",
+	    "tier_access_level": "regular"
+      },
+      {
+        "index": "subject_private",
+        "type": "subject_private",
+	    "tier_access_level": "private____typo"
+      }
+    ]
+  }
