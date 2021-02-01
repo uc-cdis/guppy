@@ -6,6 +6,7 @@ import {
   getAggregationSchema,
   getAggregationSchemaForEachType,
   getMappingSchema,
+  getHistogramSchemas,
 } from '../schema';
 import esInstance from '../es/index';
 import config from '../config';
