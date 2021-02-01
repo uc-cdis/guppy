@@ -55,10 +55,10 @@ if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
 
+const allowedTierAccessLevels = ['private', 'regular', 'libre'];
+
 if (process.env.TIER_ACCESS_LEVEL) {
-  if (process.env.TIER_ACCESS_LEVEL !== 'private'
-  && process.env.TIER_ACCESS_LEVEL !== 'regular'
-  && process.env.TIER_ACCESS_LEVEL !== 'libre') {
+  if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
     throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
   }
   config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
@@ -87,6 +87,9 @@ let allIndicesHaveTierAccessSettings = true;
 config.esConfig.indices.forEach((item) => {
   if (!item.tier_access_level && !config.tierAccessLevel) {
     throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
+  }
+  if(!allowedTierAccessLevels.includes(item.tier_access_level)) {
+    throw new Error(`tier_access_level invalid for index ${item.type}.`);
   }
   if (!item.tier_access_level) {
     allIndicesHaveTierAccessSettings = false;

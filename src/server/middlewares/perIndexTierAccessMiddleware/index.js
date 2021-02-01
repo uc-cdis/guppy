@@ -24,8 +24,6 @@ config.esConfig.indices.forEach((item) => {
     };
   } else if (item.tier_access_level === 'libre') {
     // No additional resolvers necessary
-  } else {
-    throw new Error(`tier_access_level invalid for index ${item.type}. Either set all index-scoped tiered-access levels or a site-wide tiered-access level.`);
   }
 }, {});
 
