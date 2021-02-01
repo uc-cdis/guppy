@@ -150,8 +150,6 @@ const getAggregationSchemaForOneIndex = (esInstance, esDict) => {
   const esIndex = esDict.index;
   const esType = esDict.type;
   let histogramTypePrefix = '';
-  // eslint-disable-next-line no-console
-  console.log('>>>>> inside getAggregationSchemaForOneIndex; esIndex: ', esDict);
   if (Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular') {
     histogramTypePrefix = 'RegularAccess';
   }
