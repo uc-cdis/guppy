@@ -51,7 +51,7 @@ describe('config', () => {
     process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
     const config = require('../config').default;
     const { indices } = require(fileName);
-    expect(config.tierAccessLevel).toBe(null);
+    expect(config.tierAccessLevel).toBeUndefined();
     expect(JSON.stringify(config.esConfig.indices)).toEqual(JSON.stringify(indices));
   });
 
