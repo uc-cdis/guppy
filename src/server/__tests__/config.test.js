@@ -42,12 +42,12 @@ describe('config', () => {
     const fileName = './testConfigFiles/test-invalid-index-scoped-tier-access.json';
     process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
     const invalidItemType = 'subject_private';
-    expect(() => (require('../config'))).toThrow(new Error(`tier_access_level invalid for index ${invalidItemType}."`));
+    expect(() => (require('../config'))).toThrow(new Error(`tier_access_level invalid for index ${invalidItemType}.`));
   });
 
   test('clears out site-wide default tiered-access setting if index-scoped levels set', async () => {
     process.env.TIER_ACCESS_LEVEL = null;
-    const fileName = './testConfigFiles/test-invalid-index-scoped-tier-access.json';
+    const fileName = './testConfigFiles/test-index-scoped-tier-access.json';
     process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
     const config = require('../config').default;
     const { indices } = require(fileName);
