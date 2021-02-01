@@ -88,7 +88,7 @@ config.esConfig.indices.forEach((item) => {
   if (!item.tier_access_level && !config.tierAccessLevel) {
     throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
   }
-  if(!allowedTierAccessLevels.includes(item.tier_access_level)) {
+  if (!allowedTierAccessLevels.includes(item.tier_access_level)) {
     throw new Error(`tier_access_level invalid for index ${item.type}.`);
   }
   if (!item.tier_access_level) {
