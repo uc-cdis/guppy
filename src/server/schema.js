@@ -258,6 +258,20 @@ export const getMappingSchema = (esConfig) => `
     }
   `;
 
+export const getHistogramSchemas = () => {
+  const textHistogramSchema = getTextHistogramSchema(false);
+
+  const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
+  
+  const numberHistogramSchema = getNumberHistogramSchema(false);
+
+  const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
+
+  const histogramSchemas = [textHistogramSchema, regularAccessTextHistogramSchema, numberHistogramSchema, regularAccessNumberHistogramSchema].join('\n');
+
+  return histogramSchemas;
+}
+
 export const buildSchemaString = (esConfig, esInstance) => {
   const querySchema = getQuerySchema(esConfig);
 
@@ -293,13 +307,25 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
     esInstance);
 
-  const textHistogramSchema = getTextHistogramSchema(false);
-
-  const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
-
+  const histogramSchemas = getHistogramSchemas();
+  
   const textHistogramBucketSchema = `
     type BucketsForNestedStringAgg {
       key: String
+      count: Int
+      missingFields: [BucketsForNestedMissingFields]
+      termsFields: [BucketsForNestedTermsFields]
+    }
+  `;
+
+  const numberHistogramBucketSchema = `
+    type BucketsForNestedNumberAgg {
+      """Lower and higher bounds for this bucket"""
+      key: [Float]
+      min: Float
+      max: Float
+      avg: Float
+      sum: Float
       count: Int
       missingFields: [BucketsForNestedMissingFields]
       termsFields: [BucketsForNestedTermsFields]
@@ -327,24 +353,6 @@ export const buildSchemaString = (esConfig, esInstance) => {
     }
   `;
 
-  const numberHistogramSchema = getNumberHistogramSchema(false);
-
-  const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
-
-  const numberHistogramBucketSchema = `
-    type BucketsForNestedNumberAgg {
-      """Lower and higher bounds for this bucket"""
-      key: [Float]
-      min: Float
-      max: Float
-      avg: Float
-      sum: Float
-      count: Int
-      missingFields: [BucketsForNestedMissingFields]
-      termsFields: [BucketsForNestedTermsFields]
-    }
-  `;
-
   const mappingSchema = getMappingSchema(esConfig);
 
   const schemaStr = `
@@ -357,10 +365,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${aggregationSchema}
   ${aggregationSchemasForEachType}
   ${aggregationSchemasForEachNestedType}
-  ${textHistogramSchema}
-  ${regularAccessTextHistogramSchema}
-  ${numberHistogramSchema}
-  ${regularAccessNumberHistogramSchema}
+  ${histogramSchemas}
   ${textHistogramBucketSchema}
   ${nestedMissingFieldsBucketSchema}
   ${nestedTermsFieldsBucketSchema}
