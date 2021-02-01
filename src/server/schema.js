@@ -262,7 +262,7 @@ export const getHistogramSchemas = () => {
   const textHistogramSchema = getTextHistogramSchema(false);
 
   const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
-  
+
   const numberHistogramSchema = getNumberHistogramSchema(false);
 
   const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
@@ -270,7 +270,7 @@ export const getHistogramSchemas = () => {
   const histogramSchemas = [textHistogramSchema, regularAccessTextHistogramSchema, numberHistogramSchema, regularAccessNumberHistogramSchema].join('\n');
 
   return histogramSchemas;
-}
+};
 
 export const buildSchemaString = (esConfig, esInstance) => {
   const querySchema = getQuerySchema(esConfig);
@@ -308,7 +308,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
     esInstance);
 
   const histogramSchemas = getHistogramSchemas();
-  
+
   const textHistogramBucketSchema = `
     type BucketsForNestedStringAgg {
       key: String
