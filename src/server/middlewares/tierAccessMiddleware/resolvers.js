@@ -45,8 +45,8 @@ export const tierAccessResolver = (
     // that the index has no setting and site-wide config is "regular".
     const indexConfig = esInstance.getESIndexConfigByName(esIndex);
     const indexIsRegularAccess = indexConfig.tier_access_level === 'regular';
-    const tierAccessRegularAndNotIndexScoped = !indexConfig.tier_access_level && config.tierAccessLevel === 'regular';
-    assert(indexIsRegularAccess || tierAccessRegularAndNotIndexScoped, 'Tier access middleware layer only for "regular" tier access level');
+    const siteIsRegularAccess = config.tierAccessLevel === 'regular';
+    assert(indexIsRegularAccess || siteIsRegularAccess, 'Tier access middleware layer only for "regular" tier access level');
 
     const { authHelper } = context;
     const { filter, filterSelf, accessibility } = args;
