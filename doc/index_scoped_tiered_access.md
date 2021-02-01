@@ -6,32 +6,33 @@ Guppy expects that either all indices in the guppy config block will have a tier
 
 You can set index-scoped tiered-access levels using the `tier_access_level` properties in the guppy block of a common's `manifest.json`. Note that the `tier_access_limit` setting is still site-wide and configurable in the manifest's `global` block.
 ```
+...
 "guppy": {
     "indices": [
       {
         "index": "subject_regular",
         "type": "subject",
-	    "tier_access_level": "regular"
+	"tier_access_level": "regular"
       },
       {
         "index": "subject_private",
         "type": "subject_private",
-	    "tier_access_level": "private"
+	"tier_access_level": "private"
       },
       {
         "index": "file_private",
         "type": "file",
-	    "tier_access_level": "private"
+	"tier_access_level": "private"
       },
       {
         "index": "studies_open",
         "type": "studies_open",
-	    "tier_access_level": "libre"
+	"tier_access_level": "libre"
       },
       {
         "index": "studies_controlled_access",
         "type": "studies_controlled_access",
-	    "tier_access_level": "private"
+	"tier_access_level": "private"
       }
     ],
     "auth_filter_field": "auth_resource_path",
