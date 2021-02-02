@@ -53,7 +53,7 @@ describe('config', () => {
     const config = require('../config').default;
     const { indices } = require(fileName);
     expect(config.tierAccessLevel).toBeUndefined();
-    expect(config.tierAccessLevel).toEqual(50);
+    expect(config.tierAccessLimit).toEqual(50);
     expect(JSON.stringify(config.esConfig.indices)).toEqual(JSON.stringify(indices));
   });
 
