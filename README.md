@@ -37,7 +37,7 @@ You could put following as your config files:
 }
 ```
 
-Note: Guppy expects that either all indices in the guppy config block will have a tiered-access level set OR that a site-wide tiered-access level is set in the global block of the manifest. Guppy will throw an error if the config settings do not meet one of these two expectations. See `doc/index_scoped_tiered_access.md` for more information.
+Note: Guppy expects that either all indices in the guppy config block will have a tier_access_level set OR that a site-wide TIER_ACCESS_LEVEL is set as an environment variable (or in the global block of a commons' manifest). Guppy will throw an error if the config settings do not meet one of these two expectations. See `doc/index_scoped_tiered_access.md` for more information.
 
 Following script will start server using at port 3000, using config file `example_config.json`:
 
@@ -67,12 +67,12 @@ Guppy support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`:
 - `regular`: allows all kind of aggregation (with limitation for unauthorized resources), but forbid access to raw data without authorization
 - `libre`: access to all data
 
-For `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
+For the `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
 
-`regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
+`regular` level commons can also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
 By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data'].
 Also the whitelist is disabled by default due to security reasons. If you would like to enable whitelist, simply put `enable_encrypt_whitelist: true` in your config.
-For example, a `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`:
+For example, a `regular` leveled commons with config that looks like this will skip encrypting the value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`:
 
 ```
 {
