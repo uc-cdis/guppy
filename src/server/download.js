@@ -18,14 +18,16 @@ const downloadRouter = async (req, res, next) => {
   try {
     let appliedFilter;
     /**
-     * Tier acces strategy for download endpoint:
-     * 1. if data commons is secure, add auth filter layer onto filter
-     * 2. if data commons is regular:
+     * Tier access strategy for download endpoint:
+     * 1. if the data commons or the index is secure, add auth filter layer onto filter
+     * 2. if the data commons or the index is regular:
      *   a. if request contains out-of-access resource, return 401
      *   b. if request contains only accessible resouces, return response
-     * 3. if data commons is private, always return reponse without any auth check
+     * 3. if the data commons or the index is private, always return reponse without any auth check
      */
-    switch (config.tierAccessLevel) {
+    const tierAccessLevel = config.tierAccessLevel
+      ? config.tierAccessLevel : esIndex.tier_access_level;
+    switch (tierAccessLevel) {
       case 'private': {
         appliedFilter = authHelper.applyAccessibleFilter(filter);
         break;
@@ -54,8 +56,9 @@ const downloadRouter = async (req, res, next) => {
         break;
       }
       default:
-        throw new Error(`Invalid TIER_ACCESS_LEVEL "${config.tierAccessLevel}"`);
+        throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
+    log.debug('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
     const data = await esInstance.downloadData({
       esIndex, esType: type, filter: appliedFilter, sort, fields,
     });
