@@ -24,9 +24,8 @@ config.esConfig.indices.forEach((item) => {
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
     };
-  } else if (item.tier_access_level === 'libre') {
-    // No additional resolvers necessary
   }
+  // No additional resolvers necessary for tier_access_level == 'libre'
 }, {});
 
 const perIndexTierAccessMiddleware = {
