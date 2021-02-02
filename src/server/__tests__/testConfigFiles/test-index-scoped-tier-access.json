@@ -1,29 +1,29 @@
 {
     "indices": [
-      {
-        "index": "subject_regular",
-        "type": "subject",
-        "tier_access_level": "regular"
-      },
-      {
-        "index": "subject_private",
-        "type": "subject_private",
-        "tier_access_level": "private"
-      },
-      {
-        "index": "file_private",
-        "type": "file",
-        "tier_access_level": "private"
-      },
-      {
-        "index": "studies_open",
-        "type": "studies_open",
-        "tier_access_level": "libre"
-      },
-      {
-        "index": "studies_controlled_access",
-        "type": "studies_controlled_access",
-        "tier_access_level": "private"
-      }
+        {
+            "index": "subject_regular",
+            "type": "subject",
+            "tier_access_level": "regular"
+        },
+        {
+            "index": "subject_private",
+            "type": "subject_private",
+            "tier_access_level": "private"
+        },
+        {
+            "index": "file_private",
+            "type": "file",
+            "tier_access_level": "private"
+        },
+        {
+            "index": "studies_open",
+            "type": "studies_open",
+            "tier_access_level": "libre"
+        },
+        {
+            "index": "studies_controlled_access",
+            "type": "studies_controlled_access",
+            "tier_access_level": "private"
+        }
     ]
-  }
+}
