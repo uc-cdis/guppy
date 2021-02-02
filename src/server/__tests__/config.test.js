@@ -47,11 +47,13 @@ describe('config', () => {
 
   test('clears out site-wide default tiered-access setting if index-scoped levels set', async () => {
     process.env.TIER_ACCESS_LEVEL = null;
+    process.env.TIER_ACCESS_LIMIT = 50;
     const fileName = './testConfigFiles/test-index-scoped-tier-access.json';
     process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
     const config = require('../config').default;
     const { indices } = require(fileName);
     expect(config.tierAccessLevel).toBeUndefined();
+    expect(config.tierAccessLevel).toEqual(50);
     expect(JSON.stringify(config.esConfig.indices)).toEqual(JSON.stringify(indices));
   });
 
