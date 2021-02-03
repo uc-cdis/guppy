@@ -93,8 +93,6 @@ For example, a `regular` leveled commons with config that looks like this will s
 }
 ```
 
-Tiered-access can be configured in either a site-wide manner or with per-index scoping. To configure tiered-access at the site-wide level, use the tierAccessLevel property in the global block of the manifest.json. The above example is a site-wide tiered-access configuration.
-
 The following script will start a Guppy server with a site-wide `regular` tier access level, and minimum visible count set to 100:
 
 ```
