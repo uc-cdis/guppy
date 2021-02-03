@@ -12,6 +12,12 @@ const downloadRouter = async (req, res, next) => {
 
   log.info('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexByType(type);
+  log.info('[download] esIndex: ', esIndex);
+  log.info('[download] esIndex: ', JSON.stringify(esIndex));
+  log.info('[download] config.tierAccessLevel: ', config.tierAccessLevel);
+  log.info('[download] esIndex.tier_access_level: ', esIndex.tier_access_level);
+  const tierAccessLevel = (config.tierAccessLevel
+    ? config.tierAccessLevel : esIndex.tier_access_level);
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
@@ -25,8 +31,6 @@ const downloadRouter = async (req, res, next) => {
      *   b. if request contains only accessible resouces, return response
      * 3. if the data commons or the index is private, always return reponse without any auth check
      */
-    const tierAccessLevel = config.tierAccessLevel
-      ? config.tierAccessLevel : esIndex.tier_access_level;
     switch (tierAccessLevel) {
       case 'private': {
         appliedFilter = authHelper.applyAccessibleFilter(filter);
@@ -64,7 +68,7 @@ const downloadRouter = async (req, res, next) => {
     });
     res.send(data);
   } catch (err) {
-    log.error(err)
+    log.error(err);
     next(err);
   }
   return 0;
