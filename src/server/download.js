@@ -64,7 +64,7 @@ const downloadRouter = async (req, res, next) => {
     }
     log.info('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
     const data = await esInstance.downloadData({
-      esIndex.index, esType: type, filter: appliedFilter, sort, fields,
+      esIndex: esIndex.index, esType: type, filter: appliedFilter, sort, fields,
     });
     res.send(data);
   } catch (err) {
