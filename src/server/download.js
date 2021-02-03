@@ -10,12 +10,8 @@ const downloadRouter = async (req, res, next) => {
     type, filter, sort, fields, accessibility,
   } = req.body;
 
-  log.info('[download] ', JSON.stringify(req.body, null, 4));
+  log.debug('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexConfigByType(type);
-  log.info('[download] esIndex: ', esIndex);
-  log.info('[download] esIndex: ', JSON.stringify(esIndex));
-  log.info('[download] config.tierAccessLevel: ', config.tierAccessLevel);
-  log.info('[download] esIndex.tier_access_level: ', esIndex.tier_access_level);
   const tierAccessLevel = (config.tierAccessLevel
     ? config.tierAccessLevel : esIndex.tier_access_level);
   const jwt = headerParser.parseJWT(req);
@@ -37,7 +33,7 @@ const downloadRouter = async (req, res, next) => {
         break;
       }
       case 'regular': {
-        log.info('[download] regular commons');
+        log.debug('[download] regular commons');
         if (accessibility === 'accessible') {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
@@ -46,8 +42,8 @@ const downloadRouter = async (req, res, next) => {
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
-            log.info('[download] requesting out-of-scope resources, return 401');
-            log.info(`[download] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
+            log.debug('[download] requesting out-of-scope resources, return 401');
+            log.debug(`[download] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
             throw new CodedError(401, 'You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query');
           } else { // else, go ahead download
             appliedFilter = filter;
@@ -62,7 +58,6 @@ const downloadRouter = async (req, res, next) => {
       default:
         throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
-    log.info('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
     const data = await esInstance.downloadData({
       esIndex: esIndex.index, esType: type, filter: appliedFilter, sort, fields,
     });
