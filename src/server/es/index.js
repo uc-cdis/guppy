@@ -319,6 +319,20 @@ class ES {
   }
 
   /**
+   * Get es indexConfig by es type
+   * Throw 400 error if there's no existing es type
+   * @param {string} esType
+   */
+  getESIndexConfigByType(esType) {
+    const index = this.config.indices.find((i) => i.type === esType);
+    if (index) return index;
+    throw new CodedError(
+      400,
+      `Invalid es type: "${esType}"`,
+    );
+  }
+
+  /**
    * Get es index config by es index name
    * Throw 400 error if there's no existing es index of that name
    * @param {string} esIndexName

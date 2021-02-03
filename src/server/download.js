@@ -11,7 +11,7 @@ const downloadRouter = async (req, res, next) => {
   } = req.body;
 
   log.info('[download] ', JSON.stringify(req.body, null, 4));
-  const esIndex = esInstance.getESIndexByType(type);
+  const esIndex = esInstance.getESIndexConfigByType(type);
   log.info('[download] esIndex: ', esIndex);
   log.info('[download] esIndex: ', JSON.stringify(esIndex));
   log.info('[download] config.tierAccessLevel: ', config.tierAccessLevel);
@@ -42,7 +42,7 @@ const downloadRouter = async (req, res, next) => {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-            esIndex, type, filter,
+            esIndex.index, type, filter,
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
@@ -64,7 +64,7 @@ const downloadRouter = async (req, res, next) => {
     }
     log.info('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
     const data = await esInstance.downloadData({
-      esIndex, esType: type, filter: appliedFilter, sort, fields,
+      esIndex.index, esType: type, filter: appliedFilter, sort, fields,
     });
     res.send(data);
   } catch (err) {
