@@ -21,11 +21,11 @@ const downloadRouter = async (req, res, next) => {
     let appliedFilter;
     /**
      * Tier access strategy for download endpoint:
-     * 1. if the data commons or the index is secure, add auth filter layer onto filter
+     * 1. if the data commons or the index is private, add auth filter layer onto filter
      * 2. if the data commons or the index is regular:
      *   a. if request contains out-of-access resource, return 401
      *   b. if request contains only accessible resouces, return response
-     * 3. if the data commons or the index is private, always return reponse without any auth check
+     * 3. if the data commons or the index is libre, always return reponse without any auth check
      */
     switch (tierAccessLevel) {
       case 'private': {
