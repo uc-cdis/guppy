@@ -10,7 +10,7 @@ const downloadRouter = async (req, res, next) => {
     type, filter, sort, fields, accessibility,
   } = req.body;
 
-  log.debug('[download] ', JSON.stringify(req.body, null, 4));
+  log.info('[download] ', JSON.stringify(req.body, null, 4));
   const esIndex = esInstance.getESIndexByType(type);
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
@@ -33,7 +33,7 @@ const downloadRouter = async (req, res, next) => {
         break;
       }
       case 'regular': {
-        log.debug('[download] regular commons');
+        log.info('[download] regular commons');
         if (accessibility === 'accessible') {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
@@ -58,12 +58,13 @@ const downloadRouter = async (req, res, next) => {
       default:
         throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
-    log.debug('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
+    log.info('[download] applied filter for tierAccessLevel: ', tierAccessLevel);
     const data = await esInstance.downloadData({
       esIndex, esType: type, filter: appliedFilter, sort, fields,
     });
     res.send(data);
   } catch (err) {
+    log.error(err)
     next(err);
   }
   return 0;
