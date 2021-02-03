@@ -11,9 +11,9 @@ const downloadRouter = async (req, res, next) => {
   } = req.body;
 
   log.debug('[download] ', JSON.stringify(req.body, null, 4));
-  const esIndex = esInstance.getESIndexConfigByType(type);
+  const esIndexConfig = esInstance.getESIndexConfigByType(type);
   const tierAccessLevel = (config.tierAccessLevel
-    ? config.tierAccessLevel : esIndex.tier_access_level);
+    ? config.tierAccessLevel : esIndexConfig.tier_access_level);
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
@@ -38,7 +38,7 @@ const downloadRouter = async (req, res, next) => {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-            esIndex.index, type, filter,
+            esIndexConfig.index, type, filter,
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
@@ -59,7 +59,7 @@ const downloadRouter = async (req, res, next) => {
         throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
     const data = await esInstance.downloadData({
-      esIndex: esIndex.index, esType: type, filter: appliedFilter, sort, fields,
+      esIndex: esIndexConfig.index, esType: type, filter: appliedFilter, sort, fields,
     });
     res.send(data);
   } catch (err) {
