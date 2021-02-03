@@ -42,8 +42,8 @@ const downloadRouter = async (req, res, next) => {
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
-            log.debug('[download] requesting out-of-scope resources, return 401');
-            log.debug(`[download] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
+            log.info('[download] requesting out-of-scope resources, return 401');
+            log.info(`[download] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
             throw new CodedError(401, 'You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query');
           } else { // else, go ahead download
             appliedFilter = filter;

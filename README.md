@@ -62,7 +62,7 @@ behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. P
 look into `/src/server/auth/utils.js` for more details.
 
 ### Tiered Access:
-Guppy support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`:
+The tiered-access setting is configured through either the `TIER_ACCESS_LEVEL` environment variable or the `tier_access_level` properties on individual indices in the esConfig. Guppy supports 3 different levels of tiered access:
 - `private` by default: only allows access to authorized resources
 - `regular`: allows all kind of aggregation (with limitation for unauthorized resources), but forbid access to raw data without authorization
 - `libre`: access to all data
