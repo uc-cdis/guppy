@@ -63,21 +63,24 @@ class GuppyWrapper extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
+    this._isMounted = false;
   }
 
   componentDidMount() {
+    this._isMounted = true;
+
     getAllFieldsFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
     ).then((fields) => {
       const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
         ? this.props.rawDataFields : fields;
-      this.setState({
-        allFields: fields,
-        rawDataFields,
-      }, () => {
-        this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
-      });
+
+      if (this._isMounted) {
+        this.setState({ allFields: fields, rawDataFields }, () => {
+          this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+        });
+      }
     });
     if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
       getAccessibleResources(
@@ -85,23 +88,28 @@ class GuppyWrapper extends React.Component {
         this.props.guppyConfig.type,
         this.props.accessibleFieldCheckList,
       ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
-        this.setState({
-          accessibleFieldObject,
-          unaccessibleFieldObject,
-        });
+        if (this._isMounted) {
+          this.setState({ accessibleFieldObject, unaccessibleFieldObject });
+        }
       });
     }
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   handleReceiveNewAggsData(aggsData) {
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
-    this.setState({ aggsData });
+    if (this._isMounted) this.setState({ aggsData });
   }
 
   handleFilterChange(userFilter, accessibility) {
-    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    if (this._isMounted) {
+      this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    }
     let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
       filter = mergeFilters(userFilter, this.state.adminAppliedPreFilters);
@@ -110,12 +118,11 @@ class GuppyWrapper extends React.Component {
       this.props.onFilterChange(filter);
     }
     this.filter = filter;
-    this.setState({
-      filter,
-      accessibility,
-    }, () => {
-      this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
-    });
+    if (this._isMounted) {
+      this.setState({ filter, accessibility }, () => {
+        this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
+      });
+    }
   }
 
   /**
@@ -205,7 +212,7 @@ class GuppyWrapper extends React.Component {
   }
 
   handleAccessLevelUpdate(accessLevel) {
-    this.setState({ accessibility: accessLevel });
+    if (this._isMounted) this.setState({ accessibility: accessLevel });
   }
 
   /**
@@ -218,9 +225,9 @@ class GuppyWrapper extends React.Component {
    * @param {number} size
    */
   getDataFromGuppy(fields, sort, updateDataWhenReceive, offset, size) {
-    this.setState({ gettingDataFromGuppy: true });
+    if (this._isMounted) this.setState({ gettingDataFromGuppy: true });
     if (!fields || fields.length === 0) {
-      this.setState({ gettingDataFromGuppy: false });
+      if (this._isMounted) this.setState({ gettingDataFromGuppy: false });
       return Promise.resolve({ data: [], totalCount: 0 });
     }
 
@@ -243,12 +250,10 @@ class GuppyWrapper extends React.Component {
         const data = res.data._aggregation[this.props.guppyConfig.type];
         const field = numericAggregation ? 'asTextHistogram' : 'histogram';
         const parsedData = data[this.props.guppyConfig.mainField][field];
-        if (updateDataWhenReceive) {
-          this.setState({
-            rawData: parsedData,
-          });
+        if (this._isMounted) {
+          if (updateDataWhenReceive) this.setState({ rawData: parsedData });
+          this.setState({ gettingDataFromGuppy: false });
         }
-        this.setState({ gettingDataFromGuppy: false });
         return {
           data: res.data,
         };
@@ -271,13 +276,10 @@ class GuppyWrapper extends React.Component {
       }
       const parsedData = res.data[this.props.guppyConfig.type];
       const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
-      if (updateDataWhenReceive) {
-        this.setState({
-          rawData: parsedData,
-          totalCount,
-        });
+      if (this._isMounted) {
+        if (updateDataWhenReceive) this.setState({ rawData: parsedData, totalCount });
+        this.setState({ gettingDataFromGuppy: false });
       }
-      this.setState({ gettingDataFromGuppy: false });
       return {
         data: parsedData,
         totalCount,
