@@ -46,9 +46,12 @@ class ConnectedFilter extends React.Component {
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.arrayFields = [];
+    this._isMounted = false;
   }
 
   componentDidMount() {
+    this._isMounted = true;
+
     if (this.props.onUpdateAccessLevel) {
       this.props.onUpdateAccessLevel(this.state.accessibility);
     }
@@ -86,8 +89,12 @@ class ConnectedFilter extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
-    this.setState({ receivedAggsData });
+    if (this._isMounted) this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
       this.props.onReceiveNewAggsData(resultAggsData);
@@ -104,9 +111,12 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
-    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
-    this.setState({ filtersApplied: mergedFilterResults });
+    const adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
+    if (this._isMounted) this.setState({ adminAppliedPreFilters });
+
+    const mergedFilterResults = mergeFilters(filterResults, adminAppliedPreFilters);
+    if (this._isMounted) this.setState({ filtersApplied: mergedFilterResults });
+
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -250,7 +260,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} aggsData
    */
   saveInitialAggsData(aggsData) {
-    this.setState({ initialAggsData: aggsData });
+    if (this._isMounted) this.setState({ initialAggsData: aggsData });
   }
 
   render() {
