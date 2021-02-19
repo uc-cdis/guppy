@@ -75,15 +75,24 @@ export const updateCountsInInitialTabsOptions = (
           if (flattenProcessedTabsOptions[`${field}`]
             && flattenProcessedTabsOptions[`${field}`].length > 0
             && updatedTabsOptions[`${actualFieldName}`].histogram) {
-            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = flattenProcessedTabsOptions[`${field}`][0].count;
+            const currentFlattenProcessedTabsOptions = flattenProcessedTabsOptions[`${field}`][0];
+
+            // if empty range histogram should be removed so filter is not shown
+            if (currentFlattenProcessedTabsOptions.key[0] === null
+              && currentFlattenProcessedTabsOptions.key[1] === null
+              && currentFlattenProcessedTabsOptions.count === 0) {
+              updatedTabsOptions[`${actualFieldName}`].histogram = [];
+              return;
+            }
+            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = currentFlattenProcessedTabsOptions.count;
             const newKey = [0, 0];
-            if (flattenProcessedTabsOptions[`${field}`][0].key[0]) {
+            if (currentFlattenProcessedTabsOptions.key[0]) {
               // because of the prefer-destructuring eslint rule
-              const newLowerBound = flattenProcessedTabsOptions[`${field}`][0].key[0];
+              const newLowerBound = currentFlattenProcessedTabsOptions.key[0];
               newKey[0] = newLowerBound;
             }
-            if (flattenProcessedTabsOptions[`${field}`][0].key[1]) {
-              const newHigherBound = flattenProcessedTabsOptions[`${field}`][0].key[1];
+            if (currentFlattenProcessedTabsOptions.key[1]) {
+              const newHigherBound = currentFlattenProcessedTabsOptions.key[1];
               newKey[1] = newHigherBound;
             }
             updatedTabsOptions[`${actualFieldName}`].histogram[0].key = newKey;
