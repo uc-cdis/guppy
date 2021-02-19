@@ -77,10 +77,8 @@ export const updateCountsInInitialTabsOptions = (
             && updatedTabsOptions[`${actualFieldName}`].histogram) {
             const currentFlattenProcessedTabsOptions = flattenProcessedTabsOptions[`${field}`][0];
 
-            // if empty range histogram should be removed so filter is not shown
-            if (currentFlattenProcessedTabsOptions.key[0] === null
-              && currentFlattenProcessedTabsOptions.key[1] === null
-              && currentFlattenProcessedTabsOptions.count === 0) {
+            // if empty count histogram should be removed so filter is not shown
+            if (currentFlattenProcessedTabsOptions.count === 0) {
               updatedTabsOptions[`${actualFieldName}`].histogram = [];
               return;
             }
