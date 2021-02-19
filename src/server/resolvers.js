@@ -265,6 +265,13 @@ const getResolver = (esConfig, esInstance) => {
     HistogramForString: {
       histogram: textHistogramResolver,
     },
+    RegularAccessHistogramForNumber: {
+      histogram: numericHistogramResolver,
+      asTextHistogram: textHistogramResolver,
+    },
+    RegularAccessHistogramForString: {
+      histogram: textHistogramResolver,
+    },
     Mapping: {
       ...mappingResolvers,
     },

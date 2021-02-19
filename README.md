@@ -20,11 +20,13 @@ You could put following as your config files:
   "indices": [
     {
       "index": "${ES_INDEX_1}",
-      "type": "${ES_DOC_TYPE_1}"
+      "type": "${ES_DOC_TYPE_1}",
+      "tier_access_level": "${ES_TIER_ACCESS_LEVEL_1}" // optional, set this if there is no global tierAccessLevel
     },
     {
       "index": "${ES_INDEX_2}",
-      "type": "${ES_DOC_TYPE_2}"
+      "type": "${ES_DOC_TYPE_2}",
+      "tier_access_level": "${ES_TIER_ACCESS_LEVEL_2}"  // optional, set this if there is no global tierAccessLevel
     },
     ...
   ],
@@ -34,6 +36,8 @@ You could put following as your config files:
   "missing_data_alias": "no data", // optional, only valid if `aggs_include_missing_data` is true, guppy will alias missing data into this keyword during aggregation. By default it's set to `no data`.
 }
 ```
+
+Note: Guppy expects that either all indices in the guppy config block will have a tier_access_level set OR that a site-wide TIER_ACCESS_LEVEL is set as an environment variable (or in the global block of a commons' manifest). Guppy will throw an error if the config settings do not meet one of these two expectations. See `doc/index_scoped_tiered_access.md` for more information.
 
 Following script will start server using at port 3000, using config file `example_config.json`:
 
@@ -58,17 +62,17 @@ behavior for local test without Arborist, just set `INTERNAL_LOCAL_TEST=true`. P
 look into `/src/server/auth/utils.js` for more details.
 
 ### Tiered Access:
-Guppy also support 3 different levels of tier access, by setting `TIER_ACCESS_LEVEL`:
+The tiered-access setting is configured through either the `TIER_ACCESS_LEVEL` environment variable or the `tier_access_level` properties on individual indices in the esConfig. Guppy supports 3 different levels of tiered access:
 - `private` by default: only allows access to authorized resources
 - `regular`: allows all kind of aggregation (with limitation for unauthorized resources), but forbid access to raw data without authorization
 - `libre`: access to all data
 
-For `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
+For the `regular` level, there's another configuration environment variable `TIER_ACCESS_LIMIT`, which is the minimum visible count for aggregation results.
 
-`regular` level commons could also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
+`regular` level commons can also take in a whitelist of values that won't be encrypted. It is set by `config.encrypt_whitelist`.
 By default the whitelist contains missing values: ['\_\_missing\_\_', 'unknown', 'not reported', 'no data'].
 Also the whitelist is disabled by default due to security reasons. If you would like to enable whitelist, simply put `enable_encrypt_whitelist: true` in your config.
-For example `regular` leveled commons with config looks like this will skip encrypting value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`:
+For example, a `regular` leveled commons with config that looks like this will skip encrypting the value `do-not-encrypt-me` even if its count is less than `TIER_ACCESS_LIMIT`:
 
 ```
 {
@@ -89,13 +93,15 @@ For example `regular` leveled commons with config looks like this will skip encr
 }
 ```
 
-For example following script will start a Guppy server with `regular` tier access level, and minimum visible count set to 100:
+The following script will start a Guppy server with a site-wide `regular` tier access level, and minimum visible count set to 100:
 
 ```
 export TIER_ACCESS_LEVEL=regular
 export TIER_ACCESS_LIMIT=100
 npm start
 ```
+
+To learn how to configure Guppy's tiered-access system using a per-index scoping, and which use cases might warrant such a configuration, please see `doc/index_scoped_tiered_access.md`.
 
 > #### Tier Access Sensitive Record Exclusion
 > It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
