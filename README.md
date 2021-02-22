@@ -1,6 +1,7 @@
 # Guppy
 
-[![npm (scoped)](https://img.shields.io/npm/v/@gen3/guppy)](https://www.npmjs.com/package/@gen3/guppy)
+[![npm (scoped)](https://img.shields.io/npm/v/@gen3/guppy?label=NPM%20Release%20%28Component%29)](https://www.npmjs.com/package/@gen3/guppy)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/uc-cdis/guppy?label=GH%20Release%20%28Server%29)](https://github.com/uc-cdis/guppy/releases)
 
 Server that support GraphQL queries on data from elasticsearch.
 
