@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import { jsonToFormat } from './conversion';
 
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
@@ -160,14 +161,15 @@ export const queryGuppyForRawDataAndTotalCounts = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  format,
 ) => {
   let queryLine = 'query {';
-  if (gqlFilter || sort) {
-    queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON' : ''}) {`;
+  if (gqlFilter || sort || format) {
+    queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON,' : ''}${format ? '$format: Format' : ''}) {`;
   }
-  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}) {`;
-  if (gqlFilter || sort) {
-    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter' : ''}) {`;
+  let dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, format: $format) {`;
+  if (gqlFilter || sort || format) {
+    dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${format ? 'format: $format, ' : ''}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
   }
   let typeAggsLine = `${type} accessibility: ${accessibility} {`;
   if (gqlFilter) {
@@ -186,6 +188,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
   }`;
   const queryBody = { query };
   queryBody.variables = {};
+  if (format) queryBody.variables.format = format;
   if (gqlFilter) queryBody.variables.filter = gqlFilter;
   if (sort) queryBody.variables.sort = sort;
   return fetch(`${path}${graphqlEndpoint}`, {
@@ -305,6 +308,7 @@ export const askGuppyForRawData = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  format,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
@@ -316,6 +320,7 @@ export const askGuppyForRawData = (
     offset,
     size,
     accessibility,
+    format,
   );
 };
 
@@ -336,9 +341,11 @@ export const downloadDataFromGuppy = (
     filter,
     sort,
     accessibility,
+    format,
   },
 ) => {
   const SCROLL_SIZE = 10000;
+  const JSON_FORMAT = (format === 'json' || format === undefined);
   if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };
     if (fields) queryBody.fields = fields;
@@ -351,12 +358,12 @@ export const downloadDataFromGuppy = (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(queryBody),
-    }).then((response) => response.json());
+    }).then((res) => (JSON_FORMAT ? res.json() : jsonToFormat(res.json(), format)));
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility)
+  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility, format)
     .then((res) => {
       if (res && res.data && res.data[type]) {
-        return res.data[type];
+        return JSON_FORMAT ? res.data[type] : jsonToFormat(res.data[type], format);
       }
       throw Error('Error downloading data from Guppy');
     });
