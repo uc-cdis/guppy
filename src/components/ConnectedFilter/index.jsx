@@ -46,6 +46,7 @@ class ConnectedFilter extends React.Component {
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.arrayFields = [];
     this._isMounted = false;
+    this.controller = new AbortController();
   }
 
   componentDidMount() {
@@ -122,6 +123,7 @@ class ConnectedFilter extends React.Component {
       this.state.allFields,
       mergedFilterResults,
       this.state.accessibility,
+      this.controller.signal,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(

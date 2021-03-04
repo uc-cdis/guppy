@@ -22,7 +22,7 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter, acc, signal) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -53,6 +53,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
+    signal,
   }).then((response) => response.json());
 };
 
@@ -272,9 +273,9 @@ export const askGuppyAboutAllFieldsAndOptions = (
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
-export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
+export const askGuppyForAggregationData = (path, type, fields, filter, accessibility, signal) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility, signal);
 };
 
 export const askGuppyForSubAggregationData = ({
