@@ -111,6 +111,9 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
+    this.controller.abort();
+    this.controller = new AbortController();
+
     const adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
     if (this._isMounted) this.setState({ adminAppliedPreFilters });
 
