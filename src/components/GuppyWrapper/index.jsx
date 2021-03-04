@@ -121,6 +121,7 @@ class GuppyWrapper extends React.Component {
     this.filter = filter;
     if (this._isMounted) {
       this.setState({ filter, accessibility }, () => {
+        this.controller.abort();
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
       });
     }
