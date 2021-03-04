@@ -22,7 +22,7 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter, acc, signal) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -53,6 +53,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
+    signal,
   }).then((response) => response.json());
 };
 
@@ -91,6 +92,7 @@ const queryGuppyForSubAgg = (
   missingFields,
   gqlFilter,
   acc,
+  signal,
 ) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
@@ -131,6 +133,7 @@ const queryGuppyForSubAgg = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
+    signal,
   }).then((response) => response.json())
     .catch((err) => {
       throw new Error(`Error during queryGuppyForSubAgg ${err}`);
@@ -160,6 +163,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  signal,
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort) {
@@ -194,6 +198,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(queryBody),
+    signal,
   }).then((response) => response.json())
     .catch((err) => {
       throw new Error(`Error during queryGuppyForRawDataAndTotalCounts ${err}`);
@@ -268,12 +273,12 @@ export const askGuppyAboutAllFieldsAndOptions = (
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
-export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
+export const askGuppyForAggregationData = (path, type, fields, filter, accessibility, signal) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility, signal);
 };
 
-export const askGuppyForSubAggregationData = (
+export const askGuppyForSubAggregationData = ({
   path,
   type,
   mainField,
@@ -282,7 +287,8 @@ export const askGuppyForSubAggregationData = (
   missedNestedFields,
   filter,
   accessibility,
-) => {
+  signal,
+}) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForSubAgg(
     path,
@@ -293,6 +299,7 @@ export const askGuppyForSubAggregationData = (
     missedNestedFields,
     gqlFilter,
     accessibility,
+    signal,
   );
 };
 
@@ -305,6 +312,7 @@ export const askGuppyForRawData = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  signal,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
@@ -316,6 +324,7 @@ export const askGuppyForRawData = (
     offset,
     size,
     accessibility,
+    signal,
   );
 };
 
