@@ -47,8 +47,16 @@ import { mergeFilters } from '../Utils/filters';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
+
+    let initialFilter = this.props.adminAppliedPreFilters;
+    if (Object.keys(this.props.initialFilterFromURL).length > 0) {
+      initialFilter = mergeFilters(
+        this.props.initialFilterFromURL, this.state.adminAppliedPreFilters,
+      );
+    }
+
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = { ...this.props.adminAppliedPreFilters };
+    this.filter = { ...initialFilter };
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       gettingDataFromGuppy: false,
@@ -352,6 +360,7 @@ GuppyWrapper.propTypes = {
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
+  initialFilterFromURL: PropTypes.object,
 };
 
 GuppyWrapper.defaultProps = {
@@ -360,6 +369,7 @@ GuppyWrapper.defaultProps = {
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
+  initialFilterFromURL: {},
 };
 
 export default GuppyWrapper;
