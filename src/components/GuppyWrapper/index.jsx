@@ -64,6 +64,7 @@ class GuppyWrapper extends React.Component {
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
     this._isMounted = false;
+    this.controller = new AbortController();
   }
 
   componentDidMount() {
@@ -243,6 +244,7 @@ class GuppyWrapper extends React.Component {
         [],
         this.filter,
         this.state.accessibility,
+        this.controller.signal,
       ).then((res) => {
         if (!res || !res.data) {
           throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -270,6 +272,7 @@ class GuppyWrapper extends React.Component {
       offset,
       size,
       this.state.accessibility,
+      this.controller.signal,
     ).then((res) => {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
