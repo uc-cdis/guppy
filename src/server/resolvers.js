@@ -13,11 +13,11 @@ import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/con
  */
 const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, context, resolveInfo) => {
   const {
-    offset, first, filter, sort,
+    offset, first, filter, sort, format,
   } = args;
   const fields = parseResolveInfo(resolveInfo);
   return esInstance.getData({
-    esIndex, esType, fields, filter, sort, offset, size: first,
+    esIndex, esType, fields, filter, sort, offset, size: first, format,
   });
 };
 
