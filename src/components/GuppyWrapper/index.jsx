@@ -48,16 +48,22 @@ class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
 
-    let initialFilter = this.props.adminAppliedPreFilters;
-    if (Object.keys(this.props.initialFilterFromURL).length > 0) {
-      initialFilter = mergeFilters(
-        this.props.initialFilterFromURL, this.state.adminAppliedPreFilters,
-      );
-    }
-
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = { ...initialFilter };
+    this.filter = {};
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
+    // this.initialFiltersFrozen = JSON.stringify(this.props.initialFilterFromURL).slice();
+
+    // let initialFilter = this.props.adminAppliedPreFilters;
+    // if (Object.keys(this.props.initialFilterFromURL).length > 0) {
+    //   initialFilter = mergeFilters(
+    //     this.props.initialFilterFromURL, this.props.adminAppliedPreFilters,
+    //   );
+    // }
+
+    // console.log('admin pre filter: ', JSON.stringify(this.props.adminAppliedPreFilters).slice());
+    // console.log('initial filter from url: ', JSON.stringify(this.props.initialFilterFromURL).slice());
+    // console.log('initial filter: ', JSON.stringify(initialFilter).slice());
+
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
@@ -70,6 +76,7 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
+      userFilterToLoadFromUrl: { ...this.props.initialFilterFromURL }, // This var will be emptied out once the filter has been applied.
     };
   }
 
@@ -108,7 +115,21 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(userFilter, accessibility) {
+  handleFilterChange(userFilterFromUserInput, accessibility) {
+    let userFilter = userFilterFromUserInput;
+    
+    console.log('guppy handle filter change GuppyWrapper 119');
+    console.log('userFilter: ', JSON.stringify(userFilter));
+    console.log('admin pre filter: ', JSON.stringify(this.props.adminAppliedPreFilters));
+    console.log('initial filter from url: ', JSON.stringify(this.state.userFilterToLoadFromUrl));
+    // Apply user filters from URL on page load. Empty out state to avoid reapplying used filters.
+    if(Object.keys(userFilter).length == 0 && Object.keys(this.state.userFilterToLoadFromUrl).length > 0) {
+      userFilter = JSON.parse(JSON.stringify(this.state.userFilterToLoadFromUrl));
+      // Only user filters from URLs should be explicitly applied to the UI.
+      this.props.applyFilterUIChanges(userFilter);
+      this.setState({ userFilterToLoadFromUrl : {} });
+    }
+
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
@@ -361,6 +382,7 @@ GuppyWrapper.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialFilterFromURL: PropTypes.object,
+  applyFilterUIChanges: PropTypes.func,
 };
 
 GuppyWrapper.defaultProps = {
@@ -370,6 +392,7 @@ GuppyWrapper.defaultProps = {
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialFilterFromURL: {},
+  applyFilterUIChanges: () => {},
 };
 
 export default GuppyWrapper;

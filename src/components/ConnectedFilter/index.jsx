@@ -25,6 +25,7 @@ import {
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
+    console.log('in the ConnectedFilter constructor with ', this.props.userFilterFromURLToApply);
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const allFields = props.accessibleFieldCheckList
@@ -102,6 +103,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
+    console.log('guppy handle filter change connected filter 105');
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
@@ -139,6 +141,17 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    console.log('inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURLToApply: ', this.props.userFilterFromURLToApply);
+    var filtersToDisplay = this.state.filtersApplied;
+    var applyingUserFilterFromURL = false;
+    if (Object.keys(this.props.userFilterFromURLToApply).length > 0 && Object.keys(this.state.filtersApplied).length == 0) {
+      this.setState({ filtersApplied: this.props.userFilterFromURLToApply });
+      filtersToDisplay = this.props.userFilterFromURLToApply;
+      this.setFilter(filtersToDisplay);
+      applyingUserFilterFromURL = true;
+      console.log('yuh new var alert. ', filtersToDisplay);
+      console.log('i set applyingUserFilterFromURL: ', applyingUserFilterFromURL);
+    }
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -148,12 +161,12 @@ class ConnectedFilter extends React.Component {
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
       processedTabsOptions,
-      this.state.filtersApplied,
+      filtersToDisplay,
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
 
-    if (Object.keys(this.state.filtersApplied).length) {
+    if (Object.keys(filtersToDisplay).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
       const unselectedTabsOptions = {};
@@ -166,9 +179,9 @@ class ConnectedFilter extends React.Component {
           return;
         }
         processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
-          if (this.state.filtersApplied[`${opt}`]
-          && this.state.filtersApplied[`${opt}`].selectedValues
-          && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
+          if (filtersToDisplay[`${opt}`]
+          && filtersToDisplay[`${opt}`].selectedValues
+          && filtersToDisplay[`${opt}`].selectedValues.includes(entry.key)) {
             if (!selectedTabsOptions[`${opt}`]) {
               selectedTabsOptions[`${opt}`] = {};
             }
@@ -200,10 +213,10 @@ class ConnectedFilter extends React.Component {
         allSearchFields = allSearchFields.concat(tab.searchFields);
       });
       allSearchFields.forEach((field) => {
-        if (this.state.filtersApplied[`${field}`]) {
-          const { selectedValues } = this.state.filtersApplied[`${field}`];
+        if (filtersToDisplay[`${field}`]) {
+          const { selectedValues } = filtersToDisplay[`${field}`];
           if (selectedValues) {
-            this.state.filtersApplied[`${field}`].selectedValues.forEach((val) => {
+            filtersToDisplay[`${field}`].selectedValues.forEach((val) => {
               if (!selectedTabsOptions[`${field}`]) {
                 selectedTabsOptions[`${field}`] = {};
               }
@@ -224,20 +237,31 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
-      <FilterList
+    console.log('bouta built Filter List with processedTabsOptions: ', processedTabsOptions);
+    
+    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
+      const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
+        this.state.initialAggsData, this.state.adminAppliedPreFilters,
+        this.props.guppyConfig, this.arrayFields);
+      var filterStatus;
+      console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
+      console.log('246 filtersToDisplay: ', filtersToDisplay);
+      // if(applyingUserFilterFromURL) {
+        console.log('247 AYOOOOOOO sections: ', sections);
+        filterStatus = sections.map(() => ({}));
+        filterStatus[0] = filtersToDisplay;
+        console.log('bouta send ui component filterStatus: ', filterStatus);
+      //}
+      return <FilterList
         key={index}
-        sections={
-          getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters,
-            this.props.guppyConfig, this.arrayFields)
-        }
+        sections={sections}
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
         disabledTooltipMessage={this.props.disabledTooltipMessage}
         arrayFields={this.arrayFields}
+        filterStatus={filterStatus}
       />
-    ));
+    });
     return tabs;
   }
 
