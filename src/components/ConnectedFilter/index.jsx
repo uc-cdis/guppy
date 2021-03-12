@@ -25,7 +25,7 @@ import {
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
-    console.log('in the ConnectedFilter constructor with ', this.props.userFilterFromURLToApply);
+    console.log('in the ConnectedFilter constructor with ', this.props.userFilterFromURL);
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const allFields = props.accessibleFieldCheckList
@@ -141,14 +141,15 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    console.log('inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURLToApply: ', this.props.userFilterFromURLToApply);
+    console.log('*** inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURL: ', this.props.userFilterFromURL);
+    console.log('*** and the filterConfig is: ', this.props.filterConfig);
     var filtersToDisplay = this.state.filtersApplied;
-    var applyingUserFilterFromURL = false;
-    if (Object.keys(this.props.userFilterFromURLToApply).length > 0 && Object.keys(this.state.filtersApplied).length == 0) {
-      this.setState({ filtersApplied: this.props.userFilterFromURLToApply });
-      filtersToDisplay = this.props.userFilterFromURLToApply;
+    // Apply URL filters only on page load
+    var applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
+    if (applyingUserFilterFromURL) {
+      this.setState({ filtersApplied: this.props.userFilterFromURL });
+      filtersToDisplay = this.props.userFilterFromURL;
       this.setFilter(filtersToDisplay);
-      applyingUserFilterFromURL = true;
       console.log('yuh new var alert. ', filtersToDisplay);
       console.log('i set applyingUserFilterFromURL: ', applyingUserFilterFromURL);
     }
@@ -242,7 +243,7 @@ class ConnectedFilter extends React.Component {
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
-        this.props.guppyConfig, this.arrayFields);
+        this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
       var filterStatus;
       console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
       console.log('246 filtersToDisplay: ', filtersToDisplay);
