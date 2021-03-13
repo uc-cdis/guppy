@@ -276,14 +276,14 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
-      var filterStatus = sections.map(() => ({}));
+      var filterStatusFromURL;
       console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
       console.log('247 AYOOOOOOO sections: ', sections, ' filterMetadata: ', filterMetadata);
       console.log('Thee value of index: ', index);
       if (filterMetadata && index === filterMetadata.tabIndex) {
-        filterStatus = filterMetadata.filterStatus;
+        filterStatusFromURL = filterMetadata.filterStatus;
         console.log('calculation from userFilterFromURL: ', filterMetadata.filterStatus);
       }
       // }
@@ -295,7 +295,8 @@ class ConnectedFilter extends React.Component {
           lockedTooltipMessage={this.props.lockedTooltipMessage}
           disabledTooltipMessage={this.props.disabledTooltipMessage}
           arrayFields={this.arrayFields}
-          filterStatus={filterStatus}
+          // filterStatus={filterStatus}
+          filterStatusFromURL={filterStatusFromURL}
         />
       );
     });
