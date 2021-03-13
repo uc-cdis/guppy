@@ -140,12 +140,12 @@ class ConnectedFilter extends React.Component {
     let calculatedTabIndex;
     let calculatedSectionIndex;
 
-    console.log('inside buildFilterStatusForURLFilter with ', userFilter, ' and ', sections, ' andd tabs ', tabs);
+    console.log('inside buildFilterStatusForURLFilter with ', userFilter, ' andd tabs ', tabs);
 
-    for (let tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
+    for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
       // console.log('');
       const allFieldsForThisTab = Object.keys(tabs[tabIndex].fields);
-      for (let i = 0; i < filteringFields.length; i++) {
+      for (let i = 0; i < filteringFields.length; i += 1) {
         const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
         if (sectionIndex !== -1) {
           const sections = tabs[tabIndex];
