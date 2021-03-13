@@ -276,7 +276,7 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
-      let filterStatus = sections.map(() => ({}));
+      var filterStatus = sections.map(() => ({}));
       console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
