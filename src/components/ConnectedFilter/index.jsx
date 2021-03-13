@@ -175,7 +175,7 @@ class ConnectedFilter extends React.Component {
     console.log('*** inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURL: ', this.props.userFilterFromURL);
     console.log('*** and the filterConfig is: ', this.props.filterConfig);
     let filtersToDisplay = this.state.filtersApplied;
-    let filterMetadata;
+    var filterMetadata;
     // Apply URL filters only on page load
     const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
     if (applyingUserFilterFromURL) {
@@ -283,7 +283,7 @@ class ConnectedFilter extends React.Component {
       // if(applyingUserFilterFromURL) {
       console.log('247 AYOOOOOOO sections: ', sections);
       console.log('Thee value of index: ', index);
-      if (index === filterMetadata.calculatedTabIndex) {
+      if (applyingUserFilterFromURL && index === filterMetadata.calculatedTabIndex) {
         filterStatus = filterMetadata.filterStatus;
         console.log('calculation from userFilterFromURL: ', filterMetadata.filterStatus);
       }
