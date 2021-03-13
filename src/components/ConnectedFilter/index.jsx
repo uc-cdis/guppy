@@ -181,7 +181,7 @@ class ConnectedFilter extends React.Component {
       
       filtersToDisplay = this.props.userFilterFromURL;
       filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs);
-      this.setFilter(filtersToDisplay);
+      // this.setFilter(filtersToDisplay);
       console.log('yuh new var alert. ', filtersToDisplay);
       console.log('i set applyingUserFilterFromURL: ', applyingUserFilterFromURL);
     }
