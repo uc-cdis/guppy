@@ -133,6 +133,15 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
+  findSectionIndex(userFilter, sections) {
+    console.log('inside findSectionIndex with ', userFilter , ' and ', sections);
+    for(let i = 0; i < sections.length; i++) {
+      // console.log('');
+      
+    }
+
+  }
+
   /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
@@ -249,6 +258,9 @@ class ConnectedFilter extends React.Component {
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
         console.log('247 AYOOOOOOO sections: ', sections);
+        const sectionIndex = this.findSectionIndex(filtersToDisplay, sections);
+        console.log('calculated section index for userFilterFromURL: ', sectionIndex);
+
         filterStatus = sections.map(() => ({}));
         filterStatus[0] = filtersToDisplay;
         console.log('bouta send ui component filterStatus: ', filterStatus);
