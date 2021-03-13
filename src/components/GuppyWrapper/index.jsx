@@ -117,16 +117,16 @@ class GuppyWrapper extends React.Component {
 
   handleFilterChange(userFilterFromUserInput, accessibility) {
     let userFilter = userFilterFromUserInput;
-    
+
     console.log('guppy handle filter change GuppyWrapper 119');
     console.log('userFilter: ', JSON.stringify(userFilter));
     console.log('admin pre filter: ', JSON.stringify(this.props.adminAppliedPreFilters));
     console.log('initial filter from url: ', JSON.stringify(this.state.userFilterFromURL));
     // Apply user filters from URL on page load. Empty out state to avoid reapplying used filters.
-    if(Object.keys(userFilter).length == 0 && Object.keys(this.state.userFilterFromURL).length > 0) {
+    if (Object.keys(userFilter).length == 0 && Object.keys(this.state.userFilterFromURL).length > 0) {
       userFilter = JSON.parse(JSON.stringify(this.state.userFilterFromURL));
       this.props.applyFilterUIChanges(userFilter);
-      this.setState({ userFilterFromURL : {} });
+      this.setState({ userFilterFromURL: {} });
     }
 
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });

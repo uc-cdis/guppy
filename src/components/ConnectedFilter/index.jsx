@@ -133,14 +133,33 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
-  findSectionIndex(userFilter, sections, tabs) {
-    console.log('inside findSectionIndex with ', userFilter , ' and ', sections, ' andd tabs ', tabs);
-    for(let i = 0; i < tabs.length; i++) {
+  buildFilterStatusForURLFilter(userFilter, tabs) {
+    const filteringFields = Object.keys(userFilter);
+    let filterStatus;
+
+    let calculatedTabIndex;
+    let calculatedSectionIndex;
+
+    console.log('inside buildFilterStatusForURLFilter with ', userFilter, ' and ', sections, ' andd tabs ', tabs);
+
+    for (let tabIndex = 0; tabIndex < tabs.length; tabIndex++) {
       // console.log('');
-
-
+      const allFieldsForThisTab = Object.keys(tabs[tabIndex].fields);
+      for (let i = 0; i < filteringFields.length; i++) {
+        const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
+        if (sectionIndex !== -1) {
+          const sections = tabs[tabIndex];
+          filterStatus = sections.map(() => ({}));
+          filterStatus[sectionIndex] = userFilter;
+          calculatedTabIndex = tabIndex;
+          calculatedSectionIndex = sectionIndex;
+        }
+      }
     }
-
+    return {
+      tabIndex: calculatedTabIndex,
+      filterStatus,
+    };
   }
 
   /**
@@ -153,9 +172,10 @@ class ConnectedFilter extends React.Component {
   getFilterTabs() {
     console.log('*** inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURL: ', this.props.userFilterFromURL);
     console.log('*** and the filterConfig is: ', this.props.filterConfig);
-    var filtersToDisplay = this.state.filtersApplied;
+    let filtersToDisplay = this.state.filtersApplied;
+    const filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs);
     // Apply URL filters only on page load
-    var applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
+    const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
     if (applyingUserFilterFromURL) {
       this.setState({ filtersApplied: this.props.userFilterFromURL });
       filtersToDisplay = this.props.userFilterFromURL;
@@ -249,32 +269,33 @@ class ConnectedFilter extends React.Component {
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     console.log('bouta built Filter List with processedTabsOptions: ', processedTabsOptions);
-    
+
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
-      var filterStatus;
+      let filterStatus = sections.map(() => ({}));
       console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
-        console.log('247 AYOOOOOOO sections: ', sections);
-        const sectionIndex = this.findSectionIndex(filtersToDisplay, sections, this.props.filterConfig.tabs);
-        console.log('calculated section index for userFilterFromURL: ', sectionIndex);
-
-        filterStatus = sections.map(() => ({}));
-        filterStatus[0] = filtersToDisplay;
-        console.log('bouta send ui component filterStatus: ', filterStatus);
-      //}
-      return <FilterList
-        key={index}
-        sections={sections}
-        tierAccessLimit={this.props.tierAccessLimit}
-        lockedTooltipMessage={this.props.lockedTooltipMessage}
-        disabledTooltipMessage={this.props.disabledTooltipMessage}
-        arrayFields={this.arrayFields}
-        filterStatus={filterStatus}
-      />
+      console.log('247 AYOOOOOOO sections: ', sections);
+      console.log('Thee value of index: ', index);
+      if (index === filterMetadata.calculatedTabIndex) {
+        filterStatus = filterMetadata.filterStatus;
+        console.log('calculation from userFilterFromURL: ', filterMetadata.filterStatus);
+      }
+      // }
+      return (
+        <FilterList
+          key={index}
+          sections={sections}
+          tierAccessLimit={this.props.tierAccessLimit}
+          lockedTooltipMessage={this.props.lockedTooltipMessage}
+          disabledTooltipMessage={this.props.disabledTooltipMessage}
+          arrayFields={this.arrayFields}
+          filterStatus={filterStatus}
+        />
+      );
     });
     return tabs;
   }
