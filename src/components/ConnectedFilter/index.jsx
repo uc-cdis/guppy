@@ -133,11 +133,12 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
-  findSectionIndex(userFilter, sections) {
-    console.log('inside findSectionIndex with ', userFilter , ' and ', sections);
-    for(let i = 0; i < sections.length; i++) {
+  findSectionIndex(userFilter, sections, tabs) {
+    console.log('inside findSectionIndex with ', userFilter , ' and ', sections, ' andd tabs ', tabs);
+    for(let i = 0; i < tabs.length; i++) {
       // console.log('');
-      
+
+
     }
 
   }
@@ -258,7 +259,7 @@ class ConnectedFilter extends React.Component {
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
         console.log('247 AYOOOOOOO sections: ', sections);
-        const sectionIndex = this.findSectionIndex(filtersToDisplay, sections);
+        const sectionIndex = this.findSectionIndex(filtersToDisplay, sections, this.props.filterConfig.tabs);
         console.log('calculated section index for userFilterFromURL: ', sectionIndex);
 
         filterStatus = sections.map(() => ({}));
