@@ -176,8 +176,7 @@ class ConnectedFilter extends React.Component {
     console.log('*** and the filterConfig is: ', this.props.filterConfig);
     let filtersToDisplay = this.state.filtersApplied;
     var filterMetadata;
-    // Apply URL filters only on page load
-    const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
+    const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0;
     if (applyingUserFilterFromURL) {
       this.setState({ filtersApplied: this.props.userFilterFromURL });
       filtersToDisplay = this.props.userFilterFromURL;
