@@ -144,7 +144,7 @@ class ConnectedFilter extends React.Component {
 
     for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
       // console.log('');
-      const allFieldsForThisTab = Object.keys(tabs[tabIndex].fields);
+      const allFieldsForThisTab = tabs[tabIndex].fields;
       for (let i = 0; i < filteringFields.length; i += 1) {
         const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
         console.log('looking at ', allFieldsForThisTab, ' versus ', filteringFields[i]);
