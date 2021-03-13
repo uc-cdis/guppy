@@ -281,9 +281,9 @@ class ConnectedFilter extends React.Component {
       console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
       console.log('246 filtersToDisplay: ', filtersToDisplay);
       // if(applyingUserFilterFromURL) {
-      console.log('247 AYOOOOOOO sections: ', sections);
+      console.log('247 AYOOOOOOO sections: ', sections, ' filterMetadata: ', filterMetadata);
       console.log('Thee value of index: ', index);
-      if (applyingUserFilterFromURL && index === filterMetadata.calculatedTabIndex) {
+      if (filterMetadata && index === filterMetadata.calculatedTabIndex) {
         filterStatus = filterMetadata.filterStatus;
         console.log('calculation from userFilterFromURL: ', filterMetadata.filterStatus);
       }
