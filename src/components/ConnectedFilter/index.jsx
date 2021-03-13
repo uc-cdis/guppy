@@ -150,8 +150,8 @@ class ConnectedFilter extends React.Component {
         console.log('looking at ', allFieldsForThisTab, ' versus ', filteringFields[i]);
         if (sectionIndex !== -1) {
           console.log('yes, i found something -- ', sectionIndex);
-          const sections = tabs[tabIndex];
-          filterStatus = sections.map(() => ({}));
+          const fields = tabs[tabIndex].fields;
+          filterStatus = fields.map(() => ({}));
           filterStatus[sectionIndex] = userFilter;
           calculatedTabIndex = tabIndex;
           calculatedSectionIndex = sectionIndex;
@@ -175,12 +175,13 @@ class ConnectedFilter extends React.Component {
     console.log('*** inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURL: ', this.props.userFilterFromURL);
     console.log('*** and the filterConfig is: ', this.props.filterConfig);
     let filtersToDisplay = this.state.filtersApplied;
-    const filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs);
+    const filterMetadata;
     // Apply URL filters only on page load
     const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0 && Object.keys(this.state.filtersApplied).length == 0;
     if (applyingUserFilterFromURL) {
       this.setState({ filtersApplied: this.props.userFilterFromURL });
       filtersToDisplay = this.props.userFilterFromURL;
+      filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs)
       this.setFilter(filtersToDisplay);
       console.log('yuh new var alert. ', filtersToDisplay);
       console.log('i set applyingUserFilterFromURL: ', applyingUserFilterFromURL);
