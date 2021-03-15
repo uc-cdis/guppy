@@ -95,6 +95,7 @@ class GuppyWrapper extends React.Component {
         });
       });
     }
+    console.log('GuppyWrapper componentDidMount');
   }
 
   handleReceiveNewAggsData(aggsData) {

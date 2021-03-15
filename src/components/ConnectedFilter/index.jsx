@@ -83,6 +83,7 @@ class ConnectedFilter extends React.Component {
         }
       }
     });
+    console.log('ConnectedFilter componentDidMount');
   }
 
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
