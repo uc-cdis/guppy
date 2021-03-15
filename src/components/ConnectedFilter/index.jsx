@@ -239,9 +239,11 @@ class ConnectedFilter extends React.Component {
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
       let filterStatusFromURL;
+      console.log('242 filterMetadata:', filterMetadata);
       if (filterMetadata && index === filterMetadata.tabIndex) {
         filterStatusFromURL = filterMetadata.filterStatus;
       }
+      console.log('246 filterStatusFromURL: ', filterStatusFromURL);
       return (
         <FilterList
           key={index}
