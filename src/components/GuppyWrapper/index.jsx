@@ -51,18 +51,6 @@ class GuppyWrapper extends React.Component {
     // to avoid asynchronizations, we store another filter as private var
     this.filter = {};
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
-    // this.initialFiltersFrozen = JSON.stringify(this.props.initialFilterFromURL).slice();
-
-    // let initialFilter = this.props.adminAppliedPreFilters;
-    // if (Object.keys(this.props.initialFilterFromURL).length > 0) {
-    //   initialFilter = mergeFilters(
-    //     this.props.initialFilterFromURL, this.props.adminAppliedPreFilters,
-    //   );
-    // }
-
-    // console.log('admin pre filter: ', JSON.stringify(this.props.adminAppliedPreFilters).slice());
-    // console.log('initial filter from url: ', JSON.stringify(this.props.initialFilterFromURL).slice());
-    // console.log('initial filter: ', JSON.stringify(initialFilter).slice());
 
     this.state = {
       gettingDataFromGuppy: false,

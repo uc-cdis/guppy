@@ -25,7 +25,6 @@ import {
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
-    console.log('in the ConnectedFilter constructor with ', this.props.userFilterFromURL);
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const allFields = props.accessibleFieldCheckList
@@ -103,7 +102,6 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    console.log('guppy handle filter change connected filter 105');
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
     this.setState({ filtersApplied: mergedFilterResults });
@@ -140,25 +138,17 @@ class ConnectedFilter extends React.Component {
     let calculatedTabIndex;
     let calculatedSectionIndex;
 
-    console.log('inside buildFilterStatusForURLFilter with ', userFilter, ' andd tabs ', tabs);
-
     for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
-      // console.log('');
       const allFieldsForThisTab = tabs[tabIndex].fields;
       for (let i = 0; i < filteringFields.length; i += 1) {
         const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
-        console.log('looking at ', allFieldsForThisTab, ' versus ', filteringFields[i]);
         if (sectionIndex !== -1) {
-          console.log('yes, i found something -- ', sectionIndex);
           const { fields } = tabs[tabIndex];
           filterStatus = fields.map(() => ({}));
-          console.log('building bool form. filteringFields[i]: ', filteringFields[i], 'userFilter[filteringFields[i]]: ', userFilter[filteringFields[i]]);
           let userFilterBoolForm = {};
           // Only supporting single select values at this time.
           if(typeof userFilter[filteringFields[i]] == 'object' && userFilter[filteringFields[i]].selectedValues) {
             for(let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
-              console.log('i = ', i, 'j = ', j);
-              console.log('userFilter[filteringFields[i]].selectedValues[i]: ', userFilter[filteringFields[i]].selectedValues[j]);
               userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
             }
           }
@@ -168,8 +158,6 @@ class ConnectedFilter extends React.Component {
         }
       }
     }
-
-    console.log('ayayay built ', filterStatus);
 
     return {
       tabIndex: calculatedTabIndex,
@@ -185,8 +173,6 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    console.log('*** inside ConnectedFilter getFilterTabs() with this.props.userFilterFromURL: ', this.props.userFilterFromURL);
-    console.log('*** and the filterConfig is: ', this.props.filterConfig);
     let filtersToDisplay = this.state.filtersApplied;
     var filterMetadata;
     const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0;
@@ -194,9 +180,6 @@ class ConnectedFilter extends React.Component {
       
       filtersToDisplay = this.props.userFilterFromURL;
       filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs);
-      // this.setFilter(filtersToDisplay);
-      console.log('yuh new var alert. ', filtersToDisplay);
-      console.log('i set applyingUserFilterFromURL: ', applyingUserFilterFromURL);
     }
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
@@ -283,23 +266,15 @@ class ConnectedFilter extends React.Component {
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    console.log('bouta built Filter List with processedTabsOptions: ', processedTabsOptions);
 
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
       var filterStatusFromURL;
-      console.log('246 applyingUserFilterFromURL: ', applyingUserFilterFromURL);
-      console.log('246 filtersToDisplay: ', filtersToDisplay);
-      // if(applyingUserFilterFromURL) {
-      console.log('247 AYOOOOOOO sections: ', sections, ' filterMetadata: ', filterMetadata);
-      console.log('Thee value of index: ', index);
       if (filterMetadata && index === filterMetadata.tabIndex) {
         filterStatusFromURL = filterMetadata.filterStatus;
-        console.log('calculation from userFilterFromURL: ', filterMetadata.filterStatus);
       }
-      // }
       return (
         <FilterList
           key={index}
@@ -310,7 +285,7 @@ class ConnectedFilter extends React.Component {
           arrayFields={this.arrayFields}
           // filterStatus={filterStatus}
           filterStatusFromURL={filterStatusFromURL}
-          onClear={this.onFilterListClear}
+          // onClear={this.onFilterListClear}
         />
       );
     });
