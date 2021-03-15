@@ -20,6 +20,7 @@ import {
   updateCountsInInitialTabsOptions,
   sortTabsOptions,
   mergeTabOptions,
+  buildFilterStatusForURLFilter,
 } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
@@ -131,40 +132,6 @@ class ConnectedFilter extends React.Component {
     this.handleFilterChange(filter);
   }
 
-  buildFilterStatusForURLFilter(userFilter, tabs) {
-    const filteringFields = Object.keys(userFilter);
-    let filterStatus;
-
-    let calculatedTabIndex;
-    let calculatedSectionIndex;
-
-    for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
-      const allFieldsForThisTab = tabs[tabIndex].fields;
-      for (let i = 0; i < filteringFields.length; i += 1) {
-        const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
-        if (sectionIndex !== -1) {
-          const { fields } = tabs[tabIndex];
-          filterStatus = fields.map(() => ({}));
-          let userFilterBoolForm = {};
-          // Only supporting single select values at this time.
-          if(typeof userFilter[filteringFields[i]] == 'object' && userFilter[filteringFields[i]].selectedValues) {
-            for(let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
-              userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
-            }
-          }
-          filterStatus[sectionIndex] = userFilterBoolForm;
-          calculatedTabIndex = tabIndex;
-          calculatedSectionIndex = sectionIndex;
-        }
-      }
-    }
-
-    return {
-      tabIndex: calculatedTabIndex,
-      filterStatus,
-    };
-  }
-
   /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
@@ -174,12 +141,12 @@ class ConnectedFilter extends React.Component {
    */
   getFilterTabs() {
     let filtersToDisplay = this.state.filtersApplied;
-    var filterMetadata;
+    let filterMetadata;
     const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0;
     if (applyingUserFilterFromURL) {
-      
       filtersToDisplay = this.props.userFilterFromURL;
-      filterMetadata = this.buildFilterStatusForURLFilter(filtersToDisplay, this.props.filterConfig.tabs);
+      filterMetadata = buildFilterStatusForURLFilter(filtersToDisplay,
+        this.props.filterConfig.tabs);
     }
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
@@ -270,8 +237,8 @@ class ConnectedFilter extends React.Component {
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
-        this.props.guppyConfig, this.arrayFields, this.props.userFilterFromURL);
-      var filterStatusFromURL;
+        this.props.guppyConfig, this.arrayFields);
+      let filterStatusFromURL;
       if (filterMetadata && index === filterMetadata.tabIndex) {
         filterStatusFromURL = filterMetadata.filterStatus;
       }
@@ -357,6 +324,7 @@ ConnectedFilter.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
+  userFilterFromURL: PropTypes.object,
 };
 
 ConnectedFilter.defaultProps = {
@@ -373,6 +341,7 @@ ConnectedFilter.defaultProps = {
   accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
+  userFilterFromURL: {},
 };
 
 export default ConnectedFilter;

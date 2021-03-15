@@ -171,3 +171,35 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
   });
   return mergedTabOptions;
 };
+
+export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
+  const filteringFields = Object.keys(userFilter);
+  let filterStatus;
+
+  let calculatedTabIndex;
+
+  for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
+    const allFieldsForThisTab = tabs[tabIndex].fields;
+    for (let i = 0; i < filteringFields.length; i += 1) {
+      const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
+      if (sectionIndex !== -1) {
+        const { fields } = tabs[tabIndex];
+        filterStatus = fields.map(() => ({}));
+        const userFilterBoolForm = {};
+        // Only supporting single select values at this time.
+        if (typeof userFilter[filteringFields[i]] === 'object' && userFilter[filteringFields[i]].selectedValues) {
+          for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
+            userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
+          }
+        }
+        filterStatus[sectionIndex] = userFilterBoolForm;
+        calculatedTabIndex = tabIndex;
+      }
+    }
+  }
+
+  return {
+    tabIndex: calculatedTabIndex,
+    filterStatus,
+  };
+};

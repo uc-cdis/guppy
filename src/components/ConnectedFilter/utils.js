@@ -103,13 +103,9 @@ export const checkIsArrayField = (field, arrayFields) => {
 
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields, userFilterFromURL,
+  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
-
-  // If there are user-provided filters in the URL,
-  // the FilterList component will be initialized using this filterStatus
-  const filterStatus = [];
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
