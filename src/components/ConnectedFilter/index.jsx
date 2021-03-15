@@ -157,8 +157,9 @@ class ConnectedFilter extends React.Component {
           // Only supporting single select values at this time.
           if(typeof userFilter[filteringFields[i]] == 'object' && userFilter[filteringFields[i]].selectedValues) {
             for(let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
-              console.log('userFilter[filteringFields[i]].selectedValues[i]: ', userFilter[filteringFields[i]].selectedValues[i]);
-              userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[i]] = true;
+              console.log('i = ', i, 'j = ', j);
+              console.log('userFilter[filteringFields[i]].selectedValues[i]: ', userFilter[filteringFields[i]].selectedValues[j]);
+              userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
             }
           }
           filterStatus[sectionIndex] = userFilterBoolForm;
