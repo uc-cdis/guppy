@@ -156,8 +156,8 @@ class ConnectedFilter extends React.Component {
           let userFilterBoolForm = {};
           // Only supporting single select values at this time.
           if(typeof filteringFields[i] == 'object' && filteringFields[i].selectedValues) {
-            for(let j = 0; j < filteringFields[i].selectedValues.length; j += 1) {
-              userFilterBoolForm[filteringFields[i].selectedValues[i]] = true;
+            for(let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
+              userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[i]] = true;
             }
           }
           filterStatus[sectionIndex] = userFilterBoolForm;
