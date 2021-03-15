@@ -171,19 +171,6 @@ class ConnectedFilter extends React.Component {
 
     console.log('ayayay built ', filterStatus);
 
-    // let filterStatusBoolForm = [];
-    // for (let i = 0; i < filterStatus.length; i += 1) {
-    //   if(Object.keys(filterStatus[i]).length == 0) {
-    //     filterStatusBoolForm.append({});
-    //   } else {
-    //     let allFields = filterStatus
-    //     for(let j = 0; j < ) {
-
-    //     }
-    //     filterStatus[i]
-    //   }
-    // }
-
     return {
       tabIndex: calculatedTabIndex,
       filterStatus,
@@ -323,6 +310,7 @@ class ConnectedFilter extends React.Component {
           arrayFields={this.arrayFields}
           // filterStatus={filterStatus}
           filterStatusFromURL={filterStatusFromURL}
+          onClear={this.onFilterListClear}
         />
       );
     });
