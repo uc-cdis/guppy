@@ -152,12 +152,36 @@ class ConnectedFilter extends React.Component {
           console.log('yes, i found something -- ', sectionIndex);
           const { fields } = tabs[tabIndex];
           filterStatus = fields.map(() => ({}));
-          filterStatus[sectionIndex] = userFilter;
+          console.log('building bool form ', filteringFields[i]);
+          let userFilterBoolForm = {};
+          // Only supporting single select values at this time.
+          if(typeof filteringFields[i] == 'object' && filteringFields[i].selectedValues) {
+            for(let j = 0; j < filteringFields[i].selectedValues.length; j += 1) {
+              userFilterBoolForm[filteringFields[i].selectedValues[i]] = true;
+            }
+          }
+          filterStatus[sectionIndex] = userFilterBoolForm;
           calculatedTabIndex = tabIndex;
           calculatedSectionIndex = sectionIndex;
         }
       }
     }
+
+    console.log('ayayay built ', filterStatus);
+
+    // let filterStatusBoolForm = [];
+    // for (let i = 0; i < filterStatus.length; i += 1) {
+    //   if(Object.keys(filterStatus[i]).length == 0) {
+    //     filterStatusBoolForm.append({});
+    //   } else {
+    //     let allFields = filterStatus
+    //     for(let j = 0; j < ) {
+
+    //     }
+    //     filterStatus[i]
+    //   }
+    // }
+
     return {
       tabIndex: calculatedTabIndex,
       filterStatus,
