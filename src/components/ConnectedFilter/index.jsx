@@ -268,6 +268,9 @@ class ConnectedFilter extends React.Component {
   render() {
     if (this.props.hidden) return null;
     const filterTabs = this.getFilterTabs();
+    if(Object.keys(this.props.userFilterFromURL).length > 0) {
+      this.props.initialFilterFromURLAppliedCallback();
+    }
     if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
@@ -322,6 +325,7 @@ ConnectedFilter.propTypes = {
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
   userFilterFromURL: PropTypes.object,
+  initialFilterFromURLAppliedCallback: PropTypes.func,
 };
 
 ConnectedFilter.defaultProps = {
@@ -339,6 +343,7 @@ ConnectedFilter.defaultProps = {
   hideZero: false,
   hidden: false,
   userFilterFromURL: {},
+  initialFilterFromURLAppliedCallback: () => {},
 };
 
 export default ConnectedFilter;
