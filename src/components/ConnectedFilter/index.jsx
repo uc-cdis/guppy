@@ -238,7 +238,7 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
-      let filterStatus = filterStatusArray ? filterStatusArray[index] : {};
+      let filterStatus = filterStatusArray ? filterStatusArray[index] : null;
       return (
         <FilterList
           key={index}
