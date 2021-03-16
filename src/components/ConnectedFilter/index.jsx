@@ -83,7 +83,6 @@ class ConnectedFilter extends React.Component {
         }
       }
     });
-    console.log('ConnectedFilter componentDidMount');
   }
 
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
@@ -239,7 +238,7 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
-      console.log('242 filterStatusArray:', filterStatusArray);
+      let filterStatus = filterStatusArray ? filterStatusArray[index] : {};
       return (
         <FilterList
           key={index}
@@ -249,7 +248,7 @@ class ConnectedFilter extends React.Component {
           disabledTooltipMessage={this.props.disabledTooltipMessage}
           arrayFields={this.arrayFields}
           // filterStatus={filterStatus}
-          filterStatusFromURL={filterStatusArray[index]}
+          filterStatusFromURL={filterStatus}
           // onClear={this.onFilterListClear}
         />
       );
