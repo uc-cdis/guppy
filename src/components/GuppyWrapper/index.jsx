@@ -307,6 +307,7 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
+    console.log('GuppyWrapper this.state.userFilterFromURL: ', this.state.userFilterFromURL);
     return (
       <>
         {
