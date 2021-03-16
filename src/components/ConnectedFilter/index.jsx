@@ -142,11 +142,11 @@ class ConnectedFilter extends React.Component {
    */
   getFilterTabs() {
     let filtersToDisplay = this.state.filtersApplied;
-    let filterMetadata;
+    let filterStatusArray;
     const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0;
     if (applyingUserFilterFromURL) {
       filtersToDisplay = this.props.userFilterFromURL;
-      filterMetadata = buildFilterStatusForURLFilter(filtersToDisplay,
+      filterStatusArray = buildFilterStatusForURLFilter(filtersToDisplay,
         this.props.filterConfig.tabs);
     }
     if (this.props.hidden) return null;
@@ -239,12 +239,7 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
-      let filterStatusFromURL;
-      console.log('242 filterMetadata:', filterMetadata);
-      if (filterMetadata && index === filterMetadata.tabIndex) {
-        filterStatusFromURL = filterMetadata.filterStatus;
-      }
-      console.log('246 filterStatusFromURL: ', filterStatusFromURL);
+      console.log('242 filterStatusArray:', filterStatusArray);
       return (
         <FilterList
           key={index}
@@ -254,7 +249,7 @@ class ConnectedFilter extends React.Component {
           disabledTooltipMessage={this.props.disabledTooltipMessage}
           arrayFields={this.arrayFields}
           // filterStatus={filterStatus}
-          filterStatusFromURL={filterStatusFromURL}
+          filterStatusFromURL={filterStatusArray[index]}
           // onClear={this.onFilterListClear}
         />
       );

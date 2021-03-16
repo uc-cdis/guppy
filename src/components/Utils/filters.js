@@ -173,36 +173,30 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
 };
 
 export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
-  console.log('buildFilterStatusForURLFilter sees userFilter: ', userFilter);
+  console.log('buildFilterStatusForURLFilter sees userFilter: ', userFilter, ' and tabs: ', tabs);
   const filteringFields = Object.keys(userFilter);
-  let filterStatus;
-
-  let calculatedTabIndex;
+  let filterStatusArray = tabs.map(() => ([]));
 
   for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
     const allFieldsForThisTab = tabs[tabIndex].fields;
     for (let i = 0; i < filteringFields.length; i += 1) {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
       if (sectionIndex !== -1) {
-        const { fields } = tabs[tabIndex];
-        filterStatus = fields.map(() => ({}));
+        filterStatusArray[tabIndex] = allFieldsForThisTab.map(() => ({}));
         const userFilterBoolForm = {};
         // Only supporting single select values at this time.
         if (typeof userFilter[filteringFields[i]] === 'object' && userFilter[filteringFields[i]].selectedValues) {
+          console.log('buildFilterStatusForURLFilter sees userFilter[filteringFields[i]]: ', userFilter[filteringFields[i]], ' in tabIndex: ', tabIndex);
           for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
             userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
           }
         }
-        filterStatus[sectionIndex] = userFilterBoolForm;
-        calculatedTabIndex = tabIndex;
+        filterStatusArray[tabIndex][sectionIndex] = userFilterBoolForm;
       }
     }
   }
 
-  console.log('buildFilterStatusForURLFilter is returning ', filterStatus);
+  console.log('buildFilterStatusForURLFilter is returning ', filterStatusArray);
 
-  return {
-    tabIndex: calculatedTabIndex,
-    filterStatus,
-  };
+  return filterStatusArray;
 };
