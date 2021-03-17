@@ -47,13 +47,18 @@ import { mergeFilters } from '../Utils/filters';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
+    const initialFilter = mergeFilters(
+      props.initialAppliedFilters,
+      props.adminAppliedPreFilters,
+    );
+
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = { ...this.props.adminAppliedPreFilters };
+    this.filter = { ...initialFilter };
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
-      filter: { ...this.props.adminAppliedPreFilters },
+      filter: { ...initialFilter },
       rawData: [],
       totalCount: 0,
       allFields: [],
