@@ -47,13 +47,18 @@ import { mergeFilters } from '../Utils/filters';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
+    const initialFilter = mergeFilters(
+      props.initialAppliedFilters,
+      props.adminAppliedPreFilters,
+    );
+
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = { ...this.props.adminAppliedPreFilters };
+    this.filter = { ...initialFilter };
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
-      filter: { ...this.props.adminAppliedPreFilters },
+      filter: { ...initialFilter },
       rawData: [],
       totalCount: 0,
       allFields: [],
@@ -328,6 +333,7 @@ class GuppyWrapper extends React.Component {
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
             adminAppliedPreFilters: this.props.adminAppliedPreFilters,
             accessibleFieldCheckList: this.props.accessibleFieldCheckList,
+            initialAppliedFilters: this.props.initialAppliedFilters,
           }))
         }
       </>
@@ -359,6 +365,7 @@ GuppyWrapper.propTypes = {
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
+  initialAppliedFilters: PropTypes.object,
 };
 
 GuppyWrapper.defaultProps = {
@@ -367,6 +374,7 @@ GuppyWrapper.defaultProps = {
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
+  initialAppliedFilters: {},
 };
 
 export default GuppyWrapper;
