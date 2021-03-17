@@ -83,6 +83,10 @@ class ConnectedFilter extends React.Component {
         }
       }
     });
+    if(Object.keys(this.props.userFilterFromURL).length > 0) {
+      console.log('CLEARING in ConnectedFilter componentDidMount');
+      this.props.initialFilterFromURLAppliedCallback();
+    }
   }
 
   handleReceiveNewAggsData(receivedAggsData, filterResults) {
@@ -268,9 +272,6 @@ class ConnectedFilter extends React.Component {
   render() {
     if (this.props.hidden) return null;
     const filterTabs = this.getFilterTabs();
-    if(Object.keys(this.props.userFilterFromURL).length > 0) {
-      this.props.initialFilterFromURLAppliedCallback();
-    }
     if (!filterTabs || filterTabs.length === 0) {
       return null;
     }
