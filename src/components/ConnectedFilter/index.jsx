@@ -147,7 +147,7 @@ class ConnectedFilter extends React.Component {
   getFilterTabs() {
     let filtersToDisplay = this.state.filtersApplied;
     let filterStatusArray;
-    const applyingUserFilterFromURL = Object.keys(this.props.userFilterFromURL).length > 0;
+    const applyingUserFilterFromURL = this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0;
     if (applyingUserFilterFromURL) {
       filtersToDisplay = this.props.userFilterFromURL;
       filterStatusArray = buildFilterStatusForURLFilter(filtersToDisplay,
