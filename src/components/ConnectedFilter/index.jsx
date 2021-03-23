@@ -33,6 +33,14 @@ class ConnectedFilter extends React.Component {
       : filterConfigsFields;
 
     this.initialTabsOptions = {};
+
+    // ConnectedFilter now manages UI filter state instead of FilterSection.
+    let filterStatusArray;
+    if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
+      filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL, 
+        this.props.filterConfig.tabs);
+    }
+
     this.state = {
       allFields,
       initialAggsData: {},
@@ -41,6 +49,7 @@ class ConnectedFilter extends React.Component {
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...this.props.adminAppliedPreFilters },
       filtersApplied: {},
+      filterStatusArray: filterStatusArray,
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -105,7 +114,17 @@ class ConnectedFilter extends React.Component {
   handleFilterChange(filterResults) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
-    this.setState({ filtersApplied: mergedFilterResults });
+
+    console.log('we hit ConnectedFilter handleFilterChange.');
+
+    // if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
+      let newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults, 
+        this.props.filterConfig.tabs);
+    // }
+
+    console.log('ConnectedFilter setting newFilterStatusArray: ', newFilterStatusArray);
+
+    this.setState({ filtersApplied: mergedFilterResults, filterStatusArray: newFilterStatusArray });
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -127,7 +146,6 @@ class ConnectedFilter extends React.Component {
       console.log('CLEARING in ConnectedFilter handleFilterChange');
       this.props.initialFilterFromURLAppliedCallback();
     }
-    console.log('ConnectedFilter handleFilterChange');
   }
 
   setFilter(filter) {
@@ -146,13 +164,14 @@ class ConnectedFilter extends React.Component {
    */
   getFilterTabs() {
     let filtersToDisplay = this.state.filtersApplied;
-    let filterStatusArray;
-    const applyingUserFilterFromURL = this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0;
-    if (applyingUserFilterFromURL) {
-      filtersToDisplay = this.props.userFilterFromURL;
-      filterStatusArray = buildFilterStatusForURLFilter(filtersToDisplay,
-        this.props.filterConfig.tabs);
-    }
+    console.log('158 filtersAppliedd in ConnectedFilter: ', filtersToDisplay);
+    // let filterStatusArray;
+    // const applyingUserFilterFromURL = this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0;
+    // if (applyingUserFilterFromURL) {
+    //   filtersToDisplay = this.props.userFilterFromURL;
+    //   filterStatusArray = buildFilterStatusForURLFilter(filtersToDisplay,
+    //     this.props.filterConfig.tabs);
+    // }
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -243,7 +262,7 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
-      let filterStatus = filterStatusArray ? filterStatusArray[index] : null;
+      let filterStatus = this.state.filterStatusArray ? this.state.filterStatusArray[index] : null;
       return (
         <FilterList
           key={index}
@@ -252,8 +271,8 @@ class ConnectedFilter extends React.Component {
           lockedTooltipMessage={this.props.lockedTooltipMessage}
           disabledTooltipMessage={this.props.disabledTooltipMessage}
           arrayFields={this.arrayFields}
-          // filterStatus={filterStatus}
-          filterStatusFromURL={filterStatus}
+          filterStatus={filterStatus}
+          // filterStatusFromURL={filterStatus}
           // onClear={this.onFilterListClear}
         />
       );
