@@ -119,7 +119,7 @@ class ConnectedFilter extends React.Component {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
 
-    console.log('we hit ConnectedFilter handleFilterChange.');
+    console.log('we hit ConnectedFilter handleFilterChange with filterResults: ', filterResults);
 
     // if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
       let newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults, 
@@ -150,6 +150,10 @@ class ConnectedFilter extends React.Component {
       console.log('CLEARING in ConnectedFilter handleFilterChange');
       this.props.initialFilterFromURLAppliedCallback();
     }
+  }
+
+  handleSelect(sectionIndex, singleFilterLabel) {
+    console.log('ConnectedFilter handleSelect. sectionInddex: ', sectionIndex, ' singleFilterLabel: ', singleFilterLabel);
   }
 
   setFilter(filter) {
@@ -280,6 +284,7 @@ class ConnectedFilter extends React.Component {
           filterStatusFromParent={filterStatus}
           // filterStatusFromURL={filterStatus}
           // onClear={this.onFilterListClear}
+          onSelect={this.handleSelect}
         />
       );
     });
