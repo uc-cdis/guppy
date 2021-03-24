@@ -323,6 +323,8 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        filterStatusFromParent={this.state.filterStatusArray}
+        filterResultsFromParent={this.state.filtersApplied}
       />
     );
   }
