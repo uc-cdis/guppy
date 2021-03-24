@@ -36,9 +36,11 @@ class ConnectedFilter extends React.Component {
 
     // ConnectedFilter now manages UI filter state instead of FilterSection.
     let filterStatusArray;
+    let filtersApplied = {};
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
       filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL, 
         this.props.filterConfig.tabs);
+      filtersApplied = this.props.userFilterFromURL;
     }
 
     this.state = {
@@ -48,7 +50,7 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...this.props.adminAppliedPreFilters },
-      filtersApplied: {},
+      filtersApplied: filtersApplied,
       filterStatusArray: filterStatusArray,
     };
     this.filterGroupRef = React.createRef();
