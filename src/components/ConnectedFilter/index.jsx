@@ -37,10 +37,12 @@ class ConnectedFilter extends React.Component {
     // ConnectedFilter now manages UI filter state instead of FilterSection.
     let filterStatusArray;
     let filtersApplied = {};
+    console.log('ConnectedFilter constructor', this.props.userFilterFromURL);
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
       filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL, 
         this.props.filterConfig.tabs);
       filtersApplied = this.props.userFilterFromURL;
+      console.log('ConnectedFilter constructor set filtersApplied, ', filtersApplied);
     }
 
     this.state = {
@@ -265,6 +267,8 @@ class ConnectedFilter extends React.Component {
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
       let filterStatus = this.state.filterStatusArray ? this.state.filterStatusArray[index] : null;
+      console.log('ConnectedFilter this.state.filterStatusArray ', this.state.filterStatusArray);
+      console.log('ConnectedFilter bout to give FilterList ', filterStatus);
       return (
         <FilterList
           key={index}
