@@ -273,7 +273,7 @@ class ConnectedFilter extends React.Component {
           lockedTooltipMessage={this.props.lockedTooltipMessage}
           disabledTooltipMessage={this.props.disabledTooltipMessage}
           arrayFields={this.arrayFields}
-          filterStatus={filterStatus}
+          filterStatusFromParent={filterStatus}
           // filterStatusFromURL={filterStatus}
           // onClear={this.onFilterListClear}
         />
