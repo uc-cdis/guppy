@@ -184,11 +184,19 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
       if (sectionIndex !== -1) {
         const userFilterBoolForm = {};
-        // Only supporting single select values at this time.
+        // Single select values:
         if (typeof userFilter[filteringFields[i]] === 'object' && userFilter[filteringFields[i]].selectedValues) {
           console.log('buildFilterStatusForURLFilter sees userFilter[filteringFields[i]]: ', userFilter[filteringFields[i]], ' in tabIndex: ', tabIndex);
           for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
             userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
+          }
+        } // Range values:
+        else if (typeof userFilter[filteringFields[i]] === 'object' && 
+          (userFilter[filteringFields[i]].lowerBound || userFilter[filteringFields[i]].upperBound)) {
+          console.log('range block buildFilterStatusForURLFilter sees userFilter[filteringFields[i]]: ', 
+            userFilter[filteringFields[i]], ' in tabIndex: ', tabIndex);
+          for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
+            userFilterBoolForm = [userFilter[filteringFields[i]].lowerBound, userFilter[filteringFields[i]].upperBound] ;
           }
         }
         filterStatusArray[tabIndex][sectionIndex] = userFilterBoolForm;
