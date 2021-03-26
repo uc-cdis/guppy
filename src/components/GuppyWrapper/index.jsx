@@ -95,7 +95,6 @@ class GuppyWrapper extends React.Component {
         });
       });
     }
-    console.log('GuppyWrapper componentDidMount');
   }
 
   handleReceiveNewAggsData(aggsData) {
@@ -113,7 +112,6 @@ class GuppyWrapper extends React.Component {
       && Object.keys(this.state.userFilterFromURL).length > 0) {
       userFilter = JSON.parse(JSON.stringify(this.state.userFilterFromURL));
       this.props.applyFilterUIChanges(userFilter);
-      console.log('GuppyWrapper handldeFilterChange clearing userFilter from state');
       this.setState({ userFilterFromURL: {} });
     }
 
@@ -308,7 +306,6 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
-    console.log('GuppyWrapper this.state.userFilterFromURL: ', this.state.userFilterFromURL);
     return (
       <>
         {
