@@ -183,23 +183,22 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
     for (let i = 0; i < filteringFields.length; i += 1) {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
       if (sectionIndex !== -1) {
-        const userFilterBoolForm = {};
+        const userFilterSmallForm = {};
+        let filterVar = userFilter[filteringFields[i]];
         // Single select values:
-        if (typeof userFilter[filteringFields[i]] === 'object' && userFilter[filteringFields[i]].selectedValues) {
-          console.log('buildFilterStatusForURLFilter sees userFilter[filteringFields[i]]: ', userFilter[filteringFields[i]], ' in tabIndex: ', tabIndex);
-          for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
-            userFilterBoolForm[userFilter[filteringFields[i]].selectedValues[j]] = true;
+        if (typeof filterVar === 'object' && filterVar.selectedValues) {
+          console.log('buildFilterStatusForURLFilter sees filterVar: ', filterVar, ' in tabIndex: ', tabIndex);
+          for (let j = 0; j < filterVar.selectedValues.length; j += 1) {
+            userFilterSmallForm[filterVar.selectedValues[j]] = true;
           }
         } // Range values:
-        else if (typeof userFilter[filteringFields[i]] === 'object' && 
-          (userFilter[filteringFields[i]].lowerBound || userFilter[filteringFields[i]].upperBound)) {
-          console.log('range block buildFilterStatusForURLFilter sees userFilter[filteringFields[i]]: ', 
-            userFilter[filteringFields[i]], ' in tabIndex: ', tabIndex);
-          for (let j = 0; j < userFilter[filteringFields[i]].selectedValues.length; j += 1) {
-            userFilterBoolForm = [userFilter[filteringFields[i]].lowerBound, userFilter[filteringFields[i]].upperBound] ;
-          }
+        else if (typeof filterVar === 'object' && 
+          (filterVar.lowerBound || filterVar.upperBound)) {
+          console.log('range block buildFilterStatusForURLFilter sees filterVar: ', 
+            filterVar, ' in tabIndex: ', tabIndex);
+          userFilterSmallForm = [filterVar.lowerBound, filterVar.upperBound];
         }
-        filterStatusArray[tabIndex][sectionIndex] = userFilterBoolForm;
+        filterStatusArray[tabIndex][sectionIndex] = userFilterSmallForm;
       }
     }
   }
