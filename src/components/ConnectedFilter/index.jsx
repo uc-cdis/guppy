@@ -121,7 +121,7 @@ class ConnectedFilter extends React.Component {
 
     console.log('we hit ConnectedFilter handleFilterChange with filterResults: ', filterResults);
 
-    // if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
+    // try {
       let newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults, 
         this.props.filterConfig.tabs);
     // }

@@ -183,7 +183,7 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
     for (let i = 0; i < filteringFields.length; i += 1) {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
       if (sectionIndex !== -1) {
-        const userFilterSmallForm = {};
+        let userFilterSmallForm = {};
         let filterVar = userFilter[filteringFields[i]];
         // Single select values:
         if (typeof filterVar === 'object' && filterVar.selectedValues) {
