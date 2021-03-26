@@ -17,7 +17,6 @@ import {
   mergeFilters,
   updateCountsInInitialTabsOptions,
   sortTabsOptions,
-  mergeTabOptions,
 } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
@@ -47,6 +46,7 @@ class ConnectedFilter extends React.Component {
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.arrayFields = [];
     this._isMounted = false;
+    this.controller = new AbortController();
   }
 
   componentDidMount() {
@@ -111,6 +111,9 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
+    this.controller.abort();
+    this.controller = new AbortController();
+
     const adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
     if (this._isMounted) this.setState({ adminAppliedPreFilters });
 
@@ -123,6 +126,7 @@ class ConnectedFilter extends React.Component {
       this.state.allFields,
       mergedFilterResults,
       this.state.accessibility,
+      this.controller.signal,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
@@ -165,74 +169,7 @@ class ConnectedFilter extends React.Component {
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
 
-    if (Object.keys(this.state.filtersApplied).length) {
-      // if has applied filters, sort tab options as selected/unselected separately
-      const selectedTabsOptions = {};
-      const unselectedTabsOptions = {};
-      Object.keys(processedTabsOptions).forEach((opt) => {
-        if (!processedTabsOptions[`${opt}`].histogram.length) {
-          if (!unselectedTabsOptions[`${opt}`]) {
-            unselectedTabsOptions[`${opt}`] = {};
-          }
-          unselectedTabsOptions[`${opt}`].histogram = [];
-          return;
-        }
-        processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
-          if (this.state.filtersApplied[`${opt}`]
-          && this.state.filtersApplied[`${opt}`].selectedValues
-          && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
-            if (!selectedTabsOptions[`${opt}`]) {
-              selectedTabsOptions[`${opt}`] = {};
-            }
-            if (!selectedTabsOptions[`${opt}`].histogram) {
-              selectedTabsOptions[`${opt}`].histogram = [];
-            }
-            selectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
-          } else {
-            if (!unselectedTabsOptions[`${opt}`]) {
-              unselectedTabsOptions[`${opt}`] = {};
-            }
-            if (typeof (entry.key) !== 'string') { // if it is a range filter, just copy and return
-              unselectedTabsOptions[`${opt}`].histogram = processedTabsOptions[`${opt}`].histogram;
-              return;
-            }
-            if (!unselectedTabsOptions[`${opt}`].histogram) {
-              unselectedTabsOptions[`${opt}`].histogram = [];
-            }
-            unselectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
-          }
-        });
-      });
-
-      // For search filters: If there are any search filters present, include
-      // the selected options in the `selectedTabsOptions` array.
-      // ------
-      let allSearchFields = [];
-      this.props.filterConfig.tabs.forEach((tab) => {
-        allSearchFields = allSearchFields.concat(tab.searchFields);
-      });
-      allSearchFields.forEach((field) => {
-        if (this.state.filtersApplied[`${field}`]) {
-          const { selectedValues } = this.state.filtersApplied[`${field}`];
-          if (selectedValues) {
-            this.state.filtersApplied[`${field}`].selectedValues.forEach((val) => {
-              if (!selectedTabsOptions[`${field}`]) {
-                selectedTabsOptions[`${field}`] = {};
-              }
-              if (!selectedTabsOptions[`${field}`].histogram) {
-                selectedTabsOptions[`${field}`].histogram = [];
-              }
-              selectedTabsOptions[`${field}`].histogram.push({ key: val });
-            });
-          }
-        }
-      });
-      // -------
-      processedTabsOptions = mergeTabOptions(sortTabsOptions(selectedTabsOptions),
-        sortTabsOptions(unselectedTabsOptions));
-    } else {
-      processedTabsOptions = sortTabsOptions(processedTabsOptions);
-    }
+    processedTabsOptions = sortTabsOptions(processedTabsOptions);
 
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
