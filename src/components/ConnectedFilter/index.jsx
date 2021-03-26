@@ -38,7 +38,7 @@ class ConnectedFilter extends React.Component {
     let filterStatusArray = [];
     let filtersApplied = {};
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
-      filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL, 
+      filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL,
         this.props.filterConfig.tabs);
       filtersApplied = this.props.userFilterFromURL;
     }
@@ -50,8 +50,8 @@ class ConnectedFilter extends React.Component {
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...this.props.adminAppliedPreFilters },
-      filtersApplied: filtersApplied,
-      filterStatusArray: filterStatusArray,
+      filtersApplied,
+      filterStatusArray,
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -117,8 +117,8 @@ class ConnectedFilter extends React.Component {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
 
-      let newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults, 
-        this.props.filterConfig.tabs);
+    const newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults,
+      this.props.filterConfig.tabs);
 
     this.setState({ filtersApplied: mergedFilterResults, filterStatusArray: newFilterStatusArray });
     askGuppyForAggregationData(
@@ -138,7 +138,7 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
-    if(Object.keys(this.props.userFilterFromURL).length > 0) {
+    if (Object.keys(this.props.userFilterFromURL).length > 0) {
       this.props.initialFilterFromURLAppliedCallback();
     }
   }
@@ -158,7 +158,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
-    let filtersToDisplay = this.state.filtersApplied;
+    const filtersToDisplay = this.state.filtersApplied;
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -249,7 +249,8 @@ class ConnectedFilter extends React.Component {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
-      let filterStatus = this.state.filterStatusArray ? this.state.filterStatusArray[index] : null;
+      const filterStatus = this.state.filterStatusArray
+        ? this.state.filterStatusArray[index] : null;
       return (
         <FilterList
           key={index}

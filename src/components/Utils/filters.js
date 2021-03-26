@@ -173,9 +173,8 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
 };
 
 export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
-  console.log('buildFilterStatusForURLFilter sees userFilter: ', userFilter, ' and tabs: ', tabs);
   const filteringFields = Object.keys(userFilter);
-  let filterStatusArray = tabs.map(() => ([]));
+  const filterStatusArray = tabs.map(() => ([]));
 
   for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
     const allFieldsForThisTab = tabs[tabIndex].fields;
@@ -184,26 +183,21 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
       if (sectionIndex !== -1) {
         let userFilterSmallForm = {};
-        let filterVar = userFilter[filteringFields[i]];
-        // Single select values:
+        const filterVar = userFilter[filteringFields[i]];
         if (typeof filterVar === 'object' && filterVar.selectedValues) {
-          console.log('buildFilterStatusForURLFilter sees filterVar: ', filterVar, ' in tabIndex: ', tabIndex);
+          // Single select values:
           for (let j = 0; j < filterVar.selectedValues.length; j += 1) {
             userFilterSmallForm[filterVar.selectedValues[j]] = true;
           }
-        } // Range values:
-        else if (typeof filterVar === 'object' && 
-          (filterVar.lowerBound || filterVar.upperBound)) {
-          console.log('range block buildFilterStatusForURLFilter sees filterVar: ', 
-            filterVar, ' in tabIndex: ', tabIndex);
+        } else if (typeof filterVar === 'object'
+          && (filterVar.lowerBound || filterVar.upperBound)) {
+          // Range values:
           userFilterSmallForm = [filterVar.lowerBound, filterVar.upperBound];
         }
         filterStatusArray[tabIndex][sectionIndex] = userFilterSmallForm;
       }
     }
   }
-
-  console.log('buildFilterStatusForURLFilter is returning ', filterStatusArray);
 
   return filterStatusArray;
 };
