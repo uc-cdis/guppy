@@ -35,7 +35,7 @@ class ConnectedFilter extends React.Component {
     this.initialTabsOptions = {};
 
     // ConnectedFilter now manages UI filter state instead of FilterSection.
-    let filterStatusArray;
+    let filterStatusArray = [];
     let filtersApplied = {};
     console.log('ConnectedFilter constructor', this.props.userFilterFromURL);
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
@@ -158,6 +158,7 @@ class ConnectedFilter extends React.Component {
 
   setFilter(filter) {
     if (this.filterGroupRef.current) {
+      console.log('resetFilter is being called on the FilterGroup');
       this.filterGroupRef.current.resetFilter();
     }
     this.handleFilterChange(filter);
@@ -315,6 +316,8 @@ class ConnectedFilter extends React.Component {
         return { title, fields };
       }),
     };
+    console.log('sending FilterGroup: this.state.filterStatusArray: ', this.state.filterStatusArray);
+    console.log('sending FilterGroup: this.state.filtersApplied: ', this.state.filtersApplied);
     return (
       <FilterGroup
         ref={this.filterGroupRef}
