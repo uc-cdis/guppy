@@ -240,12 +240,40 @@ describe('can convert between filter applied and filter displayed forms', () => 
     cac_score : { lowerBound: 33, upperBound: 97 },
     project_id : { selectedValues: [ "DEV-test" ]}
   };
-  const tabs = {};
+  const tabs = [
+    {
+      "title": "Medical History",
+      "fields": [ "cac_score", "cac_volume", "carotid_plaque",
+        "carotid_stenosis", "cimt_1", "cimt_2", "vte_case_status",
+        "vte_followup_start_age", "vte_prior_history", "antihypertensive_meds", 
+        "fasting_lipids", "lipid_lowering_medication"
+      ]
+    },
+    {
+      "title": "Diagnosis",
+      "fields": [
+        "bp_diastolic", "basophil_ncnc_bld", "eosinophil_ncnc_bld", "hdl",
+        "hematocrit_vfr_bld", "hemoglobin_mcnc_bld", "ldl", "lymphocyte_ncnc_bld",
+        "mch_entmass_rbc", "mchc_mcnc_rbc", "mcv_entvol_rbc", "monocyte_ncnc_bld",
+        "neutrophil_ncnc_bld", "platelet_ncnc_bld", "pmv_entvol_bld", "rbc_ncnc_bld", 
+        "rdw_ratio_rbc", "wbc_ncnc_bld"
+      ]
+    },
+    {
+      "title": "Subject",
+      "fields": [
+        "project_id", "consent_codes", "data_type", "data_format",
+        "race", "annotated_sex", "hispanic_subgroup", "ethnicity", "subcohort", "weight_baseline"
+      ]
+    }
+  ];
 
-  const displayFilterExpected = {
-    project_id: { selectedValues: ['jnkns-jenkins'] },
-    data_format: { selectedValues: ['VCF'] },
-  };
+  const displayFilterExpected =  [
+    [ [33,97], {}, { "Plaque present": true, "Plaque not present": true }, {}, {}, {},
+    {}, {}, {}, {}, {}, {} ],
+    [ {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} ],
+    [ { "DEV-test": true }, {}, {}, {}, {}, {}, {}, {}, {}, {} ]
+  ]
 
   test('build filter display from url', async () => {
     const displayFilter = buildFilterStatusForURLFilter(inputFilterFromURL, tabs);
