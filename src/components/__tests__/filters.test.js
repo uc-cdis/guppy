@@ -233,18 +233,23 @@ describe('can sort tabs options', () => {
   });
 });
 
-// describe('can convert between filter applied and filter displayed forms', () => {
-//   const inputFilterFromURL = { data_format: { selectedValues: ['VCF'] } };
-//   const tabs = {};
+describe('can convert between filter applied and filter displayed forms', () => {
+  // Unit test for buildFilterStatusForURLFilter()
+  const inputFilterFromURL = { 
+    carotid_plaque : { selectedValues: ['Plaque present', 'Plaque not present'] },
+    cac_score : { lowerBound: 33, upperBound: 97 },
+    project_id : { selectedValues: [ "DEV-test" ]}
+  };
+  const tabs = {};
 
-//   const displayFilterExpected = {
-//     project_id: { selectedValues: ['jnkns-jenkins'] },
-//     data_format: { selectedValues: ['VCF'] },
-//   };
+  const displayFilterExpected = {
+    project_id: { selectedValues: ['jnkns-jenkins'] },
+    data_format: { selectedValues: ['VCF'] },
+  };
 
-//   test('build filter display from url', async () => {
-//     const displayFilter = buildFilterStatusForURLFilter(inputFilterFromURL, tabs);
-//     expect(displayFilter)
-//       .toEqual(displayFilterExpected);
-//   });
-// });
+  test('build filter display from url', async () => {
+    const displayFilter = buildFilterStatusForURLFilter(inputFilterFromURL, tabs);
+    expect(displayFilter)
+      .toEqual(displayFilterExpected);
+  });
+});
