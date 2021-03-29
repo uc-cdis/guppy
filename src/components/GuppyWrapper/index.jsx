@@ -110,7 +110,6 @@ class GuppyWrapper extends React.Component {
     if (Object.keys(userFilter).length === 0
       && Object.keys(this.state.userFilterFromURL).length > 0) {
       userFilter = JSON.parse(JSON.stringify(this.state.userFilterFromURL));
-      console.log('---');
       this.setState({ userFilterFromURL: {} });
     }
 
