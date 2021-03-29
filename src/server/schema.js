@@ -17,6 +17,8 @@ const esgqlTypeMapping = {
   nested: 'Object',
 };
 
+const histogramTypePrefix = 'RegularAccess';
+
 const getGQLType = (esInstance, esIndex, field, esFieldType) => {
   const gqlType = esgqlTypeMapping[esFieldType];
   if (!gqlType) {
@@ -146,12 +148,15 @@ const getAggregationType = (entry) => {
   return '';
 };
 
-const getAggregationSchemaForOneIndex = (esInstance, esIndex, esType) => {
+const getAggregationSchemaForOneIndex = (esInstance, esConfigElement) => {
+  const esIndex = esConfigElement.index;
+  const esType = esConfigElement.type;
+  const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esConfigElement, 'tier_access_level') && esConfigElement.tier_access_level === 'regular';
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => f.esType !== 'nested').map((entry) => ({
     field: entry.field,
-    aggType: getAggsHistogramName(entry.type),
+    aggType: (includeHistogramPrefix ? histogramTypePrefix : '') + getAggsHistogramName(entry.type),
   }));
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   return `type ${esTypeObjName}Aggregation {
@@ -188,10 +193,11 @@ export const getAggregationSchema = (esConfig) => `
  * Multi-level nested fields are "flattened" level by level.
  * For each level of nested field a new type in schema is created.
  */
-const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
+const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
+  const esIndex = esDict.index;
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
-
+  const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular';
   let AggsNestedTypeSchema = '';
   while (fieldAggsNestedTypeMap.length > 0) {
     const entry = fieldAggsNestedTypeMap.shift();
@@ -207,7 +213,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
         }
         return `
-    ${propsKey}: ${getAggsHistogramName(esgqlTypeMapping[entryType])}`;
+    ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix : '') + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
 }`;
     }
@@ -216,9 +222,27 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esIndex) => {
   return AggsNestedTypeSchema;
 };
 
-export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneIndex(esInstance, cfg.index, cfg.type)).join('\n');
+export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneIndex(esInstance, cfg)).join('\n');
 
-export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg.index)).join('\n');
+export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
+
+const getNumberHistogramSchema = (isRegularAccess) => `
+    type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+      histogram(
+        rangeStart: Int,
+        rangeEnd: Int,
+        rangeStep: Int,
+        binCount: Int,
+      ): [BucketsForNestedNumberAgg],
+      asTextHistogram: [BucketsForNestedStringAgg]
+    }
+  `;
+
+const getTextHistogramSchema = (isRegularAccess) => `
+    type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+      histogram: [BucketsForNestedStringAgg]
+    }
+  `;
 
 export const getMappingSchema = (esConfig) => `
     type Mapping {
@@ -227,6 +251,20 @@ export const getMappingSchema = (esConfig) => `
       ): [String]`).join('\n')}
     }
   `;
+
+export const getHistogramSchemas = () => {
+  const textHistogramSchema = getTextHistogramSchema(false);
+
+  const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
+
+  const numberHistogramSchema = getNumberHistogramSchema(false);
+
+  const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
+
+  const histogramSchemas = [textHistogramSchema, regularAccessTextHistogramSchema, numberHistogramSchema, regularAccessNumberHistogramSchema].join('\n');
+
+  return histogramSchemas;
+};
 
 export const buildSchemaString = (esConfig, esInstance) => {
   const querySchema = getQuerySchema(esConfig);
@@ -263,15 +301,25 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
     esInstance);
 
-  const textHistogramSchema = `
-    type ${EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
-      histogram: [BucketsForNestedStringAgg]
-    }
-  `;
+  const histogramSchemas = getHistogramSchemas();
 
   const textHistogramBucketSchema = `
     type BucketsForNestedStringAgg {
       key: String
+      count: Int
+      missingFields: [BucketsForNestedMissingFields]
+      termsFields: [BucketsForNestedTermsFields]
+    }
+  `;
+
+  const numberHistogramBucketSchema = `
+    type BucketsForNestedNumberAgg {
+      """Lower and higher bounds for this bucket"""
+      key: [Float]
+      min: Float
+      max: Float
+      avg: Float
+      sum: Float
       count: Int
       missingFields: [BucketsForNestedMissingFields]
       termsFields: [BucketsForNestedTermsFields]
@@ -299,32 +347,6 @@ export const buildSchemaString = (esConfig, esInstance) => {
     }
   `;
 
-  const numberHistogramSchema = `
-    type ${EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
-      histogram(
-        rangeStart: Int,
-        rangeEnd: Int,
-        rangeStep: Int,
-        binCount: Int,
-      ): [BucketsForNestedNumberAgg],
-      asTextHistogram: [BucketsForNestedStringAgg]
-    }
-  `;
-
-  const numberHistogramBucketSchema = `
-    type BucketsForNestedNumberAgg {
-      """Lower and higher bounds for this bucket"""
-      key: [Float]
-      min: Float
-      max: Float
-      avg: Float
-      sum: Float
-      count: Int
-      missingFields: [BucketsForNestedMissingFields]
-      termsFields: [BucketsForNestedTermsFields]
-    }
-  `;
-
   const mappingSchema = getMappingSchema(esConfig);
 
   const schemaStr = `
@@ -337,8 +359,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   ${aggregationSchema}
   ${aggregationSchemasForEachType}
   ${aggregationSchemasForEachNestedType}
-  ${textHistogramSchema}
-  ${numberHistogramSchema}
+  ${histogramSchemas}
   ${textHistogramBucketSchema}
   ${nestedMissingFieldsBucketSchema}
   ${nestedTermsFieldsBucketSchema}
