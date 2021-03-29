@@ -110,7 +110,7 @@ class GuppyWrapper extends React.Component {
     if (Object.keys(userFilter).length === 0
       && Object.keys(this.state.userFilterFromURL).length > 0) {
       userFilter = JSON.parse(JSON.stringify(this.state.userFilterFromURL));
-      this.props.applyFilterUIChanges(userFilter);
+      console.log('---');
       this.setState({ userFilterFromURL: {} });
     }
 
@@ -366,7 +366,6 @@ GuppyWrapper.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialFilterFromURL: PropTypes.object,
-  applyFilterUIChanges: PropTypes.func,
 };
 
 GuppyWrapper.defaultProps = {
@@ -376,7 +375,6 @@ GuppyWrapper.defaultProps = {
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialFilterFromURL: {},
-  applyFilterUIChanges: () => {},
 };
 
 export default GuppyWrapper;
