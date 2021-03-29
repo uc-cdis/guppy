@@ -137,9 +137,6 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
-    if (Object.keys(this.props.userFilterFromURL).length > 0) {
-      this.props.initialFilterFromURLAppliedCallback();
-    }
   }
 
   setFilter(filter) {
@@ -333,7 +330,6 @@ ConnectedFilter.propTypes = {
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
   userFilterFromURL: PropTypes.object,
-  initialFilterFromURLAppliedCallback: PropTypes.func,
 };
 
 ConnectedFilter.defaultProps = {
@@ -351,7 +347,6 @@ ConnectedFilter.defaultProps = {
   hideZero: false,
   hidden: false,
   userFilterFromURL: {},
-  initialFilterFromURLAppliedCallback: () => {},
 };
 
 export default ConnectedFilter;
