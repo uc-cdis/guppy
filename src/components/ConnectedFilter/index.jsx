@@ -34,7 +34,6 @@ class ConnectedFilter extends React.Component {
 
     this.initialTabsOptions = {};
 
-    // ConnectedFilter now manages UI filter state instead of FilterSection.
     let filterStatusArray = [];
     let filtersApplied = {};
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {

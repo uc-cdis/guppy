@@ -64,7 +64,6 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      // This var will be emptied out once the filter has been applied:
       userFilterFromURL: { ...this.props.initialFilterFromURL },
     };
   }
