@@ -1,6 +1,6 @@
 /* eslint-disable global-require,import/no-dynamic-require */
 // Tests for Utils/filters.js
-import { mergeFilters, updateCountsInInitialTabsOptions, sortTabsOptions } from '../Utils/filters';
+import { mergeFilters, updateCountsInInitialTabsOptions, sortTabsOptions, buildFilterStatusForURLFilter } from '../Utils/filters';
 
 describe('can merge simple selectedValue filters', () => {
   const userFilter = { data_format: { selectedValues: ['VCF'] } };
@@ -232,3 +232,19 @@ describe('can sort tabs options', () => {
       .toEqual(expectedSort);
   });
 });
+
+// describe('can convert between filter applied and filter displayed forms', () => {
+//   const inputFilterFromURL = { data_format: { selectedValues: ['VCF'] } };
+//   const tabs = {};
+
+//   const displayFilterExpected = {
+//     project_id: { selectedValues: ['jnkns-jenkins'] },
+//     data_format: { selectedValues: ['VCF'] },
+//   };
+
+//   test('build filter display from url', async () => {
+//     const displayFilter = buildFilterStatusForURLFilter(inputFilterFromURL, tabs);
+//     expect(displayFilter)
+//       .toEqual(displayFilterExpected);
+//   });
+// });
