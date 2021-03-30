@@ -1,4 +1,4 @@
-FROM quay.io/cdis/ubuntu:16.04
+FROM quay.io/cdis/ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,9 +9,13 @@ RUN apt-get update \
         git \
         sudo \
         vim \
-    && curl -sL https://deb.nodesource.com/setup_10.x | bash - \ 
+        libcap2-bin \
+    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && npm i -g npm@7
+
+RUN npm --version
 
 COPY . /guppy/
 WORKDIR /guppy
@@ -32,4 +36,3 @@ EXPOSE 3000
 EXPOSE 80
 
 CMD node --max-http-header-size 16000 dist/server/server.js
-
