@@ -173,6 +173,8 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
 };
 
 export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
+  console.log('userFilter: ', userFilter);
+  console.log('tabs.searchFields: ', tabs.searchFields);
   // Converts filter-applied form to filter-displayed form
   const filteringFields = Object.keys(userFilter);
   const filterStatusArray = tabs.map(() => ([]));
