@@ -155,7 +155,7 @@ const rawDataQueryStrForEachField = (field) => {
   }`);
 };
 
-export const queryGuppyForRawDataAndTotalCounts = (
+export const queryGuppyForRawData = (
   path,
   type,
   fields,
@@ -175,19 +175,10 @@ export const queryGuppyForRawDataAndTotalCounts = (
   if (gqlFilter || sort || format) {
     dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${format ? 'format: $format, ' : ''}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
   }
-  let typeAggsLine = `${type} accessibility: ${accessibility} {`;
-  if (gqlFilter) {
-    typeAggsLine = `${type} (filter: $filter, accessibility: ${accessibility}) {`;
-  }
   const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
   const query = `${queryLine}
     ${dataTypeLine}
       ${processedFields.join('\n')}
-    }
-    _aggregation {
-      ${typeAggsLine}
-        _totalCount
-      }
     }
   }`;
   const queryBody = { query };
@@ -204,7 +195,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
     signal,
   }).then((response) => response.json())
     .catch((err) => {
-      throw new Error(`Error during queryGuppyForRawDataAndTotalCounts ${err}`);
+      throw new Error(`Error during queryGuppyForRawData ${err}`);
     });
 };
 
@@ -319,7 +310,7 @@ export const askGuppyForRawData = (
   format,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForRawDataAndTotalCounts(
+  return queryGuppyForRawData(
     path,
     type,
     fields,
