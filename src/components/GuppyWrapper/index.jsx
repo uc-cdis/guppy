@@ -294,14 +294,13 @@ class GuppyWrapper extends React.Component {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
       }
       const parsedData = res.data[this.props.guppyConfig.type];
-      const totalCount = res.data._aggregation[this.props.guppyConfig.type]._totalCount;
       if (this._isMounted) {
-        if (updateDataWhenReceive) this.setState({ rawData: parsedData, totalCount });
+        if (updateDataWhenReceive) this.setState({ rawData: parsedData });
         this.setState({ gettingDataFromGuppy: false });
       }
       return {
         data: parsedData,
-        totalCount,
+        totalCount: this.state.totalCount,
       };
     });
   }
