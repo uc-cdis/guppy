@@ -144,6 +144,7 @@ export const getFilterSections = (
 
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find((entry) => (entry.field === field));
+    console.log('overriedName: ', overrideName);
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
     console.log('in the sections loop about to work on field: ', field);
 
