@@ -45,26 +45,29 @@ const tierAccessResolver = (
     const esIndex = esInstance.getESIndexByType(esType);
     const { filter, filterSelf, accessibility } = args;
 
-    const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-      esIndex, esType, filter, filterSelf,
-    );
-    // if requesting resources is within allowed resources, return result
-    if (outOfScopeResourceList.length === 0) {
-      // unless it's requesting for `unaccessible` data, just resolve this
-      switch (accessibility) {
-        case 'accessible':
-          return resolve(root, { ...args, needEncryptAgg: false }, context, info);
-        case 'unaccessible':
-          return resolverWithUnaccessibleFilterApplied(
-            resolve, root, args, context, info, authHelper, filter,
-          );
-        default:
-          return resolve(root, { ...args, needEncryptAgg: true }, context, info);
-      }
-    }
+
+
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
-      if (accessibility === 'accessible') {
+      const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
+        esIndex, esType, filter, filterSelf,
+      );
+      // if requesting resources is within allowed resources, return result
+      if (outOfScopeResourceList.length === 0) {
+        // unless it's requesting for `unaccessible` data, just resolve this
+        switch (accessibility) {
+          case 'accessible':
+            return resolve(root, { ...args, needEncryptAgg: false }, context, info);
+          case 'unaccessible':
+            return resolverWithUnaccessibleFilterApplied(
+              resolve, root, args, context, info, authHelper, filter,
+            );
+          default:
+            return resolve(root, { ...args, needEncryptAgg: true }, context, info);
+        }
+      }
+
+      if (accessibility === 'accessible' || accessibility === 'all') {
         return resolverWithAccessibleFilterApplied(
           resolve, root, args, context, info, authHelper, filter,
         );
