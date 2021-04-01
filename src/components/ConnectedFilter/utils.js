@@ -106,6 +106,7 @@ export const getFilterSections = (
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
+  console.log('inside getFilterSections with fields: ', fields, ' ');
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
@@ -151,11 +152,14 @@ export const getFilterSections = (
         (x) => adminAppliedPreFilters[field].selectedValues.includes(x.key),
       );
     }
+    console.log('getFilterSections 154');
 
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
+
+    console.log('getFilterSections 161');
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);
 
