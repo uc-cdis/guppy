@@ -106,7 +106,8 @@ export const getFilterSections = (
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
-  console.log('inside getFilterSections with fields: ', fields, ' ');
+  console.log('inside getFilterSections with fields: ', fields, ' and fieldMapping :', fieldMapping);
+  console.log('getFilterSections searchFields: ', searchFields);
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user

@@ -250,6 +250,8 @@ class ConnectedFilter extends React.Component {
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     console.log('bouta call getFilterSections with this.state.filterStatusArray: ', this.state.filterStatusArray);
+    console.log('253 built a fieldMapping: ', fieldMapping);
+    console.log('filtersToDisplay: ', filtersToDisplay);
 
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
