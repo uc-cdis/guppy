@@ -232,6 +232,7 @@ class ConnectedFilter extends React.Component {
             this.state.initialAggsData, this.state.adminAppliedPreFilters,
             this.props.guppyConfig, this.arrayFields)
         }
+        hideEmptyFilterSection={this.props.hideEmptyFilterSection}
         tierAccessLimit={this.props.tierAccessLimit}
         lockedTooltipMessage={this.props.lockedTooltipMessage}
         disabledTooltipMessage={this.props.disabledTooltipMessage}
@@ -306,6 +307,7 @@ ConnectedFilter.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
+  hideEmptyFilterSection: PropTypes.bool,
 };
 
 ConnectedFilter.defaultProps = {
@@ -322,6 +324,7 @@ ConnectedFilter.defaultProps = {
   accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
+  hideEmptyFilterSection: false,
 };
 
 export default ConnectedFilter;
