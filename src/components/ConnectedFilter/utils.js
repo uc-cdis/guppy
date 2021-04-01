@@ -145,6 +145,7 @@ export const getFilterSections = (
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find((entry) => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
+    console.log('in the sections loop about to work on field: ', field);
 
     const tabsOptionsFiltered = { ...tabsOptions[field] };
     if (Object.keys(adminAppliedPreFilters).includes(field)) {
@@ -152,7 +153,7 @@ export const getFilterSections = (
         (x) => adminAppliedPreFilters[field].selectedValues.includes(x.key),
       );
     }
-    console.log('getFilterSections 154');
+    console.log('getFilterSections 154 - about to call get single filter option ', tabsOptionsFiltered);
 
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
