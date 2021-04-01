@@ -38,7 +38,7 @@ class ConnectedFilter extends React.Component {
     let filtersApplied = {};
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
       filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL,
-        this.props.filterConfig.tabs);
+        this.getTabsWithSearchFields());
       filtersApplied = this.props.userFilterFromURL;
     }
 
@@ -117,7 +117,7 @@ class ConnectedFilter extends React.Component {
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
 
     const newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults,
-      this.props.filterConfig.tabs);
+      this.getTabsWithSearchFields());
 
     this.setState({ filtersApplied: mergedFilterResults, filterStatusArray: newFilterStatusArray });
     askGuppyForAggregationData(
@@ -137,6 +137,15 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
+  }
+
+  getTabsWithSearchFields() {
+    return this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+      if (searchFields) {
+        return { title, fields: searchFields.concat(fields) };
+      }
+      return { title, fields };
+    });
   }
 
   setFilter(filter) {
@@ -279,12 +288,7 @@ class ConnectedFilter extends React.Component {
     }
     // If there are any search fields, insert them at the top of each tab's fields.
     const filterConfig = {
-      tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
-        if (searchFields) {
-          return { title, fields: searchFields.concat(fields) };
-        }
-        return { title, fields };
-      }),
+      tabs: this.getTabsWithSearchFields(),
     };
     return (
       <FilterGroup
