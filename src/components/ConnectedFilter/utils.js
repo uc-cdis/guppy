@@ -155,7 +155,8 @@ export const getFilterSections = (
         (x) => adminAppliedPreFilters[field].selectedValues.includes(x.key),
       );
     }
-    console.log('getFilterSections 154 - about to call get single filter option ', tabsOptionsFiltered);
+    console.log('getFilterSections 154 - about to call get single filter option. tabOptionsFiltered: ', tabsOptionsFiltered);
+    console.log('getFilterSections 154 - about to call get single filter option. initialTabsOptions: ', initialTabsOptions);
 
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
