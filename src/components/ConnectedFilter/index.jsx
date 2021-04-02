@@ -246,7 +246,7 @@ class ConnectedFilter extends React.Component {
     } else {
       processedTabsOptions = sortTabsOptions(processedTabsOptions);
     }
-
+    console.log('249 processed dtabs options: ', processedTabsOptions);
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
     console.log('bouta call getFilterSections with this.state.filterStatusArray: ', this.state.filterStatusArray);
