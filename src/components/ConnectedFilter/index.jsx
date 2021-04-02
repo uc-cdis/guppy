@@ -148,6 +148,7 @@ class ConnectedFilter extends React.Component {
       return { title, fields };
     });
     console.log('returning new tabs: ', newTabs);
+    newTabs = Object.assign({}, newTabs);
     return newTabs;
   }
 
@@ -172,6 +173,10 @@ class ConnectedFilter extends React.Component {
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
     }
+    console.log('about to call updateCountsInInitialTabsOptions with this.initialTabsOptions: ', this.initialTabsOptions);
+    console.log('processedTabsOptions, ', processedTabsOptions);
+    console.log('filtersToDisplay, ', filtersToDisplay);
+
 
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
