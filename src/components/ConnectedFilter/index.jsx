@@ -249,9 +249,7 @@ class ConnectedFilter extends React.Component {
     }
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
-
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
         this.props.guppyConfig, this.arrayFields);
@@ -261,6 +259,7 @@ class ConnectedFilter extends React.Component {
         <FilterList
           key={index}
           sections={sections}
+          hideEmptyFilterSection={this.props.hideEmptyFilterSection}
           tierAccessLimit={this.props.tierAccessLimit}
           lockedTooltipMessage={this.props.lockedTooltipMessage}
           disabledTooltipMessage={this.props.disabledTooltipMessage}
@@ -335,6 +334,7 @@ ConnectedFilter.propTypes = {
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
   userFilterFromURL: PropTypes.object,
+  hideEmptyFilterSection: PropTypes.bool,
 };
 
 ConnectedFilter.defaultProps = {
@@ -352,6 +352,7 @@ ConnectedFilter.defaultProps = {
   hideZero: false,
   hidden: false,
   userFilterFromURL: {},
+  hideEmptyFilterSection: false,
 };
 
 export default ConnectedFilter;
