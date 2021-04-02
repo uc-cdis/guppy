@@ -148,7 +148,6 @@ class ConnectedFilter extends React.Component {
       return { title, fields };
     });
     console.log('returning new tabs: ', newTabs);
-    newTabs = { ...newTabs };
     return newTabs;
   }
 
