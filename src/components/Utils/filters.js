@@ -173,8 +173,6 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
 };
 
 export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
-  console.log('userFilter: ', userFilter);
-  console.log('tabs: ', tabs);
   // Converts filter-applied form to filter-displayed form
   const filteringFields = Object.keys(userFilter);
   const filterStatusArray = tabs.map(() => ([]));
@@ -201,7 +199,6 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
       }
     }
   }
-  console.log('returning ', filterStatusArray);
 
   return filterStatusArray;
 };
