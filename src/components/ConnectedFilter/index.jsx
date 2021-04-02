@@ -140,12 +140,15 @@ class ConnectedFilter extends React.Component {
   }
 
   getTabsWithSearchFields() {
-    return this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+    console.log('inside the new function getTabsWithSearchFields');
+    let newTabs = this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
       if (searchFields) {
         return { title, fields: searchFields.concat(fields) };
       }
       return { title, fields };
     });
+    console.log('returning new tabs: ', newTabs);
+    return newTabs;
   }
 
   setFilter(filter) {
