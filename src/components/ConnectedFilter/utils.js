@@ -12,7 +12,6 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
-  console.log(`there was no error parsing field options. ${JSON.stringify(histogramResult)}`);
   // if this is for range slider
   if (histogramResult.histogram.length === 1 && (typeof histogramResult.histogram[0].key) !== 'string') {
     const rangeOptions = histogramResult.histogram.map((item) => {
@@ -107,8 +106,6 @@ export const getFilterSections = (
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
 ) => {
   let searchFieldSections = [];
-  console.log('inside getFilterSections with fields: ', fields, ' and fieldMapping :', fieldMapping);
-  console.log('getFilterSections searchFields: ', searchFields);
 
   if (searchFields) {
     // Process searchFields first -- searchFields are special filters that allow the user
@@ -146,9 +143,7 @@ export const getFilterSections = (
 
   const sections = fields.map((field) => {
     const overrideName = fieldMapping.find((entry) => (entry.field === field));
-    console.log('overriedName: ', overrideName);
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
-    console.log('in the sections loop about to work on field: ', field);
 
     const tabsOptionsFiltered = { ...tabsOptions[field] };
     if (Object.keys(adminAppliedPreFilters).includes(field)) {
@@ -156,15 +151,11 @@ export const getFilterSections = (
         (x) => adminAppliedPreFilters[field].selectedValues.includes(x.key),
       );
     }
-    console.log('getFilterSections 154 - about to call get single filter option. tabOptionsFiltered: ', tabsOptionsFiltered);
-    console.log('getFilterSections 154 - about to call get single filter option. initialTabsOptions: ', initialTabsOptions);
 
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
     );
-
-    console.log('getFilterSections 161');
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);
 

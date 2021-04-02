@@ -140,14 +140,12 @@ class ConnectedFilter extends React.Component {
   }
 
   getTabsWithSearchFields() {
-    console.log('inside the new function getTabsWithSearchFields');
     let newTabs = this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
       if (searchFields) {
         return { title, fields: searchFields.concat(fields) };
       }
       return { title, fields };
     });
-    console.log('returning new tabs: ', newTabs);
     return newTabs;
   }
 
@@ -172,9 +170,6 @@ class ConnectedFilter extends React.Component {
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
     }
-    console.log('about to call updateCountsInInitialTabsOptions with this.initialTabsOptions: ', this.initialTabsOptions);
-    console.log('processedTabsOptions, ', processedTabsOptions);
-    console.log('filtersToDisplay, ', filtersToDisplay);
 
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
@@ -252,15 +247,10 @@ class ConnectedFilter extends React.Component {
     } else {
       processedTabsOptions = sortTabsOptions(processedTabsOptions);
     }
-    console.log('249 processed dtabs options: ', processedTabsOptions);
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    console.log('bouta call getFilterSections with this.state.filterStatusArray: ', this.state.filterStatusArray);
-    console.log('253 built a fieldMapping: ', fieldMapping);
-    console.log('filtersToDisplay: ', filtersToDisplay);
 
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
-      console.log('260. working on tab with fields: ', fields, ' and searchFields: ', searchFields, ' of index ', index);
 
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
