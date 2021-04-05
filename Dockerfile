@@ -2,6 +2,7 @@ FROM quay.io/cdis/ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# need libcap2-bin so we can do setcap later
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
