@@ -166,6 +166,7 @@ export const queryGuppyForRawData = (
   accessibility = 'all',
   signal,
   format,
+  withTotalCount = false,
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort || format) {
@@ -175,11 +176,20 @@ export const queryGuppyForRawData = (
   if (gqlFilter || sort || format) {
     dataTypeLine = `${type} (accessibility: ${accessibility}, offset: ${offset}, first: ${size}, ${format ? 'format: $format, ' : ''}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
   }
+  let totalCountFragment = '';
+  if (withTotalCount) {
+    totalCountFragment = `_aggregation {
+      ${type} (${gqlFilter ? 'filter: $filter, ' : ''}accessibility: ${accessibility}) {
+        _totalCount
+      }
+    }`;
+  }
   const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
   const query = `${queryLine}
     ${dataTypeLine}
       ${processedFields.join('\n')}
     }
+    ${totalCountFragment}
   }`;
   const queryBody = { query };
   queryBody.variables = {};
@@ -308,6 +318,7 @@ export const askGuppyForRawData = (
   accessibility = 'all',
   signal,
   format,
+  withTotalCount,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawData(
@@ -321,6 +332,7 @@ export const askGuppyForRawData = (
     accessibility,
     signal,
     format,
+    withTotalCount,
   );
 };
 
