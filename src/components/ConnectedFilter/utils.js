@@ -1,5 +1,5 @@
 import flat from 'flat';
-import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
+import { queryGuppyForRawData } from '../Utils/queries';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
@@ -60,7 +60,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
         },
       };
     }
-    queryGuppyForRawDataAndTotalCounts(
+    queryGuppyForRawData(
       guppyConfig.path,
       guppyConfig.type,
       [field],
@@ -69,6 +69,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       offset,
       NUM_SEARCH_OPTIONS,
       'accessible',
+      true,
     )
       .then((res) => {
         if (!res.data || !res.data[guppyConfig.type]) {
