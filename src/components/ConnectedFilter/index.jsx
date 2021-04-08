@@ -33,13 +33,14 @@ class ConnectedFilter extends React.Component {
       : filterConfigsFields;
 
     this.initialTabsOptions = {};
-
+    let initialFilter = this.props.adminAppliedPreFilters;
     let filterStatusArray = [];
     let filtersApplied = {};
     if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
       filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL,
         this.getTabsWithSearchFields());
       filtersApplied = this.props.userFilterFromURL;
+      initialFilter = mergeFilters(this.props.initialFilterFromURL, this.props.adminAppliedPreFilters);
     }
 
     this.state = {
@@ -48,7 +49,7 @@ class ConnectedFilter extends React.Component {
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      filter: { ...this.props.adminAppliedPreFilters },
+      filter: { ...initialFilter },
       filtersApplied,
       filterStatusArray,
     };
