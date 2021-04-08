@@ -50,6 +50,7 @@ class GuppyWrapper extends React.Component {
     let initialFilter = this.props.adminAppliedPreFilters;
     if(Object.keys(this.props.initialFilterFromURL).length > 0) {
       initialFilter = mergeFilters(this.props.initialFilterFromURL, this.props.adminAppliedPreFilters);
+      console.log('initialFilter GuppyWrapper: ', initialFilter);
     }
 
     // to avoid asynchronizations, we store another filter as private var
@@ -244,6 +245,8 @@ class GuppyWrapper extends React.Component {
       this.setState({ gettingDataFromGuppy: false });
       return Promise.resolve({ data: [], totalCount: 0 });
     }
+
+    console.log('inside getDataFromGuppy with: ', this.filter);
 
     // sub aggregations -- for DAT
     if (this.props.guppyConfig.mainField) {
