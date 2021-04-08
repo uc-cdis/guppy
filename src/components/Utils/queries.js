@@ -324,7 +324,7 @@ export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConf
 export const downloadDataFromGuppy = (
   path,
   type,
-  totalCount,
+  size,
   {
     fields,
     filter,
@@ -334,7 +334,7 @@ export const downloadDataFromGuppy = (
 ) => {
   const SCROLL_SIZE = 10000;
   const JSON_FORMAT = (format === 'json' || format === undefined);
-  if (totalCount > SCROLL_SIZE) {
+  if (size > SCROLL_SIZE) {
     const queryBody = { type, accessibility: 'accessible' };
     if (fields) queryBody.fields = fields;
     if (filter) queryBody.filter = getGQLFilter(filter);
@@ -347,7 +347,7 @@ export const downloadDataFromGuppy = (
       body: JSON.stringify(queryBody),
     }).then((res) => (JSON_FORMAT ? res.json() : jsonToFormat(res.json(), format)));
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, format)
+  return askGuppyForRawData(path, type, fields, filter, sort, 0, size, format)
     .then((res) => {
       if (res && res.data && res.data[type]) {
         return JSON_FORMAT ? res.data[type] : jsonToFormat(res.data[type], format);
