@@ -41,7 +41,6 @@ class ConnectedFilter extends React.Component {
         this.getTabsWithSearchFields());
       filtersApplied = this.props.userFilterFromURL;
       initialFilter = mergeFilters(this.props.userFilterFromURL, this.props.adminAppliedPreFilters);
-      console.log('set initialFilter in connected filter to ', initialFilter);
     }
 
     this.state = {

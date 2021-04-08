@@ -265,7 +265,6 @@ export const askGuppyAboutAllFieldsAndOptions = (
   path, type, fields, accessibility, filter,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  console.log('inside askGuppyAboutAllFieldsAndOptions with ', filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
@@ -273,9 +272,7 @@ export const askGuppyAboutAllFieldsAndOptions = (
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
 export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
-  console.log('inside askGuppyForAggregationData with ', filter);
   const gqlFilter = getGQLFilter(filter);
-  console.log('and gqlFilter: ', gqlFilter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
