@@ -262,11 +262,6 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (path, type, fields, filter) => {
-  const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter);
-};
-
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
