@@ -162,7 +162,6 @@ class GuppyWrapper extends React.Component {
         fields: this.state.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
-        accessibility: this.state.accessibility,
         format,
       },
     );
@@ -186,7 +185,6 @@ class GuppyWrapper extends React.Component {
         fields: targetFields,
         sort,
         filter: this.state.filter,
-        accessibility: this.state.accessibility,
       },
     );
   }

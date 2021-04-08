@@ -329,18 +329,16 @@ export const downloadDataFromGuppy = (
     fields,
     filter,
     sort,
-    accessibility,
     format,
   },
 ) => {
   const SCROLL_SIZE = 10000;
   const JSON_FORMAT = (format === 'json' || format === undefined);
   if (totalCount > SCROLL_SIZE) {
-    const queryBody = { type };
+    const queryBody = { type, accessibility: 'accessible' };
     if (fields) queryBody.fields = fields;
     if (filter) queryBody.filter = getGQLFilter(filter);
     if (sort) queryBody.sort = sort;
-    if (typeof accessibility !== 'undefined') queryBody.accessibility = accessibility;
     return fetch(`${path}${downloadEndpoint}`, {
       method: 'POST',
       headers: {
