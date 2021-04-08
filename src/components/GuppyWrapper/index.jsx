@@ -286,7 +286,6 @@ class GuppyWrapper extends React.Component {
       sort,
       offset,
       size,
-      this.state.accessibility,
       this.controller.signal,
     ).then((res) => {
       if (!res || !res.data) {
