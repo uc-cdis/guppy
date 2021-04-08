@@ -62,7 +62,6 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      this.state.accessibility,
       this.state.filter,
     )
       .then((res) => {
@@ -125,7 +124,6 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.type,
       this.state.allFields,
       mergedFilterResults,
-      this.state.accessibility,
       this.controller.signal,
     )
       .then((res) => {

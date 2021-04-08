@@ -23,15 +23,10 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc, signal) => {
-  let accessibility = acc;
-  if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
-    accessibility = 'all';
-  }
-
+const queryGuppyForAggs = (path, type, fields, gqlFilter, signal) => {
   const query = `query {
     _aggregation {
-      ${type} (accessibility: ${accessibility}) {
+      ${type} (accessibility: all) {
         ${fields.map((field) => histogramQueryStrForEachField(field))}
       }
     }
@@ -40,7 +35,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc, signal) => {
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
-        ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
+        ${type} (filter: $filter, filterSelf: false, accessibility: all}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
         }
       }
@@ -267,19 +262,17 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility, filter,
-) => {
+export const askGuppyAboutAllFieldsAndOptions = (path, type, fields, filter) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, gqlFilter);
 };
 
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
-export const askGuppyForAggregationData = (path, type, fields, filter, accessibility, signal) => {
+export const askGuppyForAggregationData = (path, type, fields, filter, signal) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility, signal);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, signal);
 };
 
 export const askGuppyForSubAggregationData = ({
