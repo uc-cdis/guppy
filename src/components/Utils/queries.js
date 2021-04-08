@@ -87,14 +87,8 @@ const queryGuppyForSubAgg = (
   termsFields,
   missingFields,
   gqlFilter,
-  acc,
   signal,
 ) => {
-  let accessibility = acc;
-  if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
-    accessibility = 'all';
-  }
-
   const nestedAggFields = {};
   if (termsFields) {
     nestedAggFields.termsFields = termsFields;
@@ -105,7 +99,7 @@ const queryGuppyForSubAgg = (
 
   const query = `query ($nestedAggFields: JSON) {
     _aggregation {
-      ${type} (nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
+      ${type} (nestedAggFields: $nestedAggFields, accessibility: all) {
         ${nestedHistogramQueryStrForEachField(mainField, numericAggAsText)}
       }
     }
@@ -115,7 +109,7 @@ const queryGuppyForSubAgg = (
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON, $nestedAggFields: JSON) {
       _aggregation {
-        ${type} (filter: $filter, filterSelf: false, nestedAggFields: $nestedAggFields, accessibility: ${accessibility}) {
+        ${type} (filter: $filter, filterSelf: false, nestedAggFields: $nestedAggFields, accessibility: all) {
           ${nestedHistogramQueryStrForEachField(mainField, numericAggAsText)}
         }
       }
@@ -278,7 +272,6 @@ export const askGuppyForSubAggregationData = ({
   termsNestedFields,
   missedNestedFields,
   filter,
-  accessibility,
   signal,
 }) => {
   const gqlFilter = getGQLFilter(filter);
@@ -290,7 +283,6 @@ export const askGuppyForSubAggregationData = ({
     termsNestedFields,
     missedNestedFields,
     gqlFilter,
-    accessibility,
     signal,
   );
 };

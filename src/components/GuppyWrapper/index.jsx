@@ -259,7 +259,6 @@ class GuppyWrapper extends React.Component {
         this.props.guppyConfig.aggFields,
         [],
         this.filter,
-        this.state.accessibility,
         this.controller.signal,
       ).then((res) => {
         if (!res || !res.data) {
