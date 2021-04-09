@@ -156,40 +156,62 @@ export const queryGuppyForRawData = (
   format,
   withTotalCount = false,
 ) => {
-  let queryLine = 'query {';
-  if (gqlFilter || sort || format) {
-    queryLine = `query (${sort ? '$sort: JSON,' : ''}${gqlFilter ? '$filter: JSON,' : ''}${format ? '$format: Format' : ''}) {`;
-  }
-  let dataTypeLine = `${type} (accessibility: accessible, offset: ${offset}, first: ${size}, format: $format) {`;
-  if (gqlFilter || sort || format) {
-    dataTypeLine = `${type} (accessibility: accessible, offset: ${offset}, first: ${size}, ${format ? 'format: $format, ' : ''}, ${sort ? 'sort: $sort, ' : ''}${gqlFilter ? 'filter: $filter,' : ''}) {`;
-  }
-  let totalCountFragment = '';
-  if (withTotalCount) {
-    totalCountFragment = `_aggregation {
-      ${type} (${gqlFilter ? 'filter: $filter, ' : ''}accessibility: accessible) {
+  const queryArgument = [
+    sort ? '$sort: JSON' : '',
+    gqlFilter ? '$filter: JSON' : '',
+    format ? '$format: Format' : '',
+  ]
+    .filter((e) => e)
+    .join(', ');
+  const queryLine = queryArgument ? `query (${queryArgument})` : 'query';
+
+  const dataTypeArgument = [
+    'accessibility: accessible',
+    `offset: ${offset}`,
+    `first: ${size}`,
+    format && 'format: $format',
+    sort && 'sort: $sort',
+    gqlFilter && 'filter: $filter',
+  ]
+    .filter((e) => e)
+    .join(', ');
+  const dataTypeLine = `${type} (${dataTypeArgument})`;
+
+  const aggregationArgument = [
+    'accessibility: accessible',
+    gqlFilter ? 'filter: $filter' : '',
+  ]
+    .filter((e) => e)
+    .join(', ');
+  const aggregationFragment = withTotalCount
+    ? `_aggregation {
+      ${type} (${aggregationArgument}) {
         _totalCount
       }
-    }`;
-  }
+    }`
+    : '';
+
   const processedFields = fields.map((field) => rawDataQueryStrForEachField(field));
-  const query = `${queryLine}
-    ${dataTypeLine}
+  const query = `${queryLine} {
+    ${dataTypeLine} {
       ${processedFields.join('\n')}
     }
-    ${totalCountFragment}
+    ${aggregationFragment}
   }`;
-  const queryBody = { query };
-  queryBody.variables = {};
-  if (format) queryBody.variables.format = format;
-  if (gqlFilter) queryBody.variables.filter = gqlFilter;
-  if (sort) queryBody.variables.sort = sort;
+
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(queryBody),
+    body: JSON.stringify({
+      query,
+      variables: {
+        format,
+        filter: gqlFilter,
+        sort,
+      },
+    }),
     signal,
   }).then((response) => response.json())
     .catch((err) => {
