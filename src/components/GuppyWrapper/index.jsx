@@ -203,7 +203,8 @@ class GuppyWrapper extends React.Component {
   handleAskGuppyForTotalCounts(type, filter) {
     return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
-      type, filter,
+      type,
+      filter,
       this.state.accessibility,
     );
   }
