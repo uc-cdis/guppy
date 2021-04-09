@@ -178,10 +178,6 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawDataByFields({ fields, sort = [] }) {
-    let targetFields = fields;
-    if (typeof fields === 'undefined') {
-      targetFields = this.state.rawDataFields;
-    }
     return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -192,7 +188,7 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.type,
       count,
       {
-        fields: targetFields,
+        fields: fields || this.state.rawDataFields,
         sort,
         filter: this.state.filter,
       },
