@@ -35,7 +35,7 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, signal) => {
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
-        ${type} (filter: $filter, filterSelf: false, accessibility: all}) {
+        ${type} (filter: $filter, filterSelf: false, accessibility: all) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
         }
       }
