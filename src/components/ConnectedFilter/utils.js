@@ -68,7 +68,6 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       undefined,
       offset,
       NUM_SEARCH_OPTIONS,
-      'accessible',
       true,
     )
       .then((res) => {

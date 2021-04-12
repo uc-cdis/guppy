@@ -154,18 +154,22 @@ class GuppyWrapper extends React.Component {
       // eslint-disable-next-line no-console
       console.error(`Invalid value ${format} found for arg format!`);
     }
-    return downloadDataFromGuppy(
+    return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.totalCount,
+      this.state.filter,
+      'accessible',
+    ).then((count) => downloadDataFromGuppy(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      count,
       {
         fields: this.state.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
-        accessibility: this.state.accessibility,
         format,
       },
-    );
+    ));
   }
 
   /**
@@ -174,21 +178,21 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawDataByFields({ fields, sort = [] }) {
-    let targetFields = fields;
-    if (typeof fields === 'undefined') {
-      targetFields = this.state.rawDataFields;
-    }
-    return downloadDataFromGuppy(
+    return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.totalCount,
+      this.state.filter,
+      'accessible',
+    ).then((count) => downloadDataFromGuppy(
+      this.props.guppyConfig.path,
+      this.props.guppyConfig.type,
+      count,
       {
-        fields: targetFields,
+        fields: fields || this.state.rawDataFields,
         sort,
         filter: this.state.filter,
-        accessibility: this.state.accessibility,
       },
-    );
+    ));
   }
 
   /**
@@ -199,7 +203,8 @@ class GuppyWrapper extends React.Component {
   handleAskGuppyForTotalCounts(type, filter) {
     return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
-      type, filter,
+      type,
+      filter,
       this.state.accessibility,
     );
   }
@@ -215,17 +220,16 @@ class GuppyWrapper extends React.Component {
       this.props.guppyConfig.path,
       type,
       filter,
-      this.state.accessibility,
-    )
-      .then((count) => downloadDataFromGuppy(
-        this.props.guppyConfig.path,
-        type,
-        count,
-        {
-          fields,
-          filter,
-        },
-      ));
+      'accessible',
+    ).then((count) => downloadDataFromGuppy(
+      this.props.guppyConfig.path,
+      type,
+      count,
+      {
+        fields,
+        filter,
+      },
+    ));
   }
 
   handleAccessLevelUpdate(accessLevel) {
@@ -259,7 +263,6 @@ class GuppyWrapper extends React.Component {
         this.props.guppyConfig.aggFields,
         [],
         this.filter,
-        this.state.accessibility,
         this.controller.signal,
       ).then((res) => {
         if (!res || !res.data) {
@@ -287,7 +290,6 @@ class GuppyWrapper extends React.Component {
       sort,
       offset,
       size,
-      this.state.accessibility,
       this.controller.signal,
     ).then((res) => {
       if (!res || !res.data) {
