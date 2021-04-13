@@ -20,6 +20,7 @@ import {
   updateCountsInInitialTabsOptions,
   sortTabsOptions,
   mergeTabOptions,
+  buildFilterStatusForURLFilter,
 } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
@@ -32,14 +33,25 @@ class ConnectedFilter extends React.Component {
       : filterConfigsFields;
 
     this.initialTabsOptions = {};
+    let initialFilter = this.props.adminAppliedPreFilters;
+    let filterStatusArray = [];
+    let filtersApplied = {};
+    if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
+      filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL,
+        this.getTabsWithSearchFields());
+      filtersApplied = this.props.userFilterFromURL;
+      initialFilter = mergeFilters(this.props.userFilterFromURL, this.props.adminAppliedPreFilters);
+    }
+
     this.state = {
       allFields,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
-      filter: { ...this.props.adminAppliedPreFilters },
-      filtersApplied: {},
+      filter: { ...initialFilter },
+      filtersApplied,
+      filterStatusArray,
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
@@ -104,7 +116,11 @@ class ConnectedFilter extends React.Component {
   handleFilterChange(filterResults) {
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
-    this.setState({ filtersApplied: mergedFilterResults });
+
+    const newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults,
+      this.getTabsWithSearchFields());
+
+    this.setState({ filtersApplied: mergedFilterResults, filterStatusArray: newFilterStatusArray });
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
@@ -124,6 +140,16 @@ class ConnectedFilter extends React.Component {
     }
   }
 
+  getTabsWithSearchFields() {
+    const newTabs = this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+      if (searchFields) {
+        return { title, fields: searchFields.concat(fields) };
+      }
+      return { title, fields };
+    });
+    return newTabs;
+  }
+
   setFilter(filter) {
     if (this.filterGroupRef.current) {
       this.filterGroupRef.current.resetFilter();
@@ -139,6 +165,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    const filtersToDisplay = this.state.filtersApplied;
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -148,12 +175,12 @@ class ConnectedFilter extends React.Component {
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
       processedTabsOptions,
-      this.state.filtersApplied,
+      filtersToDisplay,
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
 
-    if (Object.keys(this.state.filtersApplied).length) {
+    if (Object.keys(filtersToDisplay).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
       const unselectedTabsOptions = {};
@@ -166,9 +193,9 @@ class ConnectedFilter extends React.Component {
           return;
         }
         processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
-          if (this.state.filtersApplied[`${opt}`]
-          && this.state.filtersApplied[`${opt}`].selectedValues
-          && this.state.filtersApplied[`${opt}`].selectedValues.includes(entry.key)) {
+          if (filtersToDisplay[`${opt}`]
+          && filtersToDisplay[`${opt}`].selectedValues
+          && filtersToDisplay[`${opt}`].selectedValues.includes(entry.key)) {
             if (!selectedTabsOptions[`${opt}`]) {
               selectedTabsOptions[`${opt}`] = {};
             }
@@ -200,10 +227,10 @@ class ConnectedFilter extends React.Component {
         allSearchFields = allSearchFields.concat(tab.searchFields);
       });
       allSearchFields.forEach((field) => {
-        if (this.state.filtersApplied[`${field}`]) {
-          const { selectedValues } = this.state.filtersApplied[`${field}`];
+        if (filtersToDisplay[`${field}`]) {
+          const { selectedValues } = filtersToDisplay[`${field}`];
           if (selectedValues) {
-            this.state.filtersApplied[`${field}`].selectedValues.forEach((val) => {
+            filtersToDisplay[`${field}`].selectedValues.forEach((val) => {
               if (!selectedTabsOptions[`${field}`]) {
                 selectedTabsOptions[`${field}`] = {};
               }
@@ -221,24 +248,27 @@ class ConnectedFilter extends React.Component {
     } else {
       processedTabsOptions = sortTabsOptions(processedTabsOptions);
     }
-
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
-      <FilterList
-        key={index}
-        sections={
-          getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters,
-            this.props.guppyConfig, this.arrayFields)
-        }
-        hideEmptyFilterSection={this.props.hideEmptyFilterSection}
-        tierAccessLimit={this.props.tierAccessLimit}
-        lockedTooltipMessage={this.props.lockedTooltipMessage}
-        disabledTooltipMessage={this.props.disabledTooltipMessage}
-        arrayFields={this.arrayFields}
-      />
-    ));
+    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
+      const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
+        this.state.initialAggsData, this.state.adminAppliedPreFilters,
+        this.props.guppyConfig, this.arrayFields);
+      const filterStatus = this.state.filterStatusArray
+        ? this.state.filterStatusArray[index] : null;
+      return (
+        <FilterList
+          key={index}
+          sections={sections}
+          hideEmptyFilterSection={this.props.hideEmptyFilterSection}
+          tierAccessLimit={this.props.tierAccessLimit}
+          lockedTooltipMessage={this.props.lockedTooltipMessage}
+          disabledTooltipMessage={this.props.disabledTooltipMessage}
+          arrayFields={this.arrayFields}
+          filterStatusFromParent={filterStatus}
+        />
+      );
+    });
     return tabs;
   }
 
@@ -259,12 +289,7 @@ class ConnectedFilter extends React.Component {
     }
     // If there are any search fields, insert them at the top of each tab's fields.
     const filterConfig = {
-      tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
-        if (searchFields) {
-          return { title, fields: searchFields.concat(fields) };
-        }
-        return { title, fields };
-      }),
+      tabs: this.getTabsWithSearchFields(),
     };
     return (
       <FilterGroup
@@ -274,6 +299,8 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
+        filterStatusFromParent={this.state.filterStatusArray}
+        filterResultsFromParent={this.state.filtersApplied}
       />
     );
   }
@@ -307,6 +334,7 @@ ConnectedFilter.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
+  userFilterFromURL: PropTypes.object,
   hideEmptyFilterSection: PropTypes.bool,
 };
 
@@ -324,6 +352,7 @@ ConnectedFilter.defaultProps = {
   accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
+  userFilterFromURL: {},
   hideEmptyFilterSection: false,
 };
 
