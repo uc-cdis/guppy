@@ -29,6 +29,12 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, signal) => {
       ${type} (accessibility: all) {
         ${fields.map((field) => histogramQueryStrForEachField(field))}
       }
+      accessible: ${type} (accessibility: accessible) {
+        _totalCount
+      }
+      all: ${type} (accessibility: all) {
+        _totalCount
+      }
     }
   }`;
   const queryBody = { query };
@@ -37,6 +43,12 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, signal) => {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: all) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
+        }
+        accessible: ${type} (filter: $filter, accessibility: accessible) {
+          _totalCount
+        }
+        all: ${type} (filter: $filter, accessibility: all) {
+          _totalCount
         }
       }
     }`;
