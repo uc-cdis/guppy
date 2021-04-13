@@ -70,6 +70,8 @@ class ConnectedFilter extends React.Component {
         }
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
+          res.data._aggregation.accessible._totalCount,
+          res.data._aggregation.all._totalCount,
           this.state.adminAppliedPreFilters,
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
@@ -91,11 +93,16 @@ class ConnectedFilter extends React.Component {
     this._isMounted = false;
   }
 
-  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+  handleReceiveNewAggsData(
+    receivedAggsData,
+    accessibleCount,
+    totalCount,
+    filterResults,
+  ) {
     if (this._isMounted) this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData);
+      this.props.onReceiveNewAggsData(resultAggsData, accessibleCount, totalCount);
     }
   }
 
@@ -128,6 +135,8 @@ class ConnectedFilter extends React.Component {
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
+          res.data._aggregation.accessible._totalCount,
+          res.data._aggregation.all._totalCount,
           mergedFilterResults,
         );
       });
