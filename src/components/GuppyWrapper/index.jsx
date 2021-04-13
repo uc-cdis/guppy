@@ -106,14 +106,11 @@ class GuppyWrapper extends React.Component {
     this._isMounted = false;
   }
 
-  handleReceiveNewAggsData(aggsData) {
+  handleReceiveNewAggsData(aggsData, accessibleCount, totalCount) {
     if (this.props.onReceiveNewAggsData) {
       this.props.onReceiveNewAggsData(aggsData, this.filter);
     }
-    if (this._isMounted) {
-      const totalCount = aggsData.project_id.histogram[0].count;
-      this.setState({ aggsData, totalCount });
-    }
+    if (this._isMounted) this.setState({ aggsData, accessibleCount, totalCount });
   }
 
   handleFilterChange(userFilter, accessibility) {
