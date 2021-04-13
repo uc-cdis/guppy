@@ -174,6 +174,7 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
 
 export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
   // Converts filter-applied form to filter-displayed form
+  // TODO: add support for search filters
   const filteringFields = Object.keys(userFilter);
   const filterStatusArray = tabs.map(() => ([]));
 
