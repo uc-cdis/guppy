@@ -60,6 +60,7 @@ class GuppyWrapper extends React.Component {
       aggsData: {},
       filter: { ...initialFilter },
       rawData: [],
+      accessibleCount: 0,
       totalCount: 0,
       allFields: [],
       rawDataFields: [],
@@ -318,6 +319,7 @@ class GuppyWrapper extends React.Component {
             filter: this.state.filter,
             filterConfig: this.props.filterConfig,
             rawData: this.state.rawData, // raw data (with current filter applied)
+            accessibleCount: this.state.accessibleCount,
             totalCount: this.state.totalCount, // total count of raw data (current filter applied)
             fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
             downloadRawData: this.handleDownloadRawData.bind(this),
