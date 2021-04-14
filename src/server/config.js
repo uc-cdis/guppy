@@ -25,6 +25,7 @@ const config = {
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
+    missingDataInFilters: typeof inputConfig.missing_data_display_in_filters === 'undefined' ? true : inputConfig.missing_data_display_in_filters,
   },
   port: 80,
   path: '/graphql',

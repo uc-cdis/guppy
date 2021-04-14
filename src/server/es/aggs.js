@@ -554,7 +554,9 @@ export const textAggregation = async (
   let missingAlias = {};
   // don't add missing alias to numeric field by default
   // since the value of missing alias is a string
-  if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
+  if (config.esConfig.aggregationIncludeMissingData
+    && !isNumericField
+    && config.esConfig.missingDataInFilters) {
     missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
@@ -652,7 +654,8 @@ export const textAggregation = async (
   finalResults = finalResults.sort((e1, e2) => e2.count - e1.count);
 
   // make the missing data bucket to the bottom of the list
-  if (config.esConfig.aggregationIncludeMissingData) {
+  if (config.esConfig.aggregationIncludeMissingData
+    && config.esConfig.missingDataInFilters) {
     const missingDataIndex = finalResults
       .findIndex((b) => b.key === config.esConfig.missingDataAlias);
     const missingDataItem = finalResults.find((b) => b.key === config.esConfig.missingDataAlias);

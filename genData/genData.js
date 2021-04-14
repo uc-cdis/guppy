@@ -96,7 +96,7 @@ async function run() {
     const dCopy = { ...d };
     Object.keys(dCopy).forEach((key) => {
       if (fieldValues[key]) {
-        const index = getRandomInt(0, fieldValues[key].length - 1);
+        const index = getRandomInt(0, fieldValues[key].length);
         dCopy[key] = fieldValues[key][index];
       } else {
         switch (schema.items.properties[key].rawType) {
