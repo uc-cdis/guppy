@@ -124,13 +124,6 @@ export const updateCountsInInitialTabsOptions = (
   return updatedTabsOptions;
 };
 
-function sortCountThenAlpha(a, b) {
-  if (a.count === b.count) {
-    return a.key < b.key ? -1 : 1;
-  }
-  return b.count - a.count;
-}
-
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
   const sortedTabsOptions = { ...tabsOptions };
@@ -138,7 +131,7 @@ export const sortTabsOptions = (tabsOptions) => {
     const field = fields[x];
 
     const optionsForThisField = sortedTabsOptions[field].histogram;
-    optionsForThisField.sort(sortCountThenAlpha);
+    optionsForThisField.sort((a, b) => (a.key > b.key ? 1 : -1));
     sortedTabsOptions[field].histogram = optionsForThisField;
   }
   return sortedTabsOptions;

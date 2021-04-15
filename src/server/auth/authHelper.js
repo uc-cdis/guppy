@@ -52,8 +52,8 @@ export class AuthHelper {
     return outOfScopeResourceList;
   }
 
-  applyAccessibleFilter(filter) {
-    const accessiblePart = buildFilterWithResourceList(this._accessibleResourceList);
+  applyAccessibleFilter(filter, skipUserAuthz=false) {
+    const accessiblePart = (!skipUserAuthz ? buildFilterWithResourceList(this._accessibleResourceList) : null);
     const appliedFilter = addTwoFilters(filter, accessiblePart);
     return appliedFilter;
   }
