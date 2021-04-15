@@ -13,7 +13,9 @@ const downloadRouter = async (req, res, next) => {
   } = req.body;
 
   log.debug('[download] ', JSON.stringify(req.body, null, 4));
-  const esIndex = esInstance.getESIndexByType(type);
+  const esIndexConfig = esInstance.getESIndexConfigByType(type);
+  const tierAccessLevel = (config.tierAccessLevel
+    ? config.tierAccessLevel : esIndexConfig.tier_access_level);
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
@@ -22,14 +24,14 @@ const downloadRouter = async (req, res, next) => {
   try {
     let appliedFilter;
     /**
-     * Tier acces strategy for download endpoint:
-     * 1. if data commons is secure, add auth filter layer onto filter
-     * 2. if data commons is regular:
+     * Tier access strategy for download endpoint:
+     * 1. if the data commons or the index is private, add auth filter layer onto filter
+     * 2. if the data commons or the index is regular:
      *   a. if request contains out-of-access resource, return 401
      *   b. if request contains only accessible resouces, return response
-     * 3. if data commons is private, always return reponse without any auth check
+     * 3. if the data commons or the index is libre, always return reponse without any auth check
      */
-    switch (config.tierAccessLevel) {
+    switch (tierAccessLevel) {
       case 'private': {
         appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         break;
@@ -39,7 +41,7 @@ const downloadRouter = async (req, res, next) => {
           appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-            esIndex, type, filter,
+            esIndexConfig.index, type, filter,
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
@@ -57,13 +59,14 @@ const downloadRouter = async (req, res, next) => {
         break;
       }
       default:
-        throw new Error(`Invalid TIER_ACCESS_LEVEL "${config.tierAccessLevel}"`);
+        throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
     const data = await esInstance.downloadData({
-      esIndex, esType: type, filter: appliedFilter, sort, fields,
+      esIndex: esIndexConfig.index, esType: type, filter: appliedFilter, sort, fields,
     });
     res.send(data);
   } catch (err) {
+    log.error(err);
     next(err);
   }
   return 0;
