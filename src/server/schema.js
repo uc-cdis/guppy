@@ -239,7 +239,7 @@ const getNumberHistogramSchema = (accessType) => `
   `;
 
 const getTextHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' )) + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
       histogram: [BucketsForNestedStringAgg]
     }
   `;
