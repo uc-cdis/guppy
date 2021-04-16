@@ -227,7 +227,7 @@ export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfi
 export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
 
 const getNumberHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' )) + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
       histogram(
         rangeStart: Int,
         rangeEnd: Int,
