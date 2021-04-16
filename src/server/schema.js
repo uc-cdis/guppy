@@ -213,7 +213,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
         }
         return `
-    ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix[esConfigElement.tier_access_level] : '')) + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
+    ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix[esConfigElement.tier_access_level] : '') + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
 }`;
     }
