@@ -26,7 +26,7 @@ const downloadRouter = async (req, res, next) => {
     /**
      * Tier access strategy for download endpoint:
      * 1. if the data commons or the index is private, add auth filter layer onto filter
-     * 2. if the data commons or the index is regular:
+     * 2. if the data commons or the index is regular or granular:
      *   a. if request contains out-of-access resource, return 401
      *   b. if request contains only accessible resouces, return response
      * 3. if the data commons or the index is libre, always return reponse without any auth check
@@ -36,7 +36,8 @@ const downloadRouter = async (req, res, next) => {
         appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         break;
       }
-      case 'regular': {
+      case 'regular' : 
+      case 'granular' : {
         if (accessibility === 'accessible') {
           appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         } else {

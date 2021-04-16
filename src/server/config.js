@@ -62,7 +62,7 @@ if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
 
-const allowedTierAccessLevels = ['private', 'regular', 'libre'];
+const allowedTierAccessLevels = ['private', 'regular', 'granular', 'libre'];
 
 if (process.env.TIER_ACCESS_LEVEL) {
   if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
