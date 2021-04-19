@@ -1,5 +1,4 @@
 /* eslint react/forbid-prop-types: 0 */
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -22,10 +21,7 @@ class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
 
-    const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
-    const allFields = props.accessibleFieldCheckList
-      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
-      : filterConfigsFields;
+    const allFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const initialFilter = mergeFilters(
       props.initialAppliedFilters,
       props.adminAppliedPreFilters,
@@ -171,8 +167,7 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions,
       processedTabsOptions,
       this.state.filtersApplied,
-      // for tiered access filters
-      this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
+      [],
     );
 
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
@@ -262,7 +257,6 @@ ConnectedFilter.propTypes = {
   initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
-  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
   filterComponents: PropTypes.shape({
@@ -283,7 +277,6 @@ ConnectedFilter.defaultProps = {
   initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
-  accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
 };
