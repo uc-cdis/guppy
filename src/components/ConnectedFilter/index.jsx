@@ -47,9 +47,6 @@ class ConnectedFilter extends React.Component {
   componentDidMount() {
     this._isMounted = true;
 
-    if (this.props.onUpdateAccessLevel) {
-      this.props.onUpdateAccessLevel(this.state.accessibility);
-    }
     if (this.props.onFilterChange) {
       this.props.onFilterChange(this.state.filter, this.state.accessibility);
     }
@@ -252,7 +249,6 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
-  onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
   initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
@@ -272,7 +268,6 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: (data) => (data),
-  onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
   initialAppliedFilters: {},
   lockedTooltipMessage: '',
