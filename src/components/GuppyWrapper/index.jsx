@@ -99,7 +99,7 @@ class GuppyWrapper extends React.Component {
     if (this._isMounted) this.setState({ aggsData, accessibleCount, totalCount });
   }
 
-  handleFilterChange(userFilter, accessibility) {
+  handleFilterChange(userFilter) {
     if (this._isMounted) {
       this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     }
@@ -112,7 +112,7 @@ class GuppyWrapper extends React.Component {
     }
     this.filter = filter;
     if (this._isMounted) {
-      this.setState({ filter, accessibility }, () => {
+      this.setState({ filter }, () => {
         this.controller.abort();
         this.controller = new AbortController();
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);

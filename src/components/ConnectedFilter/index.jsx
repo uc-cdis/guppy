@@ -48,7 +48,7 @@ class ConnectedFilter extends React.Component {
     this._isMounted = true;
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(this.state.filter, this.state.accessibility);
+      this.props.onFilterChange(this.state.filter);
     }
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
@@ -135,7 +135,7 @@ class ConnectedFilter extends React.Component {
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
+      this.props.onFilterChange(mergedFilterResults);
     }
   }
 
