@@ -8,7 +8,7 @@ export const getFilterGroupConfig = (filterConfig) => ({
   })),
 });
 
-const getSingleFilterOption = (histogramResult, initHistogramRes, guppyConfig) => {
+const getSingleFilterOption = (histogramResult, initHistogramRes, explorerHideDataFilter) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -29,10 +29,11 @@ const getSingleFilterOption = (histogramResult, initHistogramRes, guppyConfig) =
     return rangeOptions;
   }
   let rawtextOptions = histogramResult.histogram;
-  // hide guppyConfig.explorerHideDataFilter from filters
-  if (guppyConfig && guppyConfig.explorerHideDataFilter) {
+  // hide explorerHideDataFilter from filters
+  // explorerHideDataFilter added to guppyConfig in data-portal
+  if (explorerHideDataFilter) {
     rawtextOptions = histogramResult.histogram
-      .filter((item) => item.key !== guppyConfig.explorerHideDataFilter);
+      .filter((item) => item.key !== explorerHideDataFilter);
   }
   const textOptions = rawtextOptions.map((item) => ({
     text: item.key,
@@ -134,7 +135,7 @@ export const getFilterSections = (
         selectedOptions = getSingleFilterOption(
           tabsOptionsFiltered,
           initialTabsOptions ? initialTabsOptions[field] : undefined,
-          guppyConfig,
+          guppyConfig.explorerHideDataFilter,
         );
       }
 
@@ -161,7 +162,7 @@ export const getFilterSections = (
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
-      guppyConfig,
+      guppyConfig.explorerHideDataFilter,
     );
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);
