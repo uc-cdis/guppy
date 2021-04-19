@@ -216,10 +216,6 @@ class GuppyWrapper extends React.Component {
     ));
   }
 
-  handleAccessLevelUpdate(accessLevel) {
-    if (this._isMounted) this.setState({ accessibility: accessLevel });
-  }
-
   /**
    * This function get data with current filter (if any),
    * and update this.state.rawData and this.state.totalCount
@@ -317,7 +313,6 @@ class GuppyWrapper extends React.Component {
             onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
             onFilterChange: this.handleFilterChange.bind(this),
             guppyConfig: this.props.guppyConfig,
-            onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
             adminAppliedPreFilters: this.props.adminAppliedPreFilters,
             initialAppliedFilters: this.props.initialAppliedFilters,
           }))
