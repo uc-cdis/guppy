@@ -267,37 +267,31 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
-    return (
-      <>
-        {
-          React.Children.map(this.props.children, (child) => React.cloneElement(child, {
-            // pass data to children
-            aggsData: this.state.aggsData,
-            aggsDataIsLoading: this.state.gettingDataFromGuppy,
-            filter: this.state.filter,
-            filterConfig: this.props.filterConfig,
-            rawData: this.state.rawData, // raw data (with current filter applied)
-            accessibleCount: this.state.accessibleCount,
-            totalCount: this.state.totalCount, // total count of raw data (current filter applied)
-            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
-            downloadRawData: this.handleDownloadRawData.bind(this),
-            downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
-            allFields: this.state.allFields,
+    return React.Children.map(this.props.children, (child) => React.cloneElement(child, {
+      // pass data to children
+      aggsData: this.state.aggsData,
+      aggsDataIsLoading: this.state.gettingDataFromGuppy,
+      filter: this.state.filter,
+      filterConfig: this.props.filterConfig,
+      rawData: this.state.rawData, // raw data (with current filter applied)
+      accessibleCount: this.state.accessibleCount,
+      totalCount: this.state.totalCount, // total count of raw data (current filter applied)
+      fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
+      downloadRawData: this.handleDownloadRawData.bind(this),
+      downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
+      allFields: this.state.allFields,
 
-            // a callback function which return total counts for any type, with any filter
-            getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
-            downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
+      // a callback function which return total counts for any type, with any filter
+      getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
+      downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
 
-            // below are just for ConnectedFilter component
-            onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
-            onFilterChange: this.handleFilterChange.bind(this),
-            guppyConfig: this.props.guppyConfig,
-            adminAppliedPreFilters: this.props.adminAppliedPreFilters,
-            initialAppliedFilters: this.props.initialAppliedFilters,
-          }))
-        }
-      </>
-    );
+      // below are just for ConnectedFilter component
+      onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
+      onFilterChange: this.handleFilterChange.bind(this),
+      guppyConfig: this.props.guppyConfig,
+      adminAppliedPreFilters: this.props.adminAppliedPreFilters,
+      initialAppliedFilters: this.props.initialAppliedFilters,
+    }));
   }
 }
 
