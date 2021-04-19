@@ -390,15 +390,10 @@ export const downloadDataFromGuppy = (
     });
 };
 
-export const askGuppyForTotalCounts = (
-  path,
-  type,
-  filter,
-  accessibility = 'all',
-) => {
+export const askGuppyForTotalCounts = (path, type, filter) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
-  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: ${accessibility}) {`;
+  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: all) {`;
   const query = `${queryLine}
     _aggregation {
       ${typeAggsLine}
@@ -444,63 +439,4 @@ export const getAllFieldsFromGuppy = (
     .catch((err) => {
       throw new Error(`Error when getting fields from guppy: ${err}`);
     });
-};
-
-export const getAccessibleResources = async (
-  path,
-  type,
-  accessibleFieldCheckList,
-) => {
-  const accessiblePromiseList = [];
-  const unaccessiblePromiseList = [];
-  accessibleFieldCheckList.forEach((accessibleField) => {
-    const fetchRequestPromise = (accessible) => {
-      const query = `query {
-        _aggregation {
-          ${type} (accessibility: ${accessible ? 'accessible' : 'unaccessible'}) {
-            ${accessibleField} {
-              histogram {
-                key
-                count
-              }
-            }
-          }
-        }
-      }`;
-      const queryBody = { query };
-
-      return fetch(`${path}${graphqlEndpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(queryBody),
-      })
-        .then((response) => response.json())
-        .then(
-          (response) => ({
-            field: accessibleField,
-            list: (response.data._aggregation[type][accessibleField]
-              .histogram.map((item) => item.key)),
-          }),
-        )
-        .catch((err) => {
-          throw new Error(`Error when getting fields from guppy: ${err}`);
-        });
-    };
-    accessiblePromiseList.push(fetchRequestPromise(true));
-    unaccessiblePromiseList.push(fetchRequestPromise(false));
-  });
-
-  const accessibleFieldObject = {};
-  const accessibleFieldResult = await Promise.all(accessiblePromiseList);
-  accessibleFieldResult.forEach((res) => {
-    accessibleFieldObject[res.field] = res.list;
-  });
-  const unaccessibleFieldObject = {};
-  const unaccessibleFieldResult = await Promise.all(unaccessiblePromiseList);
-  unaccessibleFieldResult.forEach((res) => {
-    unaccessibleFieldObject[res.field] = res.list;
-  });
-  return { accessibleFieldObject, unaccessibleFieldObject };
 };

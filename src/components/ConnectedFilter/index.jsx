@@ -1,12 +1,10 @@
 /* eslint react/forbid-prop-types: 0 */
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
 } from './utils';
-import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
   askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
@@ -22,10 +20,7 @@ class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
 
-    const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
-    const allFields = props.accessibleFieldCheckList
-      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
-      : filterConfigsFields;
+    const allFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
     const initialFilter = mergeFilters(
       props.initialAppliedFilters,
       props.adminAppliedPreFilters,
@@ -36,7 +31,6 @@ class ConnectedFilter extends React.Component {
       allFields,
       initialAggsData: {},
       receivedAggsData: {},
-      accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...initialFilter },
       filtersApplied: { ...initialFilter },
@@ -51,11 +45,8 @@ class ConnectedFilter extends React.Component {
   componentDidMount() {
     this._isMounted = true;
 
-    if (this.props.onUpdateAccessLevel) {
-      this.props.onUpdateAccessLevel(this.state.accessibility);
-    }
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(this.state.filter, this.state.accessibility);
+      this.props.onFilterChange(this.state.filter);
     }
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
@@ -142,7 +133,7 @@ class ConnectedFilter extends React.Component {
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
+      this.props.onFilterChange(mergedFilterResults);
     }
   }
 
@@ -171,8 +162,6 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions,
       processedTabsOptions,
       this.state.filtersApplied,
-      // for tiered access filters
-      this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
 
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
@@ -257,12 +246,10 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
-  onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
   initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
-  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
   filterComponents: PropTypes.shape({
@@ -278,12 +265,10 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: (data) => (data),
-  onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
   initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
-  accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
 };
