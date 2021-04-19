@@ -5,7 +5,6 @@ import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
 } from './utils';
-import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
   askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
@@ -32,7 +31,6 @@ class ConnectedFilter extends React.Component {
       allFields,
       initialAggsData: {},
       receivedAggsData: {},
-      accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...initialFilter },
       filtersApplied: { ...initialFilter },

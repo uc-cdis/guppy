@@ -9,7 +9,7 @@ import {
   getAllFieldsFromGuppy,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
-import { ENUM_ACCESSIBILITY, FILE_FORMATS } from '../Utils/const';
+import { FILE_FORMATS } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 
 /**
@@ -63,7 +63,6 @@ class GuppyWrapper extends React.Component {
       totalCount: 0,
       allFields: [],
       rawDataFields: [],
-      accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
     this._isMounted = false;
