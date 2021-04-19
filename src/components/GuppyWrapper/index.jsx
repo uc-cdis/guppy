@@ -7,7 +7,6 @@ import {
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
-  getAccessibleResources,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
 import { ENUM_ACCESSIBILITY, FILE_FORMATS } from '../Utils/const';
@@ -89,17 +88,6 @@ class GuppyWrapper extends React.Component {
         });
       }
     });
-    if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
-      getAccessibleResources(
-        this.props.guppyConfig.path,
-        this.props.guppyConfig.type,
-        this.props.accessibleFieldCheckList,
-      ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
-        if (this._isMounted) {
-          this.setState({ accessibleFieldObject, unaccessibleFieldObject });
-        }
-      });
-    }
   }
 
   componentWillUnmount() {
@@ -335,7 +323,6 @@ class GuppyWrapper extends React.Component {
             guppyConfig: this.props.guppyConfig,
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
             adminAppliedPreFilters: this.props.adminAppliedPreFilters,
-            accessibleFieldCheckList: this.props.accessibleFieldCheckList,
             initialAppliedFilters: this.props.initialAppliedFilters,
           }))
         }
@@ -366,7 +353,6 @@ GuppyWrapper.propTypes = {
   rawDataFields: PropTypes.arrayOf(PropTypes.string),
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
-  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialAppliedFilters: PropTypes.object,
 };
@@ -375,7 +361,6 @@ GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
   rawDataFields: [],
-  accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialAppliedFilters: {},
 };
