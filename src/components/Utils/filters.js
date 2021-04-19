@@ -1,5 +1,4 @@
 import flat from 'flat';
-import _ from 'lodash';
 
 /**
    * This function takes two objects containing filters to be applied
@@ -134,7 +133,10 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
     return firstTabsOptions;
   }
 
-  const allOptionKeys = _.union(Object.keys(firstTabsOptions), Object.keys(secondTabsOptions));
+  const allOptionKeys = [...new Set([
+    ...Object.keys(firstTabsOptions),
+    ...Object.keys(secondTabsOptions),
+  ])];
   const mergedTabOptions = {};
   allOptionKeys.forEach((optKey) => {
     if (!mergedTabOptions[`${optKey}`]) {
