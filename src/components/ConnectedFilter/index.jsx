@@ -164,7 +164,6 @@ class ConnectedFilter extends React.Component {
       this.initialTabsOptions,
       processedTabsOptions,
       this.state.filtersApplied,
-      [],
     );
 
     processedTabsOptions = sortTabsOptions(processedTabsOptions);
