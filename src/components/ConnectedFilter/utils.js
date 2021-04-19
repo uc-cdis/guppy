@@ -8,7 +8,7 @@ export const getFilterGroupConfig = (filterConfig) => ({
   })),
 });
 
-const getSingleFilterOption = (histogramResult, initHistogramRes) => {
+const getSingleFilterOption = (histogramResult, initHistogramRes, guppyConfig) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -28,8 +28,13 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     });
     return rangeOptions;
   }
-
-  const textOptions = histogramResult.histogram.map((item) => ({
+  let rawtextOptions = histogramResult.histogram;
+  // hide guppyConfig.explorerHideDataFilter from filters
+  if (guppyConfig && guppyConfig.explorerHideDataFilter) {
+    rawtextOptions = histogramResult.histogram
+      .filter((item) => item.key !== guppyConfig.explorerHideDataFilter);
+  }
+  const textOptions = rawtextOptions.map((item) => ({
     text: item.key,
     filterType: 'singleSelect',
     count: item.count,
@@ -129,6 +134,7 @@ export const getFilterSections = (
         selectedOptions = getSingleFilterOption(
           tabsOptionsFiltered,
           initialTabsOptions ? initialTabsOptions[field] : undefined,
+          guppyConfig,
         );
       }
 
@@ -155,6 +161,7 @@ export const getFilterSections = (
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
+      guppyConfig,
     );
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);
