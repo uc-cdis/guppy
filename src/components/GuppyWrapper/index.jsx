@@ -175,12 +175,7 @@ class GuppyWrapper extends React.Component {
    * @param {object} filter
    */
   handleAskGuppyForTotalCounts(type, filter) {
-    return askGuppyForTotalCounts(
-      this.props.guppyConfig.path,
-      type,
-      filter,
-      this.state.accessibility,
-    );
+    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
   }
 
   /**

@@ -390,15 +390,10 @@ export const downloadDataFromGuppy = (
     });
 };
 
-export const askGuppyForTotalCounts = (
-  path,
-  type,
-  filter,
-  accessibility = 'all',
-) => {
+export const askGuppyForTotalCounts = (path, type, filter) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
-  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: ${accessibility}) {`;
+  const typeAggsLine = `${type} ${gqlFilter ? '(filter: $filter, ' : '('} accessibility: all) {`;
   const query = `${queryLine}
     _aggregation {
       ${typeAggsLine}
