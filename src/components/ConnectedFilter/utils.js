@@ -8,7 +8,7 @@ export const getFilterGroupConfig = (filterConfig) => ({
   })),
 });
 
-const getSingleFilterOption = (histogramResult, initHistogramRes, explorerHideDataFilter) => {
+const getSingleFilterOption = (histogramResult, initHistogramRes, filterValuesToHide) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -29,11 +29,11 @@ const getSingleFilterOption = (histogramResult, initHistogramRes, explorerHideDa
     return rangeOptions;
   }
   let rawtextOptions = histogramResult.histogram;
-  // hide explorerHideDataFilter from filters
-  // explorerHideDataFilter added to guppyConfig in data-portal
-  if (explorerHideDataFilter) {
+  // hide filterValuesToHide from filters
+  // filterValuesToHide added to guppyConfig in data-portal
+  if (filterValuesToHide.length > 0) {
     rawtextOptions = histogramResult.histogram
-      .filter((item) => item.key !== explorerHideDataFilter);
+      .filter((item) => filterValuesToHide.indexOf(item.key) < 0);
   }
   const textOptions = rawtextOptions.map((item) => ({
     text: item.key,
@@ -110,6 +110,7 @@ export const checkIsArrayField = (field, arrayFields) => {
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
+  filterValuesToHide,
 ) => {
   let searchFieldSections = [];
 
@@ -135,7 +136,7 @@ export const getFilterSections = (
         selectedOptions = getSingleFilterOption(
           tabsOptionsFiltered,
           initialTabsOptions ? initialTabsOptions[field] : undefined,
-          guppyConfig.explorerHideDataFilter,
+          filterValuesToHide,
         );
       }
 
@@ -162,7 +163,7 @@ export const getFilterSections = (
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
-      guppyConfig.explorerHideDataFilter,
+      filterValuesToHide,
     );
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);
