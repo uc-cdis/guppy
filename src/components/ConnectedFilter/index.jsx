@@ -253,7 +253,8 @@ class ConnectedFilter extends React.Component {
     const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
       const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
         this.state.initialAggsData, this.state.adminAppliedPreFilters,
-        this.props.guppyConfig, this.arrayFields);
+        this.props.guppyConfig, this.arrayFields,
+        this.props.filterValuesToHide);
       const filterStatus = this.state.filterStatusArray
         ? this.state.filterStatusArray[index] : null;
       return (
@@ -336,6 +337,7 @@ ConnectedFilter.propTypes = {
   hidden: PropTypes.bool,
   userFilterFromURL: PropTypes.object,
   hideEmptyFilterSection: PropTypes.bool,
+  filterValuesToHide: PropTypes.arrayOf(PropTypes.string),
 };
 
 ConnectedFilter.defaultProps = {
@@ -354,6 +356,7 @@ ConnectedFilter.defaultProps = {
   hidden: false,
   userFilterFromURL: {},
   hideEmptyFilterSection: false,
+  filterValuesToHide: [],
 };
 
 export default ConnectedFilter;
