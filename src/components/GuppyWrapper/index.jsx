@@ -47,13 +47,19 @@ import { mergeFilters } from '../Utils/filters';
 class GuppyWrapper extends React.Component {
   constructor(props) {
     super(props);
+    let initialFilter = this.props.adminAppliedPreFilters;
+    if (Object.keys(this.props.initialFilterFromURL).length > 0) {
+      initialFilter = mergeFilters(this.props.initialFilterFromURL,
+        this.props.adminAppliedPreFilters);
+    }
+
     // to avoid asynchronizations, we store another filter as private var
-    this.filter = { ...this.props.adminAppliedPreFilters };
+    this.filter = { ...initialFilter };
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.state = {
       gettingDataFromGuppy: false,
       aggsData: {},
-      filter: { ...this.props.adminAppliedPreFilters },
+      filter: { ...initialFilter },
       rawData: [],
       totalCount: 0,
       allFields: [],
@@ -62,6 +68,7 @@ class GuppyWrapper extends React.Component {
       unaccessibleFieldObject: undefined,
       accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
+      userFilterFromURL: { ...this.props.initialFilterFromURL },
     };
   }
 
@@ -100,7 +107,16 @@ class GuppyWrapper extends React.Component {
     this.setState({ aggsData });
   }
 
-  handleFilterChange(userFilter, accessibility) {
+  handleFilterChange(userFilterFromUserInput, accessibility) {
+    let userFilter = userFilterFromUserInput;
+
+    // Apply user filters from URL on page load. Empty out state to avoid reapplying used filters.
+    if (Object.keys(userFilter).length === 0
+      && Object.keys(this.state.userFilterFromURL).length > 0) {
+      userFilter = JSON.parse(JSON.stringify(this.state.userFilterFromURL));
+      this.setState({ userFilterFromURL: {} });
+    }
+
     this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     let filter = { ...userFilter };
     if (Object.keys(this.state.adminAppliedPreFilters).length > 0) {
@@ -352,6 +368,7 @@ GuppyWrapper.propTypes = {
   onFilterChange: PropTypes.func,
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
+  initialFilterFromURL: PropTypes.object,
 };
 
 GuppyWrapper.defaultProps = {
@@ -360,6 +377,7 @@ GuppyWrapper.defaultProps = {
   rawDataFields: [],
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
+  initialFilterFromURL: {},
 };
 
 export default GuppyWrapper;
