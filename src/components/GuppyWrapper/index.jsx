@@ -7,10 +7,9 @@ import {
   downloadDataFromGuppy,
   askGuppyForTotalCounts,
   getAllFieldsFromGuppy,
-  getAccessibleResources,
   askGuppyForSubAggregationData,
 } from '../Utils/queries';
-import { ENUM_ACCESSIBILITY, FILE_FORMATS } from '../Utils/const';
+import { FILE_FORMATS } from '../Utils/const';
 import { mergeFilters } from '../Utils/filters';
 
 /**
@@ -64,9 +63,6 @@ class GuppyWrapper extends React.Component {
       totalCount: 0,
       allFields: [],
       rawDataFields: [],
-      accessibleFieldObject: undefined,
-      unaccessibleFieldObject: undefined,
-      accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
     };
     this._isMounted = false;
@@ -89,17 +85,6 @@ class GuppyWrapper extends React.Component {
         });
       }
     });
-    if (typeof this.props.accessibleFieldCheckList !== 'undefined') {
-      getAccessibleResources(
-        this.props.guppyConfig.path,
-        this.props.guppyConfig.type,
-        this.props.accessibleFieldCheckList,
-      ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
-        if (this._isMounted) {
-          this.setState({ accessibleFieldObject, unaccessibleFieldObject });
-        }
-      });
-    }
   }
 
   componentWillUnmount() {
@@ -113,7 +98,7 @@ class GuppyWrapper extends React.Component {
     if (this._isMounted) this.setState({ aggsData, accessibleCount, totalCount });
   }
 
-  handleFilterChange(userFilter, accessibility) {
+  handleFilterChange(userFilter) {
     if (this._isMounted) {
       this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
     }
@@ -126,7 +111,7 @@ class GuppyWrapper extends React.Component {
     }
     this.filter = filter;
     if (this._isMounted) {
-      this.setState({ filter, accessibility }, () => {
+      this.setState({ filter }, () => {
         this.controller.abort();
         this.controller = new AbortController();
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
@@ -152,22 +137,17 @@ class GuppyWrapper extends React.Component {
       // eslint-disable-next-line no-console
       console.error(`Invalid value ${format} found for arg format!`);
     }
-    return askGuppyForTotalCounts(
+    return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.filter,
-      'accessible',
-    ).then((count) => downloadDataFromGuppy(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      count,
+      this.state.accessibleCount,
       {
         fields: this.state.rawDataFields,
         sort: sort || [],
         filter: this.state.filter,
         format,
       },
-    ));
+    );
   }
 
   /**
@@ -176,21 +156,16 @@ class GuppyWrapper extends React.Component {
    * This function uses current filter argument
    */
   handleDownloadRawDataByFields({ fields, sort = [] }) {
-    return askGuppyForTotalCounts(
+    return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.filter,
-      'accessible',
-    ).then((count) => downloadDataFromGuppy(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      count,
+      this.state.accessibleCount,
       {
         fields: fields || this.state.rawDataFields,
         sort,
         filter: this.state.filter,
       },
-    ));
+    );
   }
 
   /**
@@ -199,12 +174,7 @@ class GuppyWrapper extends React.Component {
    * @param {object} filter
    */
   handleAskGuppyForTotalCounts(type, filter) {
-    return askGuppyForTotalCounts(
-      this.props.guppyConfig.path,
-      type,
-      filter,
-      this.state.accessibility,
-    );
+    return askGuppyForTotalCounts(this.props.guppyConfig.path, type, filter);
   }
 
   /**
@@ -214,24 +184,15 @@ class GuppyWrapper extends React.Component {
    * @param {string[]} fields
    */
   handleDownloadRawDataByTypeAndFilter(type, filter, fields) {
-    return askGuppyForTotalCounts(
+    return downloadDataFromGuppy(
       this.props.guppyConfig.path,
       type,
-      filter,
-      'accessible',
-    ).then((count) => downloadDataFromGuppy(
-      this.props.guppyConfig.path,
-      type,
-      count,
+      this.state.accessibleCount,
       {
         fields,
         filter,
       },
-    ));
-  }
-
-  handleAccessLevelUpdate(accessLevel) {
-    if (this._isMounted) this.setState({ accessibility: accessLevel });
+    );
   }
 
   /**
@@ -306,41 +267,31 @@ class GuppyWrapper extends React.Component {
   }
 
   render() {
-    return (
-      <>
-        {
-          React.Children.map(this.props.children, (child) => React.cloneElement(child, {
-            // pass data to children
-            aggsData: this.state.aggsData,
-            aggsDataIsLoading: this.state.gettingDataFromGuppy,
-            filter: this.state.filter,
-            filterConfig: this.props.filterConfig,
-            rawData: this.state.rawData, // raw data (with current filter applied)
-            accessibleCount: this.state.accessibleCount,
-            totalCount: this.state.totalCount, // total count of raw data (current filter applied)
-            fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
-            downloadRawData: this.handleDownloadRawData.bind(this),
-            downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
-            allFields: this.state.allFields,
-            accessibleFieldObject: this.state.accessibleFieldObject,
-            unaccessibleFieldObject: this.state.unaccessibleFieldObject,
+    return React.Children.map(this.props.children, (child) => React.cloneElement(child, {
+      // pass data to children
+      aggsData: this.state.aggsData,
+      aggsDataIsLoading: this.state.gettingDataFromGuppy,
+      filter: this.state.filter,
+      filterConfig: this.props.filterConfig,
+      rawData: this.state.rawData, // raw data (with current filter applied)
+      accessibleCount: this.state.accessibleCount,
+      totalCount: this.state.totalCount, // total count of raw data (current filter applied)
+      fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
+      downloadRawData: this.handleDownloadRawData.bind(this),
+      downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
+      allFields: this.state.allFields,
 
-            // a callback function which return total counts for any type, with any filter
-            getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
-            downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
+      // a callback function which return total counts for any type, with any filter
+      getTotalCountsByTypeAndFilter: this.handleAskGuppyForTotalCounts.bind(this),
+      downloadRawDataByTypeAndFilter: this.handleDownloadRawDataByTypeAndFilter.bind(this),
 
-            // below are just for ConnectedFilter component
-            onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
-            onFilterChange: this.handleFilterChange.bind(this),
-            guppyConfig: this.props.guppyConfig,
-            onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
-            adminAppliedPreFilters: this.props.adminAppliedPreFilters,
-            accessibleFieldCheckList: this.props.accessibleFieldCheckList,
-            initialAppliedFilters: this.props.initialAppliedFilters,
-          }))
-        }
-      </>
-    );
+      // below are just for ConnectedFilter component
+      onReceiveNewAggsData: this.handleReceiveNewAggsData.bind(this),
+      onFilterChange: this.handleFilterChange.bind(this),
+      guppyConfig: this.props.guppyConfig,
+      adminAppliedPreFilters: this.props.adminAppliedPreFilters,
+      initialAppliedFilters: this.props.initialAppliedFilters,
+    }));
   }
 }
 
@@ -366,7 +317,6 @@ GuppyWrapper.propTypes = {
   rawDataFields: PropTypes.arrayOf(PropTypes.string),
   onReceiveNewAggsData: PropTypes.func,
   onFilterChange: PropTypes.func,
-  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialAppliedFilters: PropTypes.object,
 };
@@ -375,7 +325,6 @@ GuppyWrapper.defaultProps = {
   onReceiveNewAggsData: () => {},
   onFilterChange: () => {},
   rawDataFields: [],
-  accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialAppliedFilters: {},
 };

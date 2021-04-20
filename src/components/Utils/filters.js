@@ -1,5 +1,4 @@
 import flat from 'flat';
-import _ from 'lodash';
 
 /**
    * This function takes two objects containing filters to be applied
@@ -40,7 +39,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
+  initialTabsOptions, processedTabsOptions, filtersApplied,
 ) => {
   const updatedTabsOptions = {};
   try {
@@ -56,14 +55,6 @@ export const updateCountsInInitialTabsOptions = (
       const actualFieldName = field.replace('.histogram', '');
       // possible to have '.' in actualFieldName, so use it as a string
       updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
-      // if in tiered access mode
-      // we need not to process filters for field in accessibleFieldCheckList
-      if (accessibleFieldCheckList
-        && accessibleFieldCheckList.includes(actualFieldName)
-        && flattenProcessedTabsOptions[`${field}`]) {
-        updatedTabsOptions[`${actualFieldName}`].histogram = flattenProcessedTabsOptions[`${field}`];
-        return;
-      }
       const histogram = flattenInitialTabsOptions[`${field}`];
       if (!histogram) {
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
@@ -149,7 +140,10 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
     return firstTabsOptions;
   }
 
-  const allOptionKeys = _.union(Object.keys(firstTabsOptions), Object.keys(secondTabsOptions));
+  const allOptionKeys = [...new Set([
+    ...Object.keys(firstTabsOptions),
+    ...Object.keys(secondTabsOptions),
+  ])];
   const mergedTabOptions = {};
   allOptionKeys.forEach((optKey) => {
     if (!mergedTabOptions[`${optKey}`]) {
