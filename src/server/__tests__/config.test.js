@@ -37,6 +37,26 @@ describe('config', () => {
     expect(() => (require('../config'))).toThrow(new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`));
   });
 
+  test('should show error if invalid tier access level in guppy block', async () => {
+    process.env.TIER_ACCESS_LEVEL = null;
+    const fileName = './testConfigFiles/test-invalid-index-scoped-tier-access.json';
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
+    const invalidItemType = 'subject_private';
+    expect(() => (require('../config'))).toThrow(new Error(`tier_access_level invalid for index ${invalidItemType}.`));
+  });
+
+  test('clears out site-wide default tiered-access setting if index-scoped levels set', async () => {
+    process.env.TIER_ACCESS_LEVEL = null;
+    process.env.TIER_ACCESS_LIMIT = 50;
+    const fileName = './testConfigFiles/test-index-scoped-tier-access.json';
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
+    const config = require('../config').default;
+    const { indices } = require(fileName);
+    expect(config.tierAccessLevel).toBeUndefined();
+    expect(config.tierAccessLimit).toEqual(50);
+    expect(JSON.stringify(config.esConfig.indices)).toEqual(JSON.stringify(indices));
+  });
+
   /* --------------- For whitelist --------------- */
   test('could disable whitelist', async () => {
     const config = require('../config').default;
