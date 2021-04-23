@@ -27,11 +27,14 @@
   },
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
+    "@babel/cli": "^7.13.10",
+    "@babel/core": "^7.13.10",
     "@elastic/elasticsearch": "^7.12.0",
     "apollo-server": "^2.21.2",
     "apollo-server-express": "^2.21.2",
     "array.prototype.flat": "^1.2.2",
     "array.prototype.flatmap": "^1.2.3",
+    "babel-preset-env": "^1.7.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "express": "^4.16.4",
@@ -47,8 +50,6 @@
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.13.10",
-    "@babel/core": "^7.13.10",
     "@babel/node": "^7.13.12",
     "@babel/plugin-transform-runtime": "^7.13.10",
     "@babel/preset-env": "^7.13.12",
@@ -62,7 +63,6 @@
     "array.prototype.flatmap": "^1.2.4",
     "babel-jest": "^24.7.1",
     "babel-loader": "^8.0.5",
-    "babel-preset-env": "^1.7.0",
     "commander": "^3.0.1",
     "eslint": "^6.7.1",
     "eslint-config-airbnb": "^18.2.0",
