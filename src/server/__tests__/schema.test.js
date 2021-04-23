@@ -6,6 +6,7 @@ import {
   getAggregationSchema,
   getAggregationSchemaForEachType,
   getMappingSchema,
+  getHistogramSchemas,
 } from '../schema';
 import esInstance from '../es/index';
 import config from '../config';
@@ -142,5 +143,49 @@ describe('Schema', () => {
     const mappingSchema = getMappingSchema(config.esConfig);
     expect(removeSpacesNewlinesAndDes(mappingSchema))
       .toEqual(removeSpacesAndNewlines(expectedMappingSchema));
+  });
+
+  const expectedHistogramSchemas = `
+  type HistogramForString {
+    histogram: [BucketsForNestedStringAgg]
+  }
+  type RegularAccessHistogramForString {
+    histogram: [BucketsForNestedStringAgg]
+  }
+  type GranularAccessHistogramForString {
+    histogram: [BucketsForNestedStringAgg]
+  }
+  type HistogramForNumber {
+    histogram(
+      rangeStart: Int,
+      rangeEnd: Int,
+      rangeStep: Int,
+      binCount: Int,
+    ): [BucketsForNestedNumberAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
+  }
+  type RegularAccessHistogramForNumber {
+    histogram(
+      rangeStart: Int,
+      rangeEnd: Int,
+      rangeStep: Int,
+      binCount: Int,
+    ): [BucketsForNestedNumberAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
+  }
+  type GranularAccessHistogramForNumber {
+    histogram(
+      rangeStart: Int,
+      rangeEnd: Int,
+      rangeStep: Int,
+      binCount: Int,
+    ): [BucketsForNestedNumberAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
+  }`;
+  test('could create histogram schemas for each type', async () => {
+    await esInstance.initialize();
+    const histogramSchemas = getHistogramSchemas();
+    expect(removeSpacesNewlinesAndDes(histogramSchemas))
+      .toEqual(removeSpacesAndNewlines(expectedHistogramSchemas));
   });
 });
