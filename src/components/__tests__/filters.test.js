@@ -197,8 +197,8 @@ describe('can sort tabs options', () => {
     },
     extra_data: {
       histogram: [
-        { key: 'b', count: 0 },
         { key: 'a', count: 0 },
+        { key: 'b', count: 0 },
         { key: 'c', count: 1 },
       ],
     },
@@ -207,20 +207,20 @@ describe('can sort tabs options', () => {
   const expectedSort = {
     annotated_sex: {
       histogram: [
-        { key: 'blue', count: 0 },
-        { key: 'green', count: 0 },
+        { key: 'zorp', count: 4162 },
+        { key: 'yellow', count: 99 },
         { key: 'orange', count: 30 },
         { key: 'pink', count: 21 },
+        { key: 'blue', count: 0 },
+        { key: 'green', count: 0 },
         { key: 'shiny', count: 0 },
-        { key: 'yellow', count: 99 },
-        { key: 'zorp', count: 4162 },
       ],
     },
     extra_data: {
       histogram: [
+        { key: 'c', count: 1 },
         { key: 'a', count: 0 },
         { key: 'b', count: 0 },
-        { key: 'c', count: 1 },
       ],
     },
   };
