@@ -1,9 +1,11 @@
 import getAuthHelperInstance from './auth/authHelper';
 import headerParser from './utils/headerParser';
+import { validSignature } from './utils/utils';
 import esInstance from './es/index';
 import log from './logger';
 import config from './config';
 import CodedError from './utils/error';
+
 
 const downloadRouter = async (req, res, next) => {
   const {
@@ -17,25 +19,27 @@ const downloadRouter = async (req, res, next) => {
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
+  var isValid = validSignature(req);
+
   try {
     let appliedFilter;
     /**
      * Tier access strategy for download endpoint:
      * 1. if the data commons or the index is private, add auth filter layer onto filter
-     * 2. if the data commons or the index is regular:
+     * 2. if the data commons or the index is regular or granular:
      *   a. if request contains out-of-access resource, return 401
      *   b. if request contains only accessible resouces, return response
      * 3. if the data commons or the index is libre, always return reponse without any auth check
      */
     switch (tierAccessLevel) {
       case 'private': {
-        appliedFilter = authHelper.applyAccessibleFilter(filter);
+        appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         break;
       }
-      case 'regular': {
-        log.debug('[download] regular commons');
+      case 'regular' : 
+      case 'granular' : {
         if (accessibility === 'accessible') {
-          appliedFilter = authHelper.applyAccessibleFilter(filter);
+          appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
             esIndexConfig.index, type, filter,

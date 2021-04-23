@@ -12,6 +12,23 @@ const parseJWT = (req) => {
   return jwt;
 };
 
+// TODO change 'Siganture: signature token' to 'Authorizzation: Signature token' instead of Bearer after testing
+const parseSignature = (req) => {
+  const authHeader = req.headers.signature || null;
+  let signature = null;
+  if (authHeader != null) {
+    const parts = authHeader.split(' ');
+    if (parts.length === 2) {
+      if (parts[0].toLowerCase() === 'signature') {
+        signature = parts[1]; 
+      }
+    }
+  }
+  return signature;
+};
+
+
 export default {
   parseJWT,
+  parseSignature,
 };

@@ -1,5 +1,7 @@
 import config from '../config';
 import log from '../logger';
+import headerParser from './headerParser';
+import rs from 'jsrsasign';
 
 export const firstLetterUpperCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -39,6 +41,41 @@ export const isWhitelisted = (key) => {
   const lowerCasedKey = (typeof key === 'string') ? key.toLowerCase() : key;
   return lowerCasedWhitelist.includes(lowerCasedKey);
 };
+
+export const loadPublicKey = () => {
+  const publicKeyText = config.public_key;
+
+  if (!publicKeyText || 0 === publicKeyText.length) {
+    return null
+  }
+
+  try {
+    var publicKey = rs.KEYUTIL.getKey(publicKeyText);
+    return publicKey;
+  } catch (err) {
+      log.error('[KEY LOAD] error when loading the public key', err);
+      return null;
+  }
+  
+  return null;
+}
+
+export const validSignature = (req) => {
+  var isValid = false;
+  try {
+    const signature = headerParser.parseSignature(req);
+    var data = req.body;
+    data = JSON.stringify(data);
+
+    var public_key = req.app.locals.publicKey;
+    isValid = public_key.verify(data, signature) 
+  } catch (err) {
+      log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
+      return false;
+  }
+  log.info('The body signature has been decoded: ', isValid);
+  return isValid;
+}
 
 /**
  * Convert from fields of graphql query produced by graphql library to list of querying fields

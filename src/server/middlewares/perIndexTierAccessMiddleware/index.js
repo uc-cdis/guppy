@@ -2,11 +2,13 @@ import config from '../../config';
 import { firstLetterUpperCase } from '../../utils/utils';
 import authMWResolver from '../authMiddleware/resolvers';
 import { tierAccessResolver, hideNumberResolver } from '../tierAccessMiddleware/resolvers';
+import { granularAccessResolver, granularHideNumberResolver } from '../granularAccessMiddleware/resolvers';
 
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
 const totalCountTypeMapping = {};
 let atLeastOneIndexIsRegularAccess = false;
+let atLeastOneIndexIsGranularAccess = false;
 
 config.esConfig.indices.forEach((item) => {
   if (item.tier_access_level === 'private') {
@@ -23,6 +25,19 @@ config.esConfig.indices.forEach((item) => {
     const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
+    };
+  } 
+  else if (item.tier_access_level === 'granular') {
+    atLeastOneIndexIsGranularAccess = true;
+    queryTypeMapping[item.type] = granularAccessResolver({
+      isRawDataQuery: true,
+      esType: item.type,
+      esIndex: item.index,
+    });
+    aggsTypeMapping[item.type] = granularAccessResolver({ esType: item.type, esIndex: item.index });
+    const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
+    totalCountTypeMapping[aggregationName] = {
+      _totalCount: granularHideNumberResolver(true),
     };
   }
   // No additional resolvers necessary for tier_access_level == 'libre'
@@ -47,5 +62,15 @@ if (atLeastOneIndexIsRegularAccess) {
     histogram: hideNumberResolver(false),
   };
 }
+if (atLeastOneIndexIsGranularAccess) {
+  perIndexTierAccessMiddleware.GranularAccessHistogramForNumber = {
+    histogram: granularHideNumberResolver(false),
+  };
+
+  perIndexTierAccessMiddleware.GranularAccessHistogramForString = {
+    histogram: granularHideNumberResolver(false),
+  };
+}
+
 
 export default perIndexTierAccessMiddleware;

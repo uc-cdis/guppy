@@ -1,5 +1,6 @@
 import authMiddleware from './authMiddleware';
 import tierAccessMiddleware from './tierAccessMiddleware';
+import granularAccessMiddleware from './granularAccessMiddleware';
 import perIndexTierAccessMiddleware from './perIndexTierAccessMiddleware';
 import config from '../config';
 import log from '../logger';
@@ -15,6 +16,10 @@ switch (config.tierAccessLevel) {
   case 'regular':
     log.info('[Server] applying regular middleware across indices.');
     middlewares.push(tierAccessMiddleware);
+    break;
+  case 'granular':
+    log.info('[Server] applying granular middleware across indices.');
+    middlewares.push(granularAccessMiddleware);
     break;
   case 'private':
     log.info('[Server] applying private middleware across indices.');

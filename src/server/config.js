@@ -40,6 +40,13 @@ const config = {
   allowedMinimumSearchLen: 2,
 };
 
+let public_key = '';
+if (process.env.PUBLIC_KEY_PATH) {
+  public_key = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
+  log.info('[config] read guppy public KEY: ', public_key); 
+  config.public_key = public_key;
+}
+
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
 }
@@ -55,7 +62,7 @@ if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
 
-const allowedTierAccessLevels = ['private', 'regular', 'libre'];
+const allowedTierAccessLevels = ['private', 'regular', 'granular', 'libre'];
 
 if (process.env.TIER_ACCESS_LEVEL) {
   if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
