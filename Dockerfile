@@ -25,7 +25,7 @@ RUN useradd -d /guppy gen3 && chown -R gen3: /guppy
 # see https://superuser.com/questions/710253/allow-non-root-process-to-bind-to-port-80-and-443
 RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/node
 USER gen3
-RUN npm ci --unsafe-perm
+RUN npm ci --unsafe-perm --only=production
 RUN npm run-script prepare
 
 EXPOSE 3000
