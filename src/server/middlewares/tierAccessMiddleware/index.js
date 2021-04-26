@@ -2,6 +2,7 @@ import config from '../../config';
 import { firstLetterUpperCase } from '../../utils/utils';
 import { tierAccessResolver, hideNumberResolver } from './resolvers';
 
+
 // apply this middleware to all es types' data/aggregation resolvers
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
@@ -15,7 +16,7 @@ config.esConfig.indices.forEach((item) => {
   aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type, esIndex: item.index });
   const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
   totalCountTypeMapping[aggregationName] = {
-    _totalCount: hideNumberResolver(true, true),
+    _totalCount: hideNumberResolver(true),
   };
 });
 const tierAccessMiddleware = {
@@ -27,10 +28,10 @@ const tierAccessMiddleware = {
   },
   ...totalCountTypeMapping,
   HistogramForNumber: {
-    histogram: hideNumberResolver(false, true),
+    histogram: hideNumberResolver(false),
   },
   HistogramForString: {
-    histogram: hideNumberResolver(false, true),
+    histogram: hideNumberResolver(false),
   },
 };
 
