@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
 import log from '../../logger';
@@ -41,7 +40,7 @@ export const granularAccessResolver = (
   },
 ) => async (resolve, root, args, context, info) => {
   try {
-  	// Assert that either this index is "granular" access or
+    // Assert that either this index is "granular" access or
     // that the index has no setting and site-wide config is "granular".
     const indexConfig = esInstance.getESIndexConfigByName(esIndex);
     const indexIsGranularAccess = indexConfig.tier_access_level === 'granular';
@@ -182,18 +181,19 @@ export const granularAccessResolver = (
  * it hide number that is less than allowed visible number for granular tier access
  * @param {bool} isGettingTotalCount
  */
-export const granularHideNumberResolver = (isGettingTotalCount) => async (resolve, root, args, context, info) => {
-	// for aggregations, hide all counts that are greater than limited number
-	const { needEncryptAgg } = root;
-	const result = await resolve(root, args, context, info);
-	log.debug('[hideNumberResolver] result: ', result);
-	if (!needEncryptAgg) return result;
+export const granularHideNumberResolver = (isGettingTotalCount) => async (
+  resolve, root, args, context, info) => {
+  // for aggregations, hide all counts that are greater than limited number
+  const { needEncryptAgg } = root;
+  const result = await resolve(root, args, context, info);
+  log.debug('[hideNumberResolver] result: ', result);
+  if (!needEncryptAgg) return result;
 
-	// encrypt if is between (0, tierAccessLimit)
-	if (isGettingTotalCount) {
-		return (result > 0
-    		&& result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
-	}
+  // encrypt if is between (0, tierAccessLimit)
+  if (isGettingTotalCount) {
+    return (result > 0
+      && result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+  }
 
 	const encryptedResult = result.map((item) => {
   		// we don't encrypt whitelisted results
