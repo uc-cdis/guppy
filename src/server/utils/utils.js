@@ -55,9 +55,7 @@ export const loadPublicKey = () => {
   } catch (err) {
       log.error('[KEY LOAD] error when loading the public key', err);
       return null;
-  }
-  
-  return null;
+  }  
 }
 
 export const validSignature = (req) => {

@@ -195,21 +195,21 @@ export const granularHideNumberResolver = (isGettingTotalCount) => async (
       && result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
   }
 
-	const encryptedResult = result.map((item) => {
-  		// we don't encrypt whitelisted results
-  		if (isWhitelisted(item.key)) {
-    		return item;
-  		}
-  		// we only encrypt if count from no-access item is small
-  		if (result.count < config.tierAccessLimit) {
-    		return {
-      			key: item.key,
-      			count: ENCRYPT_COUNT,
-    		};
-  		}
-  		return item;
-	});
-	return encryptedResult;
+  const encryptedResult = result.map((item) => {
+      // we don't encrypt whitelisted results
+      if (isWhitelisted(item.key)) {
+        return item;
+      }
+      // we only encrypt if count from no-access item is small
+      if (result.count < config.tierAccessLimit) {
+        return {
+            key: item.key,
+            count: ENCRYPT_COUNT,
+        };
+      }
+      return item;
+  });
+  return encryptedResult;
 };
 
 
