@@ -176,42 +176,68 @@ const tierAccessResolver = (
  * it hide number that is less than allowed visible number for regular tier access
  * @param {bool} isGettingTotalCount
  */
-const hideNumberResolver = (isGettingTotalCount) => async (resolve, root, args, context, info) => {
+const hideNumberResolver = (isGettingTotalCount, applyOnAll = false) => async (resolve, root, args, context, info) => {
   // for aggregations, hide all counts that are greater than limited number
   const { needEncryptAgg } = root;
   const result = await resolve(root, args, context, info);
   log.debug('[hideNumberResolver] result: ', result);
   if (!needEncryptAgg) return result;
 
-  const newRoot = root;
-  newRoot.accessibility = 'unaccessible';
-  const { authHelper } = context;
-  newRoot.filter = authHelper.applyUnaccessibleFilter(newRoot.filter);
-  const unaccessibleResult = await resolve(newRoot, args, context, info);
-  log.debug('[hideNumberResolver] unaccessibleResult: ', unaccessibleResult);
+  if (applyOnAll) {
+    // encrypt if is between (0, tierAccessLimit)
+    if (isGettingTotalCount) {
+      return (result > 0
+        && result < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+    }
 
-  // if getting total count, only encrypt if unaccessibleResult is between (0, tierAccessLimit)
-  if (isGettingTotalCount) {
-    return (unaccessibleResult > 0
-      && unaccessibleResult < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+    const encryptedResult = result.map((item) => {
+      // we don't encrypt whitelisted results
+      if (isWhitelisted(item.key)) {
+        return item;
+      }
+      // we only encrypt if count from no-access item is small
+      if (result.count < config.tierAccessLimit) {
+        return {
+          key: item.key,
+          count: ENCRYPT_COUNT,
+        };
+      }
+      return item;
+    });
+    return encryptedResult;
+  }
+  else {
+    const newRoot = root;
+    newRoot.accessibility = 'unaccessible';
+    const { authHelper } = context;
+    newRoot.filter = authHelper.applyUnaccessibleFilter(newRoot.filter);
+    const unaccessibleResult = await resolve(newRoot, args, context, info);
+    log.debug('[hideNumberResolver] unaccessibleResult: ', unaccessibleResult);
+
+    // if getting total count, only encrypt if unaccessibleResult is between (0, tierAccessLimit)
+    if (isGettingTotalCount) {
+      return (unaccessibleResult > 0
+        && unaccessibleResult < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
+    }
+
+    const encryptedResult = result.map((item) => {
+      // we don't encrypt whitelisted results or if result is not found in unaccessibleResult
+      if (isWhitelisted(item.key) || !(unaccessibleResult.some((e) => e.key === item.key))) {
+        return item;
+      }
+      // we only encrypt if count from no-access item is small
+      const unaccessibleResultItem = _.find(unaccessibleResult, (e) => e.key === item.key);
+      if (unaccessibleResultItem.count < config.tierAccessLimit) {
+        return {
+          key: item.key,
+          count: ENCRYPT_COUNT,
+        };
+      }
+      return item;
+    });
+    return encryptedResult;
   }
 
-  const encryptedResult = result.map((item) => {
-    // we don't encrypt whitelisted results or if result is not found in unaccessibleResult
-    if (isWhitelisted(item.key) || !(unaccessibleResult.some((e) => e.key === item.key))) {
-      return item;
-    }
-    // we only encrypt if count from no-access item is small
-    const unaccessibleResultItem = _.find(unaccessibleResult, (e) => e.key === item.key);
-    if (unaccessibleResultItem.count < config.tierAccessLimit) {
-      return {
-        key: item.key,
-        count: ENCRYPT_COUNT,
-      };
-    }
-    return item;
-  });
-  return encryptedResult;
 };
 
 // apply this middleware to all es types' data/aggregation resolvers
@@ -226,7 +252,7 @@ config.esConfig.indices.forEach((item) => {
   aggsTypeMapping[item.type] = tierAccessResolver({ esType: item.type });
   const aggregationName = `${firstLetterUpperCase(item.type)}Aggregation`;
   totalCountTypeMapping[aggregationName] = {
-    _totalCount: hideNumberResolver(true),
+    _totalCount: hideNumberResolver(true, true),
   };
 });
 const tierAccessMiddleware = {
@@ -238,10 +264,10 @@ const tierAccessMiddleware = {
   },
   ...totalCountTypeMapping,
   HistogramForNumber: {
-    histogram: hideNumberResolver(false),
+    histogram: hideNumberResolver(false, true),
   },
   HistogramForString: {
-    histogram: hideNumberResolver(false),
+    histogram: hideNumberResolver(false, true),
   },
 };
 
