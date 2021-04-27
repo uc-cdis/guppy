@@ -40,11 +40,11 @@ const config = {
   allowedMinimumSearchLen: 2,
 };
 
-let public_key = '';
+let publicKey = '';
 if (process.env.PUBLIC_KEY_PATH) {
-  public_key = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
-  log.info('[config] read guppy public KEY: ', public_key); 
-  config.public_key = public_key;
+  publicKey = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
+  log.info('[config] read guppy public KEY: ', publicKey); 
+  config.publicKey = publicKey;
 }
 
 if (process.env.GEN3_ES_ENDPOINT) {

@@ -43,7 +43,7 @@ export const isWhitelisted = (key) => {
 };
 
 export const loadPublicKey = () => {
-  const publicKeyText = config.public_key;
+  const publicKeyText = config.publicKey;
 
   if (!publicKeyText || 0 === publicKeyText.length) {
     return null
@@ -67,8 +67,8 @@ export const validSignature = (req) => {
     var data = req.body;
     data = JSON.stringify(data);
 
-    var public_key = req.app.locals.publicKey;
-    isValid = public_key.verify(data, signature) 
+    var publicKey = req.app.locals.publicKey;
+    isValid = publicKey.verify(data, signature) 
   } catch (err) {
       log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
       return false;

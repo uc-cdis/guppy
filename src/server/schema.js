@@ -197,7 +197,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
   const esIndex = esDict.index;
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
-  const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esConfigElement, 'tier_access_level') && ['regular', 'granular'].includes(esConfigElement.tier_access_level);
+  const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && ['regular', 'granular'].includes(esDict.tier_access_level);
   let AggsNestedTypeSchema = '';
   while (fieldAggsNestedTypeMap.length > 0) {
     const entry = fieldAggsNestedTypeMap.shift();
@@ -213,7 +213,7 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
         }
         return `
-    ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix[esConfigElement.tier_access_level] : '') + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
+    ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix[esDict.tier_access_level] : '') + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
 }`;
     }
@@ -227,7 +227,7 @@ export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfi
 export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
 
 const getNumberHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
       histogram(
         rangeStart: Int,
         rangeEnd: Int,
@@ -239,7 +239,7 @@ const getNumberHistogramSchema = (accessType) => `
   `;
 
 const getTextHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[esConfigElement.tier_access_level] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
       histogram: [BucketsForNestedStringAgg]
     }
   `;
