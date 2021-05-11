@@ -12,15 +12,16 @@ const parseJWT = (req) => {
   return jwt;
 };
 
-// TODO change 'Siganture: signature token' to 'Authorizzation: Signature token' instead of Bearer after testing
+// TODO change 'Siganture: signature token' to 'Authorizzation: Signature token' 
+//instead of Bearer after testing
 const parseSignature = (req) => {
   const authHeader = req.headers.signature || null;
   let signature = null;
   if (authHeader != null) {
-    const parts = authHeader.split(' ');
-    if (parts.length === 2) {
-      if (parts[0].toLowerCase() === 'signature') {
-        signature = parts[1]; 
+    const [name, token] = authHeader.split(' ');
+    if (name && token) {
+      if (name.toLowerCase() === 'signature') {
+        signature = token; 
       }
     }
   }

@@ -1,4 +1,5 @@
 import flat from 'flat';
+import _ from 'lodash';
 
 /**
    * This function takes two objects containing filters to be applied
@@ -39,7 +40,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied,
+  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
 ) => {
   const updatedTabsOptions = {};
   try {
@@ -55,6 +56,14 @@ export const updateCountsInInitialTabsOptions = (
       const actualFieldName = field.replace('.histogram', '');
       // possible to have '.' in actualFieldName, so use it as a string
       updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
+      // if in tiered access mode
+      // we need not to process filters for field in accessibleFieldCheckList
+      if (accessibleFieldCheckList
+        && accessibleFieldCheckList.includes(actualFieldName)
+        && flattenProcessedTabsOptions[`${field}`]) {
+        updatedTabsOptions[`${actualFieldName}`].histogram = flattenProcessedTabsOptions[`${field}`];
+        return;
+      }
       const histogram = flattenInitialTabsOptions[`${field}`];
       if (!histogram) {
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
@@ -66,15 +75,22 @@ export const updateCountsInInitialTabsOptions = (
           if (flattenProcessedTabsOptions[`${field}`]
             && flattenProcessedTabsOptions[`${field}`].length > 0
             && updatedTabsOptions[`${actualFieldName}`].histogram) {
-            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = flattenProcessedTabsOptions[`${field}`][0].count;
+            const currentFlattenProcessedTabsOptions = flattenProcessedTabsOptions[`${field}`][0];
+
+            // if empty count histogram should be removed so filter is not shown
+            if (currentFlattenProcessedTabsOptions.count === 0) {
+              updatedTabsOptions[`${actualFieldName}`].histogram = [];
+              return;
+            }
+            updatedTabsOptions[`${actualFieldName}`].histogram[0].count = currentFlattenProcessedTabsOptions.count;
             const newKey = [0, 0];
-            if (flattenProcessedTabsOptions[`${field}`][0].key[0]) {
+            if (currentFlattenProcessedTabsOptions.key[0]) {
               // because of the prefer-destructuring eslint rule
-              const newLowerBound = flattenProcessedTabsOptions[`${field}`][0].key[0];
+              const newLowerBound = currentFlattenProcessedTabsOptions.key[0];
               newKey[0] = newLowerBound;
             }
-            if (flattenProcessedTabsOptions[`${field}`][0].key[1]) {
-              const newHigherBound = flattenProcessedTabsOptions[`${field}`][0].key[1];
+            if (currentFlattenProcessedTabsOptions.key[1]) {
+              const newHigherBound = currentFlattenProcessedTabsOptions.key[1];
               newKey[1] = newHigherBound;
             }
             updatedTabsOptions[`${actualFieldName}`].histogram[0].key = newKey;
@@ -108,6 +124,13 @@ export const updateCountsInInitialTabsOptions = (
   return updatedTabsOptions;
 };
 
+function sortCountThenAlpha(a, b) {
+  if (a.count === b.count) {
+    return a.key < b.key ? -1 : 1;
+  }
+  return b.count - a.count;
+}
+
 export const sortTabsOptions = (tabsOptions) => {
   const fields = Object.keys(tabsOptions);
   const sortedTabsOptions = { ...tabsOptions };
@@ -115,7 +138,7 @@ export const sortTabsOptions = (tabsOptions) => {
     const field = fields[x];
 
     const optionsForThisField = sortedTabsOptions[field].histogram;
-    optionsForThisField.sort((a, b) => (a.key > b.key ? 1 : -1));
+    optionsForThisField.sort(sortCountThenAlpha);
     sortedTabsOptions[field].histogram = optionsForThisField;
   }
   return sortedTabsOptions;
@@ -133,10 +156,7 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
     return firstTabsOptions;
   }
 
-  const allOptionKeys = [...new Set([
-    ...Object.keys(firstTabsOptions),
-    ...Object.keys(secondTabsOptions),
-  ])];
+  const allOptionKeys = _.union(Object.keys(firstTabsOptions), Object.keys(secondTabsOptions));
   const mergedTabOptions = {};
   allOptionKeys.forEach((optKey) => {
     if (!mergedTabOptions[`${optKey}`]) {
@@ -150,4 +170,36 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
     mergedTabOptions[`${optKey}`].histogram = firstHistogram.concat(secondHistogram);
   });
   return mergedTabOptions;
+};
+
+export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
+  // Converts filter-applied form to filter-displayed form
+  // TODO: add support for search filters
+  const filteringFields = Object.keys(userFilter);
+  const filterStatusArray = tabs.map(() => ([]));
+
+  for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
+    const allFieldsForThisTab = tabs[tabIndex].fields;
+    filterStatusArray[tabIndex] = allFieldsForThisTab.map(() => ({}));
+    for (let i = 0; i < filteringFields.length; i += 1) {
+      const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
+      if (sectionIndex !== -1) {
+        let userFilterSmallForm = {};
+        const filterVar = userFilter[filteringFields[i]];
+        if (typeof filterVar === 'object' && filterVar.selectedValues) {
+          // Single select values:
+          for (let j = 0; j < filterVar.selectedValues.length; j += 1) {
+            userFilterSmallForm[filterVar.selectedValues[j]] = true;
+          }
+        } else if (typeof filterVar === 'object'
+          && (filterVar.lowerBound || filterVar.upperBound)) {
+          // Range values:
+          userFilterSmallForm = [filterVar.lowerBound, filterVar.upperBound];
+        }
+        filterStatusArray[tabIndex][sectionIndex] = userFilterSmallForm;
+      }
+    }
+  }
+
+  return filterStatusArray;
 };

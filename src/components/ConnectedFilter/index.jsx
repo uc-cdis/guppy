@@ -1,11 +1,16 @@
 /* eslint react/forbid-prop-types: 0 */
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import FilterGroup from '@gen3/ui-component/dist/components/filters/FilterGroup';
+import FilterList from '@gen3/ui-component/dist/components/filters/FilterList';
 import {
   getFilterSections,
   excludeSelfFilterFromAggsData,
 } from './utils';
+import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
+  askGuppyAboutAllFieldsAndOptions,
   askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
@@ -14,44 +19,57 @@ import {
   mergeFilters,
   updateCountsInInitialTabsOptions,
   sortTabsOptions,
+  mergeTabOptions,
+  buildFilterStatusForURLFilter,
 } from '../Utils/filters';
 
 class ConnectedFilter extends React.Component {
   constructor(props) {
     super(props);
 
-    const allFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
-    const initialFilter = mergeFilters(
-      props.initialAppliedFilters,
-      props.adminAppliedPreFilters,
-    );
+    const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
+    const allFields = props.accessibleFieldCheckList
+      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
+      : filterConfigsFields;
 
     this.initialTabsOptions = {};
+    let initialFilter = this.props.adminAppliedPreFilters;
+    let filterStatusArray = [];
+    let filtersApplied = {};
+    if (this.props.userFilterFromURL && Object.keys(this.props.userFilterFromURL).length > 0) {
+      filterStatusArray = buildFilterStatusForURLFilter(this.props.userFilterFromURL,
+        this.getTabsWithSearchFields());
+      filtersApplied = this.props.userFilterFromURL;
+      initialFilter = mergeFilters(this.props.userFilterFromURL, this.props.adminAppliedPreFilters);
+    }
+
     this.state = {
       allFields,
       initialAggsData: {},
       receivedAggsData: {},
+      accessibility: ENUM_ACCESSIBILITY.ALL,
       adminAppliedPreFilters: { ...this.props.adminAppliedPreFilters },
       filter: { ...initialFilter },
-      filtersApplied: { ...initialFilter },
+      filtersApplied,
+      filterStatusArray,
     };
     this.filterGroupRef = React.createRef();
     this.adminPreFiltersFrozen = JSON.stringify(this.props.adminAppliedPreFilters).slice();
     this.arrayFields = [];
-    this._isMounted = false;
-    this.controller = new AbortController();
   }
 
   componentDidMount() {
-    this._isMounted = true;
-
-    if (this.props.onFilterChange) {
-      this.props.onFilterChange(this.state.filter);
+    if (this.props.onUpdateAccessLevel) {
+      this.props.onUpdateAccessLevel(this.state.accessibility);
     }
-    askGuppyForAggregationData(
+    if (this.props.onFilterChange) {
+      this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
+    }
+    askGuppyAboutAllFieldsAndOptions(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
+      this.state.accessibility,
       this.state.filter,
     )
       .then((res) => {
@@ -61,8 +79,6 @@ class ConnectedFilter extends React.Component {
         }
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          res.data._aggregation.accessible._totalCount,
-          res.data._aggregation.all._totalCount,
           this.state.adminAppliedPreFilters,
         );
         this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
@@ -80,20 +96,11 @@ class ConnectedFilter extends React.Component {
     });
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  handleReceiveNewAggsData(
-    receivedAggsData,
-    accessibleCount,
-    totalCount,
-    filterResults,
-  ) {
-    if (this._isMounted) this.setState({ receivedAggsData });
+  handleReceiveNewAggsData(receivedAggsData, filterResults) {
+    this.setState({ receivedAggsData });
     if (this.props.onReceiveNewAggsData) {
       const resultAggsData = excludeSelfFilterFromAggsData(receivedAggsData, filterResults);
-      this.props.onReceiveNewAggsData(resultAggsData, accessibleCount, totalCount);
+      this.props.onReceiveNewAggsData(resultAggsData);
     }
   }
 
@@ -107,34 +114,40 @@ class ConnectedFilter extends React.Component {
    * @param {object} filterResults
    */
   handleFilterChange(filterResults) {
-    this.controller.abort();
-    this.controller = new AbortController();
+    this.setState({ adminAppliedPreFilters: JSON.parse(this.adminPreFiltersFrozen) });
+    const mergedFilterResults = mergeFilters(filterResults, JSON.parse(this.adminPreFiltersFrozen));
 
-    const adminAppliedPreFilters = JSON.parse(this.adminPreFiltersFrozen);
-    if (this._isMounted) this.setState({ adminAppliedPreFilters });
+    const newFilterStatusArray = buildFilterStatusForURLFilter(mergedFilterResults,
+      this.getTabsWithSearchFields());
 
-    const mergedFilterResults = mergeFilters(filterResults, adminAppliedPreFilters);
-    if (this._isMounted) this.setState({ filtersApplied: mergedFilterResults });
-
+    this.setState({ filtersApplied: mergedFilterResults, filterStatusArray: newFilterStatusArray });
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
       mergedFilterResults,
-      this.controller.signal,
+      this.state.accessibility,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
           res.data._aggregation[this.props.guppyConfig.type],
-          res.data._aggregation.accessible._totalCount,
-          res.data._aggregation.all._totalCount,
           mergedFilterResults,
         );
       });
 
     if (this.props.onFilterChange) {
-      this.props.onFilterChange(mergedFilterResults);
+      this.props.onFilterChange(mergedFilterResults, this.state.accessibility);
     }
+  }
+
+  getTabsWithSearchFields() {
+    const newTabs = this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+      if (searchFields) {
+        return { title, fields: searchFields.concat(fields) };
+      }
+      return { title, fields };
+    });
+    return newTabs;
   }
 
   setFilter(filter) {
@@ -152,6 +165,7 @@ class ConnectedFilter extends React.Component {
    * component could do some pre-processing modification about filter.
    */
   getFilterTabs() {
+    const filtersToDisplay = this.state.filtersApplied;
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
     if (Object.keys(this.initialTabsOptions).length === 0) {
@@ -161,28 +175,101 @@ class ConnectedFilter extends React.Component {
     processedTabsOptions = updateCountsInInitialTabsOptions(
       this.initialTabsOptions,
       processedTabsOptions,
-      this.state.filtersApplied,
+      filtersToDisplay,
+      // for tiered access filters
+      this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
     );
 
-    processedTabsOptions = sortTabsOptions(processedTabsOptions);
+    if (Object.keys(filtersToDisplay).length) {
+      // if has applied filters, sort tab options as selected/unselected separately
+      const selectedTabsOptions = {};
+      const unselectedTabsOptions = {};
+      Object.keys(processedTabsOptions).forEach((opt) => {
+        if (!processedTabsOptions[`${opt}`].histogram.length) {
+          if (!unselectedTabsOptions[`${opt}`]) {
+            unselectedTabsOptions[`${opt}`] = {};
+          }
+          unselectedTabsOptions[`${opt}`].histogram = [];
+          return;
+        }
+        processedTabsOptions[`${opt}`].histogram.forEach((entry) => {
+          if (filtersToDisplay[`${opt}`]
+          && filtersToDisplay[`${opt}`].selectedValues
+          && filtersToDisplay[`${opt}`].selectedValues.includes(entry.key)) {
+            if (!selectedTabsOptions[`${opt}`]) {
+              selectedTabsOptions[`${opt}`] = {};
+            }
+            if (!selectedTabsOptions[`${opt}`].histogram) {
+              selectedTabsOptions[`${opt}`].histogram = [];
+            }
+            selectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
+          } else {
+            if (!unselectedTabsOptions[`${opt}`]) {
+              unselectedTabsOptions[`${opt}`] = {};
+            }
+            if (typeof (entry.key) !== 'string') { // if it is a range filter, just copy and return
+              unselectedTabsOptions[`${opt}`].histogram = processedTabsOptions[`${opt}`].histogram;
+              return;
+            }
+            if (!unselectedTabsOptions[`${opt}`].histogram) {
+              unselectedTabsOptions[`${opt}`].histogram = [];
+            }
+            unselectedTabsOptions[`${opt}`].histogram.push({ key: entry.key, count: entry.count });
+          }
+        });
+      });
 
+      // For search filters: If there are any search filters present, include
+      // the selected options in the `selectedTabsOptions` array.
+      // ------
+      let allSearchFields = [];
+      this.props.filterConfig.tabs.forEach((tab) => {
+        allSearchFields = allSearchFields.concat(tab.searchFields);
+      });
+      allSearchFields.forEach((field) => {
+        if (filtersToDisplay[`${field}`]) {
+          const { selectedValues } = filtersToDisplay[`${field}`];
+          if (selectedValues) {
+            filtersToDisplay[`${field}`].selectedValues.forEach((val) => {
+              if (!selectedTabsOptions[`${field}`]) {
+                selectedTabsOptions[`${field}`] = {};
+              }
+              if (!selectedTabsOptions[`${field}`].histogram) {
+                selectedTabsOptions[`${field}`].histogram = [];
+              }
+              selectedTabsOptions[`${field}`].histogram.push({ key: val });
+            });
+          }
+        }
+      });
+      // -------
+      processedTabsOptions = mergeTabOptions(sortTabsOptions(selectedTabsOptions),
+        sortTabsOptions(unselectedTabsOptions));
+    } else {
+      processedTabsOptions = sortTabsOptions(processedTabsOptions);
+    }
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const { FilterList } = this.props.filterComponents;
-    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => (
-      <FilterList
-        key={index}
-        sections={
-          getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
-            this.state.initialAggsData, this.state.adminAppliedPreFilters,
-            this.props.guppyConfig, this.arrayFields)
-        }
-        tierAccessLimit={this.props.tierAccessLimit}
-        lockedTooltipMessage={this.props.lockedTooltipMessage}
-        disabledTooltipMessage={this.props.disabledTooltipMessage}
-        arrayFields={this.arrayFields}
-      />
-    ));
+    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
+      const sections = getFilterSections(fields, searchFields, fieldMapping, processedTabsOptions,
+        this.state.initialAggsData, this.state.adminAppliedPreFilters,
+        this.props.guppyConfig, this.arrayFields,
+        this.props.filterValuesToHide);
+      const filterStatus = this.state.filterStatusArray
+        ? this.state.filterStatusArray[index] : null;
+      return (
+        <FilterList
+          key={index}
+          sections={sections}
+          hideEmptyFilterSection={this.props.hideEmptyFilterSection}
+          tierAccessLimit={this.props.tierAccessLimit}
+          lockedTooltipMessage={this.props.lockedTooltipMessage}
+          disabledTooltipMessage={this.props.disabledTooltipMessage}
+          arrayFields={this.arrayFields}
+          filterStatusFromParent={filterStatus}
+        />
+      );
+    });
     return tabs;
   }
 
@@ -192,7 +279,7 @@ class ConnectedFilter extends React.Component {
    * @param {object} aggsData
    */
   saveInitialAggsData(aggsData) {
-    if (this._isMounted) this.setState({ initialAggsData: aggsData });
+    this.setState({ initialAggsData: aggsData });
   }
 
   render() {
@@ -203,14 +290,8 @@ class ConnectedFilter extends React.Component {
     }
     // If there are any search fields, insert them at the top of each tab's fields.
     const filterConfig = {
-      tabs: this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
-        if (searchFields) {
-          return { title, fields: searchFields.concat(fields) };
-        }
-        return { title, fields };
-      }),
+      tabs: this.getTabsWithSearchFields(),
     };
-    const { FilterGroup } = this.props.filterComponents;
     return (
       <FilterGroup
         ref={this.filterGroupRef}
@@ -219,7 +300,8 @@ class ConnectedFilter extends React.Component {
         filterConfig={filterConfig}
         onFilterChange={(e) => this.handleFilterChange(e)}
         hideZero={this.props.hideZero}
-        initialAppliedFilters={this.props.initialAppliedFilters}
+        filterStatusFromParent={this.state.filterStatusArray}
+        filterResultsFromParent={this.state.filtersApplied}
       />
     );
   }
@@ -246,16 +328,16 @@ ConnectedFilter.propTypes = {
   })),
   tierAccessLimit: PropTypes.number,
   onProcessFilterAggsData: PropTypes.func,
+  onUpdateAccessLevel: PropTypes.func,
   adminAppliedPreFilters: PropTypes.object,
-  initialAppliedFilters: PropTypes.object,
   lockedTooltipMessage: PropTypes.string,
   disabledTooltipMessage: PropTypes.string,
+  accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   hideZero: PropTypes.bool,
   hidden: PropTypes.bool,
-  filterComponents: PropTypes.shape({
-    FilterGroup: PropTypes.elementType.isRequired,
-    FilterList: PropTypes.elementType.isRequired,
-  }).isRequired,
+  userFilterFromURL: PropTypes.object,
+  hideEmptyFilterSection: PropTypes.bool,
+  filterValuesToHide: PropTypes.arrayOf(PropTypes.string),
 };
 
 ConnectedFilter.defaultProps = {
@@ -265,12 +347,16 @@ ConnectedFilter.defaultProps = {
   fieldMapping: [],
   tierAccessLimit: undefined,
   onProcessFilterAggsData: (data) => (data),
+  onUpdateAccessLevel: () => {},
   adminAppliedPreFilters: {},
-  initialAppliedFilters: {},
   lockedTooltipMessage: '',
   disabledTooltipMessage: '',
+  accessibleFieldCheckList: undefined,
   hideZero: false,
   hidden: false,
+  userFilterFromURL: {},
+  hideEmptyFilterSection: false,
+  filterValuesToHide: [],
 };
 
 export default ConnectedFilter;

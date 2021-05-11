@@ -11,7 +11,9 @@ RUN apt-get update \
         vim \
     && curl -sL https://deb.nodesource.com/setup_10.x | bash - \ 
     && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g npm@7.8.0 \
+    && npm config set maxsockets 5
 
 COPY . /guppy/
 WORKDIR /guppy
@@ -19,7 +21,7 @@ WORKDIR /guppy
 RUN COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js
 RUN VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js
 RUN /bin/rm -rf .git
-RUN /bin/rm -rf node_modules
+# RUN /bin/rm -rf node_modules
 
 RUN useradd -d /guppy gen3 && chown -R gen3: /guppy
 # see https://superuser.com/questions/710253/allow-non-root-process-to-bind-to-port-80-and-443
@@ -32,4 +34,3 @@ EXPOSE 3000
 EXPOSE 80
 
 CMD node --max-http-header-size 16000 dist/server/server.js
-
