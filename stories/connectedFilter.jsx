@@ -48,6 +48,20 @@ storiesOf('ConnectedFilter', module)
       />
     );
   })
+  .add('Filter Hidden "no data"', () => {
+    const processFilterAggsData = (aggsData) => aggsData;
+    return (
+      <ConnectedFilter
+        filterConfig={filterConfig}
+        guppyConfig={guppyConfig}
+        onFilterChange={action('filter change')}
+        fieldMapping={fieldMapping}
+        onProcessFilterAggsData={processFilterAggsData}
+        tierAccessLimit={guppyConfig.tierAccessLimit}
+        filterValuesToHide={["no data"]}
+      />
+    );
+  })
   .add('SwitchableFilterExample', () => (
     <SwitchableFilterExample />
   ));

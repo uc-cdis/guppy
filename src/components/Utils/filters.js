@@ -171,3 +171,35 @@ export const mergeTabOptions = (firstTabsOptions, secondTabsOptions) => {
   });
   return mergedTabOptions;
 };
+
+export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
+  // Converts filter-applied form to filter-displayed form
+  // TODO: add support for search filters
+  const filteringFields = Object.keys(userFilter);
+  const filterStatusArray = tabs.map(() => ([]));
+
+  for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
+    const allFieldsForThisTab = tabs[tabIndex].fields;
+    filterStatusArray[tabIndex] = allFieldsForThisTab.map(() => ({}));
+    for (let i = 0; i < filteringFields.length; i += 1) {
+      const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);
+      if (sectionIndex !== -1) {
+        let userFilterSmallForm = {};
+        const filterVar = userFilter[filteringFields[i]];
+        if (typeof filterVar === 'object' && filterVar.selectedValues) {
+          // Single select values:
+          for (let j = 0; j < filterVar.selectedValues.length; j += 1) {
+            userFilterSmallForm[filterVar.selectedValues[j]] = true;
+          }
+        } else if (typeof filterVar === 'object'
+          && (filterVar.lowerBound || filterVar.upperBound)) {
+          // Range values:
+          userFilterSmallForm = [filterVar.lowerBound, filterVar.upperBound];
+        }
+        filterStatusArray[tabIndex][sectionIndex] = userFilterSmallForm;
+      }
+    }
+  }
+
+  return filterStatusArray;
+};
