@@ -1,5 +1,5 @@
 import flat from 'flat';
-import { queryGuppyForRawData } from '../Utils/queries';
+import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
 
 export const getFilterGroupConfig = (filterConfig) => ({
   tabs: filterConfig.tabs.map((t) => ({
@@ -8,7 +8,7 @@ export const getFilterGroupConfig = (filterConfig) => ({
   })),
 });
 
-const getSingleFilterOption = (histogramResult, initHistogramRes) => {
+const getSingleFilterOption = (histogramResult, initHistogramRes, filterValuesToHide) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
   }
@@ -28,8 +28,14 @@ const getSingleFilterOption = (histogramResult, initHistogramRes) => {
     });
     return rangeOptions;
   }
-
-  const textOptions = histogramResult.histogram.map((item) => ({
+  let rawtextOptions = histogramResult.histogram;
+  // hide filterValuesToHide from filters
+  // filterValuesToHide added to guppyConfig in data-portal
+  if (filterValuesToHide.length > 0) {
+    rawtextOptions = histogramResult.histogram
+      .filter((item) => filterValuesToHide.indexOf(item.key) < 0);
+  }
+  const textOptions = rawtextOptions.map((item) => ({
     text: item.key,
     filterType: 'singleSelect',
     count: item.count,
@@ -60,7 +66,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
         },
       };
     }
-    queryGuppyForRawData(
+    queryGuppyForRawDataAndTotalCounts(
       guppyConfig.path,
       guppyConfig.type,
       [field],
@@ -68,7 +74,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       undefined,
       offset,
       NUM_SEARCH_OPTIONS,
-      true,
+      'accessible',
     )
       .then((res) => {
         if (!res.data || !res.data[guppyConfig.type]) {
@@ -104,6 +110,7 @@ export const checkIsArrayField = (field, arrayFields) => {
 export const getFilterSections = (
   fields, searchFields, fieldMapping, tabsOptions,
   initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
+  filterValuesToHide,
 ) => {
   let searchFieldSections = [];
 
@@ -129,6 +136,7 @@ export const getFilterSections = (
         selectedOptions = getSingleFilterOption(
           tabsOptionsFiltered,
           initialTabsOptions ? initialTabsOptions[field] : undefined,
+          filterValuesToHide,
         );
       }
 
@@ -155,6 +163,7 @@ export const getFilterSections = (
     const defaultOptions = getSingleFilterOption(
       tabsOptionsFiltered,
       initialTabsOptions ? initialTabsOptions[field] : undefined,
+      filterValuesToHide,
     );
 
     const fieldIsArrayField = checkIsArrayField(field, arrayFields);

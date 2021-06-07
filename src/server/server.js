@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { ApolloServer } from 'apollo-server-express';
 import { makeExecutableSchema } from 'graphql-tools';
 import { applyMiddleware } from 'graphql-middleware';
@@ -19,6 +20,7 @@ import { statusRouter, versionRouter } from './endpoints';
 
 const app = express();
 app.use(cors());
+app.use(helmet());
 app.use(bodyParser.json({ limit: '50mb' }));
 
 //Load public key

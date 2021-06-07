@@ -26,7 +26,6 @@ const config = {
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
   },
-
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
@@ -41,11 +40,11 @@ const config = {
   allowedMinimumSearchLen: 2,
 };
 
-let public_key = '';
+let publicKey = '';
 if (process.env.PUBLIC_KEY_PATH) {
-  public_key = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
-  log.info('[config] read guppy public KEY: ', public_key); 
-  config.public_key = public_key;
+  publicKey = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
+  log.info('[config] read guppy public KEY: ', publicKey); 
+  config.publicKey = publicKey;
 }
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -61,6 +60,15 @@ if (process.env.GEN3_ARBORIST_ENDPOINT) {
 
 if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
+}
+
+const allowedTierAccessLevels = ['private', 'regular', 'granular', 'libre'];
+
+if (process.env.TIER_ACCESS_LEVEL) {
+  if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
+    throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
+  }
+  config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
 }
 
 if (process.env.TIER_ACCESS_LIMIT) {
@@ -79,14 +87,26 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
   config.analyzedTextFieldSuffix = process.env.ANALYZED_TEXT_FIELD_SUFFIX;
 }
 
-// only three options for tier access level: 'private' (default), 'regular', and 'libre'
-if (process.env.TIER_ACCESS_LEVEL) {
-  if (process.env.TIER_ACCESS_LEVEL !== 'private'
-  && process.env.TIER_ACCESS_LEVEL !== 'regular'
-  && process.env.TIER_ACCESS_LEVEL !== 'libre') {
-    throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
+// Either all indices should have explicit index-scoped tiered-access values or
+// the manifest should have a site-wide TIER_ACCESS_LEVEL value.
+// This approach is backwards-compatible with commons configured for past versions of tiered-access.
+let allIndicesHaveTierAccessSettings = true;
+config.esConfig.indices.forEach((item) => {
+  if (!item.tier_access_level && !config.tierAccessLevel) {
+    throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
   }
-  config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
+  if (item.tier_access_level && !allowedTierAccessLevels.includes(item.tier_access_level)) {
+    throw new Error(`tier_access_level invalid for index ${item.type}.`);
+  }
+  if (!item.tier_access_level) {
+    allIndicesHaveTierAccessSettings = false;
+  }
+});
+
+// If the indices all have settings, empty out the default
+// site-wide TIER_ACCESS_LEVEL from the config.
+if (allIndicesHaveTierAccessSettings) {
+  delete config.tierAccessLevel;
 }
 
 // check whitelist is enabled
