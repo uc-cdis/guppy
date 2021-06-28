@@ -148,7 +148,7 @@ class GuppyWrapper extends React.Component {
    */
   handleDownloadRawData({ sort, format }) {
     // error handling for misconfigured format types
-    if (format && !(format in FILE_FORMATS)) {
+    if (format && !(format.toUpperCase() in FILE_FORMATS)) {
       // eslint-disable-next-line no-console
       console.error(`Invalid value ${format} found for arg format!`);
     }
