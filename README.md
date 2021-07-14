@@ -38,7 +38,7 @@ You could put following as your config files:
 }
 ```
 
-Note: Guppy expects that either all indices in the guppy config block will have a tier_access_level set OR that a site-wide TIER_ACCESS_LEVEL is set as an environment variable (or in the global block of a commons' manifest). Guppy will throw an error if the config settings do not meet one of these two expectations. See `doc/index_scoped_tiered_access.md` for more information.
+Note: Guppy expects that either all indices in the guppy config block will have a tier_access_level set OR that a site-wide TIER_ACCESS_LEVEL is set as an environment variable (or in the global block of a commons' manifest). Guppy will throw an error if the config settings do not meet one of these two expectations. See [doc/index_scoped_tiered_access.md](https://github.com/uc-cdis/guppy/blob/master/doc/index_scoped_tiered_access.md) for more information.
 
 Following script will start server using at port 3000, using config file `example_config.json`:
 
