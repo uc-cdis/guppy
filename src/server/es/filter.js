@@ -279,20 +279,18 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
 
-    var nestedFilter = getFilterObj(esInstance, esIndex, filterOpObj, 
-                            aggsField, filterSelf, defaultAuthFilter, path)
-     if (nestedFilter != null) {
-         resultFilterObj = {
-           nested: {
-             path,
-             query: nestedFilter, 
-           }, 
-         };
-     }
-     else {
-         resultFilterObj = null
-     }
-     
+    const nestedFilter = getFilterObj(esInstance, esIndex, filterOpObj,
+      aggsField, filterSelf, defaultAuthFilter, path);
+    if (nestedFilter != null) {
+      resultFilterObj = {
+        nested: {
+          path,
+          query: nestedFilter,
+        },
+      };
+    } else {
+      resultFilterObj = null;
+    }
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
