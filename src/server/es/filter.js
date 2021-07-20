@@ -278,21 +278,19 @@ const getFilterObj = (
       // instead, only apply an auth filter if exists
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
-    
-    var nestedFilter = getFilterObj(esInstance, esIndex, filterOpObj, 
-                           aggsField, filterSelf, defaultAuthFilter, path)
+
+    const nestedFilter = getFilterObj(esInstance, esIndex, filterOpObj,
+      aggsField, filterSelf, defaultAuthFilter, path);
     if (nestedFilter != null) {
-        resultFilterObj = {
-          nested: {
-            path,
-            query: nestedFilter, 
-          }, 
-        };
+      resultFilterObj = {
+        nested: {
+          path,
+          query: nestedFilter,
+        },
+      };
+    } else {
+      resultFilterObj = null;
     }
-    else {
-        resultFilterObj = null
-    }
-    
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
     if (aggsField === field && !filterSelf) {
