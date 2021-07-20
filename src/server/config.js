@@ -43,7 +43,7 @@ const config = {
 let publicKey = '';
 if (process.env.PUBLIC_KEY_PATH) {
   publicKey = readFileSync(process.env.PUBLIC_KEY_PATH).toString();
-  log.info('[config] read guppy public KEY: ', publicKey); 
+  log.info('[config] read guppy public KEY: ', publicKey);
   config.publicKey = publicKey;
 }
 

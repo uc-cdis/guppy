@@ -17,7 +17,7 @@ const esgqlTypeMapping = {
   nested: 'Object',
 };
 
-const histogramTypePrefix = {'regular' : 'RegularAccess', 'granular': 'GranularAccess'}
+const histogramTypePrefix = { regular: 'RegularAccess', granular: 'GranularAccess' };
 
 const getGQLType = (esInstance, esIndex, field, esFieldType) => {
   const gqlType = esgqlTypeMapping[esFieldType];
@@ -227,7 +227,7 @@ export const getAggregationSchemaForEachType = (esConfig, esInstance) => esConfi
 export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => esConfig.indices.map((cfg) => getAggregationSchemaForOneNestedIndex(esInstance, cfg)).join('\n');
 
 const getNumberHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+    type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
       histogram(
         rangeStart: Int,
         rangeEnd: Int,
@@ -239,7 +239,7 @@ const getNumberHistogramSchema = (accessType) => `
   `;
 
 const getTextHistogramSchema = (accessType) => `
-    type ${( ['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '' ) + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+    type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
       histogram: [BucketsForNestedStringAgg]
     }
   `;

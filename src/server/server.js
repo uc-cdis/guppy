@@ -23,10 +23,10 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json({ limit: '50mb' }));
 
-//Load public key
+// Load public key
 app.locals.publicKey = loadPublicKey();
 if (app.locals.publicKey == null) {
-  log.error("[PUBLIC KEY] Failed loading public key.");
+  log.error('[PUBLIC KEY] Failed loading public key.');
 }
 
 const startServer = () => {

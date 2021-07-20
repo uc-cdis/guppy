@@ -2,7 +2,6 @@ import config from '../../config';
 import { firstLetterUpperCase } from '../../utils/utils';
 import { tierAccessResolver, hideNumberResolver } from './resolvers';
 
-
 // apply this middleware to all es types' data/aggregation resolvers
 const queryTypeMapping = {};
 const aggsTypeMapping = {};
