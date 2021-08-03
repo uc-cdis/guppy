@@ -6,7 +6,6 @@ import log from './logger';
 import config from './config';
 import CodedError from './utils/error';
 
-
 const downloadRouter = async (req, res, next) => {
   const {
     type, filter, sort, fields, accessibility,
@@ -19,7 +18,7 @@ const downloadRouter = async (req, res, next) => {
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
-  var isValid = validSignature(req);
+  const isValid = validSignature(req);
 
   try {
     let appliedFilter;
@@ -36,8 +35,8 @@ const downloadRouter = async (req, res, next) => {
         appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         break;
       }
-      case 'regular' : 
-      case 'granular' : {
+      case 'regular':
+      case 'granular': {
         if (accessibility === 'accessible') {
           appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);
         } else {

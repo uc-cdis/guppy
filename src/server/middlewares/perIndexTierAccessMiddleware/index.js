@@ -26,8 +26,7 @@ config.esConfig.indices.forEach((item) => {
     totalCountTypeMapping[aggregationName] = {
       _totalCount: hideNumberResolver(true),
     };
-  } 
-  else if (item.tier_access_level === 'granular') {
+  } else if (item.tier_access_level === 'granular') {
     atLeastOneIndexIsGranularAccess = true;
     queryTypeMapping[item.type] = granularAccessResolver({
       isRawDataQuery: true,
@@ -71,6 +70,5 @@ if (atLeastOneIndexIsGranularAccess) {
     histogram: granularHideNumberResolver(false),
   };
 }
-
 
 export default perIndexTierAccessMiddleware;
