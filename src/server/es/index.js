@@ -52,7 +52,7 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
-    log.info('[ES.query] query body: ', JSON.stringify(validatedQueryBody));
+    log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
       type: esType,
@@ -422,7 +422,7 @@ class ES {
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE}, 
+      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
       please use download endpoint for large data queries instead.`);
     }
