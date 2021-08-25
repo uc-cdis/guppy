@@ -8,7 +8,7 @@ services:
   - docker
 
 before_install:
-  - npm install -g npm@7.8.0
+  - npm install -g npm@7
   - npm config set maxsockets 5
   - COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js
   - VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js
