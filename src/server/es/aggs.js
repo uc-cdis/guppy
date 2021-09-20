@@ -537,8 +537,24 @@ export const textAggregation = async (
     nestedAggFields,
     nestedPath,
     isNumericField,
+    nestedAggsFilter,
   },
 ) => {
+  let nestedAggsFilterName;
+  let queryBodyNested;
+  if (nestedAggsFilter) {
+    nestedAggsFilterName = `${field}NestedAggsFilter`;
+    queryBodyNested = getFilterObj(
+      esInstance,
+      esIndex,
+      nestedAggsFilter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+      nestedPath
+    );
+  }
+
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -565,6 +581,7 @@ export const textAggregation = async (
     aggsNestedName = `${field}NestedAggs`;
     fieldNestedName = `${nestedPath}.${field}`;
   }
+  
 
   if (nestedAggFields && nestedAggFields.termsFields) {
     missingAlias = {};
@@ -578,31 +595,57 @@ export const textAggregation = async (
 
   // build up ES query if is nested aggregation
   if (aggsNestedName) {
-    queryBody.aggs = {
-      [aggsNestedName]: {
-        nested: {
-          path: nestedPath,
-        },
-        aggs: {
-          [aggsName]: {
-            composite: {
-              sources: [
-                {
-                  [fieldNestedName]: {
-                    terms: {
-                      field: fieldNestedName,
-                      ...missingAlias,
-                    },
+    if (nestedAggsFilterName) {
+      queryBody.aggs = {
+        [aggsNestedName]: {
+          nested: {
+            path: nestedPath,
+          },
+          aggs: {
+            [nestedAggsFilterName]: {
+              filter: {
+                ...queryBodyNested
+              },
+              aggs: {
+                [aggsName]: {
+                  terms: {
+                    field: fieldNestedName,
+                    ...missingAlias,
+                    size: PAGE_SIZE,
                   },
-                },
-              ],
-              size: PAGE_SIZE,
+                }
+              }
             },
-            ...aggsObj,
           },
         },
-      },
-    };
+      };
+    } else {
+      queryBody.aggs = {
+        [aggsNestedName]: {
+          nested: {
+            path: nestedPath,
+          },
+          aggs: {
+            [aggsName]: {
+              composite: {
+                sources: [
+                  {
+                    [fieldNestedName]: {
+                      terms: {
+                        field: fieldNestedName,
+                        ...missingAlias,
+                      },
+                    },
+                  },
+                ],
+                size: PAGE_SIZE,
+              },
+              ...aggsObj,
+            },
+          },
+        },
+      };
+    }
   } else {
     queryBody.aggs = {
       [aggsName]: {
@@ -631,18 +674,37 @@ export const textAggregation = async (
     const result = await esInstance.query(esIndex, esType, queryBody); 
     resultSize = 0;
 
-    const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+    let resultBuckets;
+    if (nestedAggsFilterName) {
+      resultBuckets = result.aggregations[aggsNestedName][nestedAggsFilterName][aggsName].buckets;
+    } else {
+      resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+    }
+    
 
     resultBuckets.forEach((item) => {
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
-      finalResults.push({
-        key: (fieldNestedName)? item.key[fieldNestedName] : item.key[field],
-        count: item.doc_count,
-        ...resultObj
-      });
+      if (nestedAggsFilterName) {
+        finalResults.push({
+          key: item.key,
+          count: item.doc_count
+        });
+      } else {
+        finalResults.push({
+          key: (fieldNestedName)? item.key[fieldNestedName] : item.key[field],
+          count: item.doc_count,
+          ...resultObj
+        });
+      }
+      
       resultSize += 1;
     });
-    const afterKey = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].after_key : result.aggregations[aggsName].after_key;
+
+    let afterKey;
+    if (!nestedAggsFilterName) {
+      afterKey = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].after_key : result.aggregations[aggsName].after_key;
+    }
+    
     if (typeof afterKey === 'undefined') break;
     (aggsNestedName) ? queryBody.aggs[aggsNestedName].aggs[aggsName].composite.after = afterKey : queryBody.aggs[aggsName].composite.after = afterKey;
   } while (resultSize === PAGE_SIZE);

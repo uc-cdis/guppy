@@ -240,7 +240,9 @@ const getNumberHistogramSchema = (accessType) => `
 
 const getTextHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
-      histogram: [BucketsForNestedStringAgg]
+      histogram(
+        nestedAggsFilter: JSON,
+      ): [BucketsForNestedStringAgg]
     }
   `;
 
