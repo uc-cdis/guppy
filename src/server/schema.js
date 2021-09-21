@@ -242,6 +242,7 @@ const getTextHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
       histogram(
         filterNestedEntity: Boolean=true,
+        reverseNested: Boolean=true,
       ): [BucketsForNestedStringAgg]
     }
   `;

@@ -539,12 +539,18 @@ export const textAggregation = async (
     nestedPath,
     isNumericField,
     filterNestedEntity,
+    reverseNested,
   },
 ) => {
   let nestedAggsFilterName;
   let queryBodyNested;
   if (filterNestedEntity) {
     nestedAggsFilterName = `${field}NestedAggsFilter`;
+  }
+
+  let reverseNestedQuery = {};
+  if (reverseNested) {
+    reverseNestedQuery = {"aggs":{"subjectAggs":{"reverse_nested":{}}}}
   }
 
   const queryBody = { size: 0 };
@@ -613,6 +619,7 @@ export const textAggregation = async (
                     ...missingAlias,
                     size: PAGE_SIZE,
                   },
+                  ...reverseNestedQuery
                 }
               }
             },
@@ -687,7 +694,7 @@ export const textAggregation = async (
       if (nestedAggsFilterName) {
         finalResults.push({
           key: item.key,
-          count: item.doc_count
+          count: (reverseNested) ? item["subjectAggs"].doc_count : item.doc_count,
         });
       } else {
         finalResults.push({

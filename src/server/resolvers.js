@@ -110,6 +110,7 @@ const textHistogramResolver = async (parent, args, context) => {
   log.debug('[resolver.textHistogramResolver] parent', parent);
   const {
     filterNestedEntity,
+    reverseNested,
   } = args;
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
@@ -124,6 +125,7 @@ const textHistogramResolver = async (parent, args, context) => {
     nestedPath,
     isNumericField,
     filterNestedEntity,
+    reverseNested,
   });
 };
 
