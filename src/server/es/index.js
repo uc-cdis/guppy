@@ -518,7 +518,7 @@ class ES {
     nestedAggFields,
     nestedPath,
     isNumericField,
-    nestedAggsFilter,
+    filterNestedEntity,
   }) {
     return esAggregator.textAggregation(
       {
@@ -534,7 +534,7 @@ class ES {
         nestedAggFields,
         nestedPath,
         isNumericField,
-        nestedAggsFilter,
+        filterNestedEntity,
       },
     );
   }

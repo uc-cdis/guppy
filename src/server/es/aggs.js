@@ -1,5 +1,6 @@
 import { UserInputError } from 'apollo-server';
 import getFilterObj from './filter';
+import extractNestedFilter from './utils';
 import {
   AGGS_GLOBAL_STATS_NAME,
   AGGS_ITEM_STATS_NAME,
@@ -537,22 +538,13 @@ export const textAggregation = async (
     nestedAggFields,
     nestedPath,
     isNumericField,
-    nestedAggsFilter,
+    filterNestedEntity,
   },
 ) => {
   let nestedAggsFilterName;
   let queryBodyNested;
-  if (nestedAggsFilter) {
+  if (filterNestedEntity) {
     nestedAggsFilterName = `${field}NestedAggsFilter`;
-    queryBodyNested = getFilterObj(
-      esInstance,
-      esIndex,
-      nestedAggsFilter,
-      field,
-      filterSelf,
-      defaultAuthFilter,
-      nestedPath
-    );
   }
 
   const queryBody = { size: 0 };
@@ -565,6 +557,14 @@ export const textAggregation = async (
       filterSelf,
       defaultAuthFilter,
     );
+
+    if (nestedAggsFilterName) {
+      queryBodyNested = extractNestedFilter(
+        queryBody.query,
+        nestedPath
+      );
+    }
+    
   }
 
   let missingAlias = {};
