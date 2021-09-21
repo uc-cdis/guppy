@@ -1,8 +1,3 @@
-import _ from 'lodash';
-import { ApolloError, UserInputError } from 'apollo-server';
-import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
-import config from '../config';
-
 import log from '../logger';
 
 
