@@ -542,17 +542,6 @@ export const textAggregation = async (
     reverseNested,
   },
 ) => {
-  let nestedAggsFilterName;
-  let queryBodyNested;
-  if (filterNestedEntity) {
-    nestedAggsFilterName = `${field}NestedAggsFilter`;
-  }
-
-  let reverseNestedQuery = {};
-  if (reverseNested) {
-    reverseNestedQuery = {"aggs":{"subjectAggs":{"reverse_nested":{}}}}
-  }
-
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -562,15 +551,7 @@ export const textAggregation = async (
       field,
       filterSelf,
       defaultAuthFilter,
-    );
-
-    if (nestedAggsFilterName) {
-      queryBodyNested = extractNestedFilter(
-        queryBody.query,
-        nestedPath
-      );
-    }
-    
+    );    
   }
 
   let missingAlias = {};
@@ -583,9 +564,30 @@ export const textAggregation = async (
   const aggsObj = {};
   let aggsNestedName;
   let fieldNestedName;
+  let nestedAggsFilterName;
+  let queryBodyNested;
+  let reverseNestedQuery = {};
+
   if (nestedPath) {
     aggsNestedName = `${field}NestedAggs`;
     fieldNestedName = `${nestedPath}.${field}`;
+
+    if (filterNestedEntity) {
+      nestedAggsFilterName = `${field}NestedAggsFilter`;
+    }
+    if (reverseNested) {
+      reverseNestedQuery = {"aggs":{"subjectAggs":{"reverse_nested":{}}}}
+    }
+
+    if (!!filter || !!defaultAuthFilter) {
+      if (nestedAggsFilterName) {
+        queryBodyNested = extractNestedFilter(
+          queryBody.query,
+          nestedPath
+        );
+      }
+      
+    }
   }
   
 

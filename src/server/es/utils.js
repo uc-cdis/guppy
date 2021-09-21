@@ -58,6 +58,7 @@ const extractNestedFilter = (
       }
     }
   }
+  return {"match_all": {}};
 };
 
 
