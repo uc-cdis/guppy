@@ -188,11 +188,15 @@ class ES {
     const promiseList = this.config.indices
       .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
         .then((res) => {
-          Object.keys(res).forEach((x) => {
-            if (res[x].enabled !== undefined && res[x].enabled === false) {
-              delete res[x];
-            }
-          });
+          Object.keys(res)
+            .forEach((fieldName) => {
+              if (res[fieldName].enabled !== undefined && res[fieldName].enabled === false) {
+                delete res[fieldName];
+              }
+              if (fieldName in res && fieldName.indexOf('__') === 0) {
+                delete Object.assign(res, { [fieldName.replace('__', 'x__')]: res[fieldName] })[fieldName];
+              }
+            });
           return {
             index: cfg.index,
             fieldTypes: res,
