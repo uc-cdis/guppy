@@ -36,11 +36,12 @@ class ES {
    */
   async query(esIndex, esType, queryBody) {
     const validatedQueryBody = {};
-    Object.keys(queryBody).forEach((key) => {
-      if (typeof queryBody[key] !== 'undefined' && queryBody[key] !== null) {
-        validatedQueryBody[key] = queryBody[key];
-      }
-    });
+    Object.keys(queryBody)
+      .forEach((key) => {
+        if (typeof queryBody[key] !== 'undefined' && queryBody[key] !== null) {
+          validatedQueryBody[key] = queryBody[key];
+        }
+      });
     validatedQueryBody.highlight = {
       pre_tags: [
         `<${config.matchedTextHighlightTagName}>`,
@@ -57,10 +58,11 @@ class ES {
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
-    }).then((resp) => resp.body, (err) => {
-      log.error(`[ES.query] error during querying: ${err.message}`);
-      throw new Error(err.message);
-    });
+    })
+      .then((resp) => resp.body, (err) => {
+        log.error(`[ES.query] error during querying: ${err.message}`);
+        throw new Error(err.message);
+      });
   }
 
   /**
@@ -81,12 +83,14 @@ class ES {
         'Invalid es index or es type name',
       );
     }
-    const allESFields = _.flattenDeep(this.getESFields(esIndex).fields.map((f) => {
-      if (f.nestedProps) {
-        return processNestedFieldNames(f);
-      }
-      return f.name;
-    }));
+    const allESFields = _.flattenDeep(this.getESFields(esIndex)
+      .fields
+      .map((f) => {
+        if (f.nestedProps) {
+          return processNestedFieldNames(f);
+        }
+        return f.name;
+      }));
     const fieldsNotBelong = _.difference(fields, allESFields);
     if (fieldsNotBelong.length > 0) {
       throw new CodedError(
@@ -117,10 +121,11 @@ class ES {
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort: sortStringList,
-        }).then((resp) => resp, (err) => {
-          log.error('[ES.query] error when query', err.message);
-          throw new Error(err.message);
-        });
+        })
+          .then((resp) => resp, (err) => {
+            log.error('[ES.query] error when query', err.message);
+            throw new Error(err.message);
+          });
         currentBatch = res.body;
         log.debug('[ES scrollQuery] created scroll');
       } else { // following batches
@@ -160,16 +165,17 @@ class ES {
     return this.client.indices.getMapping({
       index: esIndex,
       type: esType,
-    }).then((resp) => {
-      try {
-        const esIndexAlias = Object.keys(resp.body)[0];
-        return resp.body[esIndexAlias].mappings[esType].properties;
-      } catch (err) {
-        throw new Error(`${errMsg}: ${err}`);
-      }
-    }, (err) => {
-      throw new Error(`${errMsg}: ${err.message}`);
-    });
+    })
+      .then((resp) => {
+        try {
+          const esIndexAlias = Object.keys(resp.body)[0];
+          return resp.body[esIndexAlias].mappings[esType].properties;
+        } catch (err) {
+          throw new Error(`${errMsg}: ${err}`);
+        }
+      }, (err) => {
+        throw new Error(`${errMsg}: ${err.message}`);
+      });
   }
 
   async _getMappingsForAllIndices() {
@@ -181,7 +187,17 @@ class ES {
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
       .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
-        .then((res) => ({ index: cfg.index, fieldTypes: res })));
+        .then((res) => {
+          Object.keys(res).forEach((x) => {
+            if (res[x].enabled !== undefined && res[x].enabled === false) {
+              delete res[x];
+            }
+          });
+          return {
+            index: cfg.index,
+            fieldTypes: res,
+          };
+        }));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
@@ -215,34 +231,35 @@ class ES {
           },
         },
       },
-    }).then((resp) => {
-      try {
-        resp.body.hits.hits.forEach((doc) => {
-          const index = doc._id;
-          if (!this.fieldTypes[index]) {
-            const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
-            log.error(errMsg);
-            return;
-          }
-          const fields = doc._source.array;
-          fields.forEach((field) => {
-            if (!this.fieldTypes[index][field]) {
-              const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+    })
+      .then((resp) => {
+        try {
+          resp.body.hits.hits.forEach((doc) => {
+            const index = doc._id;
+            if (!this.fieldTypes[index]) {
+              const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
               log.error(errMsg);
               return;
             }
-            if (!arrayFields[index]) arrayFields[index] = [];
-            arrayFields[index].push(field);
+            const fields = doc._source.array;
+            fields.forEach((field) => {
+              if (!this.fieldTypes[index][field]) {
+                const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+                log.error(errMsg);
+                return;
+              }
+              if (!arrayFields[index]) arrayFields[index] = [];
+              arrayFields[index].push(field);
+            });
           });
-        });
-        log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
-      } catch (err) {
-        throw new Error(err);
-      }
-      return arrayFields;
-    }, (err) => {
-      throw new Error(err.message);
-    });
+          log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
+        } catch (err) {
+          throw new Error(err);
+        }
+        return arrayFields;
+      }, (err) => {
+        throw new Error(err.message);
+      });
   }
 
   /**
@@ -287,15 +304,19 @@ class ES {
       res[cfg.index] = {
         index: cfg.index,
         type: cfg.type,
-        fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
-          let r;
-          if (value.type !== 'nested') {
-            r = { name: key, type: value.type };
-          } else {
-            r = buildNestedField(key, value);
-          }
-          return r;
-        }),
+        fields: Object.entries(this.fieldTypes[cfg.index])
+          .map(([key, value]) => {
+            let r;
+            if (value.type !== 'nested') {
+              r = {
+                name: key,
+                type: value.type
+              };
+            } else {
+              r = buildNestedField(key, value);
+            }
+            return r;
+          }),
       };
     });
     if (typeof esIndex === 'undefined') {
@@ -356,30 +377,31 @@ class ES {
     }
     return this.client.indices.getAlias({
       index: indicesArray,
-    }).then((resp) => {
-      try {
-        const indicesMetadata = resp.body;
-        const indicesWithArrayFields = Object.keys(this.arrayFields);
-        for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
-          const indexName = indicesWithArrayFields[i];
-          if (!indicesMetadata[indexName]) {
-            indicesMetadata[indexName] = {};
+    })
+      .then((resp) => {
+        try {
+          const indicesMetadata = resp.body;
+          const indicesWithArrayFields = Object.keys(this.arrayFields);
+          for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
+            const indexName = indicesWithArrayFields[i];
+            if (!indicesMetadata[indexName]) {
+              indicesMetadata[indexName] = {};
+            }
+            indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
           }
-          indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
+          return {
+            statusCode: resp.statusCode,
+            warnings: resp.warnings,
+            indices: {
+              ...indicesMetadata,
+            },
+          };
+        } catch (err) {
+          throw new Error(err);
         }
-        return {
-          statusCode: resp.statusCode,
-          warnings: resp.warnings,
-          indices: {
-            ...indicesMetadata,
-          },
-        };
-      } catch (err) {
+      }, (err) => {
         throw new Error(err);
-      }
-    }, (err) => {
-      throw new Error(err);
-    });
+      });
   }
 
   /**
@@ -390,9 +412,16 @@ class ES {
   }
 
   filterData(
-    { esIndex, esType },
     {
-      filter, fields, sort, offset = 0, size,
+      esIndex,
+      esType
+    },
+    {
+      filter,
+      fields,
+      sort,
+      offset = 0,
+      size,
     },
   ) {
     const queryBody = { from: offset };
@@ -423,7 +452,13 @@ class ES {
   }
 
   async getData({
-    esIndex, esType, fields, filter, sort, offset, size,
+    esIndex,
+    esType,
+    fields,
+    filter,
+    sort,
+    offset,
+    size,
   }) {
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
       throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
@@ -431,9 +466,17 @@ class ES {
       please use download endpoint for large data queries instead.`);
     }
     const result = await this.filterData(
-      { esInstance: this, esIndex, esType },
       {
-        filter, fields, sort, offset, size,
+        esInstance: this,
+        esIndex,
+        esType
+      },
+      {
+        filter,
+        fields,
+        sort,
+        offset,
+        size,
       },
     );
     const { hits } = result.hits;
@@ -443,19 +486,20 @@ class ES {
         return h._source;
       }
       // ES returns highlight, transfer them into "_matched" schema
-      const matchedList = Object.keys(h.highlight).map((f) => {
-        let field = f;
-        if (f.endsWith(config.analyzedTextFieldSuffix)) {
-          // remove ".analyzed" suffix from field name
-          field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
-        }
-        return {
-          field,
-          // just use ES highlights' format,
-          // should be a list of string, with matched part emphasized with <
-          highlights: h.highlight[f],
-        };
-      });
+      const matchedList = Object.keys(h.highlight)
+        .map((f) => {
+          let field = f;
+          if (f.endsWith(config.analyzedTextFieldSuffix)) {
+            // remove ".analyzed" suffix from field name
+            field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
+          }
+          return {
+            field,
+            // just use ES highlights' format,
+            // should be a list of string, with matched part emphasized with <
+            highlights: h.highlight[f],
+          };
+        });
       return {
         ...h._source,
         _matched: matchedList,
@@ -465,7 +509,11 @@ class ES {
   }
 
   downloadData({
-    esIndex, esType, fields, filter, sort,
+    esIndex,
+    esType,
+    fields,
+    filter,
+    sort,
   }) {
     const esFilterObj = filter ? getFilterObj(this, esIndex, filter) : undefined;
     return this.scrollQuery(esIndex, esType, {
