@@ -34,8 +34,11 @@ const startServer = () => {
     // create graphql server instance
   const server = new ApolloServer({
     mocks: false,
+    debug: true,
     schema: schemaWithMiddleware,
     context: async ({ req }) => {
+      console.log(req.body.query);
+      console.log(req.body.variables);
       const jwt = headerParser.parseJWT(req);
       const authHelper = await getAuthHelperInstance(jwt);
       return {

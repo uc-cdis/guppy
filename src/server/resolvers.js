@@ -16,9 +16,11 @@ const typeQueryResolver = (esInstance, esIndex, esType) => (parent, args, contex
     offset, first, filter, sort, format,
   } = args;
   const fields = parseResolveInfo(resolveInfo);
-  return esInstance.getData({
+
+  const results = esInstance.getData({
     esIndex, esType, fields, filter, sort, offset, size: first, format,
   });
+  return results;
 };
 
 /**

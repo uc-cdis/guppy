@@ -247,13 +247,14 @@ class ES {
             }
             const fields = doc._source.array;
             fields.forEach((field) => {
-              if (!this.fieldTypes[index][field]) {
-                const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+              const fn = (field.indexOf('__') === 0) ? field.replace('__', 'x__') : field;
+              if (!this.fieldTypes[index][fn]) {
+                const errMsg = `[ES.initialize] wrong array entry from config: field "${fn}" not found in index ${index}, skipped.`;
                 log.error(errMsg);
                 return;
               }
               if (!arrayFields[index]) arrayFields[index] = [];
-              arrayFields[index].push(field);
+              arrayFields[index].push(fn);
             });
           });
           log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
@@ -485,6 +486,13 @@ class ES {
     );
     const { hits } = result.hits;
     const hitsWithMatchedResults = hits.map((h) => {
+      Object.keys(h._source)
+        .forEach((fieldName) => {
+          if (fieldName in h._source && fieldName.indexOf('__') === 0) {
+            delete Object.assign(h._source, { [fieldName.replace('__', 'x__')]: h._source[fieldName] })[fieldName];
+          }
+        });
+
       if (!('highlight' in h)) {
         // ES doesn't returns "highlight"
         return h._source;
