@@ -403,9 +403,13 @@ class ES {
     if (typeof size !== 'undefined') {
       queryBody.size = size;
     }
-    if (fields) {
-      const esFields = fromFieldsToSource(fields);
-      if (esFields.length > 0) queryBody._source = esFields;
+    if (fields !== undefined) {
+      if (fields) {
+        const esFields = fromFieldsToSource(fields);
+        if (esFields.length > 0) queryBody._source = esFields;
+      } else {
+        queryBody._source = false;
+      }
     }
     return this.query(esIndex, esType, queryBody);
   }
@@ -413,7 +417,7 @@ class ES {
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter },
+      { filter, fields: false },
     );
     return result.hits.total;
   }
