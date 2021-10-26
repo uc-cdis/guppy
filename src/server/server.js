@@ -16,7 +16,7 @@ import { loadPublicKey } from './utils/utils';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
-import { statusRouter, versionRouter } from './endpoints';
+import { statusRouter, versionRouter, versionData } from './endpoints';
 
 const app = express();
 app.use(cors());
@@ -59,6 +59,15 @@ const startServer = () => {
   // simple health check endpoint
   // eslint-disable-next-line no-unused-vars
   app.get('/_status', statusRouter, (req, res, err, next) => {
+    if (err instanceof CodedError) {
+      res.status(err.code).send(err.msg);
+    } else {
+      res.status(500).send(err);
+    }
+  });
+
+  // Get data index used
+  app.get('/_data_version', versionData, (req, res, err, next) => {
     if (err instanceof CodedError) {
       res.status(err.code).send(err.msg);
     } else {
