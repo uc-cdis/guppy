@@ -35,8 +35,7 @@ RUN npm run-script prepare
 EXPOSE 3000
 EXPOSE 80
 
-RUN if [[ -z "$DD_TRACE_ENABLED" ]]; \
+CMD if [[ -z "$DD_TRACE_ENABLED" ]]; \
     then export DD_TRACE_ENABLED=false; \
-    fi
-
-CMD node --max-http-header-size 16000 --require dd-trace/init dist/server/server.js
+    fi \
+    node --max-http-header-size 16000 --require dd-trace/init dist/server/server.js
