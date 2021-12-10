@@ -1,6 +1,6 @@
 {
   "name": "@gen3/guppy",
-  "version": "0.14.0",
+  "version": "0.14.3",
   "description": "Server that support GraphQL queries on data from elasticsearch",
   "main": "src/server/server.js",
   "directories": {
