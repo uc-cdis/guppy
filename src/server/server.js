@@ -67,13 +67,13 @@ const startServer = () => {
   });
 
   // Get data index used
-  app.post('/_data_version', versionData, (req, res, err, next) => { 
-      if (err instanceof CodedError) {
-        res.status(err.code).send(err.msg);
-      } else {
-        res.status(500).send(err);
-      }
-    });
+  app.get('/_data_version', versionData, (req, res, err, next) => { 
+    if (err instanceof CodedError) {
+      res.status(err.code).send(err.msg);
+    } else {
+      res.status(500).send(err);
+    }
+  });
 
   // eslint-disable-next-line no-unused-vars
   app.get('/_version', versionRouter);
