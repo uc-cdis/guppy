@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import assert from 'assert';
 import { ApolloError, UserInputError } from 'apollo-server';
 import log from '../../logger';
@@ -201,7 +202,8 @@ export const granularHideNumberResolver = (isGettingTotalCount) => async (
       return item;
     }
     // we only encrypt if count from no-access item is small
-    if (result.count < config.tierAccessLimit) {
+    const resultItem = _.find(result, (e) => e.key === item.key);
+    if (resultItem.count < config.tierAccessLimit) {
       return {
         key: item.key,
         count: ENCRYPT_COUNT,
