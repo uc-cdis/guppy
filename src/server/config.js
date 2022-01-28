@@ -28,16 +28,17 @@ const config = {
   },
   port: 80,
   path: '/graphql',
-  arboristEndpoint: 'http://arborist-service',
+  arboristEndpoint: 'mock',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   tierAccessSensitiveRecordExclusionField: inputConfig.tier_access_sensitive_record_exclusion_field,
-  logLevel: inputConfig.log_level || 'INFO',
+  logLevel: inputConfig.log_level || 'DEBUG',
   enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? false : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
+  doubleUnderscorePrefix: 'x__',
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -53,6 +54,10 @@ if (process.env.GEN3_ARBORIST_ENDPOINT) {
 
 if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
+}
+
+if (process.env.DOUBLE_UNDERSCORE) {
+  config.doubleUnderscorePrefix = process.env.DOUBLE_UNDERSCORE;
 }
 
 const allowedTierAccessLevels = ['private', 'regular', 'libre'];
