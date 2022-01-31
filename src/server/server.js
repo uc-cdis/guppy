@@ -67,7 +67,7 @@ const startServer = () => {
   });
 
   // Get data index used
-  app.get('/_data_version', versionData, (req, res, err, next) => {
+  app.get('/_data_version', versionData, (req, res, err, next) => { 
     if (err instanceof CodedError) {
       res.status(err.code).send(err.msg);
     } else {
