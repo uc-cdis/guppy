@@ -28,7 +28,7 @@
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
     "@elastic/elasticsearch": "^7.0.0-rc.1",
-    "@gen3/ui-component": "^0.10.0",
+    "@gen3/ui-component": "uc-cdis/gen3-ui-component#chore/dep-patch",
     "apollo-server": "^2.4.8",
     "apollo-server-express": "^2.4.8",
     "array.prototype.flat": "^1.2.2",
@@ -66,24 +66,26 @@
     "@babel/preset-react": "^7.8.3",
     "@babel/preset-stage-0": "^7.8.3",
     "@babel/runtime-corejs3": "^7.13.6",
-    "@storybook/addon-actions": "^5.1.1",
-    "@storybook/addon-links": "^5.1.1",
-    "@storybook/addons": "^5.1.1",
-    "@storybook/react": "^5.1.1",
-    "babel-jest": "^24.7.1",
+    "@storybook/addon-actions": "^6.0.0",
+    "@storybook/addon-links": "^6.0.0",
+    "@storybook/react": "^6.0.0",
+    "babel-jest": "^25.0.0",
     "babel-loader": "^8.0.5",
-    "babel-preset-env": "^1.7.0",
     "commander": "^3.0.1",
-    "eslint": "^6.7.1",
-    "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.16.0",
-    "jest": "^24.7.1",
+    "eslint": "^7.23.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.23.1",
+    "jest": "^25.0.0",
     "json-schema-faker": "^0.5.0-rc23",
     "nock": "^10.0.6",
-    "nodemon": "^1.18.10",
-    "react-scripts": "^3.4.3",
+    "nodemon": "^2.0.0",
     "react-table": "^6.9.2"
+  },
+  "overrides": {
+    "html-webpack-plugin": {
+      "strip-ansi": "6.0.1"
+    }
   }
 }
