@@ -84,6 +84,8 @@
     "react-table": "^6.9.2"
   },
   "overrides": {
-    "strip-ansi": "6.0.1"
+    "@storybook/react": {
+      "strip-ansi": "6.0.1"
+    }
   }
 }
