@@ -85,7 +85,8 @@
   },
   "overrides": {
     "@storybook/react": {
-      "strip-ansi": "6.0.1"
+      "strip-ansi": "6.0.1",
+      "trim": "0.0.3"
     }
   }
 }
