@@ -154,7 +154,8 @@ export const numericGlobalStats = async (
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
-  }) => {
+  },
+) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -239,7 +240,8 @@ export const numericHistogramWithFixedRangeStep = async (
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
-  }) => {
+  },
+) => {
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -358,7 +360,8 @@ export const numericHistogramWithFixedBinCount = async (
     defaultAuthFilter,
     nestedAggFields,
     nestedPath,
-  }) => {
+  },
+) => {
   const globalStats = await numericGlobalStats(
     {
       esInstance,
@@ -628,7 +631,7 @@ export const textAggregation = async (
   /* eslint-disable */
   do {
     // parse ES query result based on whether is doing nested aggregation or not (if `aggsNestedName` is defined)
-    const result = await esInstance.query(esIndex, esType, queryBody); 
+    const result = await esInstance.query(esIndex, esType, queryBody);
     resultSize = 0;
 
     const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
