@@ -226,11 +226,17 @@ class ES {
           }
           const fields = doc._source.array;
           fields.forEach((field) => {
-            if (!this.fieldTypes[index][field]) {
-              const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
-              log.error(errMsg);
-              return;
-            }
+            const nodes = field.split('.');
+            nestedObject = this.fieldTypes[index]
+            nodes.forEach((n) => {
+              if (n in nestedObject) {
+                nestedObject = nestedObject[n].properties;
+              } else {
+                const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+                console.log(errMsg);
+                return;
+              }
+            });
             if (!arrayFields[index]) arrayFields[index] = [];
             arrayFields[index].push(field);
           });
