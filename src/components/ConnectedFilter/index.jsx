@@ -28,9 +28,10 @@ class ConnectedFilter extends React.Component {
     super(props);
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
-    const allFields = props.accessibleFieldCheckList
+    let allFields = props.accessibleFieldCheckList
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
+    allFields = _.union(allFields, this.props.extraAggsFields);
 
     this.initialTabsOptions = {};
     let initialFilter = this.props.adminAppliedPreFilters;
@@ -315,6 +316,7 @@ ConnectedFilter.propTypes = {
       searchFields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
+  extraAggsFields: PropTypes.arrayOf(PropTypes.string),
   guppyConfig: PropTypes.shape({
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -341,6 +343,7 @@ ConnectedFilter.propTypes = {
 };
 
 ConnectedFilter.defaultProps = {
+  extraAggsFields: [],
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   className: '',

@@ -35,4 +35,4 @@ RUN npm run-script prepare
 EXPOSE 3000
 EXPOSE 80
 
-CMD node --max-http-header-size 16000 dist/server/server.js
+CMD bash ./startServer.sh
