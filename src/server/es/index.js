@@ -227,7 +227,7 @@ class ES {
           const fields = doc._source.array;
           fields.forEach((field) => {
             const nodes = field.split('.');
-            var nestedObject = this.fieldTypes[index]
+            let nestedObject = this.fieldTypes[index];
             nodes.forEach((n) => {
               if (n in nestedObject) {
                 nestedObject = nestedObject[n].properties;
