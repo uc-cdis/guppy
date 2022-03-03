@@ -234,7 +234,6 @@ class ES {
               } else {
                 const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
                 console.log(errMsg);
-                return;
               }
             });
             if (!arrayFields[index]) arrayFields[index] = [];
