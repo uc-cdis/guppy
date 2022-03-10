@@ -12,8 +12,8 @@ services:
     volumes:
       - "esdata:/usr/share/elasticsearch/data"
     environment:
-     cluster.name: localdev
-     discovery.type: single-node
+     "cluster.name": "localdev"
+     "discovery.type": "single-node"
      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
     deploy:
       replicas: 1
