@@ -14,8 +14,7 @@ RUN apt-get update \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@7 \
-    && npm config set maxsockets 5
+    && npm install -g npm@8
 
 COPY . /guppy/
 WORKDIR /guppy
