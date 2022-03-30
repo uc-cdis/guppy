@@ -183,7 +183,8 @@ export const tierAccessResolver = (
  * @param {bool} isGettingTotalCount
  */
 export const hideNumberResolver = (isGettingTotalCount) => async (
-  resolve, root, args, context, info) => {
+  resolve, root, args, context, info,
+) => {
   // for aggregations, hide all counts that are greater than limited number
   const { needEncryptAgg } = root;
   const result = await resolve(root, args, context, info);
