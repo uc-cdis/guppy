@@ -225,6 +225,16 @@ class ES {
             return;
           }
           const fields = doc._source.array;
+
+          // for (let i = 0; i < indicesWithArrayFields.length; i += 1) {
+          //   const indexName = indicesWithArrayFields[i];
+          //   if (!indicesMetadata[indexName]) {
+          //     indicesMetadata[indexName] = {};
+          //   }
+          //   indicesMetadata[indexName].arrayFields = this.arrayFields[indexName];
+          // }
+        
+
           fields.forEach((field) => {
             const nodes = field.split('.');
             let nestedObject = this.fieldTypes[index];
@@ -239,6 +249,8 @@ class ES {
             if (!arrayFields[index]) arrayFields[index] = [];
             arrayFields[index].push(field);
           });
+
+
         });
         log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
       } catch (err) {
@@ -391,7 +403,20 @@ class ES {
    * Check if the field is array
    */
   isArrayField(esIndex, field) {
-    return (this.arrayFields[esIndex] && this.arrayFields[esIndex].includes(field));
+
+    // TODO see where isArrayField gets the field from and pass the nested path with it to have a direct match and avoid limitation of using unique names
+
+    let isNestedArray = false;
+    if (this.arrayFields[esIndex]) {
+      for (let i = 0; i < this.arrayFields[esIndex].length; i += 1) {
+        const nodes = this.arrayFields[esIndex][i].split('.');
+        if (nodes[nodes.length - 1] == field) {
+          isNestedArray = true;
+        }
+      }
+    }
+
+    return (this.arrayFields[esIndex] && (this.arrayFields[esIndex].includes(field) || (isNestedArray)));
   }
 
   filterData(
