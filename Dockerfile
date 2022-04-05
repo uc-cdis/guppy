@@ -14,8 +14,7 @@ RUN apt-get update \
     && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@7 \
-    && npm config set maxsockets 5
+    && npm install -g npm@8
 
 COPY . /guppy/
 WORKDIR /guppy
@@ -35,4 +34,4 @@ RUN npm run-script prepare
 EXPOSE 3000
 EXPOSE 80
 
-CMD node --max-http-header-size 16000 dist/server/server.js
+CMD bash ./startServer.sh
