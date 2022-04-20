@@ -152,6 +152,12 @@ describe('Schema', () => {
   type RegularAccessHistogramForString {
     histogram: [BucketsForNestedStringAgg]
   }
+  type HistogramForBoolean {
+    histogram: [BucketsForNestedStringAgg]
+  }
+  type RegularAccessHistogramForBoolean {
+    histogram: [BucketsForNestedStringAgg]
+  }
   type HistogramForNumber {
     histogram(
       rangeStart: Int,
