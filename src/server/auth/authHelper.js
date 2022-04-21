@@ -16,20 +16,22 @@ export class AuthHelper {
   async initialize() {
     try {
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+      log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
         const subListPromise = this.getOutOfScopeResourceList(index, type);
         promiseList.push(subListPromise);
       });
-      this._unaccessibleResourceList = [];
       const listResult = await Promise.all(promiseList);
+
+      this._unaccessibleResourceList = [];
       listResult.forEach((list) => {
         this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
       });
-      log.debug('[AuthHelper] accessible resources: ', this._accessibleResourceList);
-      log.debug('[AuthHelper] unaccessible resources: ', this._unaccessibleResourceList);
+      log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
     } catch (err) {
-      log.error('[AuthHelper] error when initializing', err);
+      log.error('[AuthHelper] error when initializing:', err);
     }
   }
 
