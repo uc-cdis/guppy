@@ -931,6 +931,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
         termsFields: [
           {
             field: 'gender',
+            count: 41,
             terms: [
               {
                 key: 'male',
@@ -948,6 +949,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
           },
           {
             field: 'someNonExistingField',
+            count: 0,
             terms: [
               {
                 key: null,
@@ -963,6 +965,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
         termsFields: [
           {
             field: 'gender',
+            count: 35,
             terms: [
               {
                 key: 'male',
@@ -980,6 +983,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
           },
           {
             field: 'someNonExistingField',
+            count: 0,
             terms: [
               {
                 key: null,
@@ -1027,6 +1031,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
         termsFields: [
           {
             field: 'gender',
+            count: 41,
             terms: [
               {
                 key: 'male',
@@ -1044,6 +1049,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
           },
           {
             field: 'someNonExistingField',
+            count: 0,
             terms: [
               {
                 key: null,
@@ -1069,6 +1075,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
         termsFields: [
           {
             field: 'gender',
+            count: 35,
             terms: [
               {
                 key: 'male',
@@ -1086,6 +1093,7 @@ describe('could only aggregate to find missing fields (both existing and non-exi
           },
           {
             field: 'someNonExistingField',
+            count: 0,
             terms: [
               {
                 key: null,

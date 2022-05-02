@@ -57,6 +57,7 @@ const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
       const tempResult = {};
       tempResult.field = element;
       tempResult.terms = [];
+      tempResult.count = 0;
       const variableName = `${element}Terms`;
       if (item[variableName].buckets && item[variableName].buckets.length > 0) {
         item[variableName].buckets.forEach((itemElement) => {
@@ -64,6 +65,7 @@ const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
             key: itemElement.key,
             count: itemElement.doc_count,
           });
+          tempResult.count += itemElement.doc_count;
         });
       } else {
         tempResult.terms.push({
