@@ -561,7 +561,9 @@ export const textAggregation = async (
   // don't add missing alias to numeric field by default
   // since the value of missing alias is a string
   if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
-    missingAlias = { missing: config.esConfig.missingDataAlias };
+    if (config.esConfig.missingDataVariables.includes(field)) {
+      missingAlias = { missing: config.esConfig.missingDataAlias };
+    }
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
