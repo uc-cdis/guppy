@@ -75,6 +75,7 @@ const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
       }
       termsFields {
         field
+        count
         terms {
           key
           count
