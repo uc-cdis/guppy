@@ -18,6 +18,7 @@ class ArboristClient {
       {
         method: 'GET',
         headers,
+        timeout: 40000,
       },
     ).then(
       (response) => response.json(),
