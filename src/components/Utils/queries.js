@@ -361,7 +361,9 @@ export const downloadDataFromGuppy = (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(queryBody),
-    }).then((res) => (JSON_FORMAT ? res.json() : jsonToFormat(res.json(), format)));
+    })
+      .then((r) => r.json())
+      .then((res) => (JSON_FORMAT ? res : jsonToFormat(res, format)));
   }
   return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility, format)
     .then((res) => {
