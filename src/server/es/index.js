@@ -226,7 +226,14 @@ class ES {
           }
           const fields = doc._source.array;
           fields.forEach((field) => {
-            if (!this.fieldTypes[index][field]) {
+            const fieldArr = field.split('.');
+            if (!(this.fieldTypes[index][field]
+              || (
+                fieldArr.length > 1
+                && _.has(this.fieldTypes[index],
+                  fieldArr.join('.properties.'))
+              )
+            )) {
               const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
               log.error(errMsg);
               return;
