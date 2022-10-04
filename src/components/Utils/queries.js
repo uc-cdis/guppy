@@ -243,6 +243,7 @@ export const getGQLFilter = (filterObj) => {
       // This filter only has a combine setting so far. We can ignore it.
       return;
     } else {
+      // eslint-disable-next-line no-console
       console.error(filterValues);
       throw new Error('Invalid filter object');
     }
