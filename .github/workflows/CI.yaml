@@ -25,6 +25,7 @@ jobs:
       QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
       QUAY_ROBOT_TOKEN: ${{ secrets.QUAY_ROBOT_TOKEN }}
 
-    unit_test:
-      uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@feat_npmunittest
-      secrets: inherit
+  unit_test:
+    name: NPM Unit Test
+    uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@feat_npmunittest
+    secrets: inherit
