@@ -15,9 +15,12 @@ export class AuthHelper {
 
   async initialize() {
     try {
-      log.info("LUCAAA inside outhelper");
+      var start = process.hrtime(); 
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      var elapsed = process.hrtime(start)[1] / 1000000;
+      log.info("LUCAAAA arborist accessible time: " + elapsed.toFixed(3) + " ms");
+      start = process.hrtime();
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -30,6 +33,9 @@ export class AuthHelper {
       listResult.forEach((list) => {
         this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
       });
+      var elapsed = process.hrtime(start)[1] / 1000000;
+      log.info("LUCAAAA ES unaccessible time: " + elapsed.toFixed(3) + " ms");
+
       log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
     } catch (err) {
       log.error('[AuthHelper] error when initializing:', err);

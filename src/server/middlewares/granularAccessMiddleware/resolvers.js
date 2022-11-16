@@ -184,6 +184,7 @@ export const granularAccessResolver = (
  */
 export const granularHideNumberResolver = (isGettingTotalCount) => async (
   resolve, root, args, context, info) => {
+  var start = process.hrtime();
   // for aggregations, hide all counts that are greater than limited number
   const { needEncryptAgg } = root;
   const result = await resolve(root, args, context, info);
@@ -211,5 +212,7 @@ export const granularHideNumberResolver = (isGettingTotalCount) => async (
     }
     return item;
   });
+  var elapsed = process.hrtime(start)[1] / 1000000;
+  log.info("LUCAAAA encryption time: " + elapsed.toFixed(3) + " ms");
   return encryptedResult;
 };

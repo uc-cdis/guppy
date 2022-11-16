@@ -430,6 +430,7 @@ class ES {
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
+    var start = process.hrtime();
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
       throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
@@ -466,6 +467,8 @@ class ES {
         _matched: matchedList,
       };
     });
+    var elapsed = process.hrtime(start)[1] / 1000000;
+    log.info("LUCAAAA get raw data time: " + elapsed.toFixed(3) + " ms");
     return hitsWithMatchedResults;
   }
 
