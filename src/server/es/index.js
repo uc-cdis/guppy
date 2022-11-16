@@ -53,7 +53,7 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
-    log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
+    // log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
       type: esType,
