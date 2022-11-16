@@ -15,6 +15,7 @@ export class AuthHelper {
 
   async initialize() {
     try {
+      log.info("LUCAAA inside outhelper");
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
 

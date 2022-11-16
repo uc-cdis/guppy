@@ -26,7 +26,6 @@ class ArboristClient {
       {
         method: 'GET',
         headers,
-        agent
       },
     ).then(
       (response) => response.json(),
