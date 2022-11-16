@@ -2,6 +2,13 @@ import fetch from 'node-fetch';
 import config from '../config';
 import log from '../logger';
 import CodedError from '../utils/error';
+import http from 'node:http';
+import https from 'node:https';
+
+const httpAgent = new http.Agent({ keepAlive: true });
+const httpsAgent = new https.Agent({ keepAlive: true });
+const agent = (_parsedURL) => _parsedURL.protocol == 'http:' ? httpAgent : httpsAgent;
+
 
 class ArboristClient {
   constructor(arboristEndpoint) {
@@ -18,7 +25,7 @@ class ArboristClient {
       {
         method: 'GET',
         headers,
-        timeout: 40000,
+        agent
       },
     ).then(
       (response) => response.json(),
