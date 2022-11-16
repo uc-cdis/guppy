@@ -8,6 +8,7 @@ import {
   AGGS_QUERY_NAME,
 } from './const';
 import config from '../config';
+import log from '../logger';
 
 const PAGE_SIZE = 10000;
 
