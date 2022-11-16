@@ -16,6 +16,7 @@ class ArboristClient {
   }
 
   listAuthorizedResources(jwt) {
+    var start = process.hrtime();
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/mapping`;
     log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
@@ -45,6 +46,8 @@ class ArboristClient {
         }
       });
       log.debug('[ArboristClient] data: ', data);
+      var elapsed = process.hrtime(start)[1] / 1000000;
+      log.info("LUCAAAA arborist time: " + elapsed.toFixed(3) + " ms");
       return data;
     },
     (err) => {

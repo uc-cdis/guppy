@@ -35,6 +35,7 @@ class ES {
    * @param {object} queryBody
    */
   async query(esIndex, esType, queryBody) {
+    var start = process.hrtime();
     const validatedQueryBody = {};
     Object.keys(queryBody).forEach((key) => {
       if (typeof queryBody[key] !== 'undefined' && queryBody[key] !== null) {
@@ -57,7 +58,11 @@ class ES {
       index: esIndex,
       type: esType,
       body: validatedQueryBody,
-    }).then((resp) => resp.body, (err) => {
+    }).then((resp) => {
+      var elapsed = process.hrtime(start)[1] / 1000000;
+      log.info("LUCAAAA ES time: " + elapsed.toFixed(3) + " ms"); 
+      return resp.body;
+    }, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
     });
