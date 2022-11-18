@@ -32,4 +32,5 @@ jobs:
     uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@feat_npmunittests
     with:
       node-version: '14'
+      npm-version: '8.5'
     secrets: inherit
