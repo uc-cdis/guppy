@@ -13,7 +13,7 @@ concurrency:
 jobs:
   Security:
     name: Security Pipeline
-    uses: uc-cdis/.github/.github/workflows/securitypipeline.yaml@feat_npmunittests
+    uses: uc-cdis/.github/.github/workflows/securitypipeline.yaml@master
     with:
        python-poetry: 'false'
     secrets: inherit
@@ -29,7 +29,7 @@ jobs:
 
   unit_test:
     name: NPM Unit Test
-    uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@feat_npmunittests
+    uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@master
     with:
       node-version: '14'
       npm-version: '8.5'
