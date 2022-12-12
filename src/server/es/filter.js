@@ -23,7 +23,7 @@ const mergeRangeOperations = (a, b) => {
 
   for (let key in merged) {
     if (typeof merged[key] === 'object' && merged[key] !== null) {
-      merged[key] = deepMerge(a[key], b[key]);
+      merged[key] = mergeRangeOperations(a[key], b[key]);
     }
   }
 
