@@ -167,7 +167,22 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     const resultESFilter1 = getFilterObj(esInstance, esIndex, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, gqlFilter2);
     const resultESFilter3 = getFilterObj(esInstance, esIndex, gqlFilter3);
-    const expectedESFilter = { range: { file_count: { lte: 20, gte: 10 } } };
+    const expectedESFilter = { bool: { must: [{ range: { file_count: { lte: 20, gte: 10 } } }] } };
+    expect(resultESFilter1).toEqual(expectedESFilter);
+    expect(resultESFilter2).toEqual(expectedESFilter);
+    expect(resultESFilter3).toEqual(expectedESFilter);
+  });
+
+  test('could transfer graphql filter to ES filter object, range "<=" operator', async () => {
+    await esInstance.initialize();
+    // <=, lte, LTE
+    const gqlFilter1 = { and: [{ '<=': { file_count: 20 } }] };
+    const gqlFilter2 = { and: [{ lte: { file_count: 20 } }] };
+    const gqlFilter3 = { and: [{ LTE: { file_count: 20 } }] };
+    const resultESFilter1 = getFilterObj(esInstance, esIndex, gqlFilter1);
+    const resultESFilter2 = getFilterObj(esInstance, esIndex, gqlFilter2);
+    const resultESFilter3 = getFilterObj(esInstance, esIndex, gqlFilter3);
+    const expectedESFilter = { bool: { must: [{ range: { file_count: { lte: 20 } } }] } };
     expect(resultESFilter1).toEqual(expectedESFilter);
     expect(resultESFilter2).toEqual(expectedESFilter);
     expect(resultESFilter3).toEqual(expectedESFilter);
