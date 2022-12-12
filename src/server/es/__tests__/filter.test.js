@@ -161,9 +161,9 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
   test('could transfer graphql filter to ES filter object, range ">=" and "<=" operator', async () => {
     await esInstance.initialize();
     // <=, lte, LTE
-    const gqlFilter1 = [{ '<=': { file_count: 20 } }, { '>=': { file_count: 10 } }];
-    const gqlFilter2 = [{ lte: { file_count: 20 } }, { gte: { file_count: 10 } }];
-    const gqlFilter3 = [{ LTE: { file_count: 20 } }, { GTE: { file_count: 10 } }];
+    const gqlFilter1 = { and: [{ '<=': { file_count: 20 } }, { '>=': { file_count: 10 } }] };
+    const gqlFilter2 = { and: [{ lte: { file_count: 20 } }, { gte: { file_count: 10 } }] };
+    const gqlFilter3 = { and: [{ LTE: { file_count: 20 } }, { GTE: { file_count: 10 } }] };
     const resultESFilter1 = getFilterObj(esInstance, esIndex, gqlFilter1);
     const resultESFilter2 = getFilterObj(esInstance, esIndex, gqlFilter2);
     const resultESFilter3 = getFilterObj(esInstance, esIndex, gqlFilter3);
