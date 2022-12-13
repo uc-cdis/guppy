@@ -21,11 +21,11 @@ const fromPathToNode = (esInstance, esIndex, path) => {
 const mergeRangeOperations = (a, b) => {
   let merged = Object.assign({}, a, b);
 
-  for (let key in Object.keys(merged)) {
+  Object.keys(merged).forEach(function(key) {
     if (typeof merged[key] === 'object' && merged[key] !== null) {
       merged[key] = mergeRangeOperations(a[key], b[key]);
     }
-  }
+  })
 
   return merged;
 }
