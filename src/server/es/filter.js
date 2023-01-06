@@ -18,6 +18,18 @@ const fromPathToNode = (esInstance, esIndex, path) => {
   return node;
 };
 
+const mergeRangeOperations = (a, b) => {
+  let merged = Object.assign({}, a, b);
+
+  Object.keys(merged).forEach(function(key) {
+    if (typeof merged[key] === 'object' && merged[key] !== null) {
+      merged[key] = mergeRangeOperations(a[key], b[key]);
+    }
+  })
+
+  return merged;
+}
+
 const getNumericTextType = (
   esInstance,
   esIndex,
@@ -66,7 +78,7 @@ const getFilterItemForString = (op, pField, value, path) => {
       // if using missingDataAlias, we need to remove the missingDataAlias from filter values
       // and then add a must_not exists bool func to compensate missingDataAlias
       if (config.esConfig.aggregationIncludeMissingData
-          && value.includes(config.esConfig.missingDataAlias)) {
+        && value.includes(config.esConfig.missingDataAlias)) {
         const newValue = value.filter((element) => element !== config.esConfig.missingDataAlias);
         return {
           bool: {
@@ -233,14 +245,29 @@ const getFilterObj = (
   if (topLevelOpLowerCase === 'and' || topLevelOpLowerCase === 'or') {
     const boolConnectOp = topLevelOpLowerCase === 'and' ? 'must' : 'should';
     const boolItemsList = [];
+
+    const filterRange = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
         esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter, objPath,
       );
       if (filterObj) {
-        boolItemsList.push(filterObj);
+        if ("range" in filterObj) {
+          filterRange.push(filterObj);
+        } else {
+          boolItemsList.push(filterObj);
+        }
       }
     });
+
+    if (filterRange.length === 1) {
+      boolItemsList.push(filterRange[0]);
+    }
+
+    if (filterRange.length === 2) {
+      boolItemsList.push(mergeRangeOperations(filterRange[0], filterRange[1]));
+    }
+
     if (boolItemsList.length === 0) {
       resultFilterObj = null;
     } else {
