@@ -353,6 +353,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
   const nestedTermsFieldsBucketSchema = `
     type BucketsForNestedTermsFields {
       field: String
+      count: Int
       terms: [BucketsForString]
     }
   `;
