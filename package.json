@@ -44,7 +44,7 @@
     "graphql-middleware": "^3.0.2",
     "graphql-parse-resolve-info": "^4.1.0",
     "graphql-tools": "^4.0.4",
-    "graphql-type-json": "^0.2.1",
+    "graphql-type-json": "^0.3.2",
     "helmet": "^4.4.1",
     "isomorphic-fetch": "^3.0.0",
     "lodash": "^4.17.15",
