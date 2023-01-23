@@ -231,11 +231,31 @@ class ES {
           }
           const fields = doc._source.array;
           fields.forEach((field) => {
-            if (!this.fieldTypes[index][field]) {
+            const fieldArr = field.split('.');
+
+            if (!(this.fieldTypes[index][field]
+              || (
+                fieldArr.length > 1
+                && _.has(this.fieldTypes[index],
+                  fieldArr.join('.properties.'))
+              )
+            )) {
               const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
               log.error(errMsg);
               return;
             }
+
+            let nestedObject = this.fieldTypes[index];
+            for (let i = 0; i < fieldArr.length; i += 1) {
+              if (fieldArr[i] in nestedObject) {
+                nestedObject = nestedObject[fieldArr[i]].properties;
+              } else {
+                const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+                console.log(errMsg);
+                // break
+              }
+            }
+
             if (!arrayFields[index]) arrayFields[index] = [];
             arrayFields[index].push(field);
           });
@@ -391,7 +411,19 @@ class ES {
    * Check if the field is array
    */
   isArrayField(esIndex, field) {
-    return (this.arrayFields[esIndex] && this.arrayFields[esIndex].includes(field));
+    // TODO see where isArrayField gets the field from and pass the nested path with it to have a direct match and avoid limitation of using unique names
+
+    let isNestedArray = false;
+    if (this.arrayFields[esIndex]) {
+      for (let i = 0; i < this.arrayFields[esIndex].length; i += 1) {
+        const fieldArr = this.arrayFields[esIndex][i].split('.');
+        if (fieldArr[fieldArr.length - 1] == field) {
+          isNestedArray = true;
+        }
+      }
+    }
+
+    return (this.arrayFields[esIndex] && (this.arrayFields[esIndex].includes(field) || (isNestedArray)));
   }
 
   filterData(
