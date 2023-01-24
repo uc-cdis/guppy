@@ -59,6 +59,7 @@ class ArboristClient {
       return data;
     },
     (err) => {
+      log.info("LUCAAAA FAILED ARBORIST");
       log.error(err);
       throw new CodedError(500, err);
     });
