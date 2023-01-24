@@ -24,14 +24,17 @@ class ArboristClient {
       resourcesEndpoint,
       {
         method: 'GET',
-        headers,
-        agent: function (_parsedURL) {
-            if (_parsedURL.protocol == 'http:') {
-                return httpAgent;
-            } else {
-                return httpsAgent;
-            }
-        }
+        headers: headers,
+        agent: new http.Agent({
+          keepAlive: true
+        }),
+        // agent: function (_parsedURL) {
+        //     if (_parsedURL.protocol == 'http:') {
+        //         return httpAgent;
+        //     } else {
+        //         return httpsAgent;
+        //     }
+        // }
       },
     ).then(
       (response) => response.json(),
