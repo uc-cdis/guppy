@@ -25,6 +25,13 @@ class ArboristClient {
       {
         method: 'GET',
         headers,
+        agent: function (_parsedURL) {
+            if (_parsedURL.protocol == 'http:') {
+                return httpAgent;
+            } else {
+                return httpsAgent;
+            }
+        }
       },
     ).then(
       (response) => response.json(),
@@ -32,6 +39,7 @@ class ArboristClient {
       const data = {
         resources: [],
       };
+      log.info("LUCAAAA arborist got DATA");
       Object.keys(result).forEach((key) => {
         // logic: you have access to a project if you have the following access:
         // method 'read' (or '*' - all methods) to service 'guppy' (or '*' - all services)
@@ -43,6 +51,7 @@ class ArboristClient {
           data.resources.push(key);
         }
       });
+      log.info("LUCAAAA arborist transformed data");
       log.debug('[ArboristClient] data: ', data);
       return data;
     },
