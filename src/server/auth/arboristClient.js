@@ -25,8 +25,10 @@ class ArboristClient {
       {
         method: 'GET',
         headers: headers,
+        timeout: 0,
         agent: new http.Agent({
-          keepAlive: true
+          keepAlive: true,
+          keepAliveMsecs: 10000,
         }),
         // agent: function (_parsedURL) {
         //     if (_parsedURL.protocol == 'http:') {
