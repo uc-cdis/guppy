@@ -101,9 +101,8 @@ class ArboristClient {
         headers: headers,
         json: json,
       },
-    ).then(
-      (response) => response.json(),
-    ).then((response) => {
+    )
+    .then((response) => {
       log.info("User is admin");
       log.info(response)
       return response;
