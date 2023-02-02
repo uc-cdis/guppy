@@ -6,6 +6,7 @@ import {
   buildFilterWithResourceList,
   getAccessibleResourcesFromArboristasync,
 } from './utils';
+import arboristClient from './arboristClient';
 import config from '../config';
 
 export class AuthHelper {
@@ -15,6 +16,17 @@ export class AuthHelper {
 
   async initialize() {
     try {
+      // Check if the user is an ADMIN
+      isAdmin = arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis")
+      log.info(isAdmin);
+      log.info("LUCAAAAAAAAAAAAAAAAAAAAAA")
+      
+
+          
+
+
+
+
       var start = process.hrtime(); 
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);

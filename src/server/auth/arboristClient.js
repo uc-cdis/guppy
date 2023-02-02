@@ -66,6 +66,49 @@ class ArboristClient {
       throw new CodedError(500, err);
     });
   }
+
+  checkResourceAuth(jwt, resources, methods, service){
+    // Make request to arborist for list of resources with access
+    if (typeof(resources) === "string") {
+      resources = [resources];
+    }
+    if (typeof(methods) === "string") {
+      methods = [methods];
+    }
+
+    var data = {}
+    data["requests"] = []
+    for (var i=0; i<methods.length; i++) {
+      for (var j=0; j<resources.length; j++){
+        var tmp = {"resource": resources[j], "action": {"service": service, "method": methods[i]}};
+        data["requests"].push(tmp);
+      }
+    }
+
+    // data["user"] = {"token": jwt}
+
+
+    const resourcesEndpoint = `${this.baseEndpoint}/auth/request`;
+    log.debug('[ArboristClient] checkResourceAuth jwt: ', jwt);
+    const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
+    return fetch(
+      resourcesEndpoint,
+      {
+        method: 'GET',
+        headers: headers,
+        json: json,
+      },
+    ).then((response) => {
+      log.info(response)
+      log.info("User is admin");
+      return response;
+    },
+    (err) => {
+      log.error(err);
+      throw new CodedError(500, err);
+    });
+  }
+
 }
 
 export default new ArboristClient(config.arboristEndpoint);
