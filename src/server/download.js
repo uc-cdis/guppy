@@ -18,7 +18,7 @@ const downloadRouter = async (req, res, next) => {
   const jwt = headerParser.parseJWT(req);
   const authHelper = await getAuthHelperInstance(jwt);
 
-  const isValid = validSignature(req);
+  const isValid = validSignature(req) || authHelper.isAdmin();
 
   try {
     let appliedFilter;

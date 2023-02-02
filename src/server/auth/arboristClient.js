@@ -100,10 +100,13 @@ class ArboristClient {
       {
         method: 'POST',
         headers: headers,
-        json: json,
+        body: JSON.stringify(data),
       },
     ).then(
-      (response) => response.json(),
+      (response) => {
+        log.info("LUCCCCCCCCCCCCCCCAAAAAAAA")
+        return response.json();
+      },
     ).then((response) => {
       log.info("User is admin");
       log.info(response["auth"]);
