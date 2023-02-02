@@ -98,7 +98,7 @@ class ArboristClient {
     return fetch(
       resourcesEndpoint,
       {
-        method: 'GET',
+        method: 'POST',
         headers: headers,
         json: json,
       },
