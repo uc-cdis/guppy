@@ -85,14 +85,15 @@ class ArboristClient {
       }
     }
 
-    // data["user"] = {"token": jwt}
+    data["user"] = {"token": jwt}
 
 
     const resourcesEndpoint = `${this.baseEndpoint}/auth/request`;
     log.debug('[ArboristClient] checkResourceAuth jwt: ', jwt);
     const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
 
-    log.info("LUCAAAAAAAAAAAAAAAAAAAAAA 1")
+    log.info("LUCAAAAAAAAAAAAAAAAAAAAAA 1");
+    log.info(resourcesEndpoint);
 
     return fetch(
       resourcesEndpoint,
@@ -101,11 +102,12 @@ class ArboristClient {
         headers: headers,
         json: json,
       },
-    )
-    .then((response) => {
+    ).then(
+      (response) => response.json(),
+    ).then((response) => {
       log.info("User is admin");
-      log.info(response)
-      return response;
+      log.info(response["auth"]);
+      return response["auth"];
     },
     (err) => {
       log.error(err);
