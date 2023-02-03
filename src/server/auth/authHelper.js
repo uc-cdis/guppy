@@ -18,9 +18,10 @@ export class AuthHelper {
     try {
       // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
       // Check if the user is an ADMIN
-      isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis")
+      isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis");
       log.info(isAdmin);
-      log.info("LUCAAAAAAAAAAAAAAAAAAAAAA")
+      log.info("LUCAAAAAAAAAAAAAAAAAAAAAA");
+      log.info(typeof isAdmin);
       this._isAdmin = isAdmin;
 
       if (this._isAdmin === false) {
@@ -67,7 +68,7 @@ export class AuthHelper {
   }
 
   isAdmin() {
-    return this._isAdmin === true;
+    return this._isAdmin;
   }
 
   async getOutOfScopeResourceList(esIndex, esType, filter, filterSelf) {

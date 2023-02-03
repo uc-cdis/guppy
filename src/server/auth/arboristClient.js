@@ -110,7 +110,7 @@ class ArboristClient {
     ).then((response) => {
       log.info("User is admin");
       log.info(response["auth"]);
-      return response["auth"] === 'true';
+      return response["auth"];
     },
     (err) => {
       log.error(err);
