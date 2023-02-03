@@ -38,7 +38,7 @@ const downloadRouter = async (req, res, next) => {
       case 'regular':
       case 'granular': {
         if (accessibility === 'accessible') {
-          log.info("LUCAAAAAAA inside accessible");
+          log.info("LUCAAAAAAA inside accessible downlaod");
           log.info(authHelper.isAdmin());
           log.info(isValid);
           appliedFilter = authHelper.applyAccessibleFilter(filter, isValid);

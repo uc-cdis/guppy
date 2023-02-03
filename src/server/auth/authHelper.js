@@ -18,10 +18,10 @@ export class AuthHelper {
     try {
       // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
       // Check if the user is an ADMIN
-      isAdmin = arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis")
+      isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis")
       log.info(isAdmin);
       log.info("LUCAAAAAAAAAAAAAAAAAAAAAA")
-      this._isAdmin = true;
+      this._isAdmin = isAdmin;
 
       if (this._isAdmin === false) {
         // TODO END REMOVE
@@ -30,24 +30,28 @@ export class AuthHelper {
         log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
         var elapsed = process.hrtime(start)[1] / 1000000;
         log.info("LUCAAAA arborist accessible time: " + elapsed.toFixed(3) + " ms");
-        start = process.hrtime();
-
-        const promiseList = [];
-        config.esConfig.indices.forEach(({ index, type }) => {
-          const subListPromise = this.getOutOfScopeResourceList(index, type);
-          promiseList.push(subListPromise);
-        });
-        const listResult = await Promise.all(promiseList);
-
-        this._unaccessibleResourceList = [];
-        listResult.forEach((list) => {
-          this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
-        });
-        var elapsed = process.hrtime(start)[1] / 1000000;
-        log.info("LUCAAAA ES unaccessible time: " + elapsed.toFixed(3) + " ms");
-
-        log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
       }
+      else {
+        this._accessibleResourceList = []
+      }
+
+      var start = process.hrtime();
+
+      const promiseList = [];
+      config.esConfig.indices.forEach(({ index, type }) => {
+        const subListPromise = this.getOutOfScopeResourceList(index, type);
+        promiseList.push(subListPromise);
+      });
+      const listResult = await Promise.all(promiseList);
+
+      this._unaccessibleResourceList = [];
+      listResult.forEach((list) => {
+        this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
+      });
+      var elapsed = process.hrtime(start)[1] / 1000000;
+      log.info("LUCAAAA ES unaccessible time: " + elapsed.toFixed(3) + " ms");
+
+      log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
       
     } catch (err) {
       log.error('[AuthHelper] error when initializing:', err);
