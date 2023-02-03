@@ -71,6 +71,8 @@ export const granularAccessResolver = (
     // else, check if it's raw data query or aggs query
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
       if (accessibility === 'accessible') {
+        log.info("LUADDFAFDASFSDASDA acessible granular middleware");
+        log.info(authHelper.isAdmin());
         return resolverWithAccessibleFilterApplied(
           resolve, root, args, context, info, authHelper, filter,
         );
