@@ -35,7 +35,6 @@ class ES {
    * @param {object} queryBody
    */
   async query(esIndex, esType, queryBody) {
-    var start = process.hrtime();
     const validatedQueryBody = {};
     Object.keys(queryBody).forEach((key) => {
       if (typeof queryBody[key] !== 'undefined' && queryBody[key] !== null) {
@@ -59,8 +58,6 @@ class ES {
       type: esType,
       body: validatedQueryBody,
     }).then((resp) => {
-      var elapsed = process.hrtime(start)[1] / 1000000;
-      log.info("LUCAAAA ES time: " + elapsed.toFixed(3) + " ms"); 
       return resp.body;
     }, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
@@ -462,7 +459,6 @@ class ES {
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
-    var start = process.hrtime();
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
       throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
@@ -499,8 +495,6 @@ class ES {
         _matched: matchedList,
       };
     });
-    var elapsed = process.hrtime(start)[1] / 1000000;
-    log.info("LUCAAAA get raw data time: " + elapsed.toFixed(3) + " ms");
     return hitsWithMatchedResults;
   }
 

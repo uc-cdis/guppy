@@ -44,7 +44,6 @@ class ArboristClient {
       const data = {
         resources: [],
       };
-      log.info("LUCAAAA arborist got DATA");
       Object.keys(result).forEach((key) => {
         // logic: you have access to a project if you have the following access:
         // method 'read' (or '*' - all methods) to service 'guppy' (or '*' - all services)
@@ -56,12 +55,10 @@ class ArboristClient {
           data.resources.push(key);
         }
       });
-      log.info("LUCAAAA arborist transformed data");
       log.debug('[ArboristClient] data: ', data);
       return data;
     },
     (err) => {
-      log.info("LUCAAAA FAILED ARBORIST");
       log.error(err);
       throw new CodedError(500, err);
     });
@@ -101,13 +98,9 @@ class ArboristClient {
       },
     ).then(
       (response) => {
-        log.info("LUCCCCCCCCCCCCCCCAAAAAAAA")
         return response.json();
       },
     ).then((response) => {
-      log.info("User is admin");
-      log.info(JSON.stringify(response));
-      log.info(response["auth"]);
       return response["auth"];
     },
     (err) => {

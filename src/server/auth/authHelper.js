@@ -19,24 +19,15 @@ export class AuthHelper {
       // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
       // Check if the user is an ADMIN
       this._isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis");
-      await log.info(this._isAdmin);
-      await log.info("LUCAAAAAAAAAAAAAAAAAAAAAA");
-      await log.info(typeof this._isAdmin);
-     
 
       if (this._isAdmin === false) {
         // TODO END REMOVE
-        var start = process.hrtime(); 
         this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
         log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
-        var elapsed = process.hrtime(start)[1] / 1000000;
-        log.info("LUCAAAA arborist accessible time: " + elapsed.toFixed(3) + " ms");
       }
       else {
         this._accessibleResourceList = []
       }
-
-      var start = process.hrtime();
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -49,9 +40,6 @@ export class AuthHelper {
       listResult.forEach((list) => {
         this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
       });
-      var elapsed = process.hrtime(start)[1] / 1000000;
-      log.info("LUCAAAA ES unaccessible time: " + elapsed.toFixed(3) + " ms");
-
       log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
       
     } catch (err) {

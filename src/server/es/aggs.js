@@ -160,7 +160,6 @@ export const numericGlobalStats = async (
     nestedPath,
   },
 ) => {
-  var start = process.hrtime();
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -209,10 +208,6 @@ export const numericGlobalStats = async (
     ...resultStats,
   };
   resultStats = processResultsForNestedAgg(nestedAggFields, result.aggregations, resultStats);
-
-  var elapsed = process.hrtime(start)[1] / 1000000;
-  log.info("LUCAAAA global stat time: " + elapsed.toFixed(3) + " ms");
-
   return resultStats;
 };
 
@@ -251,7 +246,6 @@ export const numericHistogramWithFixedRangeStep = async (
     nestedPath,
   },
 ) => {
-  var start = process.hrtime();
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -334,9 +328,6 @@ export const numericHistogramWithFixedRangeStep = async (
       ...resultObj,
     });
   });
-
-  var elapsed = process.hrtime(start)[1] / 1000000;
-  log.info("LUCAAAA num histogram time: " + elapsed.toFixed(3) + " ms");
   return finalResults;
 };
 
@@ -557,7 +548,6 @@ export const textAggregation = async (
     reverseNested,
   },
 ) => {
-  var start = process.hrtime();
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
@@ -750,9 +740,5 @@ export const textAggregation = async (
       finalResults.splice(finalResults.length, 0, missingDataItem);
     }
   }
-
-  var elapsed = process.hrtime(start)[1] / 1000000;
-  log.info("LUCAAAA text time: " + elapsed.toFixed(3) + " ms");
-
   return finalResults;
 };
