@@ -92,9 +92,6 @@ class ArboristClient {
     log.debug('[ArboristClient] checkResourceAuth jwt: ', jwt);
     const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
 
-    log.info("LUCAAAAAAAAAAAAAAAAAAAAAA 1");
-    log.info(resourcesEndpoint);
-
     return fetch(
       resourcesEndpoint,
       {
@@ -109,6 +106,7 @@ class ArboristClient {
       },
     ).then((response) => {
       log.info("User is admin");
+      log.info(JSON.stringify(response));
       log.info(response["auth"]);
       return response["auth"];
     },
