@@ -6,6 +6,7 @@ import {
   buildFilterWithResourceList,
   getAccessibleResourcesFromArboristasync,
 } from './utils';
+import arboristClient from './arboristClient';
 import config from '../config';
 
 export class AuthHelper {
@@ -15,8 +16,18 @@ export class AuthHelper {
 
   async initialize() {
     try {
-      this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
-      log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
+      // Check if the user is an ADMIN
+      this._isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis");
+
+      if (this._isAdmin === false) {
+        // TODO END REMOVE
+        this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+        log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      }
+      else {
+        this._accessibleResourceList = []
+      }
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -41,6 +52,10 @@ export class AuthHelper {
 
   getUnaccessibleResources() {
     return this._unaccessibleResourceList;
+  }
+
+  isAdmin() {
+    return this._isAdmin;
   }
 
   async getOutOfScopeResourceList(esIndex, esType, filter, filterSelf) {
