@@ -41,7 +41,6 @@ export class AuthHelper {
         this._unaccessibleResourceList = _.union(this._unaccessibleResourceList, list);
       });
       log.debug('[AuthHelper] unaccessible resources:', this._unaccessibleResourceList);
-      
     } catch (err) {
       log.error('[AuthHelper] error when initializing:', err);
     }
