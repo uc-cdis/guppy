@@ -12,7 +12,7 @@ const ENCRYPT_COUNT = -1;
 const resolverWithAccessibleFilterApplied = (
   resolve, root, args, context, info, authHelper, filter,
 ) => {
-  const appliedFilter = authHelper.applyAccessibleFilter(filter);
+  const appliedFilter = authHelper.applyAccessibleFilter(filter, authHelper.isAdmin());
   const newArgs = {
     ...args,
     filter: appliedFilter,
