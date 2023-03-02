@@ -6,3 +6,4 @@ dist/
 *.old
 *.bak
 
+.dccache
