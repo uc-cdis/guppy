@@ -1,4 +1,6 @@
 import express from 'express';
+import csurf from 'csurf';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
@@ -20,8 +22,10 @@ import { statusRouter, versionRouter } from './endpoints';
 
 const app = express();
 app.use(cors());
+app.use(cookieParser());
 app.use(helmet());
 app.use(bodyParser.json({ limit: '50mb' }));
+app.use(csurf({ cookie: true }));
 
 const startServer = () => {
   // build schema and resolvers by parsing elastic search fields and types,
