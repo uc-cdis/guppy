@@ -12,6 +12,7 @@ helm upgrade --install gen3/guppy
 These commands will add the Gen3 helm chart repo and install the guppy service to your Kubernetes cluster.
 
 Deploying guppy this way will use the defaults that are defined in this [values.yaml file](https://github.com/uc-cdis/gen3-helm/blob/master/helm/guppy/values.yaml)
+
 You can learn more about these values by accessing the guppy [README.md](https://github.com/uc-cdis/gen3-helm/blob/master/helm/guppy/README.md)
 
 If you would like to override any of the default values, simply copy the above values.yaml file into a local file and make any changes needed.
