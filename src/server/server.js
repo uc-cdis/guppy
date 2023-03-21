@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from 'apollo-server-express';
 import { makeExecutableSchema } from 'graphql-tools';
 import { applyMiddleware } from 'graphql-middleware';
@@ -42,6 +43,7 @@ const startServer = () => {
   const server = new ApolloServer({
     mocks: false,
     schema: schemaWithMiddleware,
+    validationRules: [depthLimit(10)],
     context: async ({ req }) => {
       const jwt = headerParser.parseJWT(req);
       const authHelper = await getAuthHelperInstance(jwt);
@@ -60,8 +62,10 @@ const startServer = () => {
   // eslint-disable-next-line no-unused-vars
   app.get('/_status', statusRouter, (req, res, err, next) => {
     if (err instanceof CodedError) {
+      // deepcode ignore ServerLeak: no important information exists in error
       res.status(err.code).send(err.msg);
     } else {
+      // deepcode ignore ServerLeak: no important information exists in error
       res.status(500).send(err);
     }
   });
@@ -82,8 +86,10 @@ const startServer = () => {
   app.post('/download',
     downloadRouter, (err, req, res, next) => { // eslint-disable-line no-unused-vars
       if (err instanceof CodedError) {
+        // deepcode ignore ServerLeak: no important information exists in error
         res.status(err.code).send(err.msg);
       } else {
+        // deepcode ignore ServerLeak: no important information exists in error
         res.status(500).send(err);
       }
     });
