@@ -424,7 +424,7 @@ class ES {
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter, fields: false },
+      { filter, fields: false,  size: 0},
     );
     return result.hits.total;
   }
