@@ -55,7 +55,6 @@ class ES {
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
-      type: esType,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
@@ -111,7 +110,6 @@ class ES {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
           index: esIndex,
-          type: esType,
           body: validatedQueryBody,
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
@@ -159,7 +157,6 @@ class ES {
     const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
-      type: esType,
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
