@@ -12,6 +12,11 @@ Run `npm start` to start server at port 80.
 ### Local Deployment and Development:
 Guppy has some helper script to help a developer to set up a local ES service using Docker, generate some example ES indices for testing, and pop mock data into these example ES indices. Please refer to [the DEV Helper doc](https://github.com/uc-cdis/guppy/blob/master/devHelper/README.md) for more information.
 
+### Quickstart with Helm
+
+You can now deploy individual services via Helm!
+Please refer to the Helm quickstart guide HERE (https://github.com/uc-cdis/guppy/blob/master/doc/quickstart_helm.md)
+
 ### Configurations:
 Before launch, we need to write config and tell Guppy which elasticsearch indices and which auth control field to use.
 You could put following as your config files:
