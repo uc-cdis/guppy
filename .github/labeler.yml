@@ -1,2 +1,2 @@
-'@requires-hatchery':
+'@requires-guppy':
   - '**/*'
