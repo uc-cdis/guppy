@@ -769,7 +769,7 @@ Result:
 <a name="aggs-cardinality"></a>
 
 ### 6. Cardinality Count Aggregation
- By using `_cardinalityCount` keyword, return a cardinality count of a feild.
+ By using `_cardinalityCount` keyword, return a cardinality count of a field.
 
  See [Elasticsearch documentation on Cardinality](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html)
 
@@ -779,7 +779,7 @@ Result:
  query ($filter: JSON) {
   _aggregation  {
     subject(filter: $filter) {
-      file_count {
+      submitter_id {
         _cardinalityCount(
           precision_threshold: 1000 //optional defaults to 3000
         )
@@ -796,7 +796,7 @@ Example result:
 	"data": {
 		"_aggregation": {
 			"subject": {
-				"file_count": {
+				"submitter_id": {
 					"_cardinalityCount": 98
 				}
 			}
