@@ -133,9 +133,12 @@ const textHistogramResolver = async (parent, args, context) => {
 const cardinalityResolver = async (parent, args) => {
   log.debug('[resolver.cardinalityResolver] args', args);
   log.debug('[resolver.cardinalityResolver] parent', parent);
+  // TODO make work with nested
   const {
-    esInstance, esIndex, esType, filter, field
+    esInstance, esIndex, esType, filter, field,
   } = parent;
+
+  // eslint-disable-next-line camelcase
   const { precision_threshold } = args;
 
   return esInstance.getCardinalityCount(esIndex, esType, filter, field, precision_threshold);
@@ -155,7 +158,8 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   }));
 };
 
-// this spreads all fields out into individual resolvers and adds "field", "isNumericField" and "nestedPath", to parent
+// this spreads all fields out into individual resolvers and
+// adds "field", "isNumericField" and "nestedPath", to parent
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const { fields } = esInstance.getESFields(esIndex);
   const fieldAggregationResolverMappings = {};

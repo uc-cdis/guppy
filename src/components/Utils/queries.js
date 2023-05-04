@@ -23,31 +23,52 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+const cardinalityQueryStrForEachField = (field) => {
+  const splittedFieldArray = field.split('.');
+  const splittedField = splittedFieldArray.shift();
+
+  if (splittedFieldArray.length === 0) {
+    return (`
+      ${splittedField} {
+        _cardinalityCount
+      }
+      `);
+  }
+  return (`
+  ${splittedField} {
+    ${cardinalityQueryStrForEachField(splittedFieldArray.join('.'))}
+  }`);
+};
+
+const queryGuppyForAggs = (path, type, fields, countFields, gqlFilter, acc) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
   }
 
-  const query = `query {
-    _aggregation {
-      ${type} (accessibility: ${accessibility}) {
-        ${fields.map((field) => histogramQueryStrForEachField(field))}
-      }
-    }
-  }`;
-  const queryBody = { query };
+  const queryBody = {};
   if (gqlFilter) {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
-          ${fields.map((field) => histogramQueryStrForEachField(field))}
+          ${fields.map((field) => histogramQueryStrForEachField(field))},
+          ${countFields.map((field) => cardinalityQueryStrForEachField(field))}
         }
       }
     }`;
     queryBody.variables = { filter: gqlFilter };
     queryBody.query = queryWithFilter;
+  } else {
+    queryBody.query = `query {
+      _aggregation {
+        ${type} (accessibility: ${accessibility}) {
+          ${fields.map((field) => histogramQueryStrForEachField(field))}
+          ${countFields.map((field) => cardinalityQueryStrForEachField(field))}
+        }
+      }
+    }`;
   }
+
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
     headers: {
@@ -265,18 +286,25 @@ export const getGQLFilter = (filterObj) => {
 };
 
 export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility, filter,
+  path, type, fields, countFields, accessibility, filter,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, countFields, gqlFilter, accessibility);
 };
 
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
-export const askGuppyForAggregationData = (path, type, fields, filter, accessibility) => {
+export const askGuppyForAggregationData = (
+  path,
+  type,
+  fields,
+  countFields,
+  filter,
+  accessibility,
+) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, countFields, gqlFilter, accessibility);
 };
 
 export const askGuppyForSubAggregationData = (

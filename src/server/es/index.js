@@ -424,21 +424,22 @@ class ES {
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter, fields: false,  size: 0},
+      { filter, fields: false, size: 0 },
     );
     return result.hits.total;
   }
 
+  // eslint-disable-next-line camelcase
   async getCardinalityCount(esIndex, esType, filter, field, precision_threshold) {
     const queryBody = {
       size: 0,
       aggs: {
-        "cardinality_count": {
-          "cardinality": {
-            "field": field,
-            "precision_threshold": precision_threshold
-          }
-        }
+        cardinality_count: {
+          cardinality: {
+            field,
+            precision_threshold,
+          },
+        },
       },
     };
     if (typeof filter !== 'undefined') {
