@@ -8,6 +8,7 @@ Table of Contents
    - [Numeric Aggregation](#aggs-numeric)
    - [Nested Aggregation](#aggs-nested)
    - [Sub-aggregations](#aggs-sub)
+   - [Cardinality Count Aggregation](#aggs-cardinality)
 - [Filters](#filter)
    - [Basic Filter Unit](#filter-unit)
    - [Text Search Unit in Filter](#filter-search)
@@ -762,6 +763,45 @@ Result:
       }
     }
   }
+}
+```
+
+<a name="aggs-cardinality"></a>
+
+### 6. Cardinality Count Aggregation
+ By using `_cardinalityCount` keyword, return a cardinality count of a feild.
+
+ See [Elasticsearch documentation on Cardinality](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html)
+
+ Example:
+
+ ```
+ query ($filter: JSON) {
+  _aggregation  {
+    subject(filter: $filter) {
+      file_count {
+        _cardinalityCount(
+          precision_threshold: 1000 //optional defaults to 3000
+        )
+      }
+    }
+  }
+}
+```
+
+Example result:
+
+```
+{
+	"data": {
+		"_aggregation": {
+			"subject": {
+				"file_count": {
+					"_cardinalityCount": 98
+				}
+			}
+		}
+	}
 }
 ```
 

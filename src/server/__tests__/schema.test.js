@@ -110,7 +110,7 @@ describe('Schema', () => {
 
   const expectedIndividualAggsSchemas = `
     type SubjectAggregation {
-      _totalCount: Int
+      _totalCount: Int,
       gen3_resource_path: HistogramForString,
       gender: HistogramForString,
       file_count: HistogramForNumber,
@@ -121,7 +121,7 @@ describe('Schema', () => {
       visits:NestedHistogramForVisits
     }
     type FileAggregation {
-      _totalCount: Int
+      _totalCount: Int,
       gen3_resource_path: HistogramForString,
       file_id: HistogramForString,
       file_size: HistogramForNumber,
@@ -147,12 +147,15 @@ describe('Schema', () => {
 
   const expectedHistogramSchemas = `
   type HistogramForString {
+    _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram: [BucketsForNestedStringAgg]
   }
   type RegularAccessHistogramForString {
+    _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram: [BucketsForNestedStringAgg]
   }
   type HistogramForNumber {
+    _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram(
       rangeStart: Int,
       rangeEnd: Int,
@@ -162,6 +165,7 @@ describe('Schema', () => {
     asTextHistogram: [BucketsForNestedStringAgg]
   }
   type RegularAccessHistogramForNumber {
+    _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram(
       rangeStart: Int,
       rangeEnd: Int,

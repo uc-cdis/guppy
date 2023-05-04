@@ -429,6 +429,26 @@ class ES {
     return result.hits.total;
   }
 
+  async getCardinalityCount(esIndex, esType, filter, field, precision_threshold) {
+    const queryBody = {
+      size: 0,
+      aggs: {
+        "cardinality_count": {
+          "cardinality": {
+            "field": field,
+            "precision_threshold": precision_threshold
+          }
+        }
+      },
+    };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, filter);
+    }
+
+    const result = await this.query(esIndex, esType, queryBody);
+    return result.aggregations.cardinality_count.value;
+  }
+
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
