@@ -61,6 +61,7 @@ const downloadRouter = async (req, res, next) => {
     const data = await esInstance.downloadData({
       esIndex: esIndexConfig.index, esType: type, filter: appliedFilter, sort, fields,
     });
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.send(data);
   } catch (err) {
     log.error(err);
