@@ -40,7 +40,7 @@ const cardinalityQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, countFields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, cardinalityFields = [], gqlFilter, acc) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -52,7 +52,7 @@ const queryGuppyForAggs = (path, type, fields, countFields, gqlFilter, acc) => {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))},
-          ${countFields.map((field) => cardinalityQueryStrForEachField(field))}
+          ${cardinalityFields.map((field) => cardinalityQueryStrForEachField(field))}
         }
       }
     }`;
@@ -63,7 +63,7 @@ const queryGuppyForAggs = (path, type, fields, countFields, gqlFilter, acc) => {
       _aggregation {
         ${type} (accessibility: ${accessibility}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
-          ${countFields.map((field) => cardinalityQueryStrForEachField(field))}
+          ${cardinalityFields.map((field) => cardinalityQueryStrForEachField(field))}
         }
       }
     }`;

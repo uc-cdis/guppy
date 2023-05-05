@@ -773,6 +773,9 @@ Result:
 
  See [Elasticsearch documentation on Cardinality](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html)
 
+> **Note**
+> curenntly does not support nested feilds
+
  Example:
 
  ```
