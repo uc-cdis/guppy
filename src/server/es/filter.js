@@ -19,16 +19,16 @@ const fromPathToNode = (esInstance, esIndex, path) => {
 };
 
 const mergeRangeOperations = (a, b) => {
-  let merged = Object.assign({}, a, b);
+  const merged = { ...a, ...b };
 
-  Object.keys(merged).forEach(function(key) {
+  Object.keys(merged).forEach((key) => {
     if (typeof merged[key] === 'object' && merged[key] !== null) {
       merged[key] = mergeRangeOperations(a[key], b[key]);
     }
-  })
+  });
 
   return merged;
-}
+};
 
 const getNumericTextType = (
   esInstance,
@@ -252,7 +252,7 @@ const getFilterObj = (
         esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter, objPath,
       );
       if (filterObj) {
-        if ("range" in filterObj) {
+        if ('range' in filterObj) {
           filterRange.push(filterObj);
         } else {
           boolItemsList.push(filterObj);

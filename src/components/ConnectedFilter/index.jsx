@@ -46,6 +46,7 @@ class ConnectedFilter extends React.Component {
 
     this.state = {
       allFields,
+      countFields: this.props.extraAggsFieldsCardinalityCount,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -70,6 +71,7 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
+      this.state.countFields,
       this.state.accessibility,
       this.state.filter,
     )
@@ -126,6 +128,7 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
+      this.state.countFields,
       mergedFilterResults,
       this.state.accessibility,
     )
@@ -317,6 +320,7 @@ ConnectedFilter.propTypes = {
     })),
   }).isRequired,
   extraAggsFields: PropTypes.arrayOf(PropTypes.string),
+  extraAggsFieldsCardinalityCount: PropTypes.arrayOf(PropTypes.string),
   guppyConfig: PropTypes.shape({
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -344,6 +348,7 @@ ConnectedFilter.propTypes = {
 
 ConnectedFilter.defaultProps = {
   extraAggsFields: [],
+  extraAggsFieldsCardinalityCount: [],
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   className: '',
