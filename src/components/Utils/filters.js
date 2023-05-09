@@ -52,6 +52,11 @@ export const updateCountsInInitialTabsOptions = (
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
+      // check if _cardinalityCount if so skip
+      if (field.includes('._cardinalityCount')) {
+        return;
+      }
+
       // in flattened tab options, to get actual field name, strip off the last '.histogram'
       const actualFieldName = field.replace('.histogram', '');
       // possible to have '.' in actualFieldName, so use it as a string
@@ -65,8 +70,9 @@ export const updateCountsInInitialTabsOptions = (
         return;
       }
       const histogram = flattenInitialTabsOptions[`${field}`];
-      if (!histogram) {
+      if (!histogram || typeof histogram !== 'object') {
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
+        return;
       }
       histogram.forEach((opt) => {
         const { key } = opt;

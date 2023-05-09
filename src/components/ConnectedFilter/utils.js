@@ -182,7 +182,19 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
   const resultAggsData = {};
   const flattenAggsData = flat(receivedAggsData, { safe: true });
   Object.keys(flattenAggsData).forEach((field) => {
-    const actualFieldName = field.replace('.histogram', '');
+    const isCardinalityCount = field.includes('._cardinalityCount');
+    const actualFieldName = isCardinalityCount
+      ? field.replace('._cardinalityCount', '')
+      : field.replace('.histogram', '');
+
+    if (!resultAggsData[`${actualFieldName}`]) {
+      resultAggsData[`${actualFieldName}`] = {};
+    }
+
+    if (isCardinalityCount) {
+      resultAggsData[`${actualFieldName}`].cardinalityCount = flattenAggsData[`${field}`];
+      return;
+    }
     const histogram = flattenAggsData[`${field}`];
     if (!histogram) return;
     if (actualFieldName in filterResults) {
@@ -191,9 +203,9 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
         const { selectedValues } = filterResults[`${actualFieldName}`];
         resultHistogram = histogram.filter((bucket) => selectedValues.includes(bucket.key));
       }
-      resultAggsData[`${actualFieldName}`] = { histogram: resultHistogram };
+      resultAggsData[`${actualFieldName}`].histogram = resultHistogram;
     } else {
-      resultAggsData[`${actualFieldName}`] = { histogram: flattenAggsData[`${field}`] };
+      resultAggsData[`${actualFieldName}`].histogram = flattenAggsData[`${field}`];
     }
   });
   return resultAggsData;
