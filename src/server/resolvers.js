@@ -123,6 +123,27 @@ const textHistogramResolver = async (parent, args, context) => {
   });
 };
 
+/**
+ * This resolver is for Cardinality.
+ * It inherits arguments from its parent,
+ * and uses "field" from parent and args "precision_threshold" to get the cardinality count
+ * @param {object} parent
+ * @param {object} args
+ */
+const cardinalityResolver = async (parent, args) => {
+  log.debug('[resolver.cardinalityResolver] args', args);
+  log.debug('[resolver.cardinalityResolver] parent', parent);
+  // TODO make work with nested
+  const {
+    esInstance, esIndex, esType, filter, field,
+  } = parent;
+
+  // eslint-disable-next-line camelcase
+  const { precision_threshold } = args;
+
+  return esInstance.getCardinalityCount(esIndex, esType, filter, field, precision_threshold);
+};
+
 const getFieldAggregationResolverMappingsByField = (field) => {
   let isNumericField = false;
   if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -137,6 +158,8 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   }));
 };
 
+// this spreads all fields out into individual resolvers and
+// adds "field", "isNumericField" and "nestedPath", to parent
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const { fields } = esInstance.getESFields(esIndex);
   const fieldAggregationResolverMappings = {};
@@ -165,6 +188,9 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *         }
  *       }
  *       file_count {
+ *         _cardinality (
+ *           precision_threshold: 1000 //optional
+ *         ), ---> `cardinalityResolver`
  *         histogram (rangeStart: xx, rangeEnd: xx, rangeStep: xx, binCount: xx)
  *         {  ---> `numericHistogramResolver`
  *           key
@@ -259,17 +285,21 @@ const getResolver = (esConfig, esInstance) => {
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
     HistogramForNumber: {
+      _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     HistogramForString: {
+      _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
     },
     RegularAccessHistogramForNumber: {
+      _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForString: {
+      _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
     },
     Mapping: {
