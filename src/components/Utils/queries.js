@@ -23,24 +23,24 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const cardinalityQueryStrForEachField = (field) => {
+const countQueryStrForEachField = (field) => {
   const splittedFieldArray = field.split('.');
   const splittedField = splittedFieldArray.shift();
 
   if (splittedFieldArray.length === 0) {
     return (`
       ${splittedField} {
-        _cardinalityCount
+        _totalCount
       }
       `);
   }
   return (`
   ${splittedField} {
-    ${cardinalityQueryStrForEachField(splittedFieldArray.join('.'))}
+    ${countQueryStrForEachField(splittedFieldArray.join('.'))}
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, cardinalityFields = [], gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, countFields = [], gqlFilter, acc) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -52,7 +52,7 @@ const queryGuppyForAggs = (path, type, fields, cardinalityFields = [], gqlFilter
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))},
-          ${cardinalityFields.map((field) => cardinalityQueryStrForEachField(field))}
+          ${countFields.map((field) => countQueryStrForEachField(field))}
         }
       }
     }`;
@@ -63,7 +63,7 @@ const queryGuppyForAggs = (path, type, fields, cardinalityFields = [], gqlFilter
       _aggregation {
         ${type} (accessibility: ${accessibility}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
-          ${cardinalityFields.map((field) => cardinalityQueryStrForEachField(field))}
+          ${countFields.map((field) => countQueryStrForEachField(field))}
         }
       }
     }`;

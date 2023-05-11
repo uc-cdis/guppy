@@ -182,16 +182,16 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
   const resultAggsData = {};
   const flattenAggsData = flat(receivedAggsData, { safe: true });
   Object.keys(flattenAggsData).forEach((field) => {
-    const isCardinalityCount = field.includes('._cardinalityCount');
-    const actualFieldName = isCardinalityCount
-      ? field.replace('._cardinalityCount', '')
+    const isCount = field.includes('._totalCount');
+    const actualFieldName = isCount
+      ? field.replace('._totalCount', '')
       : field.replace('.histogram', '');
 
     if (!resultAggsData[`${actualFieldName}`]) {
       resultAggsData[`${actualFieldName}`] = {};
     }
 
-    if (isCardinalityCount) {
+    if (isCount) {
       resultAggsData[`${actualFieldName}`].cardinalityCount = flattenAggsData[`${field}`];
       return;
     }

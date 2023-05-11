@@ -52,8 +52,8 @@ export const updateCountsInInitialTabsOptions = (
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
-      // check if _cardinalityCount if so skip
-      if (field.includes('._cardinalityCount')) {
+      // check if _totalCount if so skip
+      if (field.includes('._totalCount')) {
         return;
       }
 

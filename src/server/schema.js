@@ -228,6 +228,7 @@ export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => e
 
 const getNumberHistogramSchema = (isRegularAccess) => `
     type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+      _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram(
         rangeStart: Int,
@@ -241,6 +242,7 @@ const getNumberHistogramSchema = (isRegularAccess) => `
 
 const getTextHistogramSchema = (isRegularAccess) => `
     type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+      _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram: [BucketsForNestedStringAgg]
     }

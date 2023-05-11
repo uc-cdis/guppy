@@ -429,6 +429,25 @@ class ES {
     return result.hits.total;
   }
 
+  async getFeildCount(esIndex, esType, filter, field) {
+    const queryBody = {
+      size: 0,
+      aggs: {
+        [field]: {
+          value_count: {
+            field,
+          },
+        },
+      },
+    };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, filter);
+    }
+
+    const result = await this.query(esIndex, esType, queryBody);
+    return result.aggregations[field].value;
+  }
+
   // eslint-disable-next-line camelcase
   async getCardinalityCount(esIndex, esType, filter, field, precision_threshold) {
     const queryBody = {

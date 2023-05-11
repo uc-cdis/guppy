@@ -50,9 +50,13 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
  * @param {object} parent
  */
 const aggsTotalQueryResolver = (parent) => {
+  log.debug('[resolver.aggsTotalQueryResolver] parent', parent);
   const {
-    filter, esInstance, esIndex, esType,
+    filter, esInstance, esIndex, esType, field,
   } = parent;
+  if (field) {
+    return esInstance.getFeildCount(esIndex, esType, filter, field);
+  }
   return esInstance.getCount(esIndex, esType, filter);
 };
 
@@ -188,6 +192,7 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *         }
  *       }
  *       file_count {
+ *         _totalCount  ---> `aggsTotalQueryResolver`
  *         _cardinality (
  *           precision_threshold: 1000 //optional
  *         ), ---> `cardinalityResolver`
@@ -285,20 +290,24 @@ const getResolver = (esConfig, esInstance) => {
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
     HistogramForNumber: {
+      _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     HistogramForString: {
+      _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
     },
     RegularAccessHistogramForNumber: {
+      _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForString: {
+      _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
     },
