@@ -46,7 +46,7 @@ class ConnectedFilter extends React.Component {
 
     this.state = {
       allFields,
-      countFields: this.props.extraAggsFieldsCardinalityCount,
+      countFields: this.props.extraAggsFieldsCount,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -320,7 +320,7 @@ ConnectedFilter.propTypes = {
     })),
   }).isRequired,
   extraAggsFields: PropTypes.arrayOf(PropTypes.string),
-  extraAggsFieldsCardinalityCount: PropTypes.arrayOf(PropTypes.string),
+  extraAggsFieldsCount: PropTypes.arrayOf(PropTypes.string),
   guppyConfig: PropTypes.shape({
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -348,7 +348,7 @@ ConnectedFilter.propTypes = {
 
 ConnectedFilter.defaultProps = {
   extraAggsFields: [],
-  extraAggsFieldsCardinalityCount: [],
+  extraAggsFieldsCount: [],
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   className: '',
