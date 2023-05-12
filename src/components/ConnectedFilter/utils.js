@@ -192,7 +192,7 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
     }
 
     if (isCount) {
-      resultAggsData[`${actualFieldName}`].cardinalityCount = flattenAggsData[`${field}`];
+      resultAggsData[`${actualFieldName}`].totalCount = flattenAggsData[`${field}`];
       return;
     }
     const histogram = flattenAggsData[`${field}`];
