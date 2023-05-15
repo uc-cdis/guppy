@@ -31,7 +31,7 @@ class ConnectedFilter extends React.Component {
     let allFields = props.accessibleFieldCheckList
       ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
       : filterConfigsFields;
-    allFields = _.union(allFields, this.props.extraAggsFields, this.props.extraAggsFieldsCount);
+    allFields = _.union(allFields, this.props.extraAggsFields);
 
     this.initialTabsOptions = {};
     let initialFilter = this.props.adminAppliedPreFilters;
@@ -187,6 +187,7 @@ class ConnectedFilter extends React.Component {
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
       allFilterValues,
     );
+
     if (Object.keys(filtersToDisplay).length) {
       // if has applied filters, sort tab options as selected/unselected separately
       const selectedTabsOptions = {};
@@ -323,7 +324,6 @@ ConnectedFilter.propTypes = {
     })),
   }).isRequired,
   extraAggsFields: PropTypes.arrayOf(PropTypes.string),
-  extraAggsFieldsCount: PropTypes.arrayOf(PropTypes.string),
   guppyConfig: PropTypes.shape({
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -351,7 +351,6 @@ ConnectedFilter.propTypes = {
 
 ConnectedFilter.defaultProps = {
   extraAggsFields: [],
-  extraAggsFieldsCount: [],
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   className: '',
