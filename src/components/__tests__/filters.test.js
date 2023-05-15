@@ -64,6 +64,11 @@ describe('will select user-applied filter for a given key if it is more exclusiv
 });
 
 describe('can update a small set of tabs with new counts', () => {
+  const allFilterValues = [
+    'annotated_sex',
+    'extra_data',
+  ];
+
   const initialTabsOptions = {
     annotated_sex: {
       histogram: [
@@ -107,7 +112,7 @@ describe('can update a small set of tabs with new counts', () => {
   };
 
   const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
-    initialTabsOptions, processedTabsOptions, filtersApplied,
+    initialTabsOptions, processedTabsOptions, filtersApplied, undefined, allFilterValues,
   );
 
   test('update tab counts', async () => {
@@ -117,6 +122,10 @@ describe('can update a small set of tabs with new counts', () => {
 });
 
 describe('can update a small set of tabs with new counts, test with ranger slide', () => {
+  const allFilterValues = [
+    'field1',
+    'field2',
+  ];
   const initialTabsOptions = {
     field1: {
       histogram: [
@@ -175,7 +184,7 @@ describe('can update a small set of tabs with new counts, test with ranger slide
   };
 
   const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
-    initialTabsOptions, processedTabsOptions, filtersApplied,
+    initialTabsOptions, processedTabsOptions, filtersApplied, undefined, allFilterValues,
   );
 
   test('update tab counts', async () => {

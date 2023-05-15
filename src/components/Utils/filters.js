@@ -41,6 +41,7 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    */
 export const updateCountsInInitialTabsOptions = (
   initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
+  allFilterValues,
 ) => {
   const updatedTabsOptions = {};
   try {
@@ -52,13 +53,14 @@ export const updateCountsInInitialTabsOptions = (
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
-      // check if _totalCount if so skip
-      if (field.includes('._totalCount')) {
+      // in flattened tab options, to get actual field name, strip off the last '.histogram'
+      const actualFieldName = field.replace('.histogram', '');
+
+      // check if Filter Value if not skip
+      if (!allFilterValues.includes(actualFieldName)) {
         return;
       }
 
-      // in flattened tab options, to get actual field name, strip off the last '.histogram'
-      const actualFieldName = field.replace('.histogram', '');
       // possible to have '.' in actualFieldName, so use it as a string
       updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
       // if in tiered access mode

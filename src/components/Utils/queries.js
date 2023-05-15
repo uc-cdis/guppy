@@ -23,24 +23,7 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const countQueryStrForEachField = (field) => {
-  const splittedFieldArray = field.split('.');
-  const splittedField = splittedFieldArray.shift();
-
-  if (splittedFieldArray.length === 0) {
-    return (`
-      ${splittedField} {
-        _totalCount
-      }
-      `);
-  }
-  return (`
-  ${splittedField} {
-    ${countQueryStrForEachField(splittedFieldArray.join('.'))}
-  }`);
-};
-
-const queryGuppyForAggs = (path, type, fields, countFields = [], gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -51,8 +34,7 @@ const queryGuppyForAggs = (path, type, fields, countFields = [], gqlFilter, acc)
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
-          ${fields.map((field) => histogramQueryStrForEachField(field))},
-          ${countFields.map((field) => countQueryStrForEachField(field))}
+          ${fields.map((field) => histogramQueryStrForEachField(field))}
         }
       }
     }`;
@@ -63,7 +45,6 @@ const queryGuppyForAggs = (path, type, fields, countFields = [], gqlFilter, acc)
       _aggregation {
         ${type} (accessibility: ${accessibility}) {
           ${fields.map((field) => histogramQueryStrForEachField(field))}
-          ${countFields.map((field) => countQueryStrForEachField(field))}
         }
       }
     }`;
@@ -286,10 +267,10 @@ export const getGQLFilter = (filterObj) => {
 };
 
 export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, countFields, accessibility, filter,
+  path, type, fields, accessibility, filter,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, countFields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
 // eslint-disable-next-line max-len
@@ -299,12 +280,11 @@ export const askGuppyForAggregationData = (
   path,
   type,
   fields,
-  countFields,
   filter,
   accessibility,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, countFields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
 
 export const askGuppyForSubAggregationData = (
