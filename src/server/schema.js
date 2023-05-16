@@ -244,7 +244,8 @@ const getTextHistogramSchema = (isRegularAccess) => `
     type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
       _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
-      histogram: [BucketsForNestedStringAgg]
+      histogram: [BucketsForNestedStringAgg],
+      asTextHistogram: [BucketsForNestedStringAgg]
     }
   `;
 

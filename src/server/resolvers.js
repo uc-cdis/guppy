@@ -299,6 +299,7 @@ const getResolver = (esConfig, esInstance) => {
       _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
+      asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForNumber: {
       _totalCount: aggsTotalQueryResolver,
@@ -310,6 +311,7 @@ const getResolver = (esConfig, esInstance) => {
       _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
+      asTextHistogram: textHistogramResolver,
     },
     Mapping: {
       ...mappingResolvers,

@@ -149,12 +149,14 @@ describe('Schema', () => {
   type HistogramForString {
     _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
-    histogram: [BucketsForNestedStringAgg]
+    histogram: [BucketsForNestedStringAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
   }
   type RegularAccessHistogramForString {
     _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
-    histogram: [BucketsForNestedStringAgg]
+    histogram: [BucketsForNestedStringAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
   }
   type HistogramForNumber {
     _totalCount: Int,

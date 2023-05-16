@@ -11,7 +11,7 @@ const histogramQueryStrForEachField = (field) => {
   if (splittedFieldArray.length === 0) {
     return (`
     ${splittedField} {
-      histogram {
+      asTextHistogram {
         key
         count
       }
