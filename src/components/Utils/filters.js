@@ -47,14 +47,14 @@ export const updateCountsInInitialTabsOptions = (
   try {
     // flatten the tab options first
     // {
-    //   project_id.histogram: ...
-    //   visit.visit_label.histogram: ...
+    //   project_id.asTextHistogram: ...
+    //   visit.visit_label.asTextHistogram: ...
     // }
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
-      // in flattened tab options, to get actual field name, strip off the last '.histogram'
-      const actualFieldName = field.replace('.histogram', '');
+      // in flattened tab options, to get actual field name, strip off the last '.asTextHistogram'
+      const actualFieldName = field.replace('.asTextHistogram', '');
 
       // check if Filter Value if not skip
       if (!allFilterValues.includes(actualFieldName)) {
