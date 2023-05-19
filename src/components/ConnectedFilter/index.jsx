@@ -46,7 +46,6 @@ class ConnectedFilter extends React.Component {
 
     this.state = {
       allFields,
-      countFields: this.props.extraAggsFieldsCardinalityCount,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -71,7 +70,6 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      this.state.countFields,
       this.state.accessibility,
       this.state.filter,
     )
@@ -128,7 +126,6 @@ class ConnectedFilter extends React.Component {
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
       this.state.allFields,
-      this.state.countFields,
       mergedFilterResults,
       this.state.accessibility,
     )
@@ -172,6 +169,12 @@ class ConnectedFilter extends React.Component {
     const filtersToDisplay = this.state.filtersApplied;
     if (this.props.hidden) return null;
     let processedTabsOptions = this.props.onProcessFilterAggsData(this.state.receivedAggsData);
+
+    // Get filter values
+    const allFilterValues = this.props.filterConfig.tabs.reduce(
+      (accumulator, tab) => ([...accumulator, ...tab.fields]), [],
+    );
+
     if (Object.keys(this.initialTabsOptions).length === 0) {
       this.initialTabsOptions = processedTabsOptions;
     }
@@ -182,6 +185,7 @@ class ConnectedFilter extends React.Component {
       filtersToDisplay,
       // for tiered access filters
       this.props.tierAccessLimit ? this.props.accessibleFieldCheckList : [],
+      allFilterValues,
     );
 
     if (Object.keys(filtersToDisplay).length) {
@@ -320,7 +324,6 @@ ConnectedFilter.propTypes = {
     })),
   }).isRequired,
   extraAggsFields: PropTypes.arrayOf(PropTypes.string),
-  extraAggsFieldsCardinalityCount: PropTypes.arrayOf(PropTypes.string),
   guppyConfig: PropTypes.shape({
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
@@ -348,7 +351,6 @@ ConnectedFilter.propTypes = {
 
 ConnectedFilter.defaultProps = {
   extraAggsFields: [],
-  extraAggsFieldsCardinalityCount: [],
   onFilterChange: () => {},
   onReceiveNewAggsData: () => {},
   className: '',
