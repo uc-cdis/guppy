@@ -55,7 +55,7 @@ const aggsTotalQueryResolver = (parent) => {
     filter, esInstance, esIndex, esType, field,
   } = parent;
   if (field) {
-    return esInstance.getFeildCount(esIndex, esType, filter, field);
+    return esInstance.getFieldCount(esIndex, esType, filter, field);
   }
   return esInstance.getCount(esIndex, esType, filter);
 };

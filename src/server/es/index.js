@@ -429,7 +429,7 @@ class ES {
     return result.hits.total;
   }
 
-  async getFeildCount(esIndex, esType, filter, field) {
+  async getFieldCount(esIndex, esType, filter, field) {
     const queryBody = {
       size: 0,
       aggs: {
