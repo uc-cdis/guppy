@@ -70,7 +70,7 @@
     "@babel/runtime-corejs3": "^7.21.5",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-links": "^6.5.16",
-    "@storybook/react": "^6.5.16",
+    "@storybook/react": "^7.0.18",
     "babel-jest": "^26.0.0",
     "babel-loader": "^8.0.5",
     "commander": "^3.0.1",
