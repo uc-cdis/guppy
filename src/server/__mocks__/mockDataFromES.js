@@ -382,7 +382,6 @@ const mockArrayConfig = () => {
       hits: [
         {
           _index: 'gen3-dev-config',
-          _type: '_doc',
           _id: 'gen3-dev-subject',
           _score: 1.0,
           _source: {
