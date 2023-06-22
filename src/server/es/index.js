@@ -151,16 +151,16 @@ class ES {
    * Return a Promise of an Object: { <field>: <type> }
    * If error, print error stack
    * @param {string} esIndex
-   * @param {string} esType
    */
-  async _getESFieldsTypes(esIndex, esType) {
+  async _getESFieldsTypes(esIndex) {
     const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        return resp.body[esIndexAlias].mappings[esType].properties;
+        log.info('Mapping response from ES: ', resp.body[esIndexAlias]);
+        return resp.body[esIndexAlias].mappings.properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -177,7 +177,7 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
+      .map((cfg) => this._getESFieldsTypes(cfg.index)
         .then((res) => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
