@@ -216,6 +216,7 @@ class ES {
       try {
         resp.body.hits.hits.forEach((doc) => {
           const index = doc._id;
+          log.debug(this.fieldTypes)
           if (!this.fieldTypes[index]) {
             const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
             log.error(errMsg);
