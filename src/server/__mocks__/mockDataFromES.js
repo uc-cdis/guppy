@@ -343,7 +343,7 @@ const mockESMapping = () => {
   };
   nock(config.esConfig.host)
     .persist()
-    .get(/_mapping\/subject/)
+    .get(/subject\/_mapping/)
     .reply(200, fakeSubjectMapping);
   const fakeFileMapping = {
     'gen3-dev-file': {
@@ -369,7 +369,7 @@ const mockESMapping = () => {
   };
   nock(config.esConfig.host)
     .persist()
-    .get(/_mapping\/file/)
+    .get(/file\/_mapping/)
     .reply(200, fakeFileMapping);
 };
 
