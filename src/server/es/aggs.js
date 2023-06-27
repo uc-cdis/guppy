@@ -581,7 +581,7 @@ export const textAggregation = async (
   // don't add missing alias to numeric field by default
   // since the value of missing alias is a string
   if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
-    missingAlias = { missing_bucket: config.esConfig.missingDataAlias };
+    missingAlias = { missing: config.esConfig.missingDataAlias };
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
@@ -649,6 +649,8 @@ export const textAggregation = async (
       },
     };
   }
+  console.log("Query body:")
+  console.log(queryBody);
   let resultSize;
   let finalResults = [];
   /* eslint-disable */
