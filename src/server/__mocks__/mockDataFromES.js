@@ -24,7 +24,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
@@ -98,7 +99,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
@@ -157,7 +159,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
