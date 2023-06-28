@@ -581,7 +581,7 @@ export const textAggregation = async (
   // don't add missing alias to numeric field by default
   // since the value of missing alias is a string
   if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
-    missingAlias = { missing: config.esConfig.missingDataAlias };
+    missingAlias = { missing_bucket: true, order: "desc" };
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
@@ -649,8 +649,6 @@ export const textAggregation = async (
       },
     };
   }
-  console.log("Query body:")
-  console.log(queryBody);
   let resultSize;
   let finalResults = [];
   /* eslint-disable */
@@ -660,6 +658,8 @@ export const textAggregation = async (
     resultSize = 0;
 
     const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+    console.log("results in bucket:");
+    console.log(resultBuckets);
 
     resultBuckets.forEach((item) => {
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
@@ -677,17 +677,31 @@ export const textAggregation = async (
   /* eslint-enable */
 
   // order aggregations by doc count
-  finalResults = finalResults.sort((e1, e2) => e2.count - e1.count);
+  console.log("Final results before replace:");
+  console.log(finalResults);
+  finalResults = finalResults.sort((e1, e2) => {
+    if (e1.key === null)
+      return 1;
+    if (e2.key === null)
+      return -1;
+    return e2.count - e1.count;
+  });
 
   // make the missing data bucket to the bottom of the list
+  console.log("Final result length:");
+  console.log(finalResults.length);
+  let lastIndex = finalResults.length - 1;
   if (config.esConfig.aggregationIncludeMissingData) {
-    const missingDataIndex = finalResults
-      .findIndex((b) => b.key === config.esConfig.missingDataAlias);
-    const missingDataItem = finalResults.find((b) => b.key === config.esConfig.missingDataAlias);
-    if (missingDataItem) {
-      finalResults.splice(missingDataIndex, 1);
-      finalResults.splice(finalResults.length, 0, missingDataItem);
+    const missingDataItem = finalResults[lastIndex];
+    console.log("Right before replacing key");
+    console.log(lastIndex);
+    console.log(missingDataItem)
+    if (missingDataItem.key === null) {
+      missingDataItem.key = config.esConfig.missingDataAlias;
+      finalResults[lastIndex] = missingDataItem;
     }
   }
+  console.log("Final results:");
+  console.log(finalResults);
   return finalResults;
 };
