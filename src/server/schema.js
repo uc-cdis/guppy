@@ -160,7 +160,7 @@ const getAggregationSchemaForOneIndex = (esInstance, esConfigElement) => {
   }));
   const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
   return `type ${esTypeObjName}Aggregation {
-    _totalCount: Int
+    _totalCount: Int,
     ${fieldAggsTypeMap.map((entry) => `${getAggregationType(entry)}`).join('\n')}
     ${fieldAggsNestedTypeMap.map((entry) => `${entry.field}: NestedHistogramFor${firstLetterUpperCase(entry.field)}`).join('\n')}
   }`;
@@ -228,6 +228,7 @@ export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => e
 
 const getNumberHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+      _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram(
         rangeStart: Int,
         rangeEnd: Int,
@@ -240,6 +241,7 @@ const getNumberHistogramSchema = (accessType) => `
 
 const getTextHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+      _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram(
         filterNestedEntity: Boolean=true,
         reverseNested: Boolean=true,
