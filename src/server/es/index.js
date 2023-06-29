@@ -216,7 +216,6 @@ class ES {
       try {
         resp.body.hits.hits.forEach((doc) => {
           const index = doc._id;
-          log.debug(this.fieldTypes)
           if (!this.fieldTypes[index]) {
             const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
             log.error(errMsg);
@@ -426,7 +425,7 @@ class ES {
       { esInstance: this, esIndex, esType },
       { filter, fields: false, size: 0 },
     );
-    return result.hits.total;
+    return result.hits.total.value;
   }
 
   async getFieldCount(esIndex, esType, filter, field) {
@@ -441,7 +440,7 @@ class ES {
       },
     };
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, filter);
+      queryBody.query = getFilterObj(this, esIndex, filter, field);
     }
 
     const result = await this.query(esIndex, esType, queryBody);
