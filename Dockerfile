@@ -11,10 +11,9 @@ RUN apt-get update \
         sudo \
         vim \
         libcap2-bin \
-    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@8.5
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . /guppy/
 WORKDIR /guppy
