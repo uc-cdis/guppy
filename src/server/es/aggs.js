@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from '@apollo/server';
 import getFilterObj from './filter';
 import {
   AGGS_GLOBAL_STATS_NAME,

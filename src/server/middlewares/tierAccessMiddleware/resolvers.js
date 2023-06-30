@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import assert from 'assert';
-import { ApolloError, UserInputError } from 'apollo-server';
+import { ApolloError, UserInputError } from '@apollo/server';
 import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';

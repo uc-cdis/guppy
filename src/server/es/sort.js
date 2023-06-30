@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from '@apollo/server';
 
 /**
  * Transfer graphql sort arg to ES sort object

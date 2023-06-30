@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from '@apollo/server';
 import config from '../config';
 import getFilterObj from './filter';
 import getESSortBody from './sort';
