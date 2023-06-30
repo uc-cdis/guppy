@@ -1,4 +1,4 @@
-import { UserInputError } from '@apollo/server';
+import { GraphQLError } from 'graphql';
 import getFilterObj from './filter';
 import {
   AGGS_GLOBAL_STATS_NAME,
@@ -442,16 +442,32 @@ export const numericAggregation = async (
   },
 ) => {
   if (rangeStep <= 0) {
-    throw new UserInputError(`Invalid rangeStep ${rangeStep}`);
+    throw new GraphQLError(`Invalid rangeStep ${rangeStep}`, {
+      extensions: {
+        code: 'ApolloServerErrorCode.BAD_USER_INPUT',
+      },
+    });
   }
   if (rangeStart > rangeEnd) {
-    throw new UserInputError(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`);
+    throw new GraphQLError(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`, {
+      extensions: {
+        code: 'ApolloServerErrorCode.BAD_USER_INPUT',
+      },
+    });
   }
   if (binCount <= 0) {
-    throw new UserInputError(`Invalid binCount ${binCount}`);
+    throw new GraphQLError(`Invalid binCount ${binCount}`, {
+      extensions: {
+        code: 'ApolloServerErrorCode.BAD_USER_INPUT',
+      },
+    });
   }
   if (typeof rangeStep !== 'undefined' && typeof binCount !== 'undefined') {
-    throw new UserInputError('Invalid to set "rangeStep" and "binCount" at same time');
+    throw new GraphQLError('Invalid to set "rangeStep" and "binCount" at same time', {
+      extensions: {
+        code: 'ApolloServerErrorCode.BAD_USER_INPUT',
+      },
+    });
   }
   if (typeof rangeStep !== 'undefined') {
     return numericHistogramWithFixedRangeStep(
