@@ -13,7 +13,8 @@ RUN apt-get update \
         libcap2-bin \
     && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g npm@8.5
 
 COPY . /guppy/
 WORKDIR /guppy
