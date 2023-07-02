@@ -71,7 +71,7 @@
     "@storybook/addon-actions": "^7.0.18",
     "@storybook/addon-links": "^7.0.18",
     "@storybook/react": "^7.0.18",
-    "@storybook/react-webpack5": "^7.0.18",
+    "@storybook/react-webpack5": "^7.0.20",
     "babel-jest": "^26.0.0",
     "babel-loader": "^8.0.5",
     "commander": "^3.0.1",
