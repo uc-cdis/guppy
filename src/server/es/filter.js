@@ -277,7 +277,13 @@ const getFilterObj = (
     const filterRange = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
       const filterObj = getFilterObj(
-        esInstance, esIndex, filterItem, aggsField, filterSelf, defaultAuthFilter, objPath,
+        esInstance,
+        esIndex,
+        filterItem,
+        aggsField,
+        filterSelf,
+        defaultAuthFilter,
+        objPath,
       );
       if (filterObj) {
         if ('range' in filterObj) {
@@ -332,7 +338,10 @@ const getFilterObj = (
     }
     const targetSearchFields = graphqlFilterObj[topLevelOp].fields;
     resultFilterObj = getESSearchFilterFragment(
-      esInstance, esIndex, targetSearchFields, targetSearchKeyword,
+      esInstance,
+      esIndex,
+      targetSearchFields,
+      targetSearchKeyword,
     );
   } else if (topLevelOpLowerCase === 'nested') {
     const { path } = graphqlFilterObj[topLevelOp];
@@ -346,8 +355,15 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
 
-    const nestedFilter = getFilterObj(esInstance, esIndex, filterOpObj,
-      aggsField, filterSelf, defaultAuthFilter, path);
+    const nestedFilter = getFilterObj(
+      esInstance,
+      esIndex,
+      filterOpObj,
+      aggsField,
+      filterSelf,
+      defaultAuthFilter,
+      path,
+    );
     if (nestedFilter != null) {
       resultFilterObj = {
         nested: {

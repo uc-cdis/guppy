@@ -229,8 +229,10 @@ class ES {
             if (!(this.fieldTypes[index][field]
               || (
                 fieldArr.length > 1
-                && _.has(this.fieldTypes[index],
-                  fieldArr.join('.properties.'))
+                && _.has(
+                  this.fieldTypes[index],
+                  fieldArr.join('.properties.'),
+                )
               )
             )) {
               const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
@@ -455,7 +457,7 @@ class ES {
         cardinality_count: {
           cardinality: {
             field,
-            precision_threshold,
+            precision_threshold, // eslint-disable-line camelcase
           },
         },
       },

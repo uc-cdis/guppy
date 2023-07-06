@@ -302,8 +302,10 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
 
-  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
-    esInstance);
+  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(
+    esConfig,
+    esInstance,
+  );
 
   const histogramSchemas = getHistogramSchemas();
 

@@ -161,7 +161,12 @@ export const numericGlobalStats = async (
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
-      esInstance, esIndex, filter, field, filterSelf, defaultAuthFilter,
+      esInstance,
+      esIndex,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
     );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
