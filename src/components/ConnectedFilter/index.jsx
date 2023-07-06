@@ -155,6 +155,14 @@ class ConnectedFilter extends React.Component {
     return newTabs;
   }
 
+  // eslint-disable-next-line react/no-unused-class-component-methods
+  setFilter(filter) {
+    if (this.filterGroupRef.current) {
+      this.filterGroupRef.current.resetFilter();
+    }
+    this.handleFilterChange(filter);
+  }
+
   /**
    * This function contains partial rendering logic for filter components.
    * It transfers aggregation data (`this.state.receivedAggsData`) to items inside filters.
