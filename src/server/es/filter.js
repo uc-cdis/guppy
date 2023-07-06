@@ -256,7 +256,7 @@ const getFilterObj = (
   esIndex,
   graphqlFilterObj,
   aggsField,
-  filterSelf = true,
+  filterSelf = true, // eslint-disable-line default-param-last
   defaultAuthFilter,
   objPath = null,
 ) => {
