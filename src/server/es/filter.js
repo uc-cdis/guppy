@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ApolloError, UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
 
@@ -11,7 +11,11 @@ const fromPathToNode = (esInstance, esIndex, path) => {
       if (n in node) {
         node = node[n].properties;
       } else {
-        throw new UserInputError(`Field ${n} does not exist in ES index`);
+        throw new GraphQLError(`Field ${n} does not exist in ES index`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       }
     });
   }
@@ -38,11 +42,19 @@ const getNumericTextType = (
 ) => {
   const node = fromPathToNode(esInstance, esIndex, path);
   if (!esInstance.fieldTypes[esIndex] || !node[field]) {
-    throw new UserInputError('Please check your syntax for input "filter" argument');
+    throw new GraphQLError('Please check your syntax for input "filter" argument', {
+      extensions: {
+        code: 'BAD_USER_INPUT',
+      },
+    });
   }
   const numericTextType = esFieldNumericTextTypeMapping[node[field].type];
   if (typeof numericTextType === 'undefined') {
-    throw new ApolloError(`ES type ${node[field].type} not supported.`, 500);
+    throw new GraphQLError(`ES type ${node[field].type} not supported.`, {
+      extensions: {
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
   }
   return numericTextType;
 };
@@ -122,7 +134,11 @@ const getFilterItemForString = (op, pField, value, path) => {
         },
       };
     default:
-      throw new UserInputError(`Invalid operation "${op}" in filter argument.`);
+      throw new GraphQLError(`Invalid operation "${op}" in filter argument.`, {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
   }
 };
 
@@ -181,7 +197,11 @@ const getFilterItemForNumbers = (op, pField, value, path) => {
       },
     };
   }
-  throw new UserInputError(`Invalid numeric operation "${op}" for field "${field}" in filter argument`);
+  throw new GraphQLError(`Invalid numeric operation "${op}" for field "${field}" in filter argument`, {
+    extensions: {
+      code: 'BAD_USER_INPUT',
+    },
+  });
 };
 
 const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
@@ -193,9 +213,17 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
     // Check fields are valid
     fields.forEach((f) => {
       if (!esInstance.fieldTypes[esIndex]) {
-        throw new UserInputError(`es index ${esIndex} doesn't exist`);
+        throw new GraphQLError(`es index ${esIndex} doesn't exist`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       } else if (!esInstance.fieldTypes[esIndex][f]) {
-        throw new UserInputError(`invalid field ${f} in "filter" variable`);
+        throw new GraphQLError(`invalid field ${f} in "filter" variable`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       }
     });
     analyzedFields = fields.map((f) => `${f}${config.analyzedTextFieldSuffix}`);
@@ -213,10 +241,10 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
  * It first parse graphql filter object recursively from top to down,
  * until reach the bottom level, it translate gql filter unit to ES filter unit.
  * And finally combines all filter units from down to top.
- * @param {string} esInstance
+ * @param {ES} esInstance
  * @param {string} esIndex
  * @param {object} graphqlFilterObj
- * @param {string[]} aggsField - target agg field, only need for agg queries
+ * @param {string} aggsField - target agg field, only need for agg queries
  * @param {boolean} filterSelf - whether we want to filter this field or not,
  *                               only need for agg queries
  * @param {object} defaultAuthFilter - once graphqlFilterObj is empty,
@@ -227,9 +255,9 @@ const getFilterObj = (
   esInstance,
   esIndex,
   graphqlFilterObj,
-  aggsField,
+  aggsField = null,
   filterSelf = true,
-  defaultAuthFilter,
+  defaultAuthFilter = null,
   objPath = null,
 ) => {
   if (!graphqlFilterObj
@@ -279,16 +307,28 @@ const getFilterObj = (
     }
   } else if (topLevelOpLowerCase === 'search') {
     if (!('keyword' in graphqlFilterObj[topLevelOp])) { // "keyword" required
-      throw new UserInputError('Invalid search filter syntax: missing \'keyword\' field');
+      throw new GraphQLError('Invalid search filter syntax: missing \'keyword\' field', {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
     }
     Object.keys(graphqlFilterObj[topLevelOp]).forEach((o) => { // check filter syntax
       if (o !== 'keyword' && o !== 'fields') {
-        throw new UserInputError(`Invalid search filter syntax: unrecognized field '${o}'`);
+        throw new GraphQLError(`Invalid search filter syntax: unrecognized field '${o}'`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       }
     });
     const targetSearchKeyword = graphqlFilterObj[topLevelOp].keyword;
     if (targetSearchKeyword.length < config.allowedMinimumSearchLen) {
-      throw new UserInputError(`Keyword too short (length < ${config.allowedMinimumSearchLen}`);
+      throw new GraphQLError(`Keyword too short (length < ${config.allowedMinimumSearchLen}`, {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
     }
     const targetSearchFields = graphqlFilterObj[topLevelOp].fields;
     resultFilterObj = getESSearchFilterFragment(
@@ -332,7 +372,11 @@ const getFilterObj = (
     } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
       resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
     } else {
-      throw new ApolloError(`Invalid es field type ${numericOrTextType}`, 500);
+      throw new GraphQLError(`Invalid es field type ${numericOrTextType}`, {
+        extensions: {
+          code: 'INTERNAL_SERVER_ERROR',
+        },
+      });
     }
   }
   return resultFilterObj;
