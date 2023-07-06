@@ -55,6 +55,7 @@ class ES {
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
+      type: esType,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
@@ -110,6 +111,7 @@ class ES {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
           index: esIndex,
+          type: esType,
           body: validatedQueryBody,
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
@@ -151,18 +153,17 @@ class ES {
    * Return a Promise of an Object: { <field>: <type> }
    * If error, print error stack
    * @param {string} esIndex
+   * @param {string} esType
    */
-  async _getESFieldsTypes(esIndex) {
+  async _getESFieldsTypes(esIndex, esType) {
     const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
+      type: esType,
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        log.info('Mapping response from ES: ', resp.body[esIndexAlias]);
-        // This may not be needed when upgrading to ES 7
-        const esIndexContainerAlias = Object.keys(resp.body[esIndexAlias].mappings)[0];
-        return resp.body[esIndexAlias].mappings[esIndexContainerAlias].properties;
+        return resp.body[esIndexAlias].mappings[esType].properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -179,7 +180,7 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map((cfg) => this._getESFieldsTypes(cfg.index)
+      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
         .then((res) => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
@@ -427,7 +428,7 @@ class ES {
       { esInstance: this, esIndex, esType },
       { filter, fields: false, size: 0 },
     );
-    return result.hits.total.value;
+    return result.hits.total;
   }
 
   async getFieldCount(esIndex, esType, filter, field) {
@@ -442,7 +443,7 @@ class ES {
       },
     };
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, filter, field);
+      queryBody.query = getFilterObj(this, esIndex, filter);
     }
 
     const result = await this.query(esIndex, esType, queryBody);
