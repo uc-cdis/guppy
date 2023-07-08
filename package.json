@@ -34,7 +34,7 @@
     "array.prototype.flat": "^1.2.2",
     "array.prototype.flatmap": "^1.2.3",
     "body-parser": "^1.20.2",
-    "core-js": "^3.30.2",
+    "core-js": "^3.31.0",
     "cors": "^2.8.5",
     "csurf": "^1.11.0",
     "dd-trace": "^1.5.0",
