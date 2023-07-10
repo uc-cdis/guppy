@@ -21,7 +21,9 @@ import { statusRouter, versionRouter } from './endpoints';
 
 const app = express();
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+}));
 app.use(bodyParser.json({ limit: '50mb' }));
 
 const startServer = async () => {
