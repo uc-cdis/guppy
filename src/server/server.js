@@ -23,6 +23,10 @@ const app = express();
 app.use(cors());
 app.use(helmet({
   contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  originAgentCluster: false,
 }));
 app.use(bodyParser.json({ limit: '50mb' }));
 
