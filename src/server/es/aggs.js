@@ -684,7 +684,7 @@ export const textAggregation = async (
   const lastIndex = finalResults.length - 1;
   if (config.esConfig.aggregationIncludeMissingData) {
     const missingDataItem = finalResults[lastIndex];
-    if (missingDataItem.key === null) {
+    if (missingDataItem !== undefined && missingDataItem.key === null) {
       missingDataItem.key = config.esConfig.missingDataAlias;
       finalResults[lastIndex] = missingDataItem;
     }
