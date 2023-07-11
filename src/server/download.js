@@ -38,7 +38,9 @@ const downloadRouter = async (req, res, next) => {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-            esIndexConfig.index, type, filter,
+            esIndexConfig.index,
+            type,
+            filter,
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
