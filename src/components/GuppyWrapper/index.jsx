@@ -49,8 +49,10 @@ class GuppyWrapper extends React.Component {
     super(props);
     let initialFilter = this.props.adminAppliedPreFilters;
     if (Object.keys(this.props.initialFilterFromURL).length > 0) {
-      initialFilter = mergeFilters(this.props.initialFilterFromURL,
-        this.props.adminAppliedPreFilters);
+      initialFilter = mergeFilters(
+        this.props.initialFilterFromURL,
+        this.props.adminAppliedPreFilters,
+      );
     }
 
     // to avoid asynchronizations, we store another filter as private var
@@ -197,7 +199,8 @@ class GuppyWrapper extends React.Component {
   handleAskGuppyForTotalCounts(type, filter) {
     return askGuppyForTotalCounts(
       this.props.guppyConfig.path,
-      type, filter,
+      type,
+      filter,
       this.state.accessibility,
     );
   }
@@ -284,6 +287,7 @@ class GuppyWrapper extends React.Component {
       fields,
       this.filter,
       sort,
+      undefined,
       offset,
       size,
       this.state.accessibility,
