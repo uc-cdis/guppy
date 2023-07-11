@@ -90,11 +90,11 @@ const queryGuppyForSubAgg = (
   path,
   type,
   mainField,
-  numericAggAsText = false,
   termsFields,
   missingFields,
   gqlFilter,
   acc,
+  numericAggAsText = false,
 ) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
@@ -161,10 +161,10 @@ export const queryGuppyForRawDataAndTotalCounts = (
   fields,
   gqlFilter,
   sort,
+  format,
   offset = 0,
   size = 20,
   accessibility = 'all',
-  format,
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort || format) {
@@ -266,9 +266,7 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (
-  path, type, fields, accessibility, filter,
-) => {
+export const askGuppyAboutAllFieldsAndOptions = (path, type, fields, accessibility, filter) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
 };
@@ -302,11 +300,11 @@ export const askGuppyForSubAggregationData = (
     path,
     type,
     mainField,
-    numericAggAsText,
     termsNestedFields,
     missedNestedFields,
     gqlFilter,
     accessibility,
+    numericAggAsText,
   );
 };
 
@@ -316,10 +314,10 @@ export const askGuppyForRawData = (
   fields,
   filter,
   sort,
+  format,
   offset = 0,
   size = 20,
   accessibility = 'all',
-  format,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
@@ -328,10 +326,10 @@ export const askGuppyForRawData = (
     fields,
     gqlFilter,
     sort,
+    format,
     offset,
     size,
     accessibility,
-    format,
   );
 };
 
@@ -373,7 +371,7 @@ export const downloadDataFromGuppy = (
       .then((r) => r.json())
       .then((res) => (JSON_FORMAT ? res : jsonToFormat(res, format)));
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, 0, totalCount, accessibility, format)
+  return askGuppyForRawData(path, type, fields, filter, sort, format, 0, totalCount, accessibility)
     .then((res) => {
       if (res && res.data && res.data[type]) {
         return JSON_FORMAT ? res.data[type] : jsonToFormat(res.data[type], format);

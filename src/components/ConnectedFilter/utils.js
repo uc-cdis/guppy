@@ -72,6 +72,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       [field],
       filter,
       undefined,
+      undefined,
       offset,
       NUM_SEARCH_OPTIONS,
       'accessible',
@@ -108,8 +109,14 @@ export const checkIsArrayField = (field, arrayFields) => {
 };
 
 export const getFilterSections = (
-  fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
+  fields,
+  searchFields,
+  fieldMapping,
+  tabsOptions,
+  initialTabsOptions,
+  adminAppliedPreFilters,
+  guppyConfig,
+  arrayFields,
   filterValuesToHide,
 ) => {
   let searchFieldSections = [];
