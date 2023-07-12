@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 
 /**
  * Transfer graphql sort arg to ES sort object
@@ -33,17 +33,29 @@ const getESSortBody = (graphqlSort, esInstance, esIndex) => {
     // check fields and sort methods are valid
     for (let i = 0; i < graphqlSortObj.length; i += 1) {
       if (!graphqlSortObj[i] || Object.keys(graphqlSortObj[i]).length !== 1) {
-        throw new UserInputError('Invalid sort argument');
+        throw new GraphQLError('Invalid sort argument', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       }
       const field = Object.keys(graphqlSortObj[i])[0];
       const method = graphqlSortObj[i][field];
       if (method !== 'asc' && method !== 'desc') {
-        throw new UserInputError('Invalid sort argument');
+        throw new GraphQLError('Invalid sort argument', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
       }
       if (!field.includes('.')) {
         // non-nested field name, normal check logic
         if (typeof esInstance.fieldTypes[esIndex][field] === 'undefined') {
-          throw new UserInputError('Invalid sort argument');
+          throw new GraphQLError('Invalid sort argument', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+            },
+          });
         } else {
           sortBody.push({
             [field]: {
@@ -60,7 +72,11 @@ const getESSortBody = (graphqlSort, esInstance, esIndex) => {
           if (fieldTypesToCheck && fieldTypesToCheck[FieldNameToCheck]) {
             fieldTypesToCheck = fieldTypesToCheck[FieldNameToCheck].properties;
           } else {
-            throw new UserInputError('Invalid sort argument');
+            throw new GraphQLError('Invalid sort argument', {
+              extensions: {
+                code: 'BAD_USER_INPUT',
+              },
+            });
           }
         }
         // if we got here, everything looks good

@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import config from '../config';
 import getFilterObj from './filter';
 import getESSortBody from './sort';
@@ -475,9 +475,13 @@ class ES {
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
+      throw new GraphQLError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
-      please use download endpoint for large data queries instead.`);
+      please use download endpoint for large data queries instead.`, {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
     }
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },

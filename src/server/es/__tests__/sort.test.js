@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from '@apollo/server';
 import getESSortBody from '../sort';
 import esInstance from '../index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
