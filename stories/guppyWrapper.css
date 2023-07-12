@@ -3,6 +3,14 @@
   display: flex;
 }
 
+.connected-table-example table > thead > tr > th {
+  background-color: #ebebeb;
+}
+
+.connected-table-example table > tbody > tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
 .guppy-wrapper__filter {
   display: inline;
   width: 20%;
