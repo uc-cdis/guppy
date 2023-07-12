@@ -379,9 +379,4 @@ export const buildSchemaString = (esConfig, esInstance) => {
   return schemaStr;
 };
 
-const getSchema = (esConfig, esInstance) => {
-  const schemaStr = buildSchemaString(esConfig, esInstance);
-  return schemaStr;
-};
-
-export default getSchema;
+export default buildSchemaString(esConfig, esInstance);
