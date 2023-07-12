@@ -379,4 +379,4 @@ export const buildSchemaString = (esConfig, esInstance) => {
   return schemaStr;
 };
 
-export default buildSchemaString(esConfig, esInstance);
+export default buildSchemaString;
