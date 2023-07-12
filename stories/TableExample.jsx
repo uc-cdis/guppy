@@ -36,14 +36,12 @@ class ConnectedTableExample extends React.Component {
     }));
 
     const handleTableChange = (pagination, filters, sorter) => {
-      console.log('handleTableChange', pagination, filters, sorter);
       const size = pagination.pageSize;
       this.setState({ loading: true });
       const offset = (pagination.current - 1) * size;
       const sort = sorter?.order ? {
         [sorter.field]: sorter.order === 'descend' ? 'desc' : 'asc',
       } : {};
-      console.log('handleTableChange', offset, size, sort);
       this.props.fetchAndUpdateRawData({
         offset,
         size,
@@ -59,7 +57,6 @@ class ConnectedTableExample extends React.Component {
         });
       });
     };
-    console.log('table render', this.state.pagination);
     return (
       <Table
         className={`connected-table-example ${this.props.className}`}
