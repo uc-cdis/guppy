@@ -42,7 +42,9 @@ const startServer = async () => {
 
   await server.start();
 
-  app.use('/graphql', cors(),
+  app.use(
+    '/graphql',
+    cors(),
     expressMiddleware(server, {
       context: async ({ req }) => {
         const jwt = headerParser.parseJWT(req);
