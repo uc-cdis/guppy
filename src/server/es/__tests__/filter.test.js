@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { UserInputError } from '@apollo/server';
+import { GraphQLError } from 'graphql';
 import getFilterObj from '../filter';
 import esInstance from '../index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
@@ -210,18 +210,24 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(resultESFilter3).toEqual(expectedESFilter3);
   });
 
+  const userInputError = new GraphQLError('Please check your syntax for input "filter" argument', {
+    extensions: {
+      code: 'BAD_USER_INPUT',
+    },
+  });
+
   test('could throw err for invalid operator', async () => {
     await esInstance.initialize();
 
     expect(() => { // for string field
       const gqlFilter = { '+': { gender: 'female' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(userInputError);
 
     expect(() => { // for int field
       const gqlFilter = { '+': { file_count: 10 } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(userInputError);
   });
 
   test('could throw err for nonexisting field', async () => {
@@ -230,7 +236,7 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(() => { // for string field
       const gqlFilter = { '=': { strange_field: 'value' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(userInputError);
   });
 });
 
