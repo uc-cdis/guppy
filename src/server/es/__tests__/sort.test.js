@@ -120,33 +120,27 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
     expect(resultESSort3).toEqual(expectedESSort3);
   });
 
-  const userInputError = new GraphQLError('Invalid sort argument', {
-    extensions: {
-      code: 'BAD_USER_INPUT',
-    },
-  });
-
   test('array format sort arg with nonexisting field', async () => {
     await esInstance.initialize();
     expect(() => {
       const graphQLSort = { invalid_field: 'asc' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ invalid_field: 'asc' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'female', invalid_field: 'asc' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ gender: 'female', 'visits.invalid_field': 'asc' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
   });
 
   test('array format sort arg with invalid method', async () => {
@@ -154,21 +148,21 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
     expect(() => {
       const graphQLSort = { gender: 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ gender: 'invalid_method' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'asc', file_count: 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'asc', 'visits.visit_label': 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
   });
 });

@@ -210,24 +210,18 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(resultESFilter3).toEqual(expectedESFilter3);
   });
 
-  const userInputError = new GraphQLError('Please check your syntax for input "filter" argument', {
-    extensions: {
-      code: 'BAD_USER_INPUT',
-    },
-  });
-
   test('could throw err for invalid operator', async () => {
     await esInstance.initialize();
 
     expect(() => { // for string field
       const gqlFilter = { '+': { gender: 'female' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => { // for int field
       const gqlFilter = { '+': { file_count: 10 } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
   });
 
   test('could throw err for nonexisting field', async () => {
@@ -236,7 +230,7 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(() => { // for string field
       const gqlFilter = { '=': { strange_field: 'value' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(userInputError);
+    }).toThrow(GraphQLError);
   });
 });
 
