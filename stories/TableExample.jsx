@@ -1,54 +1,70 @@
 import React from 'react';
-import ReactTable from 'react-table';
+import { Table } from 'antd';
 import PropTypes from 'prop-types';
-import 'react-table/react-table.css';
 import { tableConfig } from './conf';
 
-const defaultPageSize = 20;
 class ConnectedTableExample extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: false,
-      pageSize: defaultPageSize,
+      pagination: {
+        current: 1,
+        pageSize: 20,
+        total: this.props.totalCount,
+      },
     };
   }
 
-  fetchData(state, instance) {
-    this.setState({ loading: true });
-    const offset = state.page * state.pageSize;
-    const sort = state.sorted.map(i => ({
-      [i.id]: i.desc ? 'desc' : 'asc',
-    }));
-    const size = state.pageSize;
-    this.props.fetchAndUpdateRawData({
-      offset,
-      size,
-      sort,
-    }).then((res) => {
+  componentDidUpdate(prevProps) {
+    if (prevProps?.totalCount !== this.props.totalCount) {
       this.setState({
-        loading: false,
-        pageSize: size,
+        pagination: {
+          current: this.state.pagination.current,
+          pageSize: this.state.pagination.pageSize,
+          total: this.props.totalCount,
+        },
       });
-    });
+    }
   }
 
   render() {
-    const columnsConfig = tableConfig.map(c => ({ Header: c.name, accessor: c.field }));
-    const { totalCount } = this.props;
-    const { pageSize } = this.state;
-    const totalPages = Math.floor(totalCount / pageSize) + ((totalCount % pageSize === 0) ? 0 : 1);
+    const columnsConfig = tableConfig.map(c => ({
+      title: c.name,
+      dataIndex: c.field,
+      sorter: true,
+    }));
+
+    const handleTableChange = (pagination, filters, sorter) => {
+      const size = pagination.pageSize;
+      this.setState({ loading: true });
+      const offset = (pagination.current - 1) * size;
+      const sort = sorter?.order ? {
+        [sorter.field]: sorter.order === 'descend' ? 'desc' : 'asc',
+      } : {};
+      this.props.fetchAndUpdateRawData({
+        offset,
+        size,
+        sort,
+      }).then((res) => {
+        this.setState({
+          loading: false,
+          pagination: {
+            current: pagination.current,
+            pageSize: size,
+            total: this.props.totalCount,
+          },
+        });
+      });
+    };
     return (
-      <ReactTable
+      <Table
+        className={`connected-table-example ${this.props.className}`}
         columns={columnsConfig}
-        manual // Forces table not to paginate or sort automatically, so we can handle it server-side
-        data={this.props.rawData || []}
-        pages={totalPages} // Display the total number of pages
+        dataSource={this.props.rawData || []}
+        pagination={this.state.pagination}
         loading={this.state.loading} // Display the loading overlay when we need it
-        onFetchData={this.fetchData.bind(this)} // Request new data when things change
-        defaultPageSize={defaultPageSize}
-        className={`-striped -highlight ${this.props.className}`}
-        minRows={0}
+        onChange={handleTableChange} // Request new data when things change
       />
     );
   }

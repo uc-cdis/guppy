@@ -40,7 +40,10 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
+  initialTabsOptions,
+  processedTabsOptions,
+  filtersApplied,
+  accessibleFieldCheckList,
   allFilterValues,
 ) => {
   const updatedTabsOptions = {};

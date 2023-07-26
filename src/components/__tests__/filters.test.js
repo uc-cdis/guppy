@@ -112,7 +112,11 @@ describe('can update a small set of tabs with new counts', () => {
   };
 
   const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
-    initialTabsOptions, processedTabsOptions, filtersApplied, undefined, allFilterValues,
+    initialTabsOptions,
+    processedTabsOptions,
+    filtersApplied,
+    undefined,
+    allFilterValues,
   );
 
   test('update tab counts', async () => {
@@ -184,7 +188,11 @@ describe('can update a small set of tabs with new counts, test with ranger slide
   };
 
   const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
-    initialTabsOptions, processedTabsOptions, filtersApplied, undefined, allFilterValues,
+    initialTabsOptions,
+    processedTabsOptions,
+    filtersApplied,
+    undefined,
+    allFilterValues,
   );
 
   test('update tab counts', async () => {
