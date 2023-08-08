@@ -1,4 +1,3 @@
-import { gql } from 'apollo-server-express';
 import log from './logger';
 import { firstLetterUpperCase } from './utils/utils';
 
@@ -380,10 +379,4 @@ export const buildSchemaString = (esConfig, esInstance) => {
   return schemaStr;
 };
 
-const getSchema = (esConfig, esInstance) => {
-  const schemaStr = buildSchemaString(esConfig, esInstance);
-  const finalSchema = gql`${schemaStr}`;
-  return finalSchema;
-};
-
-export default getSchema;
+export default buildSchemaString;
