@@ -40,20 +40,30 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
+  initialTabsOptions,
+  processedTabsOptions,
+  filtersApplied,
+  accessibleFieldCheckList,
+  allFilterValues,
 ) => {
   const updatedTabsOptions = {};
   try {
     // flatten the tab options first
     // {
-    //   project_id.histogram: ...
-    //   visit.visit_label.histogram: ...
+    //   project_id.asTextHistogram: ...
+    //   visit.visit_label.asTextHistogram: ...
     // }
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
-      // in flattened tab options, to get actual field name, strip off the last '.histogram'
-      const actualFieldName = field.replace('.histogram', '');
+      // in flattened tab options, to get actual field name, strip off the last '.asTextHistogram'
+      const actualFieldName = field.replace('.asTextHistogram', '');
+
+      // check if Filter Value if not skip
+      if (!allFilterValues.includes(actualFieldName)) {
+        return;
+      }
+
       // possible to have '.' in actualFieldName, so use it as a string
       updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
       // if in tiered access mode
@@ -65,8 +75,9 @@ export const updateCountsInInitialTabsOptions = (
         return;
       }
       const histogram = flattenInitialTabsOptions[`${field}`];
-      if (!histogram) {
+      if (!histogram || typeof histogram !== 'object') {
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
+        return;
       }
       histogram.forEach((opt) => {
         const { key } = opt;

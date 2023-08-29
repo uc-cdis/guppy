@@ -228,6 +228,7 @@ export const getAggregationSchemaForEachNestedType = (esConfig, esInstance) => e
 
 const getNumberHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER} {
+      _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram(
         rangeStart: Int,
@@ -241,11 +242,13 @@ const getNumberHistogramSchema = (accessType) => `
 
 const getTextHistogramSchema = (accessType) => `
     type ${(['regular', 'granular'].includes(accessType) ? histogramTypePrefix[accessType] : '') + EnumAggsHistogramName.HISTOGRAM_FOR_STRING} {
+      _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram(
         filterNestedEntity: Boolean=true,
         reverseNested: Boolean=true,
-      ): [BucketsForNestedStringAgg]
+      ): [BucketsForNestedStringAgg],
+      asTextHistogram: [BucketsForNestedStringAgg]
     }
   `;
 
@@ -307,8 +310,10 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
 
-  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(esConfig,
-    esInstance);
+  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(
+    esConfig,
+    esInstance,
+  );
 
   const histogramSchemas = getHistogramSchemas();
 

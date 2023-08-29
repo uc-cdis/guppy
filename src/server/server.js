@@ -83,8 +83,10 @@ const startServer = () => {
   app.get('/_version', versionRouter);
 
   // download endpoint for fetching data directly from es
-  app.post('/download',
-    downloadRouter, (err, req, res, next) => { // eslint-disable-line no-unused-vars
+  app.post(
+    '/download',
+    downloadRouter,
+    (err, req, res, next) => { // eslint-disable-line no-unused-vars
       if (err instanceof CodedError) {
         // deepcode ignore ServerLeak: no important information exists in error
         res.status(err.code).send(err.msg);
@@ -92,7 +94,8 @@ const startServer = () => {
         // deepcode ignore ServerLeak: no important information exists in error
         res.status(500).send(err);
       }
-    });
+    },
+  );
 
   app.listen(config.port, () => {
     log.info(`[Server] guppy listening on port ${config.port}!`);
