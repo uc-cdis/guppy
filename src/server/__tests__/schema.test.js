@@ -147,17 +147,22 @@ describe('Schema', () => {
 
   const expectedHistogramSchemas = `
   type HistogramForString {
+    _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
-    histogram: [BucketsForNestedStringAgg]
+    histogram: [BucketsForNestedStringAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
   }
   type RegularAccessHistogramForString {
+    _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
-    histogram: [BucketsForNestedStringAgg]
+    histogram: [BucketsForNestedStringAgg],
+    asTextHistogram: [BucketsForNestedStringAgg]
   }
   type GranularAccessHistogramForString {
     histogram: [BucketsForNestedStringAgg]
   }
   type HistogramForNumber {
+    _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram(
       rangeStart: Int,
@@ -168,6 +173,7 @@ describe('Schema', () => {
     asTextHistogram: [BucketsForNestedStringAgg]
   }
   type RegularAccessHistogramForNumber {
+    _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
     histogram(
       rangeStart: Int,

@@ -233,8 +233,10 @@ class ES {
             if (!(this.fieldTypes[index][field]
               || (
                 fieldArr.length > 1
-                && _.has(this.fieldTypes[index],
-                  fieldArr.join('.properties.'))
+                && _.has(
+                  this.fieldTypes[index],
+                  fieldArr.join('.properties.'),
+                )
               )
             )) {
               const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
@@ -456,6 +458,25 @@ class ES {
     return result.hits.total;
   }
 
+  async getFieldCount(esIndex, esType, filter, field) {
+    const queryBody = {
+      size: 0,
+      aggs: {
+        [field]: {
+          value_count: {
+            field,
+          },
+        },
+      },
+    };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, filter);
+    }
+
+    const result = await this.query(esIndex, esType, queryBody);
+    return result.aggregations[field].value;
+  }
+
   // eslint-disable-next-line camelcase
   async getCardinalityCount(esIndex, esType, filter, field, precision_threshold) {
     const queryBody = {
@@ -464,7 +485,7 @@ class ES {
         cardinality_count: {
           cardinality: {
             field,
-            precision_threshold,
+            precision_threshold, // eslint-disable-line camelcase
           },
         },
       },
