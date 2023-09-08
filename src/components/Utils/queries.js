@@ -331,13 +331,12 @@ export const askGuppyForRawData = (
   );
 };
 
-export const getAllFieldsFromFilterConfigs = filterTabConfigs =>
-filterTabConfigs.reduce((acc, cur) => {
+export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs.reduce((acc, cur) => {
   Object.keys(cur)
-    .filter(key => key === 'fields' || key === 'asTextAggFields')
-    .forEach(key => acc[key] = acc[key].concat(cur[key], []));
-    return acc
-}, {fields:[], asTextAggFields:[]});
+    .filter((key) => key === 'fields' || key === 'asTextAggFields')
+    .forEach((key) => acc[key] = acc[key].concat(cur[key], []));
+  return acc;
+}, { fields: [], asTextAggFields: [] });
 
 /**
  * Download all data from guppy using fields, filter, and sort args.

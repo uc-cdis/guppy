@@ -57,7 +57,7 @@ export const updateCountsInInitialTabsOptions = (
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
       // in flattened tab options, to get actual field name, strip off the last '.histogram' or '.asTextHistogram'
-      const actualFieldName = field.replace('histogram', '').replace('.asTextHistogram', '');
+      const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');
 
       // check if Filter Value if not skip
       if (!allFilterValues.includes(actualFieldName)) {
