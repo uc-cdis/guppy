@@ -10,7 +10,6 @@ import {
 } from './utils';
 import { ENUM_ACCESSIBILITY } from '../Utils/const';
 import {
-  askGuppyAboutAllFieldsAndOptions,
   askGuppyAboutArrayTypes,
   askGuppyForAggregationData,
   getAllFieldsFromFilterConfigs,
@@ -28,10 +27,13 @@ class ConnectedFilter extends React.Component {
     super(props);
 
     const filterConfigsFields = getAllFieldsFromFilterConfigs(props.filterConfig.tabs);
-    let allFields = props.accessibleFieldCheckList
-      ? _.union(filterConfigsFields, props.accessibleFieldCheckList)
-      : filterConfigsFields;
-    allFields = _.union(allFields, this.props.extraAggsFields);
+    const filterConfigsRegularAggFields = filterConfigsFields.fields || [];
+    const filterConfigsAsTextAggFields = filterConfigsFields.asTextAggFields || [];
+    const allRegularAggFields = props.accessibleFieldCheckList
+      ? _.union(filterConfigsRegularAggFields, props.accessibleFieldCheckList)
+      : filterConfigsRegularAggFields;
+    // props.extraAggsFields are chart fields, use asTextAgg for all of them
+    const allAsTextAggFields = _.union(filterConfigsAsTextAggFields, this.props.extraAggsFields);
 
     this.initialTabsOptions = {};
     let initialFilter = this.props.adminAppliedPreFilters;
@@ -47,7 +49,8 @@ class ConnectedFilter extends React.Component {
     }
 
     this.state = {
-      allFields,
+      allRegularAggFields,
+      allAsTextAggFields,
       initialAggsData: {},
       receivedAggsData: {},
       accessibility: ENUM_ACCESSIBILITY.ALL,
@@ -68,12 +71,13 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
-    askGuppyAboutAllFieldsAndOptions(
+    askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields,
-      this.state.accessibility,
+      this.state.allRegularAggFields,
+      this.state.allAsTextAggFields,
       this.state.filter,
+      this.state.accessibility,
     )
       .then((res) => {
         if (!res.data) {
@@ -129,7 +133,8 @@ class ConnectedFilter extends React.Component {
     askGuppyForAggregationData(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
-      this.state.allFields,
+      this.state.allRegularAggFields,
+      this.state.allAsTextAggFields,
       mergedFilterResults,
       this.state.accessibility,
     )

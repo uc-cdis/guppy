@@ -189,7 +189,7 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
   const resultAggsData = {};
   const flattenAggsData = flat(receivedAggsData, { safe: true });
   Object.keys(flattenAggsData).forEach((field) => {
-    const actualFieldName = field.replace('.asTextHistogram', '');
+    const actualFieldName = field.replace('histogram', '').replace('.asTextHistogram', '');
     const histogram = flattenAggsData[`${field}`];
     if (!histogram) return;
     if (actualFieldName in filterResults) {
