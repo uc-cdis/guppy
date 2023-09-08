@@ -246,7 +246,8 @@ export const getGQLFilter = (filterObj) => {
     } else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
       // This filter only has a combine setting so far. We can ignore it.
       return;
-    } else {
+    } else if (hasSelectedValues) {
+      // filter has selected values but we don't know how to process it
       // eslint-disable-next-line no-console
       console.error(filterValues);
       throw new Error('Invalid filter object');
