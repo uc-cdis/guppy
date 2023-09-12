@@ -151,11 +151,13 @@ class ConnectedFilter extends React.Component {
   }
 
   getTabsWithSearchFields() {
-    const newTabs = this.props.filterConfig.tabs.map(({ title, fields, searchFields }) => {
+    const newTabs = this.props.filterConfig.tabs.map(({
+      title, fields, searchFields, asTextAggFields = [],
+    }) => {
       if (searchFields) {
-        return { title, fields: searchFields.concat(fields) };
+        return { title, fields: searchFields.concat(fields), asTextAggFields };
       }
-      return { title, fields };
+      return { title, fields, asTextAggFields };
     });
     return newTabs;
   }
@@ -271,9 +273,10 @@ class ConnectedFilter extends React.Component {
     }
     if (!processedTabsOptions || Object.keys(processedTabsOptions).length === 0) return null;
     const { fieldMapping } = this.props;
-    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields }, index) => {
+    const tabs = this.props.filterConfig.tabs.map(({ fields, searchFields, asTextAggFields = [] }, index) => {
+      const aggFields = _.union(fields, asTextAggFields);
       const sections = getFilterSections(
-        fields,
+        aggFields,
         searchFields,
         fieldMapping,
         processedTabsOptions,
@@ -340,6 +343,7 @@ ConnectedFilter.propTypes = {
     tabs: PropTypes.arrayOf(PropTypes.shape({
       title: PropTypes.string,
       fields: PropTypes.arrayOf(PropTypes.string),
+      asTextAggFields: PropTypes.arrayOf(PropTypes.string),
       searchFields: PropTypes.arrayOf(PropTypes.string),
     })),
   }).isRequired,
