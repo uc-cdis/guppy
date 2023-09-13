@@ -155,9 +155,9 @@ class ConnectedFilter extends React.Component {
       title, fields, searchFields, asTextAggFields = [],
     }) => {
       if (searchFields) {
-        return { title, fields: searchFields.concat(fields), asTextAggFields };
+        return { title, fields: searchFields.concat(fields).concat(asTextAggFields) };
       }
-      return { title, fields, asTextAggFields };
+      return { title, fields: fields.concat(asTextAggFields) };
     });
     return newTabs;
   }
@@ -184,7 +184,7 @@ class ConnectedFilter extends React.Component {
 
     // Get filter values
     const allFilterValues = this.props.filterConfig.tabs.reduce(
-      (accumulator, tab) => ([...accumulator, ...tab.fields]),
+      (accumulator, tab) => ([...accumulator, ...tab.fields, ...tab.asTextAggFields || []]),
       [],
     );
 
