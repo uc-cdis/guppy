@@ -1,4 +1,4 @@
-# How to generate mock data and start developing in your local 
+# How to generate mock data and start developing in your local
 
 ## Step.1 start elasticsearch
 Go to the repository's root directory, do:
@@ -11,6 +11,10 @@ In the root directory of this repo, run the following command:
 
 ```
 sh ./generate_data.sh
+```
+On Ubuntu may need to run directly
+```
+./generate_data.sh
 ```
 
 Doing so will automatically generate 3 ES indices (1 for `subject`, 1 for `file`, and 1 for `config`) and populate 100 records into each index.
@@ -50,8 +54,8 @@ In the root directory of this repo, run:
 GUPPY_PORT=3000 INTERNAL_LOCAL_TEST=true npm start
 ```
 
-The Guppy server will be hosted at [localhost:3000/graphql](http://localhost:3000/graphql), now use Insomnia or Postman to play with it! 
-We use nodemon to start the server, so all code change will be hot applied to the running server in realtime. 
+The Guppy server will be hosted at [localhost:3000/graphql](http://localhost:3000/graphql), now use Insomnia or Postman to play with it!
+We use nodemon to start the server, so all code change will be hot applied to the running server in realtime.
 
 ## Step.4 start storybook for developing front-end components
 In the root directory of this repo, run:
@@ -60,4 +64,4 @@ In the root directory of this repo, run:
 npm run storybook
 ```
 
-[Storybook](https://storybook.js.org/) will be hosted at [localhost:6006](http://localhost:6006). 
+[Storybook](https://storybook.js.org/) will be hosted at [localhost:6006](http://localhost:6006).
