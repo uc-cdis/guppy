@@ -47,7 +47,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
             }
           },
           "analyzer": {
-            "ngram_analyzer": { 
+            "ngram_analyzer": {
               "type": "custom",
               "tokenizer": "ngram_tokenizer",
               "filter": [
@@ -91,6 +91,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
           "file_type": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "file_format": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
           "auth_resource_path": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+          "consortium_id": { "type": "integer" },
           "file_count": { "type": "integer" },
           "whatever_lab_result_value": { "type": "float" },
           "some_nested_array_field": {
@@ -159,4 +160,3 @@ curl -iv -X PUT "${ESHOST}/${configIndexName}" \
 function es_indices() {
   curl -X GET "${ESHOST}/_cat/indices?v"
 }
-
