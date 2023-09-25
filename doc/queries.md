@@ -146,7 +146,10 @@ Aggregation query is wrapped within `_aggregation` keyword. Three possible aggre
 <a name="aggs-total"></a>
 
 ### 1. Total count aggregation
- By using `_totalCount` keyword, return total count of the result. Example:
+ By using `_totalCount` keyword, return total count of the result.
+ Can also use `_totalCount` keyword inside text aggregation to get [value count](https://www.elastic.co/guide/en/elasticsearch/reference/8.7/search-aggregations-metrics-valuecount-aggregation.html) of text aggregation
+
+ Example:
 
  ```
  query ($filter: JSON) {
@@ -166,6 +169,36 @@ Example result:
     "_aggregation": {
       "subject": {
         "_totalCount": 46
+      }
+    }
+  }
+}
+```
+
+Text Aggregation Example:
+
+ ```
+ query ($filter: JSON) {
+  _aggregation  {
+    subject(filter: $filter) {
+      subject_id {
+        _totalCount
+      }
+    }
+  }
+}
+```
+
+Example result:
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "subject_id": {
+          "_totalCount": 42
+        }
       }
     }
   }
