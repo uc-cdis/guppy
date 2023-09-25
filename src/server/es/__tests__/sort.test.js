@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import getESSortBody from '../sort';
 import esInstance from '../index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
@@ -125,22 +125,22 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
     expect(() => {
       const graphQLSort = { invalid_field: 'asc' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ invalid_field: 'asc' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'female', invalid_field: 'asc' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ gender: 'female', 'visits.invalid_field': 'asc' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
   });
 
   test('array format sort arg with invalid method', async () => {
@@ -148,21 +148,21 @@ describe('Transfer GraphQL sort argument to ES sort argument', () => {
     expect(() => {
       const graphQLSort = { gender: 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = [{ gender: 'invalid_method' }];
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'asc', file_count: 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => {
       const graphQLSort = { gender: 'asc', 'visits.visit_label': 'invalid_method' };
       getESSortBody(graphQLSort, esInstance, esIndex);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
   });
 });

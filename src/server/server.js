@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from 'graphql-tools';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
@@ -30,7 +31,7 @@ if (app.locals.publicKey == null) {
   log.error('[PUBLIC KEY] Failed loading public key.');
 }
 
-const startServer = () => {
+const startServer = async () => {
   // build schema and resolvers by parsing elastic search fields and types,
   const typeDefs = getSchema(config.esConfig, esInstance);
   const resolvers = getResolver(config.esConfig, esInstance);
@@ -44,19 +45,25 @@ const startServer = () => {
     mocks: false,
     schema: schemaWithMiddleware,
     validationRules: [depthLimit(10)],
-    context: async ({ req }) => {
-      const jwt = headerParser.parseJWT(req);
-      const authHelper = await getAuthHelperInstance(jwt);
-      return {
-        authHelper,
-      };
-    },
   });
-    // bind graphql server to express app at config.path
-  server.applyMiddleware({
-    app,
-    path: config.path,
-  });
+
+  await server.start();
+
+  app.use(
+    '/graphql',
+    cors(),
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        const jwt = headerParser.parseJWT(req);
+        const authHelper = await getAuthHelperInstance(jwt);
+        return {
+          authHelper,
+        };
+      },
+      // bind graphql server to express app at config.path
+      path: config.path,
+    }),
+  );
 
   // simple health check endpoint
   // eslint-disable-next-line no-unused-vars
