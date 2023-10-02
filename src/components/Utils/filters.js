@@ -55,11 +55,6 @@ export const updateCountsInInitialTabsOptions = (
     // }
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
-    console.log('fito');
-    console.log(flattenInitialTabsOptions);
-    console.log('fpto');
-    console.log(flattenProcessedTabsOptions);
-    console.log('**********************');
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
       // in flattened tab options, to get actual field name, strip off the last '.histogram' or '.asTextHistogram'
       const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');
@@ -113,25 +108,17 @@ export const updateCountsInInitialTabsOptions = (
           }
           return;
         }
-        console.log('field');
-        console.log(field);
-        const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
-        console.log('findOpt');
-        console.log(findOpt);
-        console.log('=====================');
-        if (findOpt) {
-          const { count } = findOpt;
-          updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+        if (flattenProcessedTabsOptions[`${field}`]) {
+          const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
+          if (findOpt) {
+            const { count } = findOpt;
+            updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+          }
         }
       });
       if (filtersApplied[`${actualFieldName}`]) {
         if (filtersApplied[`${actualFieldName}`].selectedValues) {
           filtersApplied[`${actualFieldName}`].selectedValues.forEach((optKey) => {
-            console.log('updatedTabsOptions');
-            console.log(updatedTabsOptions);
-            console.log('actualFieldName');
-            console.log(actualFieldName);
-            console.log('####################');
             if (!updatedTabsOptions[`${actualFieldName}`].histogram.find((o) => o.key === optKey)) {
               updatedTabsOptions[`${actualFieldName}`].histogram.push({ key: optKey, count: 0 });
             }
