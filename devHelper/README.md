@@ -10,10 +10,6 @@ docker-compose -f ./devHelper/docker/esearch.yml up -d
 In the root directory of this repo, run the following command:
 
 ```
-sh ./generate_data.sh
-```
-On Ubuntu may need to run directly
-```
 ./generate_data.sh
 ```
 
