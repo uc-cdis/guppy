@@ -5,13 +5,13 @@ const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 const statusEndpoint = '/_status';
 
-const histogramQueryStrForEachField = (field) => {
+const histogramQueryStrForEachField = (field, isAsTextAgg = false) => {
   const splittedFieldArray = field.split('.');
   const splittedField = splittedFieldArray.shift();
   if (splittedFieldArray.length === 0) {
     return (`
     ${splittedField} {
-      asTextHistogram {
+      ${(isAsTextAgg) ? 'asTextHistogram' : 'histogram'} {
         key
         count
       }
@@ -23,7 +23,7 @@ const histogramQueryStrForEachField = (field) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, regularAggFields, asTextAggFields, gqlFilter, acc) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -34,7 +34,8 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     const queryWithFilter = `query ($filter: JSON) {
       _aggregation {
         ${type} (filter: $filter, filterSelf: false, accessibility: ${accessibility}) {
-          ${fields.map((field) => histogramQueryStrForEachField(field))}
+          ${regularAggFields.map((field) => histogramQueryStrForEachField(field, false))}
+          ${asTextAggFields.map((field) => histogramQueryStrForEachField(field, true))}
         }
       }
     }`;
@@ -44,7 +45,8 @@ const queryGuppyForAggs = (path, type, fields, gqlFilter, acc) => {
     queryBody.query = `query {
       _aggregation {
         ${type} (accessibility: ${accessibility}) {
-          ${fields.map((field) => histogramQueryStrForEachField(field))}
+          ${regularAggFields.map((field) => histogramQueryStrForEachField(field, false))}
+          ${asTextAggFields.map((field) => histogramQueryStrForEachField(field, true))}
         }
       }
     }`;
@@ -244,7 +246,8 @@ export const getGQLFilter = (filterObj) => {
     } else if (filterValues.__combineMode && !hasSelectedValues && !hasRangeFilter) {
       // This filter only has a combine setting so far. We can ignore it.
       return;
-    } else {
+    } else if (hasSelectedValues) {
+      // filter has selected values but we don't know how to process it
       // eslint-disable-next-line no-console
       console.error(filterValues);
       throw new Error('Invalid filter object');
@@ -266,23 +269,19 @@ export const getGQLFilter = (filterObj) => {
   return gqlFilter;
 };
 
-export const askGuppyAboutAllFieldsAndOptions = (path, type, fields, accessibility, filter) => {
-  const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
-};
-
 // eslint-disable-next-line max-len
 export const askGuppyAboutArrayTypes = (path) => queryGuppyForStatus(path).then((res) => res.indices);
 
 export const askGuppyForAggregationData = (
   path,
   type,
-  fields,
+  regularAggFields,
+  asTextAggFields,
   filter,
   accessibility,
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, fields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, regularAggFields, asTextAggFields, gqlFilter, accessibility);
 };
 
 export const askGuppyForSubAggregationData = (
@@ -333,8 +332,12 @@ export const askGuppyForRawData = (
   );
 };
 
-export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs
-  .reduce((acc, cur) => acc.concat(cur.fields), []);
+export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs.reduce((acc, cur) => {
+  Object.keys(cur)
+    .filter((key) => key === 'fields' || key === 'asTextAggFields')
+    .forEach((key) => acc[key] = acc[key].concat(cur[key], []));
+  return acc;
+}, { fields: [], asTextAggFields: [] });
 
 /**
  * Download all data from guppy using fields, filter, and sort args.
