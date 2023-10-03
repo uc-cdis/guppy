@@ -108,10 +108,12 @@ export const updateCountsInInitialTabsOptions = (
           }
           return;
         }
-        const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
-        if (findOpt) {
-          const { count } = findOpt;
-          updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+        if (flattenProcessedTabsOptions[`${field}`]) {
+          const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
+          if (findOpt) {
+            const { count } = findOpt;
+            updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+          }
         }
       });
       if (filtersApplied[`${actualFieldName}`]) {
