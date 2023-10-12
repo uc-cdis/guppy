@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
-import { ApolloError, UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
 import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
@@ -77,7 +78,11 @@ export const granularAccessResolver = (
       }
       log.info('[granularAccessResolver] requesting out-of-scope resources, return 401');
       log.info(`[granularAccessResolver] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
-      throw new ApolloError('You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query', 401);
+      throw new GraphQLError('You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query', {
+        extensions: {
+          code: 401,
+        },
+      });
     }
 
     /**
@@ -162,16 +167,14 @@ export const granularAccessResolver = (
       resolve, root, args, context, info, authHelper, filter,
     );
   } catch (err) {
-    if (err instanceof ApolloError) {
-      if (err.extensions.code >= 500) {
+    if (err instanceof GraphQLError) {
+      if (ApolloServerErrorCode[err.extensions.code]) {
         console.trace(err); // eslint-disable-line no-console
       }
     } else if (err instanceof CodedError) {
       if (err.code >= 500) {
         console.trace(err); // eslint-disable-line no-console
       }
-    } else if (!(err instanceof UserInputError)) {
-      console.trace(err); // eslint-disable-line no-console
     }
     throw err;
   }
