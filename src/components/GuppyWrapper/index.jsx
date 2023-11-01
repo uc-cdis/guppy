@@ -64,7 +64,8 @@ class GuppyWrapper extends React.Component {
       filter: { ...initialFilter },
       rawData: [],
       totalCount: 0,
-      allFields: [],
+      allRegularAggFields: [],
+      allAsTextAggFields: [],
       rawDataFields: [],
       accessibleFieldObject: undefined,
       unaccessibleFieldObject: undefined,
@@ -82,7 +83,7 @@ class GuppyWrapper extends React.Component {
       const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
         ? this.props.rawDataFields : fields;
       this.setState({
-        allFields: fields,
+        allRegularAggFields: fields,
         rawDataFields,
       }, () => {
         this.getDataFromGuppy(this.state.rawDataFields, undefined, true);
@@ -326,7 +327,8 @@ class GuppyWrapper extends React.Component {
             fetchAndUpdateRawData: this.handleFetchAndUpdateRawData.bind(this),
             downloadRawData: this.handleDownloadRawData.bind(this),
             downloadRawDataByFields: this.handleDownloadRawDataByFields.bind(this),
-            allFields: this.state.allFields,
+            allRegularAggFields: this.state.allRegularAggFields,
+            allAsTextAggFields: this.state.allAsTextAggFields,
             accessibleFieldObject: this.state.accessibleFieldObject,
             unaccessibleFieldObject: this.state.unaccessibleFieldObject,
 

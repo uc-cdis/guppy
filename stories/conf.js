@@ -5,6 +5,9 @@ export const filterConfig = {
       'project',
       'study',
     ],
+    asTextAggFields: [
+      'consortium_id',
+    ],
   },
   {
     title: 'Subject',
