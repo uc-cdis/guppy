@@ -47,7 +47,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
             }
           },
           "analyzer": {
-            "ngram_analyzer": { 
+            "ngram_analyzer": {
               "type": "custom",
               "tokenizer": "ngram_tokenizer",
               "filter": [
@@ -153,4 +153,3 @@ curl -iv -X PUT "${ESHOST}/${configIndexName}" \
 function es_indices() {
   curl -X GET "${ESHOST}/_cat/indices?v"
 }
-
