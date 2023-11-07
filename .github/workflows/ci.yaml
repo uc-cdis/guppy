@@ -32,5 +32,6 @@ jobs:
     uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@master
     with:
       node-version: '16'
-      npm-version: '8.5'
-      pre-test: 'npm run relay && npm run params && COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js && npm run eslint'
+      npm-version: '8'
+      pre-test: 'COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js'
+      post-test: 'npm run eslint'
