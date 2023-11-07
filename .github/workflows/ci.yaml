@@ -33,5 +33,5 @@ jobs:
     with:
       node-version: '16'
       npm-version: '8'
-      pre-test: 'COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js'
+      pre-test: 'COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>server/version.js'
       post-test: 'npm run eslint'
