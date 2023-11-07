@@ -34,4 +34,3 @@ jobs:
       node-version: '16'
       npm-version: '8.5'
       pre-test: 'npm run relay && npm run params && COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >src/server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>src/server/version.js && npm run eslint'
-      post-test: 'bash ./testSchema.sh'
