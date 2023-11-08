@@ -17,7 +17,8 @@ const mockNestedAggs = () => {
                   'visits.visit_label': {
                     terms: {
                       field: 'visits.visit_label',
-                      missing: 'no data',
+                      missing_bucket: true,
+                      order: "desc"
                     },
                   },
                 },
@@ -58,7 +59,7 @@ const mockNestedAggs = () => {
             },
             {
               key: {
-                'visits.visit_label': 'no data',
+                'visits.visit_label': null,
               },
               doc_count: 40,
             },
