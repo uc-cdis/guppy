@@ -107,7 +107,7 @@ class ES {
     // This is really ridiculous that ES's JS library has it, but we need to
     // convert list of sort obj into comma separated strings to make it work
     // see https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_search
-    const sortStringList = sort && sort.map((item) => `${Object.keys(item)[0]}:${Object.values(item)[0]}`);
+    const sortStringList = sort && sort.map((item) => `${Object.keys(item)[0]}:${Object.values(item)[0]["order"]}`);
 
     while (!currentBatch || batchSize > 0) {
       if (typeof scrollID === 'undefined') { // first batch
