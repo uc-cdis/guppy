@@ -585,7 +585,8 @@ export const textAggregation = async (
   // since the value of missing alias is a string
   if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
     if (config.esConfig.missingDataVariables.includes(field)) {
-      missingAlias = { missing: config.esConfig.missingDataAlias };
+      // missingAlias = { missing: config.esConfig.missingDataAlias };
+      missingAlias = { missing_bucket: true, order: 'desc' };
     }
   }
   const aggsName = `${field}Aggs`;
@@ -718,7 +719,6 @@ export const textAggregation = async (
       resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
     }
     
-
     resultBuckets.forEach((item) => {
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
       if (nestedAggsFilterName) {
@@ -748,16 +748,19 @@ export const textAggregation = async (
   /* eslint-enable */
 
   // order aggregations by doc count
-  finalResults = finalResults.sort((e1, e2) => e2.count - e1.count);
+  finalResults = finalResults.sort((e1, e2) => {
+    if (e1.key === null) return 1;
+    if (e2.key === null) return -1;
+    return e2.count - e1.count;
+  });
 
   // make the missing data bucket to the bottom of the list
+  const lastIndex = finalResults.length - 1;
   if (config.esConfig.aggregationIncludeMissingData) {
-    const missingDataIndex = finalResults
-      .findIndex((b) => b.key === config.esConfig.missingDataAlias);
-    const missingDataItem = finalResults.find((b) => b.key === config.esConfig.missingDataAlias);
-    if (missingDataItem) {
-      finalResults.splice(missingDataIndex, 1);
-      finalResults.splice(finalResults.length, 0, missingDataItem);
+    const missingDataItem = finalResults[lastIndex];
+    if (missingDataItem !== undefined && missingDataItem.key === null) {
+      missingDataItem.key = config.esConfig.missingDataAlias;
+      finalResults[lastIndex] = missingDataItem;
     }
   }
   return finalResults;
