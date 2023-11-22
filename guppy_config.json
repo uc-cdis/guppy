@@ -1,0 +1,1 @@
+{ "indices": [ { "index": "tb", "type": "subject" }, { "index": "tb_file", "type": "file" } ], "config_index": "tb-array-config", "auth_filter_field": "auth_resource_path" }

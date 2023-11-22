@@ -76,12 +76,7 @@ const getRandomString = () => (Math.random() + 1).toString(36).substring(7);
 async function run() {
   const mapping = await client.indices.getMapping({ index: esIndex });
 
-  let m = mapping.body[esIndex].mappings;
-
-  if (program.doc_type) {
-    m = m[program.doc_type];
-  }
-
+  const m = mapping.body[esIndex].mappings;
   if (m !== undefined) {
     Object.entries(m.properties).forEach(([key, value]) => {
       schema.items.properties[key] = fakerType(key, value, arrayFields);
@@ -124,7 +119,6 @@ async function run() {
   const body = sample.flatMap((d) => [{
     index: {
       _index: esIndex,
-      _type: program.doc_type || null,
     },
   }, d]);
   const chunks = chunkArray(body, 100);
@@ -165,7 +159,6 @@ async function run() {
       {
         index: {
           _index: configIndex,
-          _type: '_doc',
           _id: esIndex,
         },
       },
