@@ -71,7 +71,7 @@ describe('can update a small set of tabs with new counts', () => {
 
   const initialTabsOptions = {
     annotated_sex: {
-      asTextHistogram: [
+      histogram: [
         { key: 'yellow', count: 137675 },
         { key: 'pink', count: 56270 },
         { key: 'silver', count: 2020 },
@@ -79,7 +79,7 @@ describe('can update a small set of tabs with new counts', () => {
       ],
     },
     extra_data: {
-      asTextHistogram: [
+      histogram: [
         { key: 'a', count: 2 },
       ],
     },
@@ -87,12 +87,12 @@ describe('can update a small set of tabs with new counts', () => {
 
   const processedTabsOptions = {
     annotated_sex: {
-      asTextHistogram: [
+      histogram: [
         { key: 'yellow', count: 1 },
         { key: 'orange', count: 107574 },
       ],
     },
-    extra_data: { asTextHistogram: [] },
+    extra_data: { histogram: [] },
   };
 
   const filtersApplied = { annotated_sex: { selectedValues: ['silver'] } };
@@ -132,7 +132,7 @@ describe('can update a small set of tabs with new counts, test with ranger slide
   ];
   const initialTabsOptions = {
     field1: {
-      asTextHistogram: [
+      histogram: [
         { key: 'option1', count: 137675 },
         { key: 'option2', count: 56270 },
         { key: 'option3', count: 2020 },
@@ -140,7 +140,7 @@ describe('can update a small set of tabs with new counts, test with ranger slide
       ],
     },
     field2: {
-      asTextHistogram: [
+      histogram: [
         { key: [0, 100], count: 100 },
       ],
     },
@@ -148,12 +148,12 @@ describe('can update a small set of tabs with new counts, test with ranger slide
 
   const processedTabsOptions = {
     field1: {
-      asTextHistogram: [
+      histogram: [
         { key: 'option3', count: 30 },
       ],
     },
     field2: {
-      asTextHistogram: [
+      histogram: [
         {
           key: [4, 39],
           count: 49,

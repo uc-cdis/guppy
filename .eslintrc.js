@@ -23,7 +23,19 @@ module.exports = {
     'react/no-array-index-key': 'off',
     "import/no-extraneous-dependencies": ["error", {
       "devDependencies": true
-    }]
+    }],
+    'max-len': [
+      'error',
+      {
+        code: 150,
+        ignoreComments: true,
+        ignoreTrailingComments: true,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+      },
+    ],
+    'no-return-assign': 'warn'
   },
   overrides: [{
     "files": ["src/**/*.test.js"],
