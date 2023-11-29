@@ -12,7 +12,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
@@ -31,7 +32,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 40,
           },
@@ -78,7 +79,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
@@ -97,7 +99,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 40,
           },
@@ -138,7 +140,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: "desc"
                 },
               },
             },
@@ -157,7 +160,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 20,
           },
