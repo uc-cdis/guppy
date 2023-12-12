@@ -24,6 +24,7 @@ const mockHistogramFixWidth = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixWidthResult = {
     aggregations: {
@@ -107,6 +108,7 @@ const mockHistogramFixWidth = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixWidthResult1 = {
     aggregations: {
@@ -206,6 +208,7 @@ const mockHistogramFixWidth = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixWidthResult2 = {
     aggregations: {
@@ -256,6 +259,7 @@ const mockHistogramFixWidth = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixWidthResult3 = {
     aggregations: {

@@ -18,7 +18,7 @@ const mockNestedAggs = () => {
                     terms: {
                       field: 'visits.visit_label',
                       missing_bucket: true,
-                      order: "desc"
+                      order: 'desc',
                     },
                   },
                 },
@@ -29,6 +29,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeNestedAggs1 = {
     aggregations: {
@@ -67,6 +68,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   mockSearchEndpoint(nestedAggsQuery1, fakeNestedAggs1);
 
@@ -87,6 +89,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeNestedAggs2 = {
     aggregations: {
@@ -101,6 +104,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   mockSearchEndpoint(nestedAggsQuery2, fakeNestedAggs2);
 
@@ -134,6 +138,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeNestedAggs3 = {
     aggregations: {
@@ -185,6 +190,7 @@ const mockNestedAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   mockSearchEndpoint(nestedAggsQuery3, fakeNestedAggs3);
 };

@@ -13,7 +13,7 @@ const mockTextAggs = () => {
                 terms: {
                   field: 'gender',
                   missing_bucket: true,
-                  order: "desc"
+                  order: 'desc',
                 },
               },
             },
@@ -22,6 +22,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs = {
     aggregations: {
@@ -80,7 +81,7 @@ const mockTextAggs = () => {
                 terms: {
                   field: 'gender',
                   missing_bucket: true,
-                  order: "desc"
+                  order: 'desc',
                 },
               },
             },
@@ -89,6 +90,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs2 = {
     aggregations: {
@@ -141,7 +143,7 @@ const mockTextAggs = () => {
                 terms: {
                   field: 'gender',
                   missing_bucket: true,
-                  order: "desc"
+                  order: 'desc',
                 },
               },
             },
@@ -150,6 +152,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs3 = {
     aggregations: {
