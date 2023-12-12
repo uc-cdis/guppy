@@ -45,6 +45,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResource = {
     aggregations: {
@@ -120,6 +121,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResourceWithFilter1 = {
     aggregations: {
@@ -180,6 +182,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResourceWithFilter2 = {
     aggregations: {

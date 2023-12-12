@@ -52,6 +52,7 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
+    validatedQueryBody.track_total_hits = true;
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
@@ -425,6 +426,10 @@ class ES {
       { esInstance: this, esIndex, esType },
       { filter, fields: false, size: 0 },
     );
+    // Really shouldn't be getting this, but just in case
+    if (result.hits.total.relation !== 'eq') {
+      log.error(`The returned total count might be inaccurate. See hits.total object: ${result.hits.total}`);
+    }
     return result.hits.total.value;
   }
 

@@ -11,6 +11,7 @@ const mockNumericAggsGlobalStats = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeFileCountGlobalStatsAggs = {
     aggregations: {
@@ -40,6 +41,7 @@ const mockNumericAggsGlobalStats = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeFileCountGlobalStatsAggs1 = {
     aggregations: {
@@ -84,6 +86,7 @@ const mockNumericAggsGlobalStats = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeFileCountGlobalStatsAggs2 = {
     aggregations: {
@@ -113,6 +116,7 @@ const mockNumericAggsGlobalStats = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeFileCountGlobalStatsAggs3 = {
     aggregations: {
