@@ -52,7 +52,7 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
-    validatedQueryBody.track_total_hits = 500000;
+    validatedQueryBody.track_total_hits = true;
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
