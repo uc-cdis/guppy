@@ -78,6 +78,7 @@ class ConnectedFilter extends React.Component {
       this.state.allAsTextAggFields,
       this.state.filter,
       this.state.accessibility,
+      this.props.csrfToken,
     )
       .then((res) => {
         if (!res.data) {
