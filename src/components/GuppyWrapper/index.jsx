@@ -79,6 +79,7 @@ class GuppyWrapper extends React.Component {
     getAllFieldsFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
+      this.props.csrfToken,
     ).then((fields) => {
       const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
         ? this.props.rawDataFields : fields;
@@ -94,6 +95,7 @@ class GuppyWrapper extends React.Component {
         this.props.guppyConfig.path,
         this.props.guppyConfig.type,
         this.props.accessibleFieldCheckList,
+        this.props.csrfToken,
       ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
         this.setState({
           accessibleFieldObject,
@@ -205,6 +207,7 @@ class GuppyWrapper extends React.Component {
       type,
       filter,
       this.state.accessibility,
+      this.props.csrfToken,
     );
   }
 
@@ -220,6 +223,7 @@ class GuppyWrapper extends React.Component {
       type,
       filter,
       this.state.accessibility,
+      this.props.csrfToken,
     )
       .then((count) => downloadDataFromGuppy(
         this.props.guppyConfig.path,

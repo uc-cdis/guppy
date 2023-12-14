@@ -389,6 +389,7 @@ export const askGuppyForTotalCounts = (
   type,
   filter,
   accessibility = 'all',
+  csrfToken = '',
 ) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
@@ -406,9 +407,7 @@ export const askGuppyForTotalCounts = (
 
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .then((response) => {
@@ -425,6 +424,7 @@ export const askGuppyForTotalCounts = (
 export const getAllFieldsFromGuppy = (
   path,
   type,
+  csrfToken = '',
 ) => {
   const query = `{
     _mapping {
@@ -434,9 +434,7 @@ export const getAllFieldsFromGuppy = (
   const queryBody = { query };
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .then((response) => response.data._mapping[type])
@@ -449,6 +447,7 @@ export const getAccessibleResources = async (
   path,
   type,
   accessibleFieldCheckList,
+  csrfToken = '',
 ) => {
   const accessiblePromiseList = [];
   const unaccessiblePromiseList = [];
@@ -470,9 +469,7 @@ export const getAccessibleResources = async (
 
       return fetch(`${path}${graphqlEndpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
         body: JSON.stringify(queryBody),
       })
         .then((response) => response.json())
