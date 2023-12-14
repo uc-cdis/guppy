@@ -112,7 +112,7 @@ class ConnectedFilter extends React.Component {
   }
 
   /**
-   * Handler function that is called everytime filter changes
+   * Handler function that is called every time filter changes
    * What this function does:
    * 1. Ask guppy for aggregation data using (processed) filter
    * 2. After get aggregation response, call `handleReceiveNewAggsData` handler
@@ -137,6 +137,7 @@ class ConnectedFilter extends React.Component {
       this.state.allAsTextAggFields,
       mergedFilterResults,
       this.state.accessibility,
+      this.props.csrfToken,
     )
       .then((res) => {
         this.handleReceiveNewAggsData(
@@ -285,6 +286,7 @@ class ConnectedFilter extends React.Component {
         this.props.guppyConfig,
         this.arrayFields,
         this.props.filterValuesToHide,
+        this.props.csrfToken,
       );
       const filterStatus = this.state.filterStatusArray
         ? this.state.filterStatusArray[index] : null;
@@ -371,6 +373,7 @@ ConnectedFilter.propTypes = {
   userFilterFromURL: PropTypes.object,
   hideEmptyFilterSection: PropTypes.bool,
   filterValuesToHide: PropTypes.arrayOf(PropTypes.string),
+  csrfToken: PropTypes.string,
 };
 
 ConnectedFilter.defaultProps = {
@@ -391,6 +394,7 @@ ConnectedFilter.defaultProps = {
   userFilterFromURL: {},
   hideEmptyFilterSection: false,
   filterValuesToHide: [],
+  csrfToken: '',
 };
 
 export default ConnectedFilter;

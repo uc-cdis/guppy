@@ -166,6 +166,7 @@ class GuppyWrapper extends React.Component {
         accessibility: this.state.accessibility,
         format,
       },
+      this.props.csrfToken,
     );
   }
 
@@ -189,6 +190,7 @@ class GuppyWrapper extends React.Component {
         filter: this.state.filter,
         accessibility: this.state.accessibility,
       },
+      this.props.csrfToken,
     );
   }
 
@@ -227,6 +229,7 @@ class GuppyWrapper extends React.Component {
           fields,
           filter,
         },
+        this.props.csrfToken,
       ));
   }
 
@@ -262,6 +265,7 @@ class GuppyWrapper extends React.Component {
         [],
         this.filter,
         this.state.accessibility,
+        this.props.csrfToken,
       ).then((res) => {
         if (!res || !res.data) {
           throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -375,6 +379,7 @@ GuppyWrapper.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialFilterFromURL: PropTypes.object,
+  csrfToken: PropTypes.string,
 };
 
 GuppyWrapper.defaultProps = {
@@ -384,6 +389,7 @@ GuppyWrapper.defaultProps = {
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialFilterFromURL: {},
+  csrfToken: '',
 };
 
 export default GuppyWrapper;
