@@ -337,7 +337,7 @@ export const askGuppyForRawData = (
 export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs.reduce((acc, cur) => {
   Object.keys(cur)
     .filter((key) => key === 'fields' || key === 'asTextAggFields')
-    .forEach((key) => acc[key] = acc[key].concat(cur[key], []));
+    .forEach((key) => { acc[key] = acc[key].concat(cur[key], []); });
   return acc;
 }, { fields: [], asTextAggFields: [] });
 
