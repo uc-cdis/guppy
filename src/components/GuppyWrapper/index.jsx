@@ -352,6 +352,7 @@ class GuppyWrapper extends React.Component {
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
             adminAppliedPreFilters: this.props.adminAppliedPreFilters,
             accessibleFieldCheckList: this.props.accessibleFieldCheckList,
+            csrfToken: this.props.csrfToken,
           }))
         }
       </>
