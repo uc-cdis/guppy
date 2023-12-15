@@ -71,26 +71,28 @@ class ConnectedFilter extends React.Component {
     if (this.props.onFilterChange) {
       this.props.onFilterChange(this.state.adminAppliedPreFilters, this.state.accessibility);
     }
-    askGuppyForAggregationData(
-      this.props.guppyConfig.path,
-      this.props.guppyConfig.type,
-      this.state.allRegularAggFields,
-      this.state.allAsTextAggFields,
-      this.state.filter,
-      this.state.accessibility,
-      this.props.csrfToken,
-    )
-      .then((res) => {
-        if (!res.data) {
-          const msg = `error querying guppy${res.errors && res.errors.length > 0 ? `: ${res.errors[0].message}` : ''}`;
-          console.error(msg); // eslint-disable-line no-console
-        }
-        this.handleReceiveNewAggsData(
-          res.data._aggregation[this.props.guppyConfig.type],
-          this.state.adminAppliedPreFilters,
-        );
-        this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
-      });
+    if (this.props.csrfToken) {
+      askGuppyForAggregationData(
+        this.props.guppyConfig.path,
+        this.props.guppyConfig.type,
+        this.state.allRegularAggFields,
+        this.state.allAsTextAggFields,
+        this.state.filter,
+        this.state.accessibility,
+        this.props.csrfToken,
+      )
+        .then((res) => {
+          if (!res.data) {
+            const msg = `error querying guppy${res.errors && res.errors.length > 0 ? `: ${res.errors[0].message}` : ''}`;
+            console.error(msg); // eslint-disable-line no-console
+          }
+          this.handleReceiveNewAggsData(
+            res.data._aggregation[this.props.guppyConfig.type],
+            this.state.adminAppliedPreFilters,
+          );
+          this.saveInitialAggsData(res.data._aggregation[this.props.guppyConfig.type]);
+        });
+    }
 
     askGuppyAboutArrayTypes(this.props.guppyConfig.path).then((res) => {
       this.arrayFields = [];
