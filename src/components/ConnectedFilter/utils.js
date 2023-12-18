@@ -111,6 +111,7 @@ export const getFilterSections = (
   guppyConfig,
   arrayFields,
   filterValuesToHide,
+  csrfToken,
 ) => {
   let searchFieldSections = [];
 
@@ -144,7 +145,7 @@ export const getFilterSections = (
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
+        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig, csrfToken),
       };
     });
   }
