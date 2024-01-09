@@ -183,7 +183,7 @@ class ES {
           // remove disabled fields and convert double underscore prefix to single underscore
           // set root to properties
           const root = res[Object.keys(res)[0]].properties;
-          Object.keys(root)
+          root && Object.keys(root)
             .forEach((fieldName) => {
               if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
                 delete res[fieldName];
