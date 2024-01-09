@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import getFilterObj from '../filter';
 import esInstance from '../index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
@@ -158,6 +158,36 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(resultESFilter3).toEqual(expectedESFilter);
   });
 
+  test('could transfer graphql filter to ES filter object, range ">=" and "<=" operator', async () => {
+    await esInstance.initialize();
+    // <=, lte, LTE
+    const gqlFilter1 = { and: [{ '<=': { file_count: 20 } }, { '>=': { file_count: 10 } }] };
+    const gqlFilter2 = { and: [{ lte: { file_count: 20 } }, { gte: { file_count: 10 } }] };
+    const gqlFilter3 = { and: [{ LTE: { file_count: 20 } }, { GTE: { file_count: 10 } }] };
+    const resultESFilter1 = getFilterObj(esInstance, esIndex, gqlFilter1);
+    const resultESFilter2 = getFilterObj(esInstance, esIndex, gqlFilter2);
+    const resultESFilter3 = getFilterObj(esInstance, esIndex, gqlFilter3);
+    const expectedESFilter = { bool: { must: [{ range: { file_count: { lte: 20, gte: 10 } } }] } };
+    expect(resultESFilter1).toEqual(expectedESFilter);
+    expect(resultESFilter2).toEqual(expectedESFilter);
+    expect(resultESFilter3).toEqual(expectedESFilter);
+  });
+
+  test('could transfer graphql filter to ES filter object, range "<=" operator', async () => {
+    await esInstance.initialize();
+    // <=, lte, LTE
+    const gqlFilter1 = { and: [{ '<=': { file_count: 20 } }] };
+    const gqlFilter2 = { and: [{ lte: { file_count: 20 } }] };
+    const gqlFilter3 = { and: [{ LTE: { file_count: 20 } }] };
+    const resultESFilter1 = getFilterObj(esInstance, esIndex, gqlFilter1);
+    const resultESFilter2 = getFilterObj(esInstance, esIndex, gqlFilter2);
+    const resultESFilter3 = getFilterObj(esInstance, esIndex, gqlFilter3);
+    const expectedESFilter = { bool: { must: [{ range: { file_count: { lte: 20 } } }] } };
+    expect(resultESFilter1).toEqual(expectedESFilter);
+    expect(resultESFilter2).toEqual(expectedESFilter);
+    expect(resultESFilter3).toEqual(expectedESFilter);
+  });
+
   test('could transfer graphql filter to ES filter object, "search" operator', async () => {
     await esInstance.initialize();
     const keyword = 'male';
@@ -186,12 +216,12 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(() => { // for string field
       const gqlFilter = { '+': { gender: 'female' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
 
     expect(() => { // for int field
       const gqlFilter = { '+': { file_count: 10 } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
   });
 
   test('could throw err for nonexisting field', async () => {
@@ -200,7 +230,7 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
     expect(() => { // for string field
       const gqlFilter = { '=': { strange_field: 'value' } };
       getFilterObj(esInstance, esIndex, esType, gqlFilter);
-    }).toThrow(UserInputError);
+    }).toThrow(GraphQLError);
   });
 });
 

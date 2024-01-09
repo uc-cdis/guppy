@@ -1,13 +1,6 @@
 import flat from 'flat';
 import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
 
-export const getFilterGroupConfig = (filterConfig) => ({
-  tabs: filterConfig.tabs.map((t) => ({
-    title: t.title,
-    fields: t.filters.map((f) => f.field),
-  })),
-});
-
 const getSingleFilterOption = (histogramResult, initHistogramRes, filterValuesToHide) => {
   if (!histogramResult || !histogramResult.histogram) {
     throw new Error(`Error parsing field options ${JSON.stringify(histogramResult)}`);
@@ -28,14 +21,14 @@ const getSingleFilterOption = (histogramResult, initHistogramRes, filterValuesTo
     });
     return rangeOptions;
   }
-  let rawtextOptions = histogramResult.histogram;
+  let rawTextOptions = histogramResult.histogram;
   // hide filterValuesToHide from filters
   // filterValuesToHide added to guppyConfig in data-portal
   if (filterValuesToHide.length > 0) {
-    rawtextOptions = histogramResult.histogram
+    rawTextOptions = histogramResult.histogram
       .filter((item) => filterValuesToHide.indexOf(item.key) < 0);
   }
-  const textOptions = rawtextOptions.map((item) => ({
+  const textOptions = rawTextOptions.map((item) => ({
     text: item.key,
     filterType: 'singleSelect',
     count: item.count,
@@ -71,6 +64,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       guppyConfig.type,
       [field],
       filter,
+      undefined,
       undefined,
       offset,
       NUM_SEARCH_OPTIONS,
@@ -108,9 +102,16 @@ export const checkIsArrayField = (field, arrayFields) => {
 };
 
 export const getFilterSections = (
-  fields, searchFields, fieldMapping, tabsOptions,
-  initialTabsOptions, adminAppliedPreFilters, guppyConfig, arrayFields,
+  aggFields,
+  searchFields,
+  fieldMapping,
+  tabsOptions,
+  initialTabsOptions,
+  adminAppliedPreFilters,
+  guppyConfig,
+  arrayFields,
   filterValuesToHide,
+  csrfToken,
 ) => {
   let searchFieldSections = [];
 
@@ -144,12 +145,12 @@ export const getFilterSections = (
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
+        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig, csrfToken),
       };
     });
   }
 
-  const sections = fields.map((field) => {
+  const sections = aggFields.map((field) => {
     const overrideName = fieldMapping.find((entry) => (entry.field === field));
     const label = overrideName ? overrideName.name : capitalizeFirstLetter(field);
 
@@ -182,7 +183,7 @@ export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) =
   const resultAggsData = {};
   const flattenAggsData = flat(receivedAggsData, { safe: true });
   Object.keys(flattenAggsData).forEach((field) => {
-    const actualFieldName = field.replace('.histogram', '');
+    const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');
     const histogram = flattenAggsData[`${field}`];
     if (!histogram) return;
     if (actualFieldName in filterResults) {

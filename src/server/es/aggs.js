@@ -1,4 +1,4 @@
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import getFilterObj from './filter';
 import {
   AGGS_GLOBAL_STATS_NAME,
@@ -57,6 +57,7 @@ const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
       const tempResult = {};
       tempResult.field = element;
       tempResult.terms = [];
+      tempResult.count = 0;
       const variableName = `${element}Terms`;
       if (item[variableName].buckets && item[variableName].buckets.length > 0) {
         item[variableName].buckets.forEach((itemElement) => {
@@ -64,6 +65,7 @@ const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
             key: itemElement.key,
             count: itemElement.doc_count,
           });
+          tempResult.count += itemElement.doc_count;
         });
       } else {
         tempResult.terms.push({
@@ -159,7 +161,12 @@ export const numericGlobalStats = async (
   const queryBody = { size: 0 };
   if (!!filter || !!defaultAuthFilter) {
     queryBody.query = getFilterObj(
-      esInstance, esIndex, filter, field, filterSelf, defaultAuthFilter,
+      esInstance,
+      esIndex,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
     );
   }
   queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
@@ -440,16 +447,32 @@ export const numericAggregation = async (
   },
 ) => {
   if (rangeStep <= 0) {
-    throw new UserInputError(`Invalid rangeStep ${rangeStep}`);
+    throw new GraphQLError(`Invalid rangeStep ${rangeStep}`, {
+      extensions: {
+        code: 'BAD_USER_INPUT',
+      },
+    });
   }
   if (rangeStart > rangeEnd) {
-    throw new UserInputError(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`);
+    throw new GraphQLError(`Invalid rangeStart (${rangeStep}) > rangeEnd (${rangeEnd})`, {
+      extensions: {
+        code: 'BAD_USER_INPUT',
+      },
+    });
   }
   if (binCount <= 0) {
-    throw new UserInputError(`Invalid binCount ${binCount}`);
+    throw new GraphQLError(`Invalid binCount ${binCount}`, {
+      extensions: {
+        code: 'BAD_USER_INPUT',
+      },
+    });
   }
   if (typeof rangeStep !== 'undefined' && typeof binCount !== 'undefined') {
-    throw new UserInputError('Invalid to set "rangeStep" and "binCount" at same time');
+    throw new GraphQLError('Invalid to set "rangeStep" and "binCount" at same time', {
+      extensions: {
+        code: 'BAD_USER_INPUT',
+      },
+    });
   }
   if (typeof rangeStep !== 'undefined') {
     return numericHistogramWithFixedRangeStep(
@@ -558,7 +581,7 @@ export const textAggregation = async (
   // don't add missing alias to numeric field by default
   // since the value of missing alias is a string
   if (config.esConfig.aggregationIncludeMissingData && !isNumericField) {
-    missingAlias = { missing: config.esConfig.missingDataAlias };
+    missingAlias = { missing_bucket: true, order: 'desc' };
   }
   const aggsName = `${field}Aggs`;
   const aggsObj = {};
@@ -635,7 +658,6 @@ export const textAggregation = async (
     resultSize = 0;
 
     const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
-
     resultBuckets.forEach((item) => {
       const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
       finalResults.push({
@@ -652,16 +674,19 @@ export const textAggregation = async (
   /* eslint-enable */
 
   // order aggregations by doc count
-  finalResults = finalResults.sort((e1, e2) => e2.count - e1.count);
+  finalResults = finalResults.sort((e1, e2) => {
+    if (e1.key === null) return 1;
+    if (e2.key === null) return -1;
+    return e2.count - e1.count;
+  });
 
   // make the missing data bucket to the bottom of the list
+  const lastIndex = finalResults.length - 1;
   if (config.esConfig.aggregationIncludeMissingData) {
-    const missingDataIndex = finalResults
-      .findIndex((b) => b.key === config.esConfig.missingDataAlias);
-    const missingDataItem = finalResults.find((b) => b.key === config.esConfig.missingDataAlias);
-    if (missingDataItem) {
-      finalResults.splice(missingDataIndex, 1);
-      finalResults.splice(finalResults.length, 0, missingDataItem);
+    const missingDataItem = finalResults[lastIndex];
+    if (missingDataItem !== undefined && missingDataItem.key === null) {
+      missingDataItem.key = config.esConfig.missingDataAlias;
+      finalResults[lastIndex] = missingDataItem;
     }
   }
   return finalResults;

@@ -3,7 +3,8 @@ version: "3.3"
 services:
   # see https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.12
+    # use elasticsearch/elasticsearch:7.10.0-arm64 for ARM architecture
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.0
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -12,9 +13,12 @@ services:
     volumes:
       - "esdata:/usr/share/elasticsearch/data"
     environment:
-     "cluster.name": "localdev"
-     "discovery.type": "single-node"
-     ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      - cluster.name=localdev
+      - bootstrap.memory_lock=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - http.port=9200
     deploy:
       replicas: 1
       restart_policy:
@@ -24,7 +28,7 @@ services:
         window: 120s
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:6.5.4
+    image: docker.elastic.co/kibana/kibana-oss:7.10.0
     ports:
       - "5601:5601"
     logging:
@@ -38,6 +42,9 @@ services:
       - elasticsearch
     environment:
       LOGGING_QUIET: "true"
+      SERVER_NAME: elasticsearch
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      network.host: 0.0.0.0
 
 volumes:
   esdata:

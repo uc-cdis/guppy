@@ -11,10 +11,10 @@ RUN apt-get update \
         sudo \
         vim \
         libcap2-bin \
-    && curl -sL https://deb.nodesource.com/setup_14.x | bash - \
+    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@8.5
+    && npm install -g npm@8
 
 COPY . /guppy/
 WORKDIR /guppy
@@ -28,7 +28,7 @@ RUN useradd -d /guppy gen3 && chown -R gen3: /guppy
 # see https://superuser.com/questions/710253/allow-non-root-process-to-bind-to-port-80-and-443
 RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/node
 USER gen3
-RUN npm ci --unsafe-perm
+RUN npm ci
 RUN npm run-script prepare
 
 EXPOSE 3000

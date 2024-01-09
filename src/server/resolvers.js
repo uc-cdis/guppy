@@ -52,9 +52,13 @@ const typeAggsQueryResolver = (esInstance, esIndex, esType) => (parent, args) =>
  * @param {object} parent
  */
 const aggsTotalQueryResolver = (parent) => {
+  log.debug('[resolver.aggsTotalQueryResolver] parent', parent);
   const {
-    filter, esInstance, esIndex, esType,
+    filter, esInstance, esIndex, esType, field,
   } = parent;
+  if (field) {
+    return esInstance.getFieldCount(esIndex, esType, filter, field);
+  }
   return esInstance.getCount(esIndex, esType, filter);
 };
 
@@ -125,6 +129,27 @@ const textHistogramResolver = async (parent, args, context) => {
   });
 };
 
+/**
+ * This resolver is for Cardinality.
+ * It inherits arguments from its parent,
+ * and uses "field" from parent and args "precision_threshold" to get the cardinality count
+ * @param {object} parent
+ * @param {object} args
+ */
+const cardinalityResolver = async (parent, args) => {
+  log.debug('[resolver.cardinalityResolver] args', args);
+  log.debug('[resolver.cardinalityResolver] parent', parent);
+  // TODO make work with nested
+  const {
+    esInstance, esIndex, esType, filter, field,
+  } = parent;
+
+  // eslint-disable-next-line camelcase
+  const { precision_threshold } = args;
+
+  return esInstance.getCardinalityCount(esIndex, esType, filter, field, precision_threshold);
+};
+
 const getFieldAggregationResolverMappingsByField = (field) => {
   let isNumericField = false;
   if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -139,6 +164,8 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   }));
 };
 
+// this spreads all fields out into individual resolvers and
+// adds "field", "isNumericField" and "nestedPath", to parent
 const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
   const { fields } = esInstance.getESFields(esIndex);
   const fieldAggregationResolverMappings = {};
@@ -167,6 +194,10 @@ const getFieldAggregationResolverMappings = (esInstance, esIndex) => {
  *         }
  *       }
  *       file_count {
+ *         _totalCount  ---> `aggsTotalQueryResolver`
+ *         _cardinality (
+ *           precision_threshold: 1000 //optional
+ *         ), ---> `cardinalityResolver`
  *         histogram (rangeStart: xx, rangeEnd: xx, rangeStep: xx, binCount: xx)
  *         {  ---> `numericHistogramResolver`
  *           key
@@ -261,18 +292,28 @@ const getResolver = (esConfig, esInstance) => {
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
     HistogramForNumber: {
+      _totalCount: aggsTotalQueryResolver,
+      _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     HistogramForString: {
+      _totalCount: aggsTotalQueryResolver,
+      _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
+      asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForNumber: {
+      _totalCount: aggsTotalQueryResolver,
+      _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForString: {
+      _totalCount: aggsTotalQueryResolver,
+      _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
+      asTextHistogram: textHistogramResolver,
     },
     Mapping: {
       ...mappingResolvers,

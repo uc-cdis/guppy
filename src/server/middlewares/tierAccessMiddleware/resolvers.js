@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
-import { ApolloError, UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
+import { ApolloServerErrorCode } from '@apollo/server/errors';
 import log from '../../logger';
 import config from '../../config';
 import esInstance from '../../es/index';
@@ -10,7 +11,13 @@ import { isWhitelisted, addTwoFilters } from '../../utils/utils';
 const ENCRYPT_COUNT = -1;
 
 const resolverWithAccessibleFilterApplied = (
-  resolve, root, args, context, info, authHelper, filter,
+  resolve,
+  root,
+  args,
+  context,
+  info,
+  authHelper,
+  filter,
 ) => {
   const appliedFilter = authHelper.applyAccessibleFilter(filter);
   const newArgs = {
@@ -22,7 +29,13 @@ const resolverWithAccessibleFilterApplied = (
 };
 
 const resolverWithUnaccessibleFilterApplied = (
-  resolve, root, args, context, info, authHelper, filter,
+  resolve,
+  root,
+  args,
+  context,
+  info,
+  authHelper,
+  filter,
 ) => {
   const appliedFilter = authHelper.applyUnaccessibleFilter(filter);
   const newArgs = {
@@ -52,7 +65,10 @@ export const tierAccessResolver = (
     const { filter, filterSelf, accessibility } = args;
 
     const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-      esIndex, esType, filter, filterSelf,
+      esIndex,
+      esType,
+      filter,
+      filterSelf,
     );
     // if requesting resources is within allowed resources, return result
     if (outOfScopeResourceList.length === 0) {
@@ -62,7 +78,13 @@ export const tierAccessResolver = (
           return resolve(root, { ...args, needEncryptAgg: false }, context, info);
         case 'unaccessible':
           return resolverWithUnaccessibleFilterApplied(
-            resolve, root, args, context, info, authHelper, filter,
+            resolve,
+            root,
+            args,
+            context,
+            info,
+            authHelper,
+            filter,
           );
         default:
           return resolve(root, { ...args, needEncryptAgg: true }, context, info);
@@ -72,12 +94,22 @@ export const tierAccessResolver = (
     if (isRawDataQuery) { // raw data query for out-of-scope resources are forbidden
       if (accessibility === 'accessible') {
         return resolverWithAccessibleFilterApplied(
-          resolve, root, args, context, info, authHelper, filter,
+          resolve,
+          root,
+          args,
+          context,
+          info,
+          authHelper,
+          filter,
         );
       }
       log.info('[tierAccessResolver] requesting out-of-scope resources, return 401');
       log.info(`[tierAccessResolver] the following resources are out-of-scope: [${outOfScopeResourceList.join(', ')}]`);
-      throw new ApolloError('You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query', 401);
+      throw new GraphQLError('You don\'t have access to all the data you are querying. Try using \'accessibility: accessible\' in your query', {
+        extensions: {
+          code: 401,
+        },
+      });
     }
 
     /**
@@ -136,7 +168,13 @@ export const tierAccessResolver = (
       // user has access to all of these projects.
       log.debug('[tierAccessResolver] applying "accessible" to resolver');
       return resolverWithAccessibleFilterApplied(
-        resolve, root, args, context, info, authHelper, filter,
+        resolve,
+        root,
+        args,
+        context,
+        info,
+        authHelper,
+        filter,
       );
     }
     // The below code executes if accessibility === 'unaccessible'.
@@ -159,19 +197,23 @@ export const tierAccessResolver = (
       );
     }
     return resolverWithUnaccessibleFilterApplied(
-      resolve, root, args, context, info, authHelper, filter,
+      resolve,
+      root,
+      args,
+      context,
+      info,
+      authHelper,
+      filter,
     );
   } catch (err) {
-    if (err instanceof ApolloError) {
-      if (err.extensions.code >= 500) {
+    if (err instanceof GraphQLError) {
+      if (ApolloServerErrorCode[err.extensions.code]) {
         console.trace(err); // eslint-disable-line no-console
       }
     } else if (err instanceof CodedError) {
       if (err.code >= 500) {
         console.trace(err); // eslint-disable-line no-console
       }
-    } else if (!(err instanceof UserInputError)) {
-      console.trace(err); // eslint-disable-line no-console
     }
     throw err;
   }
@@ -183,7 +225,11 @@ export const tierAccessResolver = (
  * @param {bool} isGettingTotalCount
  */
 export const hideNumberResolver = (isGettingTotalCount) => async (
-  resolve, root, args, context, info,
+  resolve,
+  root,
+  args,
+  context,
+  info,
 ) => {
   // for aggregations, hide all counts that are greater than limited number
   const { needEncryptAgg } = root;

@@ -40,7 +40,11 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
    * they are still checked but their counts are zero.
    */
 export const updateCountsInInitialTabsOptions = (
-  initialTabsOptions, processedTabsOptions, filtersApplied, accessibleFieldCheckList,
+  initialTabsOptions,
+  processedTabsOptions,
+  filtersApplied,
+  accessibleFieldCheckList,
+  allFilterValues,
 ) => {
   const updatedTabsOptions = {};
   try {
@@ -52,8 +56,14 @@ export const updateCountsInInitialTabsOptions = (
     const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
     const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
-      // in flattened tab options, to get actual field name, strip off the last '.histogram'
-      const actualFieldName = field.replace('.histogram', '');
+      // in flattened tab options, to get actual field name, strip off the last '.histogram' or '.asTextHistogram'
+      const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');
+
+      // check if Filter Value if not skip
+      if (!allFilterValues.includes(actualFieldName)) {
+        return;
+      }
+
       // possible to have '.' in actualFieldName, so use it as a string
       updatedTabsOptions[`${actualFieldName}`] = { histogram: [] };
       // if in tiered access mode
@@ -65,8 +75,9 @@ export const updateCountsInInitialTabsOptions = (
         return;
       }
       const histogram = flattenInitialTabsOptions[`${field}`];
-      if (!histogram) {
+      if (!histogram || typeof histogram !== 'object') {
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
+        return;
       }
       histogram.forEach((opt) => {
         const { key } = opt;
@@ -97,10 +108,12 @@ export const updateCountsInInitialTabsOptions = (
           }
           return;
         }
-        const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
-        if (findOpt) {
-          const { count } = findOpt;
-          updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+        if (flattenProcessedTabsOptions[`${field}`]) {
+          const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
+          if (findOpt) {
+            const { count } = findOpt;
+            updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
+          }
         }
       });
       if (filtersApplied[`${actualFieldName}`]) {
@@ -179,7 +192,7 @@ export const buildFilterStatusForURLFilter = (userFilter, tabs) => {
   const filterStatusArray = tabs.map(() => ([]));
 
   for (let tabIndex = 0; tabIndex < tabs.length; tabIndex += 1) {
-    const allFieldsForThisTab = tabs[tabIndex].fields;
+    const allFieldsForThisTab = _.union(tabs[tabIndex].fields, tabs[tabIndex].asTextAggFields || []);
     filterStatusArray[tabIndex] = allFieldsForThisTab.map(() => ({}));
     for (let i = 0; i < filteringFields.length; i += 1) {
       const sectionIndex = allFieldsForThisTab.indexOf(filteringFields[i]);

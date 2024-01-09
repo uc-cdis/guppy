@@ -8,6 +8,7 @@ Table of Contents
    - [Numeric Aggregation](#aggs-numeric)
    - [Nested Aggregation](#aggs-nested)
    - [Sub-aggregations](#aggs-sub)
+   - [Cardinality Count Aggregation](#aggs-cardinality)
 - [Filters](#filter)
    - [Basic Filter Unit](#filter-unit)
    - [Text Search Unit in Filter](#filter-search)
@@ -145,7 +146,10 @@ Aggregation query is wrapped within `_aggregation` keyword. Three possible aggre
 <a name="aggs-total"></a>
 
 ### 1. Total count aggregation
- By using `_totalCount` keyword, return total count of the result. Example:
+ By using `_totalCount` keyword, return total count of the result.
+ Can also use `_totalCount` keyword inside text aggregation to get [value count](https://www.elastic.co/guide/en/elasticsearch/reference/8.7/search-aggregations-metrics-valuecount-aggregation.html) of text aggregation
+
+ Example:
 
  ```
  query ($filter: JSON) {
@@ -165,6 +169,36 @@ Example result:
     "_aggregation": {
       "subject": {
         "_totalCount": 46
+      }
+    }
+  }
+}
+```
+
+Text Aggregation Example:
+
+ ```
+ query ($filter: JSON) {
+  _aggregation  {
+    subject(filter: $filter) {
+      subject_id {
+        _totalCount
+      }
+    }
+  }
+}
+```
+
+Example result:
+
+```
+{
+  "data": {
+    "_aggregation": {
+      "subject": {
+        "subject_id": {
+          "_totalCount": 42
+        }
       }
     }
   }
@@ -762,6 +796,48 @@ Result:
       }
     }
   }
+}
+```
+
+<a name="aggs-cardinality"></a>
+
+### 6. Cardinality Count Aggregation
+ By using `_cardinalityCount` keyword, return a cardinality count of a field.
+
+ See [Elasticsearch documentation on Cardinality](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html)
+
+> **Note**
+> curenntly does not support nested feilds
+
+ Example:
+
+ ```
+ query ($filter: JSON) {
+  _aggregation  {
+    subject(filter: $filter) {
+      submitter_id {
+        _cardinalityCount(
+          precision_threshold: 1000 //optional defaults to 3000
+        )
+      }
+    }
+  }
+}
+```
+
+Example result:
+
+```
+{
+	"data": {
+		"_aggregation": {
+			"subject": {
+				"submitter_id": {
+					"_cardinalityCount": 98
+				}
+			}
+		}
+	}
 }
 ```
 

@@ -38,7 +38,9 @@ const downloadRouter = async (req, res, next) => {
           appliedFilter = authHelper.applyAccessibleFilter(filter);
         } else {
           const outOfScopeResourceList = await authHelper.getOutOfScopeResourceList(
-            esIndexConfig.index, type, filter,
+            esIndexConfig.index,
+            type,
+            filter,
           );
           // if requesting resources > allowed resources, return 401,
           if (outOfScopeResourceList.length > 0) {
@@ -61,6 +63,7 @@ const downloadRouter = async (req, res, next) => {
     const data = await esInstance.downloadData({
       esIndex: esIndexConfig.index, esType: type, filter: appliedFilter, sort, fields,
     });
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.send(data);
   } catch (err) {
     log.error(err);

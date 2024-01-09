@@ -12,7 +12,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -21,6 +22,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs = {
     aggregations: {
@@ -31,7 +33,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 40,
           },
@@ -78,7 +80,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -87,6 +90,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs2 = {
     aggregations: {
@@ -97,7 +101,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 40,
           },
@@ -138,7 +142,8 @@ const mockTextAggs = () => {
               gender: {
                 terms: {
                   field: 'gender',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -147,6 +152,7 @@ const mockTextAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeGenderAggs3 = {
     aggregations: {
@@ -157,7 +163,7 @@ const mockTextAggs = () => {
         buckets: [
           {
             key: {
-              gender: 'no data',
+              gender: null,
             },
             doc_count: 20,
           },

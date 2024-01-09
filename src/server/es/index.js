@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 import config from '../config';
 import getFilterObj from './filter';
 import getESSortBody from './sort';
@@ -8,7 +8,7 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
-import { buildNestedField, fromFieldsToSource, processNestedFieldNames } from '../utils/utils';
+import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -52,10 +52,10 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
+    validatedQueryBody.track_total_hits = true;
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
-      type: esType,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
@@ -111,7 +111,6 @@ class ES {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
           index: esIndex,
-          type: esType,
           body: validatedQueryBody,
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
@@ -153,17 +152,16 @@ class ES {
    * Return a Promise of an Object: { <field>: <type> }
    * If error, print error stack
    * @param {string} esIndex
-   * @param {string} esType
    */
-  async _getESFieldsTypes(esIndex, esType) {
+  async _getESFieldsTypes(esIndex) {
     const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
-      type: esType,
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        return resp.body[esIndexAlias].mappings[esType].properties;
+        log.info('Mapping response from ES: ', resp.body[esIndexAlias]);
+        return resp.body[esIndexAlias].mappings.properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -180,7 +178,7 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
+      .map((cfg) => this._getESFieldsTypes(cfg.index)
         .then((res) => {
           Object.keys(res)
             .forEach((fieldName) => {
@@ -240,9 +238,18 @@ class ES {
           }
           const fields = doc._source.array;
           fields.forEach((field) => {
+            const fieldArr = field.split('.');
             const fn = (field.indexOf('__') === 0) ? field.replace('__', config.doubleUnderscorePrefix) : field;
-            if (!this.fieldTypes[index][fn]) {
-              const errMsg = `[ES.initialize] wrong array entry from config: field "${fn}" not found in index ${index}, skipped.`;
+            if (!(this.fieldTypes[index][field]
+              || (
+                fieldArr.length > 1
+                && _.has(
+                  this.fieldTypes[index],
+                  fieldArr.join('.properties.'),
+                )
+              )
+            )) {
+              const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
               log.error(errMsg);
               return;
             }
@@ -432,18 +439,66 @@ class ES {
   async getCount(esIndex, esType, filter) {
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
-      { filter, fields: false },
+      { filter, fields: false, size: 0 },
     );
-    return result.hits.total;
+    // Really shouldn't be getting this, but just in case
+    if (result.hits.total.relation !== 'eq') {
+      log.error(`The returned total count might be inaccurate. See hits.total object: ${result.hits.total}`);
+    }
+    return result.hits.total.value;
+  }
+
+  async getFieldCount(esIndex, esType, filter, field) {
+    const queryBody = {
+      size: 0,
+      aggs: {
+        [field]: {
+          value_count: {
+            field,
+          },
+        },
+      },
+    };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, filter, field);
+    }
+
+    const result = await this.query(esIndex, esType, queryBody);
+    return result.aggregations[field].value;
+  }
+
+  // eslint-disable-next-line camelcase
+  async getCardinalityCount(esIndex, esType, filter, field, precision_threshold) {
+    const queryBody = {
+      size: 0,
+      aggs: {
+        cardinality_count: {
+          cardinality: {
+            field,
+            precision_threshold, // eslint-disable-line camelcase
+          },
+        },
+      },
+    };
+    if (typeof filter !== 'undefined') {
+      queryBody.query = getFilterObj(this, esIndex, filter);
+    }
+
+    const result = await this.query(esIndex, esType, queryBody);
+    return result.aggregations.cardinality_count.value;
   }
 
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
     if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-      throw new UserInputError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
+      throw new GraphQLError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
-      please use download endpoint for large data queries instead.`);
+      please use download endpoint for large data queries instead.`, {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
     }
     const result = await this.filterData(
       { esInstance: this, esIndex, esType },
@@ -452,7 +507,32 @@ class ES {
       },
     );
     const { hits } = result.hits;
-    return hits.map((h) => {
+    const hitsWithMatchedResults = hits.map((h) => {
+      if (!('highlight' in h)) {
+        // ES doesn't returns "highlight"
+        return h._source;
+      }
+      // ES returns highlight, transfer them into "_matched" schema
+      const matchedList = Object.keys(h.highlight).map((f) => {
+        let field = f;
+        if (f.endsWith(config.analyzedTextFieldSuffix)) {
+          // remove ".analyzed" suffix from field name
+          field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
+        }
+        return {
+          field,
+          // just use ES highlights' format,
+          // should be a list of string, with matched part emphasized with <
+          highlights: h.highlight[f],
+        };
+      });
+      return {
+        ...h._source,
+        _matched: matchedList,
+      };
+    });
+
+    const hitsWithNoDoubleUnderscore = hitsWithMatchedResults.map((h) => {
       Object.keys(h._source)
         .forEach((fieldName) => {
           if (fieldName in h._source && fieldName.indexOf('__') === 0) {
@@ -460,30 +540,7 @@ class ES {
           }
         });
 
-      if (!('highlight' in h)) {
-        // ES doesn't returns "highlight"
-        return h._source;
-      }
-      // ES returns highlight, transfer them into "_matched" schema
-      const matchedList = Object.keys(h.highlight)
-        .map((f) => {
-          let field = f;
-          if (f.endsWith(config.analyzedTextFieldSuffix)) {
-            // remove ".analyzed" suffix from field name
-            field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
-          }
-          return {
-            field,
-            // just use ES highlights' format,
-            // should be a list of string, with matched part emphasized with <
-            highlights: h.highlight[f],
-          };
-        });
-      return {
-        ...h._source,
-        _matched: matchedList,
-      };
-    });
+    return hitsWithNoDoubleUnderscore;
   }
 
   downloadData({

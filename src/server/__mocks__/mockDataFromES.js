@@ -24,7 +24,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -44,6 +45,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResource = {
     aggregations: {
@@ -98,7 +100,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -118,6 +121,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResourceWithFilter1 = {
     aggregations: {
@@ -157,7 +161,8 @@ const mockResourcePath = () => {
               gen3_resource_path: {
                 terms: {
                   field: 'gen3_resource_path',
-                  missing: 'no data',
+                  missing_bucket: true,
+                  order: 'desc',
                 },
               },
             },
@@ -177,6 +182,7 @@ const mockResourcePath = () => {
         '*.analyzed': {},
       },
     },
+    track_total_hits: true,
   };
   const fakeResourceWithFilter2 = {
     aggregations: {
@@ -277,65 +283,63 @@ const mockESMapping = () => {
   const fakeSubjectMapping = {
     'gen3-dev-subject': {
       mappings: {
-        subject: {
-          properties: {
-            gen3_resource_path: {
-              type: 'keyword',
-            },
-            visits: {
-              type: 'nested',
-              properties: {
-                days_to_visit: { type: 'integer' },
-                visit_label: {
-                  type: 'keyword',
-                  fields: {
-                    analyzed: {
-                      type: 'text',
-                      analyzer: 'ngram_analyzer',
-                      search_analyzer: 'search_analyzer',
-                      term_vector: 'with_positions_offsets',
-                    },
+        properties: {
+          gen3_resource_path: {
+            type: 'keyword',
+          },
+          visits: {
+            type: 'nested',
+            properties: {
+              days_to_visit: { type: 'integer' },
+              visit_label: {
+                type: 'keyword',
+                fields: {
+                  analyzed: {
+                    type: 'text',
+                    analyzer: 'ngram_analyzer',
+                    search_analyzer: 'search_analyzer',
+                    term_vector: 'with_positions_offsets',
                   },
                 },
-                follow_ups: {
-                  type: 'nested',
-                  properties: {
-                    days_to_follow_up: {
-                      type: 'integer',
-                    },
-                    follow_up_label: {
-                      type: 'keyword',
-                      fields: {
-                        analyzed: {
-                          type: 'text',
-                          analyzer: 'ngram_analyzer',
-                          search_analyzer: 'search_analyzer',
-                          term_vector: 'with_positions_offsets',
-                        },
+              },
+              follow_ups: {
+                type: 'nested',
+                properties: {
+                  days_to_follow_up: {
+                    type: 'integer',
+                  },
+                  follow_up_label: {
+                    type: 'keyword',
+                    fields: {
+                      analyzed: {
+                        type: 'text',
+                        analyzer: 'ngram_analyzer',
+                        search_analyzer: 'search_analyzer',
+                        term_vector: 'with_positions_offsets',
                       },
                     },
                   },
                 },
               },
             },
-            gender: {
-              type: 'keyword',
-            },
-            file_count: {
-              type: 'integer',
-            },
-            name: {
-              type: 'text',
-            },
-            some_array_integer_field: {
-              type: 'integer',
-            },
-            some_array_string_field: {
-              type: 'keyword',
-            },
-            whatever_lab_result_value: {
-              type: 'float',
-            },
+          },
+          gender: {
+            type: 'keyword',
+          },
+          file_count: {
+            type: 'integer',
+          },
+          name: {
+            type: 'text',
+          },
+          some_array_integer_field: {
+            type: 'integer',
+          },
+          some_array_string_field: {
+            type: 'keyword',
+          },
+          whatever_lab_result_value: {
+            type: 'float',
           },
         },
       },
@@ -343,25 +347,23 @@ const mockESMapping = () => {
   };
   nock(config.esConfig.host)
     .persist()
-    .get(/_mapping\/subject/)
+    .get(/subject\/_mapping/)
     .reply(200, fakeSubjectMapping);
   const fakeFileMapping = {
     'gen3-dev-file': {
       mappings: {
-        file: {
-          properties: {
-            gen3_resource_path: {
-              type: 'keyword',
-            },
-            file_id: {
-              type: 'keyword',
-            },
-            file_size: {
-              type: 'long',
-            },
-            subject_id: {
-              type: 'keyword',
-            },
+        properties: {
+          gen3_resource_path: {
+            type: 'keyword',
+          },
+          file_id: {
+            type: 'keyword',
+          },
+          file_size: {
+            type: 'long',
+          },
+          subject_id: {
+            type: 'keyword',
           },
         },
       },
@@ -369,7 +371,7 @@ const mockESMapping = () => {
   };
   nock(config.esConfig.host)
     .persist()
-    .get(/_mapping\/file/)
+    .get(/file\/_mapping/)
     .reply(200, fakeFileMapping);
 };
 
@@ -382,7 +384,6 @@ const mockArrayConfig = () => {
       hits: [
         {
           _index: 'gen3-dev-config',
-          _type: '_doc',
           _id: 'gen3-dev-subject',
           _score: 1.0,
           _source: {
