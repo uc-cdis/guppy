@@ -539,6 +539,7 @@ class ES {
             delete Object.assign(h._source, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: h._source[fieldName] })[fieldName];
           }
         });
+    });
 
     return hitsWithNoDoubleUnderscore;
   }
