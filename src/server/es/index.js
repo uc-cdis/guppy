@@ -180,13 +180,16 @@ class ES {
     const promiseList = this.config.indices
       .map((cfg) => this._getESFieldsTypes(cfg.index)
         .then((res) => {
-          Object.keys(res)
+          // remove disabled fields and convert double underscore prefix to single underscore
+          // set root to properties
+          const root = res[Object.keys(res)[0]].properties;
+          Object.keys(root)
             .forEach((fieldName) => {
-              if (res[fieldName].enabled !== undefined && res[fieldName].enabled === false) {
+              if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
                 delete res[fieldName];
               }
-              if (fieldName in res && fieldName.indexOf('__') === 0) {
-                delete Object.assign(res, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: res[fieldName] })[fieldName];
+              if (fieldName in root && fieldName.indexOf('__') === 0) {
+                delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
               }
             });
           return {

@@ -63,7 +63,6 @@ export const fromFieldsToSource = (parsedInfo) => {
       cur.name = (cur.name.indexOf('x__') === 0) ? cur.name.replace('x__', '__') : cur.name;
       const newTypeName = cur.name;
       const fieldName = [curNodeName, newTypeName].filter((s) => s.length > 0).join('.');
-
       if (newTypeName in cur.fieldsByTypeName) {
         const children = Object.values(cur.fieldsByTypeName[newTypeName]);
         curNodeName = fieldName;

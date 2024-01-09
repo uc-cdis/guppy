@@ -13,15 +13,11 @@ const config = {
     host: 'localhost:9200',
     indices: inputConfig.indices || [
       {
-        index: 'gen3-dev-subject',
-        type: 'subject',
-      },
-      {
-        index: 'gen3-dev-file',
-        type: 'file',
+        index: 'default-commons-index',
+        type: 'metadata',
       },
     ],
-    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
+    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'default-commons-config-index',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
