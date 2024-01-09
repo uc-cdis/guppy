@@ -508,6 +508,12 @@ class ES {
     );
     const { hits } = result.hits;
     const hitsWithMatchedResults = hits.map((h) => {
+      Object.keys(h._source)
+        .forEach((fieldName) => {
+          if (fieldName in h._source && fieldName.indexOf('__') === 0) {
+            delete Object.assign(h._source, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: h._source[fieldName] })[fieldName];
+          }
+        });
       if (!('highlight' in h)) {
         // ES doesn't returns "highlight"
         return h._source;
@@ -531,17 +537,7 @@ class ES {
         _matched: matchedList,
       };
     });
-
-    const hitsWithNoDoubleUnderscore = hitsWithMatchedResults.map((h) => {
-      Object.keys(h._source)
-        .forEach((fieldName) => {
-          if (fieldName in h._source && fieldName.indexOf('__') === 0) {
-            delete Object.assign(h._source, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: h._source[fieldName] })[fieldName];
-          }
-        });
-    });
-
-    return hitsWithNoDoubleUnderscore;
+    return hitsWithMatchedResults;
   }
 
   downloadData({
