@@ -183,15 +183,17 @@ class ES {
           // remove disabled fields and convert double underscore prefix to single underscore
           // set root to properties
           const root = res[Object.keys(res)[0]].properties;
-          root && Object.keys(root)
-            .forEach((fieldName) => {
-              if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
-                delete res[fieldName];
-              }
-              if (fieldName in root && fieldName.indexOf('__') === 0) {
-                delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
-              }
-            });
+          if (root) {
+            Object.keys(root)
+              .forEach((fieldName) => {
+                if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
+                  delete res[fieldName];
+                }
+                if (fieldName in root && fieldName.indexOf('__') === 0) {
+                  delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
+                }
+              });
+          }
           return {
             index: cfg.index,
             fieldTypes: res,
