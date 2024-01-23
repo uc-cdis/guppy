@@ -170,6 +170,11 @@ class ES {
     });
   }
 
+  /**
+   * Gets the mappings for all indices from Elasticsearch.
+   * @returns {Promise<Object>} A promise that resolves to an object containing the field types for each index.
+   * @throws {Error} Throws an error if the "config.indices" block is empty.
+   */
   async _getMappingsForAllIndices() {
     if (!this.config.indices || this.config.indices === 0) {
       const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
@@ -187,7 +192,10 @@ class ES {
             Object.keys(root)
               .forEach((fieldName) => {
                 if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
-                  delete res[fieldName];
+                  delete root[fieldName];
+                }
+                if (fieldName in root && config.ignoredFields.includes(fieldName)) {
+                  delete root[fieldName];
                 }
                 if (fieldName in root && fieldName.indexOf('__') === 0) {
                   delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
