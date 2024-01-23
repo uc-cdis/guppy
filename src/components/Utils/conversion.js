@@ -32,7 +32,7 @@ export async function conversion(json, config) {
  * @param {JSON} json
  * @param {string} format
  */
-export async function jsonToFormat(json, format : keyof FILE_DELIMITERS ) {
+export async function jsonToFormat(json, format) {
   if (format in FILE_DELIMITERS) {
     const flatJson = await flattenJson(json);
     const data = await conversion(flatJson, { delimiter: FILE_DELIMITERS[format] });
