@@ -170,11 +170,67 @@ class ES {
     });
   }
 
+  async _getMappingsForAllIndices() {
+    if (!this.config.indices || this.config.indices === 0) {
+      const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
+      throw new Error(errMsg);
+    }
+    const fieldTypes = {};
+    log.info('[ES.initialize] getting mapping from elasticsearch...');
+
+    const promiseList = this.config.indices.map((indexConfig) => this._processEachIndex(indexConfig));
+
+    const resultList = await Promise.all(promiseList);
+    log.info('[ES.initialize] got mapping from elasticsearch');
+    resultList.forEach((res) => {
+      fieldTypes[res.index] = res.fieldTypes;
+    });
+    log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
+    return fieldTypes;
+  }
+
+  async _processEachIndex(indexConfig) {
+    const res = await this._getESFieldsTypes(indexConfig.index);
+    Object.keys(res).forEach((fieldName) => {
+      this._modifyIndexRootProperties(res);
+      if (res[fieldName] && 'properties' in res[fieldName] && res[fieldName].type === 'nested') {
+        const root = res[fieldName].properties;
+        this._modifyIndexRootProperties(root);
+      }
+    });
+
+    return {
+      index: indexConfig.index,
+      fieldTypes: res,
+    };
+  }
+
+  _modifyIndexRootProperties(root) {
+    const DOUBLE_UNDERSCORE = '__';
+
+    if (root) {
+      Object.keys(root).forEach((fieldName) => {
+        if (root[fieldName].enabled === false) {
+          // eslint-disable-next-line no-param-reassign
+          delete root[fieldName];
+        }
+        if (root[fieldName] && config.ignoredFields.includes(fieldName)) {
+          // eslint-disable-next-line no-param-reassign
+          delete root[fieldName];
+        }
+        if (root[fieldName] && fieldName.startsWith(DOUBLE_UNDERSCORE)) {
+          delete Object.assign(root, { [fieldName.replace(DOUBLE_UNDERSCORE, this.config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
+        }
+      });
+    }
+  }
+
   /**
    * Gets the mappings for all indices from Elasticsearch.
    * @returns {Promise<Object>} A promise that resolves to an object containing the field types for each index.
    * @throws {Error} Throws an error if the "config.indices" block is empty.
    */
+  /**----
   async _getMappingsForAllIndices() {
     if (!this.config.indices || this.config.indices === 0) {
       const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
@@ -187,14 +243,18 @@ class ES {
         .then((res) => {
           // remove disabled fields and convert double underscore prefix to single underscore
           // set root to properties
+          console.log("res...",res);
           const root = res[Object.keys(res)[0]].properties;
+          console.log("root", root, config.ignoredFields);
           if (root) {
             Object.keys(root)
               .forEach((fieldName) => {
+                console.log("field name", fieldName);
                 if (root[fieldName].enabled !== undefined && root[fieldName].enabled === false) {
                   delete root[fieldName];
                 }
                 if (fieldName in root && config.ignoredFields.includes(fieldName)) {
+                  console.log("deleting field", fieldName);
                   delete root[fieldName];
                 }
                 if (fieldName in root && fieldName.indexOf('__') === 0) {
@@ -215,7 +275,7 @@ class ES {
     log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
     return fieldTypes;
   }
-
+--- */
   /**
    * Read array config and check if there's any array fields for each index.
    * Array fields are grouped and stored by index as a doc in array config,
