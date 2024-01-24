@@ -24,6 +24,8 @@ const config = {
   arboristEndpoint: 'http://mock-arborist',
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
+  ignoredFields: ['@version'],
+  doubleUnderscorePrefix: 'x__',
 };
 
 export default config;
