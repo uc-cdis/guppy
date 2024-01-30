@@ -460,6 +460,7 @@ class ES {
       filter, fields, sort, offset = 0, size,
     },
   ) {
+
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
       queryBody.query = getFilterObj(this, esIndex, filter);
@@ -470,7 +471,7 @@ class ES {
     }
     if (fields !== undefined) {
       if (fields) {
-        const esFields = fromFieldsToSource(fields);
+        const esFields = fromFieldsToSource(fields, this.config.doubleUnderscorePrefix);
         if (esFields.length > 0) queryBody._source = esFields;
       } else {
         queryBody._source = false;

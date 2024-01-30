@@ -46,7 +46,7 @@ export const isWhitelisted = (key) => {
  * @param parsedInfo: parsing information from graphql library
  * @returns: list of selected fields.
  */
-export const fromFieldsToSource = (parsedInfo) => {
+export const fromFieldsToSource = (parsedInfo, underscorePrefix) => {
   let stack = Object.values(parsedInfo.fieldsByTypeName[firstLetterUpperCase(parsedInfo.name)]);
   const levels = { 0: stack.length };
   const fields = [];
@@ -60,7 +60,7 @@ export const fromFieldsToSource = (parsedInfo) => {
       curNodeName = curNodeName.slice(0, (lastPeriod !== -1) ? lastPeriod : 0);
     } else {
       const cur = stack.pop();
-      cur.name = (cur.name.indexOf('x__') === 0) ? cur.name.replace('x__', '__') : cur.name;
+      cur.name = (cur.name.indexOf(underscorePrefix) === 0) ? cur.name.replace(underscorePrefix, '__') : cur.name;
       const newTypeName = cur.name;
       const fieldName = [curNodeName, newTypeName].filter((s) => s.length > 0).join('.');
       if (newTypeName in cur.fieldsByTypeName) {
