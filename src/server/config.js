@@ -13,11 +13,15 @@ const config = {
     host: 'localhost:9200',
     indices: inputConfig.indices || [
       {
-        index: 'default-commons-index',
-        type: 'metadata',
+        index: 'gen3-dev-subject',
+        type: 'subject',
+      },
+      {
+        index: 'gen3-dev-file',
+        type: 'file',
       },
     ],
-    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'default-commons-config-index',
+    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
@@ -25,7 +29,7 @@ const config = {
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
-  tierAccessLevel: 'libre',
+  tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   tierAccessSensitiveRecordExclusionField: inputConfig.tier_access_sensitive_record_exclusion_field,
   logLevel: inputConfig.log_level || 'INFO',

@@ -17,7 +17,7 @@ describe('config', () => {
   /* --------------- For tier access --------------- */
   test('default tier access level should be private', async () => {
     const config = require('../config').default;
-    expect(config.tierAccessLevel).toEqual('libre');
+    expect(config.tierAccessLevel).toEqual('private');
   });
 
   test('config for libre tier access level', async () => {
