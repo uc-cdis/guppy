@@ -38,7 +38,7 @@ const config = {
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
-  ignoredFields: ['@version'],
+  ignoredFields: [],
   doubleUnderscorePrefix: 'x__',
 };
 
