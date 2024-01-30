@@ -43,7 +43,8 @@ export const isWhitelisted = (key) => {
 /**
  * Convert from fields of graphql query produced by graphql library to list of querying fields
  * This list will be put to _source fields of the ES query
- * @param parsedInfo: parsing information from graphql library
+ * @param - parsedInfo: parsing information from graphql library
+ * @param - underscorePrefix: prefix to use for fields that start with __
  * @returns: list of selected fields.
  */
 export const fromFieldsToSource = (parsedInfo, underscorePrefix) => {
