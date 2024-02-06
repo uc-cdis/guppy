@@ -28,7 +28,7 @@ const config = {
   tierAccessLevel: 'libre',
   tierAccessLimit: 1000,
   tierAccessSensitiveRecordExclusionField: inputConfig.tier_access_sensitive_record_exclusion_field,
-  logLevel: inputConfig.log_level || 'INFO',
+  logLevel: 'DEBUG',
   enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? false : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
   analyzedTextFieldSuffix: '.analyzed',
