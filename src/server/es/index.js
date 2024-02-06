@@ -226,7 +226,6 @@ class ES {
    * @param {object} root - The index root object to be modified.
    */
   _modifyIndexRootProperties(root) {
-    const DOUBLE_UNDERSCORE = '__';
 
     // Changes root object by updating in place
     if (root) {
@@ -239,8 +238,8 @@ class ES {
           // eslint-disable-next-line no-param-reassign
           delete root[fieldName];
         }
-        if (root[fieldName] && fieldName.startsWith(DOUBLE_UNDERSCORE)) {
-          delete Object.assign(root, { [fieldName.replace(DOUBLE_UNDERSCORE, this.config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
+        if (root[fieldName] && fieldName.startsWith('__')) {
+          delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
         }
       });
     }
@@ -471,7 +470,7 @@ class ES {
     }
     if (fields !== undefined) {
       if (fields) {
-        const esFields = fromFieldsToSource(fields, this.config.doubleUnderscorePrefix);
+        const esFields = fromFieldsToSource(fields, config.doubleUnderscorePrefix);
         if (esFields.length > 0) queryBody._source = esFields;
       } else {
         queryBody._source = false;
