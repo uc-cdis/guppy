@@ -57,6 +57,9 @@ class ArboristClient {
           }
         });
         log.debug('[ArboristClient] data: ', data);
+
+        // TODO remove this line
+        log.error('[ArboristClient] data: ', data);
         return data;
       },
       (err) => {
