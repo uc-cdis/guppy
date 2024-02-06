@@ -16,18 +16,21 @@ export class AuthHelper {
 
   async initialize() {
     try {
-      // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
-      // Check if the user is an ADMIN
-      this._isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis");
+      // // TODO REMOVE PATCH FOR ARBORIST PERFORMANCES
+      // // Check if the user is an ADMIN
+      // this._isAdmin = await arboristClient.checkResourceAuth(this._jwt, "/services/amanuensis", "*", "amanuensis");
 
-      if (this._isAdmin === false) {
-        // TODO END REMOVE
-        this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
-        log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
-      }
-      else {
-        this._accessibleResourceList = []
-      }
+      // if (this._isAdmin === false) {
+      //   // TODO END REMOVE
+      //   this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+      //   log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      // }
+      // else {
+      //   this._accessibleResourceList = []
+      // }
+
+      this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+      log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
