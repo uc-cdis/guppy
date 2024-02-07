@@ -19,51 +19,55 @@ class ArboristClient {
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/mapping`;
     log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
-    const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
-    return fetch(
-      resourcesEndpoint,
-      {
-        method: 'POST',
-        headers: headers,
-        timeout: 0,
-        agent: new http.Agent({
-          keepAlive: true,
-          keepAliveMsecs: 10000,
-        }),
-        // agent: function (_parsedURL) {
-        //     if (_parsedURL.protocol == 'http:') {
-        //         return httpAgent;
-        //     } else {
-        //         return httpsAgent;
-        //     }
-        // }
-      },
-    ).then(
-      (response) => response.json(),
-    ).then(
-      (result) => {
-        const data = {
-          resources: [],
-        };
-        Object.keys(result).forEach((key) => {
-        // logic: you have access to a project if you have the following access:
-        // method 'read' (or '*' - all methods) to service 'guppy' (or '*' - all services)
-        // on the project resource.
-          if (result[key] && result[key].some((x) => (
-            (x.method === 'read' || x.method === '*')
-          && (x.service === 'guppy' || x.service === '*')
-          ))) {
-            data.resources.push(key);
-          }
-        });
-        log.debug('[ArboristClient] data: ', data);
-        return data;
-      },
-      (err) => {
-        log.error(err);
-        throw new CodedError(500, err);
-      },
-    );
+    if (jwt) {
+      const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
+      return fetch(
+        resourcesEndpoint,
+        {
+          method: 'POST',
+          headers: headers,
+          timeout: 0,
+          agent: new http.Agent({
+            keepAlive: true,
+            keepAliveMsecs: 10000,
+          }),
+          // agent: function (_parsedURL) {
+          //     if (_parsedURL.protocol == 'http:') {
+          //         return httpAgent;
+          //     } else {
+          //         return httpsAgent;
+          //     }
+          // }
+        },
+      ).then(
+        (response) => response.json(),
+      ).then(
+        (result) => {
+          const data = {
+            resources: [],
+          };
+          Object.keys(result).forEach((key) => {
+          // logic: you have access to a project if you have the following access:
+          // method 'read' (or '*' - all methods) to service 'guppy' (or '*' - all services)
+          // on the project resource.
+            if (result[key] && result[key].some((x) => (
+              (x.method === 'read' || x.method === '*')
+            && (x.service === 'guppy' || x.service === '*')
+            ))) {
+              data.resources.push(key);
+            }
+          });
+          log.debug('[ArboristClient] data: ', data);
+          return data;
+        },
+        (err) => {
+          log.error(err);
+          throw new CodedError(500, err);
+        },
+      );
+    } else {
+      return {"resources": []}
+    }
   }
 
   checkResourceAuth(jwt, resources, methods, service){
