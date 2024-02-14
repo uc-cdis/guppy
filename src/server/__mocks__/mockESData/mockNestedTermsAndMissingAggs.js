@@ -32,6 +32,7 @@ const mockNestedTermsAndMissingAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeMissingAggs = {
     aggregations: {
@@ -103,6 +104,7 @@ const mockNestedTermsAndMissingAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fakeTermsAggs = {
     aggregations: {
@@ -167,6 +169,7 @@ const mockNestedTermsAndMissingAggs = () => {
         ],
       },
     },
+    track_total_hits: true,
   };
   mockSearchEndpoint(termsAggsQuery, fakeTermsAggs);
 
@@ -213,6 +216,7 @@ const mockNestedTermsAndMissingAggs = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const combinedTermsAggs = {
     aggregations: {
@@ -286,6 +290,7 @@ const mockNestedTermsAndMissingAggs = () => {
         ],
       },
     },
+    track_total_hits: true,
   };
   mockSearchEndpoint(combinedAggsQuery, combinedTermsAggs);
 };
