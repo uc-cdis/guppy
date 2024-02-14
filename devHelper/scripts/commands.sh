@@ -99,6 +99,7 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
             "some_string_inside_nested": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } }
           }
         },
+        "consortium_id": { "type": "integer" },
         "some_integer_field": { "type": "integer" },
         "some_long_field": { "type": "long" },
         "sensitive": { "type": "keyword" }

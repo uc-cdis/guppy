@@ -4,6 +4,9 @@ import { jsonToFormat } from './conversion';
 const graphqlEndpoint = '/graphql';
 const downloadEndpoint = '/download';
 const statusEndpoint = '/_status';
+const headers = {
+  'Content-Type': 'application/json',
+};
 
 const histogramQueryStrForEachField = (field, isAsTextAgg = false) => {
   const splittedFieldArray = field.split('.');
@@ -23,7 +26,7 @@ const histogramQueryStrForEachField = (field, isAsTextAgg = false) => {
   }`);
 };
 
-const queryGuppyForAggs = (path, type, regularAggFields, asTextAggFields, gqlFilter, acc) => {
+const queryGuppyForAggs = (path, type, regularAggFields, asTextAggFields, gqlFilter, acc, csrfToken = '') => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
     accessibility = 'all';
@@ -54,18 +57,14 @@ const queryGuppyForAggs = (path, type, regularAggFields, asTextAggFields, gqlFil
 
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json());
 };
 
 const queryGuppyForStatus = (path) => fetch(`${path}${statusEndpoint}`, {
   method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers,
 }).then((response) => response.json());
 
 const nestedHistogramQueryStrForEachField = (mainField, numericAggAsText) => (`
@@ -97,6 +96,7 @@ const queryGuppyForSubAgg = (
   gqlFilter,
   acc,
   numericAggAsText = false,
+  csrfToken = '',
 ) => {
   let accessibility = acc;
   if (accessibility !== 'all' && accessibility !== 'accessible' && accessibility !== 'unaccessible') {
@@ -133,9 +133,7 @@ const queryGuppyForSubAgg = (
   }
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .catch((err) => {
@@ -167,6 +165,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  csrfToken = '',
 ) => {
   let queryLine = 'query {';
   if (gqlFilter || sort || format) {
@@ -198,9 +197,7 @@ export const queryGuppyForRawDataAndTotalCounts = (
   if (sort) queryBody.variables.sort = sort;
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .catch((err) => {
@@ -279,9 +276,10 @@ export const askGuppyForAggregationData = (
   asTextAggFields,
   filter,
   accessibility,
+  csrfToken = '',
 ) => {
   const gqlFilter = getGQLFilter(filter);
-  return queryGuppyForAggs(path, type, regularAggFields, asTextAggFields, gqlFilter, accessibility);
+  return queryGuppyForAggs(path, type, regularAggFields, asTextAggFields, gqlFilter, accessibility, csrfToken);
 };
 
 export const askGuppyForSubAggregationData = (
@@ -293,6 +291,7 @@ export const askGuppyForSubAggregationData = (
   missedNestedFields,
   filter,
   accessibility,
+  csrfToken,
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForSubAgg(
@@ -304,6 +303,7 @@ export const askGuppyForSubAggregationData = (
     gqlFilter,
     accessibility,
     numericAggAsText,
+    csrfToken,
   );
 };
 
@@ -317,6 +317,7 @@ export const askGuppyForRawData = (
   offset = 0,
   size = 20,
   accessibility = 'all',
+  csrfToken = '',
 ) => {
   const gqlFilter = getGQLFilter(filter);
   return queryGuppyForRawDataAndTotalCounts(
@@ -329,13 +330,14 @@ export const askGuppyForRawData = (
     offset,
     size,
     accessibility,
+    csrfToken,
   );
 };
 
 export const getAllFieldsFromFilterConfigs = (filterTabConfigs) => filterTabConfigs.reduce((acc, cur) => {
   Object.keys(cur)
     .filter((key) => key === 'fields' || key === 'asTextAggFields')
-    .forEach((key) => acc[key] = acc[key].concat(cur[key], []));
+    .forEach((key) => { acc[key] = acc[key].concat(cur[key], []); });
   return acc;
 }, { fields: [], asTextAggFields: [] });
 
@@ -355,6 +357,7 @@ export const downloadDataFromGuppy = (
     accessibility,
     format,
   },
+  csrfToken = '',
 ) => {
   const SCROLL_SIZE = 10000;
   const JSON_FORMAT = (format === 'json' || format === undefined);
@@ -366,15 +369,13 @@ export const downloadDataFromGuppy = (
     if (typeof accessibility !== 'undefined') queryBody.accessibility = accessibility;
     return fetch(`${path}${downloadEndpoint}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
       body: JSON.stringify(queryBody),
     })
       .then((r) => r.json())
       .then((res) => (JSON_FORMAT ? res : jsonToFormat(res, format)));
   }
-  return askGuppyForRawData(path, type, fields, filter, sort, format, 0, totalCount, accessibility)
+  return askGuppyForRawData(path, type, fields, filter, sort, format, 0, totalCount, accessibility, csrfToken)
     .then((res) => {
       if (res && res.data && res.data[type]) {
         return JSON_FORMAT ? res.data[type] : jsonToFormat(res.data[type], format);
@@ -388,6 +389,7 @@ export const askGuppyForTotalCounts = (
   type,
   filter,
   accessibility = 'all',
+  csrfToken = '',
 ) => {
   const gqlFilter = getGQLFilter(filter);
   const queryLine = `query ${gqlFilter ? '($filter: JSON)' : ''}{`;
@@ -405,9 +407,7 @@ export const askGuppyForTotalCounts = (
 
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .then((response) => {
@@ -424,6 +424,7 @@ export const askGuppyForTotalCounts = (
 export const getAllFieldsFromGuppy = (
   path,
   type,
+  csrfToken = '',
 ) => {
   const query = `{
     _mapping {
@@ -433,9 +434,7 @@ export const getAllFieldsFromGuppy = (
   const queryBody = { query };
   return fetch(`${path}${graphqlEndpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
     body: JSON.stringify(queryBody),
   }).then((response) => response.json())
     .then((response) => response.data._mapping[type])
@@ -448,6 +447,7 @@ export const getAccessibleResources = async (
   path,
   type,
   accessibleFieldCheckList,
+  csrfToken = '',
 ) => {
   const accessiblePromiseList = [];
   const unaccessiblePromiseList = [];
@@ -469,9 +469,7 @@ export const getAccessibleResources = async (
 
       return fetch(`${path}${graphqlEndpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: csrfToken ? { ...headers, 'x-csrf-token': csrfToken } : headers,
         body: JSON.stringify(queryBody),
       })
         .then((response) => response.json())
