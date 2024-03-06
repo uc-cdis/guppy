@@ -38,23 +38,28 @@ class ArboristClient {
         //     }
         // }
       },
-    ).catch( (error) => {
-      log.error("LUCAAAAAAAAAAAA");
-      log.error(error.status);
-      if (error.status == 400) {
-        // Retry with GET instead of POST. Older version of Arborist POST auth/mapping 
-        // didn't support token authentication.
-        // This catch block can be removed in a little while, when it will likely not cause issues
-        return fetch(
-          resourcesEndpoint,
-          {
-            method: 'GET',
-            headers,
-          },
-        )
-      }
-    }).then(
-      (response) => response.json(),
+    )
+    .then(
+      (response) => { 
+        log.error("LUCAAAAAAAAAAAA");
+        log.error(response.status);
+        if (response.status == 400) {
+          return fetch(
+            resourcesEndpoint,
+            {
+              method: 'GET',
+              headers,
+            },
+          ).then( (response) => response.json(),)
+        } else {
+          return response.json()
+        }
+      },
+      (err) => {
+        log.error("LUCAAAAAAAA 2");
+        log.error(err);
+        throw new CodedError(500, err);
+      },
     ).then(
       (result) => {
         const data = {
