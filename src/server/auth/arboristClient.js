@@ -20,7 +20,21 @@ class ArboristClient {
         method: 'POST',
         headers,
       },
-    ).then(
+    ).catch( (error) => {
+      log.error(error.status);
+      if (error.status == 400) {
+        // Retry with GET instead of POST. Older version of Arborist POST auth/mapping 
+        // didn't support token authentication.
+        // This catch block can be removed in a little while, when it will likely not cause issues
+        return fetch(
+          resourcesEndpoint,
+          {
+            method: 'GET',
+            headers,
+          },
+        )
+      }
+    }).then(
       (response) => response.json(),
     ).then(
       (result) => {
