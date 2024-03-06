@@ -39,6 +39,7 @@ class ArboristClient {
         // }
       },
     ).catch( (error) => {
+      log.error("LUCAAAAAAAAAAAA");
       log.error(error.status);
       if (error.status == 400) {
         // Retry with GET instead of POST. Older version of Arborist POST auth/mapping 
