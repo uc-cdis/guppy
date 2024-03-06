@@ -41,9 +41,10 @@ class ArboristClient {
     )
     .then(
       (response) => { 
-        log.error("LUCAAAAAAAAAAAA");
-        log.error(response.status);
         if (response.status == 400) {
+          // Retry with GET instead of POST. Older version of Arborist POST auth/mapping 
+          // didn't support token authentication.
+          // This catch block can be removed in a little while, when it will likely not cause issues
           return fetch(
             resourcesEndpoint,
             {
@@ -56,7 +57,6 @@ class ArboristClient {
         }
       },
       (err) => {
-        log.error("LUCAAAAAAAA 2");
         log.error(err);
         throw new CodedError(500, err);
       },
