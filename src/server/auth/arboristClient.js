@@ -12,7 +12,7 @@ class ArboristClient {
     // Make request to arborist for list of resources with access
     const resourcesEndpoint = `${this.baseEndpoint}/auth/mapping`;
     log.debug('[ArboristClient] listAuthorizedResources jwt: ', jwt);
-    
+
     const headers = (jwt) ? { Authorization: `bearer ${jwt}` } : {};
     return fetch(
       resourcesEndpoint,
@@ -21,9 +21,9 @@ class ArboristClient {
         headers,
       },
     ).then(
-      (response) => { 
-        if (response.status == 400) {
-          // Retry with GET instead of POST. Older version of Arborist POST auth/mapping 
+      (response) => {
+        if (response.status === 400) {
+          // Retry with GET instead of POST. Older version of Arborist POST auth/mapping
           // didn't support token authentication.
           // This catch block can be removed in a little while, when it will likely not cause issues
           return fetch(
@@ -32,10 +32,9 @@ class ArboristClient {
               method: 'GET',
               headers,
             },
-          ).then( (response) => response.json(),)
-        } else {
-          return response.json()
+          ).then((res) => res.json());
         }
+        return response.json();
       },
       (err) => {
         log.error(err);
