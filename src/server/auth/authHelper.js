@@ -29,6 +29,10 @@ export class AuthHelper {
         this._accessibleResourceList = []
       }
 
+      // this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+      // log.info("LUCAAAAAAAAAA")
+      // log.info('[AuthHelper] accessible resources:', this._accessibleResourceList);
+
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
         const subListPromise = this.getOutOfScopeResourceList(index, type);
