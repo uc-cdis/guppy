@@ -170,6 +170,11 @@ class ES {
     });
   }
 
+  /**
+   * Gets the mappings for all indices from Elasticsearch.
+   * @returns {Promise<Object>} A promise that resolves to an object containing the field types for each index.
+   * @throws {Error} Throws an error if the "config.indices" block is empty.
+   */
   async _getMappingsForAllIndices() {
     if (!this.config.indices || this.config.indices === 0) {
       const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
@@ -177,9 +182,9 @@ class ES {
     }
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
-    const promiseList = this.config.indices
-      .map((cfg) => this._getESFieldsTypes(cfg.index)
-        .then((res) => ({ index: cfg.index, fieldTypes: res })));
+
+    const promiseList = this.config.indices.map((indexConfig) => this._processEachIndex(indexConfig));
+
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
@@ -187,6 +192,57 @@ class ES {
     });
     log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
     return fieldTypes;
+  }
+
+  /**
+   * Processes each index configuration and retrieves the field types for the specified index.
+   * Modifies the index root properties and nested properties if necessary.
+   *
+   * @param {object} indexConfig - The index configuration object.
+   * @param {string} indexConfig.index - The index name.
+   * @returns {Promise<object>} - A promise that resolves to an object containing the index name and field types.
+   */
+  async _processEachIndex(indexConfig) {
+    const res = await this._getESFieldsTypes(indexConfig.index);
+    Object.keys(res).forEach((fieldName) => {
+      this._modifyIndexRootProperties(res);
+      if (res[fieldName] && 'properties' in res[fieldName] && res[fieldName].type === 'nested') {
+        const root = res[fieldName].properties;
+        this._modifyIndexRootProperties(root);
+      }
+    });
+
+    return {
+      index: indexConfig.index,
+      fieldTypes: res,
+    };
+  }
+
+  /**
+   * Modifies the properties of the index root object.
+   * This function has a side effect of modifying the index root object which
+   * is done to make the code more readable.
+   * It removes disabled fields, ignored fields, and converts double underscore prefix to single underscore.
+   * @param {object} root - The index root object to be modified.
+   */
+  _modifyIndexRootProperties(root) {
+
+    // Changes root object by updating in place
+    if (root) {
+      Object.keys(root).forEach((fieldName) => {
+        if (root[fieldName].enabled === false) {
+          // eslint-disable-next-line no-param-reassign
+          delete root[fieldName];
+        }
+        if (root[fieldName] && config.ignoredFields.includes(fieldName)) {
+          // eslint-disable-next-line no-param-reassign
+          delete root[fieldName];
+        }
+        if (root[fieldName] && fieldName.startsWith('__')) {
+          delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
+        }
+      });
+    }
   }
 
   /**
@@ -225,6 +281,7 @@ class ES {
           const fields = doc._source.array;
           fields.forEach((field) => {
             const fieldArr = field.split('.');
+            const fn = (field.indexOf('__') === 0) ? field.replace('__', config.doubleUnderscorePrefix) : field;
             if (!(this.fieldTypes[index][field]
               || (
                 fieldArr.length > 1
@@ -239,7 +296,7 @@ class ES {
               return;
             }
             if (!arrayFields[index]) arrayFields[index] = [];
-            arrayFields[index].push(field);
+            arrayFields[index].push(fn);
           });
         });
         log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
@@ -402,6 +459,7 @@ class ES {
       filter, fields, sort, offset = 0, size,
     },
   ) {
+
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
       queryBody.query = getFilterObj(this, esIndex, filter);
@@ -412,7 +470,7 @@ class ES {
     }
     if (fields !== undefined) {
       if (fields) {
-        const esFields = fromFieldsToSource(fields);
+        const esFields = fromFieldsToSource(fields, config.doubleUnderscorePrefix);
         if (esFields.length > 0) queryBody._source = esFields;
       } else {
         queryBody._source = false;
@@ -476,8 +534,9 @@ class ES {
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
-    if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
-      throw new GraphQLError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
+    // TODO: understand why it's offset + size > SCROLL_PAGE_SIZE instead of offset > SCROLL_PAGE_SIZE
+    if (typeof size !== 'undefined' && size > SCROLL_PAGE_SIZE) {
+      throw new GraphQLError(`Large graphql query forbidden for size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
       please use download endpoint for large data queries instead.`, {
         extensions: {
@@ -493,6 +552,12 @@ class ES {
     );
     const { hits } = result.hits;
     const hitsWithMatchedResults = hits.map((h) => {
+      Object.keys(h._source)
+        .forEach((fieldName) => {
+          if (fieldName in h._source && fieldName.indexOf('__') === 0) {
+            delete Object.assign(h._source, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: h._source[fieldName] })[fieldName];
+          }
+        });
       if (!('highlight' in h)) {
         // ES doesn't returns "highlight"
         return h._source;
