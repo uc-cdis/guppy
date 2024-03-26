@@ -55,7 +55,7 @@ class ES {
     validatedQueryBody.track_total_hits = true;
 
     var start = Date().now();
-    var searchResult = this.client.search({
+    return this.client.search({
       index: esIndex,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
@@ -66,7 +66,6 @@ class ES {
        var durationInMS = end - start;
 
        log.info('[ES.query] DurationInMS:' + durationInMS + '. index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
-       return searchResult;
     })
   }
 
