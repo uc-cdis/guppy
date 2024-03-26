@@ -79,6 +79,7 @@ class GuppyWrapper extends React.Component {
     getAllFieldsFromGuppy(
       this.props.guppyConfig.path,
       this.props.guppyConfig.type,
+      this.props.csrfToken,
     ).then((fields) => {
       const rawDataFields = (this.props.rawDataFields && this.props.rawDataFields.length > 0)
         ? this.props.rawDataFields : fields;
@@ -94,6 +95,7 @@ class GuppyWrapper extends React.Component {
         this.props.guppyConfig.path,
         this.props.guppyConfig.type,
         this.props.accessibleFieldCheckList,
+        this.props.csrfToken,
       ).then(({ accessibleFieldObject, unaccessibleFieldObject }) => {
         this.setState({
           accessibleFieldObject,
@@ -166,6 +168,7 @@ class GuppyWrapper extends React.Component {
         accessibility: this.state.accessibility,
         format,
       },
+      this.props.csrfToken,
     );
   }
 
@@ -189,6 +192,7 @@ class GuppyWrapper extends React.Component {
         filter: this.state.filter,
         accessibility: this.state.accessibility,
       },
+      this.props.csrfToken,
     );
   }
 
@@ -203,6 +207,7 @@ class GuppyWrapper extends React.Component {
       type,
       filter,
       this.state.accessibility,
+      this.props.csrfToken,
     );
   }
 
@@ -218,6 +223,7 @@ class GuppyWrapper extends React.Component {
       type,
       filter,
       this.state.accessibility,
+      this.props.csrfToken,
     )
       .then((count) => downloadDataFromGuppy(
         this.props.guppyConfig.path,
@@ -227,6 +233,7 @@ class GuppyWrapper extends React.Component {
           fields,
           filter,
         },
+        this.props.csrfToken,
       ));
   }
 
@@ -262,6 +269,7 @@ class GuppyWrapper extends React.Component {
         [],
         this.filter,
         this.state.accessibility,
+        this.props.csrfToken,
       ).then((res) => {
         if (!res || !res.data) {
           throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -292,6 +300,7 @@ class GuppyWrapper extends React.Component {
       offset,
       size,
       this.state.accessibility,
+      this.props.csrfToken,
     ).then((res) => {
       if (!res || !res.data) {
         throw new Error(`Error getting raw ${this.props.guppyConfig.type} data from Guppy server ${this.props.guppyConfig.path}.`);
@@ -343,6 +352,7 @@ class GuppyWrapper extends React.Component {
             onUpdateAccessLevel: this.handleAccessLevelUpdate.bind(this),
             adminAppliedPreFilters: this.props.adminAppliedPreFilters,
             accessibleFieldCheckList: this.props.accessibleFieldCheckList,
+            csrfToken: this.props.csrfToken,
           }))
         }
       </>
@@ -375,6 +385,7 @@ GuppyWrapper.propTypes = {
   accessibleFieldCheckList: PropTypes.arrayOf(PropTypes.string),
   adminAppliedPreFilters: PropTypes.object,
   initialFilterFromURL: PropTypes.object,
+  csrfToken: PropTypes.string,
 };
 
 GuppyWrapper.defaultProps = {
@@ -384,6 +395,7 @@ GuppyWrapper.defaultProps = {
   accessibleFieldCheckList: undefined,
   adminAppliedPreFilters: {},
   initialFilterFromURL: {},
+  csrfToken: '',
 };
 
 export default GuppyWrapper;

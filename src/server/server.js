@@ -67,7 +67,7 @@ const startServer = async () => {
 
   // simple health check endpoint
   // eslint-disable-next-line no-unused-vars
-  app.get('/_status', statusRouter, (req, res, err, next) => {
+  app.get('/_status', statusRouter, (err, req, res, next) => {
     if (err instanceof CodedError) {
       // deepcode ignore ServerLeak: no important information exists in error
       res.status(err.code).send(err.msg);
@@ -78,7 +78,7 @@ const startServer = async () => {
   });
 
   // Get data index used
-  app.get('/_data_version', versionData, (req, res, err, next) => { 
+  app.get('/_data_version', versionData, (err, req, res, next) => { 
     if (err instanceof CodedError) {
       res.status(err.code).send(err.msg);
     } else {

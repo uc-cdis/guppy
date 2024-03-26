@@ -45,6 +45,7 @@ const mockHistogramFixBinCount = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixBinCountResult = {
     aggregations: {
@@ -158,6 +159,7 @@ const mockHistogramFixBinCount = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixBinCountResult1 = {
     aggregations: {
@@ -264,6 +266,7 @@ const mockHistogramFixBinCount = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixBinCountResult2 = {
     aggregations: {
@@ -377,6 +380,7 @@ const mockHistogramFixBinCount = () => {
         },
       },
     },
+    track_total_hits: true,
   };
   const fileCountHistogramFixBinCountResult3 = {
     aggregations: {

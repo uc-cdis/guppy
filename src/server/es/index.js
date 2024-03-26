@@ -52,10 +52,10 @@ class ES {
         [`*${config.analyzedTextFieldSuffix}`]: {},
       },
     };
+    validatedQueryBody.track_total_hits = true;
     log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
     return this.client.search({
       index: esIndex,
-      type: esType,
       body: validatedQueryBody,
     }).then((resp) => {
       return resp.body;
@@ -113,7 +113,6 @@ class ES {
       if (typeof scrollID === 'undefined') { // first batch
         const res = await this.client.search({ // eslint-disable-line no-await-in-loop
           index: esIndex,
-          type: esType,
           body: validatedQueryBody,
           scroll: '1m',
           size: SCROLL_PAGE_SIZE,
@@ -155,17 +154,16 @@ class ES {
    * Return a Promise of an Object: { <field>: <type> }
    * If error, print error stack
    * @param {string} esIndex
-   * @param {string} esType
    */
-  async _getESFieldsTypes(esIndex, esType) {
+  async _getESFieldsTypes(esIndex) {
     const errMsg = `[ES.initialize] error getting mapping from ES index "${esIndex}"`;
     return this.client.indices.getMapping({
       index: esIndex,
-      type: esType,
     }).then((resp) => {
       try {
         const esIndexAlias = Object.keys(resp.body)[0];
-        return resp.body[esIndexAlias].mappings[esType].properties;
+        log.info('Mapping response from ES: ', resp.body[esIndexAlias]);
+        return resp.body[esIndexAlias].mappings.properties;
       } catch (err) {
         throw new Error(`${errMsg}: ${err}`);
       }
@@ -182,7 +180,7 @@ class ES {
     const fieldTypes = {};
     log.info('[ES.initialize] getting mapping from elasticsearch...');
     const promiseList = this.config.indices
-      .map((cfg) => this._getESFieldsTypes(cfg.index, cfg.type)
+      .map((cfg) => this._getESFieldsTypes(cfg.index)
         .then((res) => ({ index: cfg.index, fieldTypes: res })));
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
@@ -455,7 +453,11 @@ class ES {
       { esInstance: this, esIndex, esType },
       { filter, fields: false, size: 0 },
     );
-    return result.hits.total;
+    // Really shouldn't be getting this, but just in case
+    if (result.hits.total.relation !== 'eq') {
+      log.error(`The returned total count might be inaccurate. See hits.total object: ${result.hits.total}`);
+    }
+    return result.hits.total.value;
   }
 
   async getFieldCount(esIndex, esType, filter, field) {
@@ -470,7 +472,7 @@ class ES {
       },
     };
     if (typeof filter !== 'undefined') {
-      queryBody.query = getFilterObj(this, esIndex, filter);
+      queryBody.query = getFilterObj(this, esIndex, filter, field);
     }
 
     const result = await this.query(esIndex, esType, queryBody);
