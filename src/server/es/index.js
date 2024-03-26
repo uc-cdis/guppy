@@ -61,12 +61,13 @@ class ES {
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
-    });
-    var end = new Date().getTime();
-    var durationInMS = end - start;
+    }).finally(() => {
+       var end = new Date().getTime();
+       var durationInMS = end - start;
 
-    log.info('[ES.query] DurationInMS:' + durationInMS + '. index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
-    return searchResult;
+       log.info('[ES.query] DurationInMS:' + durationInMS + '. index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
+       return searchResult;
+    })
   }
 
   /**
