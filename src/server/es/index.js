@@ -66,7 +66,7 @@ class ES {
        var durationInMS = end - start;
 
        log.info('[ES.query] DurationInMS:' + durationInMS + '. index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
-    })
+    });
   }
 
   /**
