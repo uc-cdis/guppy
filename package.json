@@ -42,7 +42,7 @@
     "graphql-depth-limit": "^1.1.0",
     "graphql-middleware": "^6.1.34",
     "graphql-parse-resolve-info": "^4.13.0",
-    "graphql-tools": "^9.0.0",
+    "graphql-tools": "^9.0.1",
     "graphql-type-json": "^0.3.2",
     "helmet": "^7.1.0",
     "isomorphic-fetch": "^3.0.0",
