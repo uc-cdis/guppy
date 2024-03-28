@@ -459,7 +459,6 @@ class ES {
       filter, fields, sort, offset = 0, size,
     },
   ) {
-
     const queryBody = { from: offset };
     if (typeof filter !== 'undefined') {
       queryBody.query = getFilterObj(this, esIndex, filter);
@@ -559,7 +558,7 @@ class ES {
           }
         });
       if (!('highlight' in h)) {
-        // ES doesn't returns "highlight"
+        // ES doesn't return "highlight"
         return h._source;
       }
       // ES returns highlight, transfer them into "_matched" schema
