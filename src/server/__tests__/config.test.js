@@ -97,4 +97,14 @@ describe('config', () => {
     expect(config.esConfig.aggregationIncludeMissingData).toBe(true);
     expect(config.esConfig.missingDataAlias).toEqual(alias);
   });
+
+  test('could ignoredFields fields from mapping', async () => {
+    const config = require('../config').default;
+    expect(config.ignoredFields).toEqual(['@version']);
+  });
+
+  test('could remap "__field" from to "prefix__field"', async () => {
+    const config = require('../config').default;
+    expect(config.doubleUnderscorePrefix).toEqual('x__');
+  });
 });
