@@ -3,6 +3,8 @@ import UtilsData from '../__mockData__/utils.data';
 
 describe('Parse fields from GraphQL query to fields in ES query', () => {
   test('could parse fields in GraphQL query correctly', async () => {
-    expect(fromFieldsToSource(UtilsData.parsedInfo, "x__")).toEqual(UtilsData.fields);
+    expect(fromFieldsToSource(UtilsData.parsedInfo, 'x__')).toEqual(
+      UtilsData.fields,
+    );
   });
 });

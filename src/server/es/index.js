@@ -10,6 +10,32 @@ import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
 import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
 
+/**
+ * Modifies the properties of the index root object.
+ * This function has a side effect of modifying the index root object which
+ * is done to make the code more readable.
+ * It removes disabled fields, ignored fields, and converts double underscore prefix to single underscore.
+ * @param {object} root - The index root object to be modified.
+ */
+function modifyIndexRootProperties(root) {
+  // Changes root object by updating in place
+  if (root) {
+    Object.keys(root).forEach((fieldName) => {
+      if (root[fieldName].enabled === false) {
+        // eslint-disable-next-line no-param-reassign
+        delete root[fieldName];
+      }
+      if (root[fieldName] && config.ignoredFields.includes(fieldName)) {
+        // eslint-disable-next-line no-param-reassign
+        delete root[fieldName];
+      }
+      if (root[fieldName] && fieldName.startsWith('__')) {
+        delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
+      }
+    });
+  }
+}
+
 class ES {
   constructor(esConfig = config.esConfig) {
     this.config = esConfig;
@@ -54,7 +80,7 @@ class ES {
     };
     validatedQueryBody.track_total_hits = true;
 
-    var start = Date.now();
+    const start = Date.now();
     return this.client.search({
       index: esIndex,
       body: validatedQueryBody,
@@ -62,10 +88,10 @@ class ES {
       log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
     }).finally(() => {
-       var end = Date.now();
-       var durationInMS = end - start;
+      const end = Date.now();
+      const durationInMS = end - start;
 
-       log.info('[ES.query] DurationInMS:' + durationInMS + '. index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
+      log.info(`[ES.query] DurationInMS:${durationInMS}. index, type, query body: `, esIndex, esType, JSON.stringify(validatedQueryBody));
     });
   }
 
@@ -211,10 +237,10 @@ class ES {
   async _processEachIndex(indexConfig) {
     const res = await this._getESFieldsTypes(indexConfig.index);
     Object.keys(res).forEach((fieldName) => {
-      this._modifyIndexRootProperties(res);
+      modifyIndexRootProperties(res);
       if (res[fieldName] && 'properties' in res[fieldName] && res[fieldName].type === 'nested') {
         const root = res[fieldName].properties;
-        this._modifyIndexRootProperties(root);
+        modifyIndexRootProperties(root);
       }
     });
 
@@ -222,33 +248,6 @@ class ES {
       index: indexConfig.index,
       fieldTypes: res,
     };
-  }
-
-  /**
-   * Modifies the properties of the index root object.
-   * This function has a side effect of modifying the index root object which
-   * is done to make the code more readable.
-   * It removes disabled fields, ignored fields, and converts double underscore prefix to single underscore.
-   * @param {object} root - The index root object to be modified.
-   */
-  _modifyIndexRootProperties(root) {
-
-    // Changes root object by updating in place
-    if (root) {
-      Object.keys(root).forEach((fieldName) => {
-        if (root[fieldName].enabled === false) {
-          // eslint-disable-next-line no-param-reassign
-          delete root[fieldName];
-        }
-        if (root[fieldName] && config.ignoredFields.includes(fieldName)) {
-          // eslint-disable-next-line no-param-reassign
-          delete root[fieldName];
-        }
-        if (root[fieldName] && fieldName.startsWith('__')) {
-          delete Object.assign(root, { [fieldName.replace('__', config.doubleUnderscorePrefix)]: root[fieldName] })[fieldName];
-        }
-      });
-    }
   }
 
   /**
