@@ -20,4 +20,4 @@ export const esFieldNumericTextTypeMapping = {
   scaled_float: NumericTextTypeTypeEnum.ES_NUMERIC_TYPE,
 };
 
-export const SCROLL_PAGE_SIZE = 10000;
+export const SCROLL_PAGE_SIZE = 100;
