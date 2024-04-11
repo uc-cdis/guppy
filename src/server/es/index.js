@@ -538,9 +538,8 @@ class ES {
   async getData({
     esIndex, esType, fields, filter, sort, offset, size,
   }) {
-    // TODO: understand why it's offset + size > SCROLL_PAGE_SIZE instead of offset > SCROLL_PAGE_SIZE
-    if (typeof size !== 'undefined' && size > SCROLL_PAGE_SIZE) {
-      throw new GraphQLError(`Large graphql query forbidden for size > ${SCROLL_PAGE_SIZE},
+    if (typeof size !== 'undefined' && offset + size > SCROLL_PAGE_SIZE) {
+      throw new GraphQLError(`Large graphql query forbidden for offset + size > ${SCROLL_PAGE_SIZE},
       offset = ${offset} and size = ${size},
       please use download endpoint for large data queries instead.`, {
         extensions: {
