@@ -44,7 +44,7 @@ const capitalizeFirstLetter = (str) => {
 
 // createSearchFilterLoadOptionsFn creates a handler function that loads the search filter's
 // autosuggest options as the user types in the search filter.
-const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, offset) => {
+const createSearchFilterLoadOptionsFn = (field, guppyConfig, csrfToken) => (searchString, offset) => {
   const NUM_SEARCH_OPTIONS = 20;
   return new Promise((resolve, reject) => {
     // If searchString is empty return just the first NUM_SEARCH_OPTIONS options.
@@ -69,6 +69,7 @@ const createSearchFilterLoadOptionsFn = (field, guppyConfig) => (searchString, o
       offset,
       NUM_SEARCH_OPTIONS,
       'accessible',
+      csrfToken,
     )
       .then((res) => {
         if (!res.data || !res.data[guppyConfig.type]) {
@@ -111,6 +112,7 @@ export const getFilterSections = (
   guppyConfig,
   arrayFields,
   filterValuesToHide,
+  csrfToken,
 ) => {
   let searchFieldSections = [];
 
@@ -144,7 +146,7 @@ export const getFilterSections = (
         title: label,
         options: selectedOptions,
         isSearchFilter: true,
-        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig),
+        onSearchFilterLoadOptions: createSearchFilterLoadOptionsFn(field, guppyConfig, csrfToken),
       };
     });
   }
