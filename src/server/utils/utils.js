@@ -64,6 +64,7 @@ export const validSignature = (req) => {
   try {
     const signature = headerParser.parseSignature(req);
     let data = req.body;
+    data = JSON.stringify(data);
     let data_encoded = Buffer.from(data, 'utf-8');
 
     const { publicKey } = req.app.locals;
