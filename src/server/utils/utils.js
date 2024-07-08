@@ -73,6 +73,7 @@ export const validSignature = (req) => {
     let data_encoded = Buffer.from(data, 'utf-8');
     console.log("LUCCAAA 3");
     console.log(data_encoded);
+    console.log(signature);
 
     const { publicKey } = req.app.locals;
 
