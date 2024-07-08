@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import rs from 'jsrsasign';
 import config from '../config';
 import log from '../logger';
@@ -62,11 +63,18 @@ export const validSignature = (req) => {
   let isValid = false;
   try {
     const signature = headerParser.parseSignature(req);
+    // let data = JSON.parse(req.body);
     let data = req.body;
     data = JSON.stringify(data);
+    let data_encoded = Buffer.from(data, 'utf-8');
 
     const { publicKey } = req.app.locals;
-    isValid = publicKey.verify(data, signature);
+
+    const signature_new = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
+    signature_new.init(publicKey);
+    signature_new.updateString(data);
+
+    isValid = signature_new.verify(signature);
   } catch (err) {
     log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
     return false;
