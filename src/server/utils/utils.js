@@ -63,7 +63,7 @@ export const validSignature = (req) => {
   let isValid = false;
   try {
     const signature = headerParser.parseSignature(req);
-    let data = req.body;
+    let data = JSON.parse(req.body);
     console.log("LUCCAAA");
     console.log(data);
     data = JSON.stringify(data);
