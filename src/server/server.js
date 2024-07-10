@@ -30,7 +30,6 @@ const refreshRouter  = async (req, res, next) => {
   try {
     if (config.allowRefresh) {
       log.debug('[Refresh] ', JSON.stringify(req.body, null, 4));
-
       const jwt = headerParser.parseJWT(req);
       if (!jwt) {
         const noJwtError = new CodedError(401, '[Refresh] no JWT user token provided to _refresh function');
@@ -38,7 +37,7 @@ const refreshRouter  = async (req, res, next) => {
       }
       const authHelper = await getAuthHelperInstance(jwt);
       console.log("AUTH HELPER: ", authHelper)
-      if (authHelper._accessibleResourceList === undefined || authHelper._accessibleResourceList.length === 0) {
+      if (authHelper._accessibleCreateResourceList === undefined || authHelper._accessibleCreateResourceList.length === 0) {
         const noPermsUser = new CodedError(401, '[Refresh] User cannot refresh Guppy without a valid token that has read access to at least one project');
         throw noPermsUser;
       }
@@ -48,7 +47,7 @@ const refreshRouter  = async (req, res, next) => {
       const disabledRefresh = new CodedError(404, '[Refresh] guppy _refresh functionality is not enabled');
       throw disabledRefresh;
     }
-    next();
+    res.send("[Refresh] guppy refreshed successfully")
   } catch (err) {
     log.error(err);
     next(err);

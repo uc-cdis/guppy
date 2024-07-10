@@ -5,6 +5,7 @@ import {
   getRequestResourceListFromFilter,
   buildFilterWithResourceList,
   getAccessibleResourcesFromArboristasync,
+  getAccessibleCreateResourcesFromArboristasync
 } from './utils';
 import config from '../config';
 
@@ -17,6 +18,9 @@ export class AuthHelper {
     try {
       this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+
+      this._accessibleCreateResourceList = await getAccessibleCreateResourcesFromArboristasync(this._jwt);
+      log.debug('[AuthHelper] accessible resources with create method:', this._accessibleCreateResourceList);
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -37,6 +41,10 @@ export class AuthHelper {
 
   getAccessibleResources() {
     return this._accessibleResourceList;
+  }
+
+  getAccessibleCreateResources(){
+    return this._accessibleCreateResourceList
   }
 
   getUnaccessibleResources() {

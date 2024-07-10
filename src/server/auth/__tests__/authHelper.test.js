@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import nock from 'nock'; // must import this to enable mock data by nock 
+import nock from 'nock'; // must import this to enable mock data by nock
 import getAuthHelperInstance from '../authHelper';
 import esInstance from '../../es/index';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
@@ -12,6 +12,8 @@ setupMockDataEndpoint();
 describe('AuthHelper', () => {
   test('could create auth helper instance', async () => {
     const authHelper = await getAuthHelperInstance('fake-jwt');
+    expect(authHelper.getAccessibleCreateResources()).toEqual(['internal-project-1', 'internal-project-3', 'internal-project-4', 'internal-project-4']);
+    expect(authHelper.getAccessibleCreateResources()).not.toContain(['internal-project-2', 'internal-project-6']);
     expect(authHelper.getAccessibleResources()).toEqual(['internal-project-1', 'internal-project-2', 'internal-project-4', 'internal-project-5']);
     expect(authHelper.getAccessibleResources()).not.toContain(['internal-project-3', 'internal-project-6']);
     expect(authHelper.getUnaccessibleResources()).toEqual(['external-project-1', 'external-project-2']);
