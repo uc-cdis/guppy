@@ -5,3 +5,5 @@ if [[ -z "$DD_TRACE_ENABLED" ]]; then
 fi
 
 node --max-http-header-size 16000 --require dd-trace/init dist/server/server.js
+
+#npm start
