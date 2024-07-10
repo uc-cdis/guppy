@@ -8,7 +8,9 @@ import mockNestedTermsAndMissingAggs from './mockESData/mockNestedTermsAndMissin
 import mockNestedAggs from './mockESData/mockNestedAggs';
 
 const mockPing = () => {
-  nock(config.esConfig.host).head('/').reply(200, 'hello');
+  nock(config.esConfig.host)
+    .head('/')
+    .reply(200, 'hello');
 };
 
 const mockRefresh = () => {
@@ -45,8 +47,12 @@ const mockResourcePath = () => {
       },
     },
     highlight: {
-      pre_tags: ['<em>'],
-      post_tags: ['</em>'],
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
       fields: {
         '*.analyzed': {},
       },
@@ -117,8 +123,12 @@ const mockResourcePath = () => {
       },
     },
     highlight: {
-      pre_tags: ['<em>'],
-      post_tags: ['</em>'],
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
       fields: {
         '*.analyzed': {},
       },
@@ -174,8 +184,12 @@ const mockResourcePath = () => {
       },
     },
     highlight: {
-      pre_tags: ['<em>'],
-      post_tags: ['</em>'],
+      pre_tags: [
+        '<em>',
+      ],
+      post_tags: [
+        '</em>',
+      ],
       fields: {
         '*.analyzed': {},
       },
@@ -210,8 +224,7 @@ const mockArborist = () => {
     .persist()
     .post('/auth/mapping')
     .reply(200, {
-      'internal-project-1': [
-        // accessible
+      'internal-project-1': [ // accessible
         {
           service: '*',
           method: 'create',
@@ -233,15 +246,13 @@ const mockArborist = () => {
           method: 'update',
         },
       ],
-      'internal-project-2': [
-        // accessible
+      'internal-project-2': [ // accessible
         {
           service: '*',
           method: 'read',
         },
       ],
-      'internal-project-3': [
-        // not accessible since method does not match
+      'internal-project-3': [ // not accessible since method does not match
         {
           service: '*',
           method: 'create',
@@ -259,22 +270,19 @@ const mockArborist = () => {
           method: 'update',
         },
       ],
-      'internal-project-4': [
-        // accessible
+      'internal-project-4': [ // accessible
         {
           service: '*',
           method: '*',
         },
       ],
-      'internal-project-5': [
-        // accessible
+      'internal-project-5': [ // accessible
         {
           service: 'guppy',
           method: '*',
         },
       ],
-      'internal-project-6': [
-        // not accessible since service does not match
+      'internal-project-6': [ // not accessible since service does not match
         {
           service: 'indexd',
           method: '*',
@@ -380,9 +388,7 @@ const mockESMapping = () => {
 };
 
 const mockArrayConfig = () => {
-  const arrayConfigQuery = {
-    query: { ids: { values: ['gen3-dev-subject', 'gen3-dev-file'] } },
-  };
+  const arrayConfigQuery = { query: { ids: { values: ['gen3-dev-subject', 'gen3-dev-file'] } } };
   const fakeArrayConfig = {
     hits: {
       total: 1,
@@ -393,7 +399,10 @@ const mockArrayConfig = () => {
           _id: 'gen3-dev-subject',
           _score: 1.0,
           _source: {
-            array: ['some_array_integer_field', 'some_array_string_field'],
+            array: [
+              'some_array_integer_field',
+              'some_array_string_field',
+            ],
           },
         },
       ],
