@@ -12,7 +12,7 @@ setupMockDataEndpoint();
 describe('AuthHelper', () => {
   test('could create auth helper instance', async () => {
     const authHelper = await getAuthHelperInstance('fake-jwt');
-    expect(authHelper.getAccessibleCreateResources()).toEqual(['internal-project-1', 'internal-project-3', 'internal-project-4', 'internal-project-4']);
+    expect(authHelper.getAccessibleCreateResources()).toEqual(['internal-project-1', 'internal-project-3', 'internal-project-4', 'internal-project-5']);
     expect(authHelper.getAccessibleCreateResources()).not.toContain(['internal-project-2', 'internal-project-6']);
     expect(authHelper.getAccessibleResources()).toEqual(['internal-project-1', 'internal-project-2', 'internal-project-4', 'internal-project-5']);
     expect(authHelper.getAccessibleResources()).not.toContain(['internal-project-3', 'internal-project-6']);
