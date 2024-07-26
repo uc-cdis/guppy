@@ -28,7 +28,11 @@ app.use(bodyParser.json({ limit: '50mb' }));
 const refreshRouter  = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   try {
-    if (config.allowRefresh) {
+    if (config.allowRefresh === false) {
+      const disabledRefresh = new CodedError(404, '[Refresh] guppy _refresh functionality is not enabled');
+      throw disabledRefresh;
+    }
+    else if (config.allowRefresh) {
       log.debug('[Refresh] ', JSON.stringify(req.body, null, 4));
       const jwt = headerParser.parseJWT(req);
       if (!jwt) {
@@ -36,16 +40,12 @@ const refreshRouter  = async (req, res, next) => {
         throw noJwtError;
       }
       const authHelper = await getAuthHelperInstance(jwt);
-      console.log("AUTH HELPER: ", authHelper)
-      if (authHelper._accessibleCreateResourceList === undefined || authHelper._accessibleCreateResourceList.length === 0) {
-        const noPermsUser = new CodedError(401, '[Refresh] User cannot refresh Guppy without a valid token that has read access to at least one project');
+      if (authHelper._canRefresh === undefined || authHelper._canRefresh === false) {
+        const noPermsUser = new CodedError(401, '[Refresh] User cannot refresh Guppy without a valid token that has admin_access method on guppy service for resource path /guppy_admin');
         throw noPermsUser;
       }
       await server.stop()
       await initializeAndStartServer();
-    } else if (config.allowRefresh === false) {
-      const disabledRefresh = new CodedError(404, '[Refresh] guppy _refresh functionality is not enabled');
-      throw disabledRefresh;
     }
     res.send("[Refresh] guppy refreshed successfully")
   } catch (err) {
