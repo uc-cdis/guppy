@@ -97,4 +97,11 @@ describe('config', () => {
     expect(config.esConfig.aggregationIncludeMissingData).toBe(true);
     expect(config.esConfig.missingDataAlias).toEqual(alias);
   });
+
+  /* --------------- For _refresh testing --------------- */
+  test('could not access _refresh method if not in config', async () => {
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/testConfigFiles/test-no-refresh-option-provided.json`;
+    const config = require("../config").default;
+    expect(config.allowRefresh).toBe(false);
+  });
 });
