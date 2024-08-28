@@ -38,6 +38,7 @@ const config = {
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
+  allowRefresh: inputConfig.allowRefresh || false,
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {

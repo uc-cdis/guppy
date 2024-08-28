@@ -16,7 +16,7 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
       ],
     };
   } else {
-    data = await arboristClient.listAuthorizedResources(jwt);
+    data = await arboristClient.listAuthMapping(jwt);
   }
 
   log.debug('[authMiddleware] list resources: ', JSON.stringify(data, null, 4));
@@ -27,8 +27,37 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
     }
     throw new CodedError(data.error.code, data.error.message);
   }
+
+  data = resourcePathsWithServiceMethodCombination(data, ['guppy', '*'], ['read', '*'])
   const resources = data.resources ? _.uniq(data.resources) : [];
   return resources;
+};
+
+export const canRefresh = async (jwt) => {
+  let data;
+  if (config.internalLocalTest) {
+    data = {
+      resources: [ // these are just for testing
+        '/programs/DEV/projects/test',
+        '/programs/jnkns/projects/jenkins',
+      ],
+    };
+  } else {
+    data = await arboristClient.listAuthMapping(jwt);
+  }
+
+  log.debug('[authMiddleware] list resources: ', JSON.stringify(data, null, 4));
+  if (data && data.error) {
+    // if user is not in arborist db, assume has no access to any
+    if (data.error.code === 404) {
+      return false;
+    }
+    throw new CodedError(data.error.code, data.error.message);
+  }
+  data = resourcePathsWithServiceMethodCombination(data, ['guppy'], ['admin_access', '*'])
+
+  // Only guppy_admin resource path can control guppy admin access
+  return data.resources ? data.resources.includes('/guppy_admin') : false;
 };
 
 export const getRequestResourceListFromFilter = async (
@@ -49,3 +78,20 @@ export const buildFilterWithResourceList = (resourceList = []) => {
   };
   return filter;
 };
+
+export const resourcePathsWithServiceMethodCombination = (userAuthMapping, services, methods = {}) => {
+  const data = {
+    resources: [],
+  };
+  Object.keys(userAuthMapping).forEach((key) => {
+  // logic: you have access to a project if you have
+  // access to any of the combinations made by the method and service lists
+  if (userAuthMapping[key] && userAuthMapping[key].some((x) => (
+        methods.includes(x.method)
+        && services.includes(x.service)
+      ))) {
+        data.resources.push(key);
+      }
+  });
+  return data
+}
