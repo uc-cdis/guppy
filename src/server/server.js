@@ -25,7 +25,7 @@ app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json({ limit: '50mb' }));
 
-const refreshRouter  = async (req, res, next) => {
+const refreshRouter = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   try {
     if (config.allowRefresh === false) {
@@ -119,10 +119,10 @@ app.post('/download', downloadRouter, (err, req, res, next) => {
   }
 });
 
-app.post('/_refresh',refreshRouter,   (err, req, res, next) => {
+app.post('/_refresh', refreshRouter, (err, req, res, next) => {
   if (err instanceof CodedError) {
     res.status(err.code).send(err.msg);
-  }else{
+  } else {
     res.status(500).send(err)
   }
 });
