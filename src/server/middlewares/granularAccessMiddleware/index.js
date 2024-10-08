@@ -28,9 +28,11 @@ const granularAccessMiddleware = {
   ...totalCountTypeMapping,
   HistogramForNumber: {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   },
   HistogramForString: {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   },
 };
 

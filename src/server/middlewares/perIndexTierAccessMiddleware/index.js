@@ -66,10 +66,12 @@ if (atLeastOneIndexIsRegularAccess) {
 if (atLeastOneIndexIsGranularAccess) {
   perIndexTierAccessMiddleware.GranularAccessHistogramForNumber = {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   };
 
   perIndexTierAccessMiddleware.GranularAccessHistogramForString = {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   };
 }
 
