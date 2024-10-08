@@ -55,10 +55,12 @@ const perIndexTierAccessMiddleware = {
 if (atLeastOneIndexIsRegularAccess) {
   perIndexTierAccessMiddleware.RegularAccessHistogramForNumber = {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   };
 
   perIndexTierAccessMiddleware.RegularAccessHistogramForString = {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   };
 }
 if (atLeastOneIndexIsGranularAccess) {
