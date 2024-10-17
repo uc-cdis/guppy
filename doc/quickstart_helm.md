@@ -42,4 +42,4 @@ You can also store your images in a local registry. Kind and Minikube are popula
 - https://kind.sigs.k8s.io/docs/user/local-registry/
 - https://minikube.sigs.k8s.io/docs/handbook/registry/#enabling-insecure-registries
 
-Note: Guppy relies on elasticsearch to run. Please view the [Elasticsearch Helm chart](https://github.com/uc-cdis/gen3-helm/tree/master/helm/elasticsearch) for more information.
+Note: Guppy relies on elasticsearch to run. Please view the [Elasticsearch Helm chart](https://github.com/uc-cdis/gen3-helm/tree/master/helm/etl) for more information.
