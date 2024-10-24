@@ -6,6 +6,23 @@ import arboristClient from './arboristClient';
 import CodedError from '../utils/error';
 import config from '../config';
 
+export const resourcePathsWithServiceMethodCombination = (userAuthMapping, services, methods = {}) => {
+  const data = {
+    resources: [],
+  };
+  Object.keys(userAuthMapping).forEach((key) => {
+    // logic: you have access to a project if you have
+    // access to any of the combinations made by the method and service lists
+    if (userAuthMapping[key] && userAuthMapping[key].some((x) => (
+      methods.includes(x.method)
+      && services.includes(x.service)
+    ))) {
+      data.resources.push(key);
+    }
+  });
+  return data;
+};
+
 export const getAccessibleResourcesFromArboristasync = async (jwt) => {
   let data;
   if (config.internalLocalTest) {
@@ -28,9 +45,9 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
     throw new CodedError(data.error.code, data.error.message);
   }
 
-  read = resourcePathsWithServiceMethodCombination(data, ['guppy', '*'], ['read', '*']);
-  const read_resources = data.resources ? _.uniq(data.resources) : [];
-  return read_resources, data;
+  const read = resourcePathsWithServiceMethodCombination(data, ['guppy', '*'], ['read', '*']);
+  const readResources = read.resources ? _.uniq(read.resources) : [];
+  return [readResources, data];
 };
 
 export const checkIfUserCanRefreshServer = async (data) => {
@@ -51,10 +68,10 @@ export const checkIfUserCanRefreshServer = async (data) => {
     }
     throw new CodedError(data.error.code, data.error.message);
   }
-  data = resourcePathsWithServiceMethodCombination(data, ['guppy'], ['admin_access', '*']);
+  const adminAccess = resourcePathsWithServiceMethodCombination(data, ['guppy'], ['admin_access', '*']);
 
   // Only guppy_admin resource path can control guppy admin access
-  return data.resources ? data.resources.includes('/guppy_admin') : false;
+  return adminAccess.resources ? adminAccess.resources.includes('/guppy_admin') : false;
 };
 
 export const getRequestResourceListFromFilter = async (
@@ -74,21 +91,4 @@ export const buildFilterWithResourceList = (resourceList = []) => {
     },
   };
   return filter;
-};
-
-export const resourcePathsWithServiceMethodCombination = (userAuthMapping, services, methods = {}) => {
-  const data = {
-    resources: [],
-  };
-  Object.keys(userAuthMapping).forEach((key) => {
-  // logic: you have access to a project if you have
-  // access to any of the combinations made by the method and service lists
-    if (userAuthMapping[key] && userAuthMapping[key].some((x) => (
-      methods.includes(x.method)
-        && services.includes(x.service)
-    ))) {
-      data.resources.push(key);
-    }
-  });
-  return data;
 };

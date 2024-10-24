@@ -16,9 +16,11 @@ export class AuthHelper {
 
   async initialize() {
     try {
-      this._accessibleResourceList, this._arborist_resources = await getAccessibleResourcesFromArboristasync(this._jwt);
+      const [accessibleResourceList, arboristResources] = await getAccessibleResourcesFromArboristasync(this._jwt);
+      this._accessibleResourceList = accessibleResourceList;
+      this._arboristResources = arboristResources;
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
-      this._canRefresh = await checkIfUserCanRefreshServer(this._arborist_resources);
+      this._canRefresh = await checkIfUserCanRefreshServer(this._arboristResources);
       log.debug('[AuthHelper] can user refresh:', this._canRefresh);
 
       const promiseList = [];
