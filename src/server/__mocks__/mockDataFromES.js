@@ -23,18 +23,6 @@ const mockRefresh = () => {
   }
 };
 
-const mockRefresh = () => {
-  if (config.allowRefresh) {
-    nock(config.esConfig.host)
-      .post('/_refresh')
-      .reply(200, '[Server] guppy refreshed successfully');
-  } else {
-    nock(config.esConfig.host)
-      .post('/_refresh')
-      .reply(404, '[Server] guppy _refresh functionality is not enabled');
-  }
-};
-
 const mockResourcePath = () => {
   const queryResource = {
     size: 0,

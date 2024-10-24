@@ -1,12 +1,12 @@
-import { readFileSync } from "fs";
-import log from "./logger";
+import { readFileSync } from 'fs';
+import log from './logger';
 
 let inputConfig = {};
 if (process.env.GUPPY_CONFIG_FILEPATH) {
   const configFilepath = process.env.GUPPY_CONFIG_FILEPATH;
   inputConfig = JSON.parse(readFileSync(configFilepath).toString());
   log.info(
-    "[config] read guppy config from",
+    '[config] read guppy config from',
     configFilepath,
     JSON.stringify(inputConfig, null, 4),
   );
@@ -15,47 +15,47 @@ if (process.env.GUPPY_CONFIG_FILEPATH) {
 const config = {
   allowRefresh: inputConfig.allowRefresh || false,
   esConfig: {
-    host: "localhost:9200",
+    host: 'localhost:9200',
     indices: inputConfig.indices || [
       {
-        index: "gen3-dev-subject",
-        type: "subject",
+        index: 'gen3-dev-subject',
+        type: 'subject',
       },
       {
-        index: "gen3-dev-file",
-        type: "file",
+        index: 'gen3-dev-file',
+        type: 'file',
       },
     ],
     configIndex: inputConfig.indices
       ? inputConfig.config_index
-      : "gen3-dev-config",
-    authFilterField: inputConfig.auth_filter_field || "auth_resource_path",
+      : 'gen3-dev-config',
+    authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData:
-      typeof inputConfig.aggs_include_missing_data === "undefined"
+      typeof inputConfig.aggs_include_missing_data === 'undefined'
         ? true
         : inputConfig.aggs_include_missing_data,
-    missingDataAlias: inputConfig.missing_data_alias || "no data",
+    missingDataAlias: inputConfig.missing_data_alias || 'no data',
   },
   port: 80,
-  path: "/graphql",
-  arboristEndpoint: "http://arborist-service",
-  tierAccessLevel: "private",
+  path: '/graphql',
+  arboristEndpoint: 'http://arborist-service',
+  tierAccessLevel: 'private',
   tierAccessLimit: 1000,
   tierAccessSensitiveRecordExclusionField:
     inputConfig.tier_access_sensitive_record_exclusion_field,
-  logLevel: inputConfig.log_level || "INFO",
+  logLevel: inputConfig.log_level || 'INFO',
   enableEncryptWhiteList:
-    typeof inputConfig.enable_encrypt_whitelist === "undefined"
+    typeof inputConfig.enable_encrypt_whitelist === 'undefined'
       ? false
       : inputConfig.enable_encrypt_whitelist,
   encryptWhitelist: inputConfig.encrypt_whitelist || [
-    "__missing__",
-    "unknown",
-    "not reported",
-    "no data",
+    '__missing__',
+    'unknown',
+    'not reported',
+    'no data',
   ],
-  analyzedTextFieldSuffix: ".analyzed",
-  matchedTextHighlightTagName: "em",
+  analyzedTextFieldSuffix: '.analyzed',
+  matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
   allowRefresh: inputConfig.allowRefresh || false,
 };
@@ -63,7 +63,7 @@ const config = {
 if (process.env.GEN3_ES_ENDPOINT) {
   config.esConfig.host = process.env.GEN3_ES_ENDPOINT;
 }
-if (!config.esConfig.host.startsWith("http")) {
+if (!config.esConfig.host.startsWith('http')) {
   config.esConfig.host = `http://${config.esConfig.host}`;
 }
 
@@ -75,7 +75,7 @@ if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
 }
 
-const allowedTierAccessLevels = ["private", "regular", "libre"];
+const allowedTierAccessLevels = ['private', 'regular', 'libre'];
 
 if (process.env.TIER_ACCESS_LEVEL) {
   if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
@@ -109,12 +109,12 @@ let allIndicesHaveTierAccessSettings = true;
 config.esConfig.indices.forEach((item) => {
   if (!item.tier_access_level && !config.tierAccessLevel) {
     throw new Error(
-      "Either set all index-scoped tiered-access levels or a site-wide tiered-access level.",
+      'Either set all index-scoped tiered-access levels or a site-wide tiered-access level.',
     );
   }
   if (
-    item.tier_access_level &&
-    !allowedTierAccessLevels.includes(item.tier_access_level)
+    item.tier_access_level
+    && !allowedTierAccessLevels.includes(item.tier_access_level)
   ) {
     throw new Error(`tier_access_level invalid for index ${item.type}.`);
   }
@@ -131,7 +131,7 @@ if (allIndicesHaveTierAccessSettings) {
 
 // check whitelist is enabled
 if (config.enableEncryptWhiteList) {
-  if (typeof config.encryptWhitelist !== "object") {
+  if (typeof config.encryptWhitelist !== 'object') {
     config.encryptWhitelist = [config.encryptWhitelist];
   }
 } else {
@@ -140,7 +140,7 @@ if (config.enableEncryptWhiteList) {
 
 log.setLogLevel(config.logLevel);
 log.info(
-  "[config] starting server using config",
+  '[config] starting server using config',
   JSON.stringify(config, null, 4),
 );
 

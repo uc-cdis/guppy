@@ -31,8 +31,7 @@ const refreshRouter = async (req, res, next) => {
     if (config.allowRefresh === false) {
       const disabledRefresh = new CodedError(404, '[Refresh] guppy _refresh functionality is not enabled');
       throw disabledRefresh;
-    }
-    else {
+    } else {
       log.debug('[Refresh] ', JSON.stringify(req.body, null, 4));
       const jwt = headerParser.parseJWT(req);
       if (!jwt) {
@@ -44,10 +43,10 @@ const refreshRouter = async (req, res, next) => {
         const noPermsUser = new CodedError(401, '[Refresh] User cannot refresh Guppy without a valid token that has admin_access method on guppy service for resource path /guppy_admin');
         throw noPermsUser;
       }
-      await server.stop()
+      await server.stop();
       await initializeAndStartServer();
     }
-    res.send("[Refresh] guppy refreshed successfully")
+    res.send('[Refresh] guppy refreshed successfully');
   } catch (err) {
     log.error(err);
     next(err);
@@ -124,7 +123,7 @@ app.post('/_refresh', refreshRouter, (err, req, res, next) => {
   if (err instanceof CodedError) {
     res.status(err.code).send(err.msg);
   } else {
-    res.status(500).send(err)
+    res.status(500).send(err);
   }
 });
 

@@ -42,8 +42,8 @@ export class AuthHelper {
     return this._accessibleResourceList;
   }
 
-  getCanRefresh(){
-    return this._canRefresh
+  getCanRefresh() {
+    return this._canRefresh;
   }
 
   getUnaccessibleResources() {
