@@ -34,7 +34,9 @@ describe('config', () => {
 
   test('should show error if invalid tier access level', async () => {
     process.env.TIER_ACCESS_LEVEL = 'invalid-level';
-    expect(() => (require('../config'))).toThrow(new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`));
+    expect(() => require('../config')).toThrow(
+      new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`),
+    );
   });
 
   test('should show error if invalid tier access level in guppy block', async () => {
@@ -42,7 +44,9 @@ describe('config', () => {
     const fileName = './testConfigFiles/test-invalid-index-scoped-tier-access.json';
     process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/${fileName}`;
     const invalidItemType = 'subject_private';
-    expect(() => (require('../config'))).toThrow(new Error(`tier_access_level invalid for index ${invalidItemType}.`));
+    expect(() => require('../config')).toThrow(
+      new Error(`tier_access_level invalid for index ${invalidItemType}.`),
+    );
   });
 
   test('clears out site-wide default tiered-access setting if index-scoped levels set', async () => {
@@ -54,7 +58,9 @@ describe('config', () => {
     const { indices } = require(fileName);
     expect(config.tierAccessLevel).toBeUndefined();
     expect(config.tierAccessLimit).toEqual(50);
-    expect(JSON.stringify(config.esConfig.indices)).toEqual(JSON.stringify(indices));
+    expect(JSON.stringify(config.esConfig.indices)).toEqual(
+      JSON.stringify(indices),
+    );
   });
 
   /* --------------- For whitelist --------------- */
@@ -96,5 +102,12 @@ describe('config', () => {
     const alias = require(fileName).missing_data_alias;
     expect(config.esConfig.aggregationIncludeMissingData).toBe(true);
     expect(config.esConfig.missingDataAlias).toEqual(alias);
+  });
+
+  /* --------------- For _refresh testing --------------- */
+  test('could not access _refresh method if not in config', async () => {
+    process.env.GUPPY_CONFIG_FILEPATH = `${__dirname}/testConfigFiles/test-no-refresh-option-provided.json`;
+    const config = require('../config').default;
+    expect(config.allowRefresh).toBe(false);
   });
 });
