@@ -28,13 +28,12 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
     throw new CodedError(data.error.code, data.error.message);
   }
 
-  data = resourcePathsWithServiceMethodCombination(data, ['guppy', '*'], ['read', '*'])
-  const resources = data.resources ? _.uniq(data.resources) : [];
-  return resources;
+  read = resourcePathsWithServiceMethodCombination(data, ['guppy', '*'], ['read', '*'])
+  const read_resources = data.resources ? _.uniq(data.resources) : [];
+  return read_resources, data;
 };
 
-export const canRefresh = async (jwt) => {
-  let data;
+export const checkIfUserCanRefreshServer = async (data) => {
   if (config.internalLocalTest) {
     data = {
       resources: [ // these are just for testing
@@ -42,8 +41,6 @@ export const canRefresh = async (jwt) => {
         '/programs/jnkns/projects/jenkins',
       ],
     };
-  } else {
-    data = await arboristClient.listAuthMapping(jwt);
   }
 
   log.debug('[authMiddleware] list resources: ', JSON.stringify(data, null, 4));

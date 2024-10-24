@@ -32,7 +32,7 @@ const refreshRouter  = async (req, res, next) => {
       const disabledRefresh = new CodedError(404, '[Refresh] guppy _refresh functionality is not enabled');
       throw disabledRefresh;
     }
-    else if (config.allowRefresh) {
+    else {
       log.debug('[Refresh] ', JSON.stringify(req.body, null, 4));
       const jwt = headerParser.parseJWT(req);
       if (!jwt) {
