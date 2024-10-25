@@ -13,7 +13,6 @@ if (process.env.GUPPY_CONFIG_FILEPATH) {
 }
 
 const config = {
-  allowRefresh: inputConfig.allowRefresh || false,
   esConfig: {
     host: 'localhost:9200',
     indices: inputConfig.indices || [

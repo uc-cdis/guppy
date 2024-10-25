@@ -50,7 +50,8 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
   return [readResources, data];
 };
 
-export const checkIfUserCanRefreshServer = async (data) => {
+export const checkIfUserCanRefreshServer = async (passedData) => {
+  let data = passedData;
   if (config.internalLocalTest) {
     data = {
       resources: [ // these are just for testing
