@@ -5,6 +5,7 @@ import {
   getRequestResourceListFromFilter,
   buildFilterWithResourceList,
   getAccessibleResourcesFromArboristasync,
+  checkIfUserCanRefreshServer,
 } from './utils';
 import config from '../config';
 
@@ -15,8 +16,12 @@ export class AuthHelper {
 
   async initialize() {
     try {
-      this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+      const [accessibleResourceList, arboristResources] = await getAccessibleResourcesFromArboristasync(this._jwt);
+      this._accessibleResourceList = accessibleResourceList;
+      this._arboristResources = arboristResources;
       log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      this._canRefresh = await checkIfUserCanRefreshServer(this._arboristResources);
+      log.debug('[AuthHelper] can user refresh:', this._canRefresh);
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -37,6 +42,10 @@ export class AuthHelper {
 
   getAccessibleResources() {
     return this._accessibleResourceList;
+  }
+
+  getCanRefresh() {
+    return this._canRefresh;
   }
 
   getUnaccessibleResources() {
