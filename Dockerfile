@@ -34,4 +34,4 @@ RUN npm run-script prepare
 EXPOSE 3000
 EXPOSE 80
 
-CMD bash ./startServer.sh
+CMD [ "bash", "./startServer.sh" ]

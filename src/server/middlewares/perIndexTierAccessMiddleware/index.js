@@ -55,19 +55,23 @@ const perIndexTierAccessMiddleware = {
 if (atLeastOneIndexIsRegularAccess) {
   perIndexTierAccessMiddleware.RegularAccessHistogramForNumber = {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   };
 
   perIndexTierAccessMiddleware.RegularAccessHistogramForString = {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   };
 }
 if (atLeastOneIndexIsGranularAccess) {
   perIndexTierAccessMiddleware.GranularAccessHistogramForNumber = {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   };
 
   perIndexTierAccessMiddleware.GranularAccessHistogramForString = {
     histogram: granularHideNumberResolver(false),
+    asTextHistogram: granularHideNumberResolver(false),
   };
 }
 
