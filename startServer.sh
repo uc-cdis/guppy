@@ -1,3 +1,3 @@
 #!/bin/bash
 
-node --max-http-header-size 16000 --require dist/server/server.js
+node --max-http-header-size 16000 dist/server/server.js
