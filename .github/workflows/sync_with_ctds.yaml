@@ -30,11 +30,15 @@ jobs:
         run: |
           git checkout pcdc_dev
           git checkout -b sync-upstream
-          git merge upstream/master
+          # git merge upstream/master
+          if ! git merge upstream/master; then
+            echo "Merge conflicts detected. PR will be created for manual review."
+          fi
 
       - name: Push Sync Branch
+        if: success() || failure()
         run: |
-          git push origin sync-upstream
+          git push origin sync-upstream --force
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
@@ -43,4 +47,7 @@ jobs:
           branch: sync-upstream
           title: "Sync with CTDS"
           body: "Automated (Github Action) sync PR to merge upstream changes from CTDS into the pcdc repo."
+          labels: "auto-generated"
+          reviewers: grugna
+
 
