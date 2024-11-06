@@ -45,9 +45,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: sync-upstream
+          base: pcdc_dev
           title: "Sync with CTDS"
           body: "Automated (Github Action) sync PR to merge upstream changes from CTDS into the pcdc repo."
           labels: "auto-generated"
           reviewers: grugna
+
 
 
