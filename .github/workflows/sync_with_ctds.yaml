@@ -30,10 +30,10 @@ jobs:
         run: |
           git checkout pcdc_dev
           git checkout -b sync-upstream
-          # git merge upstream/master
-          if ! git merge upstream/master; then
-            echo "Merge conflicts detected. PR will be created for manual review."
-          fi
+          git merge upstream/master || exit 1
+          # if ! git merge upstream/master; then
+          #   echo "Merge conflicts detected. PR will be created for manual review."
+          # fi
 
       - name: Push Sync Branch
         if: success() || failure()
