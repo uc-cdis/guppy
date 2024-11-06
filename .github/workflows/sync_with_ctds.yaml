@@ -1,0 +1,40 @@
+name: Create Sync PR for Upstream Changes
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"  # Weekly
+  workflow_dispatch:
+
+jobs:
+  sync_fork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Fork Repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Add Original Repo as Upstream
+        run: |
+          git remote add upstream https://github.com/uc-cdis/guppy.git
+          git fetch upstream
+
+      - name: Create Sync Branch
+        run: |
+          git checkout pcdc_dev
+          git checkout -b sync-upstream
+          git merge upstream/master
+
+      - name: Push Sync Branch
+        run: |
+          git push origin sync-upstream
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: sync-upstream
+          title: "Sync with CTDS"
+          body: "Automated (Github Action) sync PR to merge upstream changes from CTDS into the pcdc repo."
