@@ -115,7 +115,7 @@ To learn how to configure Guppy's tiered-access system using a per-index scoping
 > Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
 > be counted in the aggregation query whether or not it is sensitive.
 >
-> To enable Sensitive Record Exclusion, set  `guppy.tier_access_sensitive_record_exclusion_field: "fieldname"` in the commons' `manifest.json`. "fieldName" should match a boolean field in the Elasticsearch index that indicates whether or not a record is sensitive.
+> To enable Sensitive Record Exclusion, set  `guppy.tier_access_sensitive_record_exclusion_field: "fieldname"` in the commons' `manifest.json`. "fieldName" should match a boolean field in the Elasticsearch index that indicates whether or not a record is sensitive
 >
 > (E.g., `"tier_access_sensitive_record_exclusion_field": "sensitive"` in the Guppy config tells Guppy to look for a field in the ES index called `sensitive`, and to exclude records in the ES index which have `sensitive: "true"`)
 
