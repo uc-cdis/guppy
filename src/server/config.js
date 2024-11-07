@@ -1,6 +1,8 @@
 import { readFileSync } from 'fs';
 import log from './logger';
 
+// dummy comment
+
 let inputConfig = {};
 if (process.env.GUPPY_CONFIG_FILEPATH) {
   const configFilepath = process.env.GUPPY_CONFIG_FILEPATH;
