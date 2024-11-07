@@ -110,7 +110,7 @@ npm start
 To learn how to configure Guppy's tiered-access system using a per-index scoping, and which use cases might warrant such a configuration, please see `doc/index_scoped_tiered_access.md`.
 
 > #### Tier Access Sensitive Record Exclusion
-> It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular").
+> It is possible to configure Guppy to hide some records from being returned in `_aggregation` queries when Tiered Access is enabled (tierAccessLevel: "regular")
 > The purpose of this is to "hide" information about certain sensitive resources, essentially making this an escape hatch from Tiered Access.
 > Crucially, Sensitive Record Exclusion only applies to records which the user does not have access to. If the user has access to a record, it will
 > be counted in the aggregation query whether or not it is sensitive.
