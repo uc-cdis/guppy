@@ -5,6 +5,7 @@ import {
   getRequestResourceListFromFilter,
   buildFilterWithResourceList,
   getAccessibleResourcesFromArboristasync,
+  checkIfUserCanRefreshServer,
 } from './utils';
 import arboristClient from './arboristClient';
 import config from '../config';
@@ -22,16 +23,24 @@ export class AuthHelper {
 
       if (this._isAdmin === false) {
         // TODO END REMOVE
-        this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
+        const [accessibleResourceList, arboristResources] = await getAccessibleResourcesFromArboristasync(this._jwt);
+        this._accessibleResourceList = accessibleResourceList;
+        this._arboristResources = arboristResources;
         log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+        this._canRefresh = await checkIfUserCanRefreshServer(this._arboristResources);
+        log.debug('[AuthHelper] can user refresh:', this._canRefresh);
       }
       else {
         this._accessibleResourceList = []
+        this._arboristResources = [];
       }
 
-      // this._accessibleResourceList = await getAccessibleResourcesFromArboristasync(this._jwt);
-      // log.info("LUCAAAAAAAAAA")
-      // log.info('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      // const [accessibleResourceList, arboristResources] = await getAccessibleResourcesFromArboristasync(this._jwt);
+      // this._accessibleResourceList = accessibleResourceList;
+      // this._arboristResources = arboristResources;
+      // log.debug('[AuthHelper] accessible resources:', this._accessibleResourceList);
+      // this._canRefresh = await checkIfUserCanRefreshServer(this._arboristResources);
+      // log.debug('[AuthHelper] can user refresh:', this._canRefresh);
 
       const promiseList = [];
       config.esConfig.indices.forEach(({ index, type }) => {
@@ -52,6 +61,10 @@ export class AuthHelper {
 
   getAccessibleResources() {
     return this._accessibleResourceList;
+  }
+
+  getCanRefresh() {
+    return this._canRefresh;
   }
 
   getUnaccessibleResources() {
