@@ -1,4 +1,4 @@
-FROM 707767160287.dkr.ecr.us-east-1.amazonaws.com/gen3/nodejs-base:master
+FROM quay.io/cdis/nodejs-base:master
 
 COPY . /guppy/
 WORKDIR /guppy
