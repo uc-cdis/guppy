@@ -53,13 +53,19 @@ class ES {
       },
     };
     validatedQueryBody.track_total_hits = true;
-    log.info('[ES.query] index, type, query body: ', esIndex, esType, JSON.stringify(validatedQueryBody));
+
+    const start = Date.now();
     return this.client.search({
       index: esIndex,
       body: validatedQueryBody,
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
+    }).finally(() => {
+      const end = Date.now();
+      const durationInMS = end - start;
+
+      log.info(`[ES.query] DurationInMS:${durationInMS}. index, type, query body: `, esIndex, esType, JSON.stringify(validatedQueryBody));
     });
   }
 

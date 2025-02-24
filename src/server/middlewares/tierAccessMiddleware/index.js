@@ -28,9 +28,11 @@ const tierAccessMiddleware = {
   ...totalCountTypeMapping,
   HistogramForNumber: {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   },
   HistogramForString: {
     histogram: hideNumberResolver(false),
+    asTextHistogram: hideNumberResolver(false),
   },
 };
 

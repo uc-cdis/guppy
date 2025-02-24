@@ -3,7 +3,7 @@
 ## Step.1 start elasticsearch
 Go to the repository's root directory, do:
 ```
-docker-compose -f ./devHelper/docker/esearch.yml up -d
+docker compose -f ./devHelper/docker/esearch.yml up -d
 ```
 
 ## Step.2 import mock data into elasticsearch index
