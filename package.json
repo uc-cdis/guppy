@@ -93,6 +93,9 @@
     },
     "default-browser-id": {
       "meow": "6.1.0"
+    },
+    "storybook": {
+      "tar-fs": "^2.1.2"
     }
   }
 }
