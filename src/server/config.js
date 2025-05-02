@@ -5,7 +5,11 @@ let inputConfig = {};
 if (process.env.GUPPY_CONFIG_FILEPATH) {
   const configFilepath = process.env.GUPPY_CONFIG_FILEPATH;
   inputConfig = JSON.parse(readFileSync(configFilepath).toString());
-  log.info('[config] read guppy config from', configFilepath, JSON.stringify(inputConfig, null, 4));
+  log.info(
+    '[config] read guppy config from',
+    configFilepath,
+    JSON.stringify(inputConfig, null, 4),
+  );
 }
 
 const config = {
@@ -21,9 +25,14 @@ const config = {
         type: 'file',
       },
     ],
-    configIndex: (inputConfig.indices) ? inputConfig.config_index : 'gen3-dev-config',
+    configIndex: inputConfig.indices
+      ? inputConfig.config_index
+      : 'gen3-dev-config',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
-    aggregationIncludeMissingData: typeof inputConfig.aggs_include_missing_data === 'undefined' ? true : inputConfig.aggs_include_missing_data,
+    aggregationIncludeMissingData:
+      typeof inputConfig.aggs_include_missing_data === 'undefined'
+        ? true
+        : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
   },
   port: 80,
@@ -31,15 +40,25 @@ const config = {
   arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
-  tierAccessSensitiveRecordExclusionField: inputConfig.tier_access_sensitive_record_exclusion_field,
+  tierAccessSensitiveRecordExclusionField:
+    inputConfig.tier_access_sensitive_record_exclusion_field,
   logLevel: inputConfig.log_level || 'INFO',
-  enableEncryptWhiteList: typeof inputConfig.enable_encrypt_whitelist === 'undefined' ? false : inputConfig.enable_encrypt_whitelist,
-  encryptWhitelist: inputConfig.encrypt_whitelist || ['__missing__', 'unknown', 'not reported', 'no data'],
+  enableEncryptWhiteList:
+    typeof inputConfig.enable_encrypt_whitelist === 'undefined'
+      ? false
+      : inputConfig.enable_encrypt_whitelist,
+  encryptWhitelist: inputConfig.encrypt_whitelist || [
+    '__missing__',
+    'unknown',
+    'not reported',
+    'no data',
+  ],
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
   ignoredFields: ['@version'],
   doubleUnderscorePrefix: 'x__',
+  allowRefresh: inputConfig.allowRefresh || false,
 };
 
 if (process.env.GEN3_ES_ENDPOINT) {
@@ -73,7 +92,9 @@ const allowedTierAccessLevels = ['private', 'regular', 'libre'];
 
 if (process.env.TIER_ACCESS_LEVEL) {
   if (!allowedTierAccessLevels.includes(process.env.TIER_ACCESS_LEVEL)) {
-    throw new Error(`Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`);
+    throw new Error(
+      `Invalid TIER_ACCESS_LEVEL "${process.env.TIER_ACCESS_LEVEL}"`,
+    );
   }
   config.tierAccessLevel = process.env.TIER_ACCESS_LEVEL;
 }
@@ -100,9 +121,14 @@ if (process.env.ANALYZED_TEXT_FIELD_SUFFIX) {
 let allIndicesHaveTierAccessSettings = true;
 config.esConfig.indices.forEach((item) => {
   if (!item.tier_access_level && !config.tierAccessLevel) {
-    throw new Error('Either set all index-scoped tiered-access levels or a site-wide tiered-access level.');
+    throw new Error(
+      'Either set all index-scoped tiered-access levels or a site-wide tiered-access level.',
+    );
   }
-  if (item.tier_access_level && !allowedTierAccessLevels.includes(item.tier_access_level)) {
+  if (
+    item.tier_access_level
+    && !allowedTierAccessLevels.includes(item.tier_access_level)
+  ) {
     throw new Error(`tier_access_level invalid for index ${item.type}.`);
   }
   if (!item.tier_access_level) {
@@ -126,6 +152,9 @@ if (config.enableEncryptWhiteList) {
 }
 
 log.setLogLevel(config.logLevel);
-log.info('[config] starting server using config', JSON.stringify(config, null, 4));
+log.info(
+  '[config] starting server using config',
+  JSON.stringify(config, null, 4),
+);
 
 export default config;

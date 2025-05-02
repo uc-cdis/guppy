@@ -1,20 +1,4 @@
-FROM quay.io/cdis/ubuntu:20.04
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# need libcap2-bin so we can do setcap later
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        sudo \
-        vim \
-        libcap2-bin \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm install -g npm@8
+FROM 707767160287.dkr.ecr.us-east-1.amazonaws.com/gen3/nodejs-base:master
 
 COPY . /guppy/
 WORKDIR /guppy
@@ -24,14 +8,14 @@ RUN VERSION=`git describe --always --tags` && echo "export const gitVersion =\"$
 RUN /bin/rm -rf .git
 RUN /bin/rm -rf node_modules
 
-RUN useradd -d /guppy gen3 && chown -R gen3: /guppy
+RUN chown -R gen3: /guppy
 # see https://superuser.com/questions/710253/allow-non-root-process-to-bind-to-port-80-and-443
-RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/bin/node
+RUN  setcap CAP_NET_BIND_SERVICE=+eip "$NVM_DIR/versions/node/$NODE_VERSION/bin/node"
 USER gen3
-RUN npm ci
+RUN source $NVM_DIR/nvm.sh && npm ci
 RUN npm run-script prepare
 
 EXPOSE 3000
 EXPOSE 80
 
-CMD bash ./startServer.sh
+CMD [ "bash", "./startServer.sh" ]
