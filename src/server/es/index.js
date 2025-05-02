@@ -26,6 +26,7 @@ function modifyIndexRootProperties(root) {
         delete root[fieldName];
       }
       if (root[fieldName] && config.ignoredFields.includes(fieldName)) {
+        log.info(`[ES] deleting field ${fieldName} because it should be ignored.`);
         // eslint-disable-next-line no-param-reassign
         delete root[fieldName];
       }
