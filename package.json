@@ -66,8 +66,8 @@
     "@babel/runtime-corejs3": "^7.22.6",
     "@storybook/addon-actions": "^7.0.26",
     "@storybook/addon-links": "^7.0.26",
-    "@storybook/react": "^7.0.26",
-    "@storybook/react-webpack5": "^7.0.26",
+    "@storybook/react": "^8.6.12",
+    "@storybook/react-webpack5": "^8.6.12",
     "antd": "^4.24.11",
     "babel-jest": "^29.6.1",
     "babel-loader": "^9.1.2",
@@ -82,7 +82,7 @@
     "json-schema-faker": "^0.5.3",
     "nock": "^13.3.1",
     "nodemon": "^2.0.22",
-    "storybook": "^7.0.26"
+    "storybook": "^8.6.12"
   },
   "overrides": {
     "glob-parent": "^5.1.2",
