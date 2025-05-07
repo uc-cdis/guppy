@@ -14,6 +14,7 @@ jobs:
       TEST_REPO_BRANCH: feat/GPE-1747
       HELM_BRANCH: feat/ci-fixes
       SERVICE_TO_TEST: guppy
+      WORKING_DIR: gen3-code-vigil/gen3-integration-tests
     secrets:
       CI_AWS_ACCESS_KEY_ID: ${{ secrets.CI_AWS_ACCESS_KEY_ID }}
       CI_AWS_SECRET_ACCESS_KEY: ${{ secrets.CI_AWS_SECRET_ACCESS_KEY }}
