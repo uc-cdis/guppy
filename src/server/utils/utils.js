@@ -68,12 +68,12 @@ export const validSignature = (req) => {
       return false;
     }
 
-    // Reconstruct canonical payload
+    // Reconstruct standardized payload
     const payload = {
       method: req.method.toUpperCase(),
       path: req.originalUrl.split('?')[0],  // Ensure no query string
       service: serviceName,
-      body: JSON.stringify(req.body || {}, null, 0),  // Canonical JSON
+      body: JSON.stringify(req.body || {}, null, 0),  // standardized JSON
     };
 
     // Serialize with consistent key order
