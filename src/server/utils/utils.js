@@ -59,25 +59,46 @@ export const loadPublicKey = () => {
 };
 
 export const validSignature = (req) => {
-  let isValid = false;
   try {
-    const signature = headerParser.parseSignature(req);
-    let data = req.body;
-    data = JSON.stringify(data);
+    const signatureBase64 = headerParser.parseSignature(req);
+    const serviceName = req.headers['gen3-service'] || '';
 
-    const { publicKey } = req.app.locals;
+    if (!signatureBase64 || !serviceName) {
+      log.warn('[SIGNATURE CHECK] Missing signature or service header');
+      return false;
+    }
 
-    const signature_new = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
-    signature_new.init(publicKey);
-    signature_new.updateString(data);
+    // Reconstruct canonical payload
+    const payload = {
+      method: req.method.toUpperCase(),
+      path: req.originalUrl.split('?')[0],  // Ensure no query string
+      service: serviceName,
+      body: JSON.stringify(req.body || {}, null, 0),  // Canonical JSON
+    };
 
-    isValid = signature_new.verify(signature);
+    // Serialize with consistent key order
+    const standardized_payload = JSON.stringify(payload, Object.keys(payload).sort());
+
+    // Get public key (ensure it's loaded)
+    const publicKey = req.app.locals?.publicKey || loadPublicKey();
+    if (!publicKey) {
+      log.error('[SIGNATURE CHECK] Public key is not available');
+      return false;
+    }
+
+    // Validate signature with SHA256
+    const sig = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
+    sig.init(publicKey);
+    sig.updateString(standardized_payload);
+
+    const isValid = sig.verify(signatureBase64);
+    log.info('[SIGNATURE CHECK] Signature verification result:', isValid);
+    return isValid;
+
   } catch (err) {
-    log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
+    log.error('[SIGNATURE CHECK] Error verifying signature:', err);
     return false;
   }
-  log.info('The body signature has been decoded: ', isValid);
-  return isValid;
 };
 
 /**
