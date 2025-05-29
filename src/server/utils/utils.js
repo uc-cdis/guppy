@@ -61,6 +61,8 @@ export const loadPublicKey = () => {
 export const validSignature = (req) => {
   try {
     const signatureBase64 = headerParser.parseSignature(req);
+
+    // Make a copy of the config and plug in the private key we found
     const serviceName = req.headers['gen3-service'] || '';
 
     if (!signatureBase64 || !serviceName) {
@@ -79,11 +81,20 @@ export const validSignature = (req) => {
     // Serialize with consistent key order
     const standardized_payload = JSON.stringify(payload, Object.keys(payload).sort());
 
+    // Attempt to load service-specific key first
+    const serviceKey = req.app.locals?.[`${serviceName}_PUBLIC_KEY`];
+    const fallbackKey = req.app.locals?.publicKey || loadPublicKey();
+
     // Get public key (ensure it's loaded)
-    const publicKey = req.app.locals?.publicKey || loadPublicKey();
+    const publicKey = serviceKey || fallbackKey;
+
     if (!publicKey) {
-      log.error('[SIGNATURE CHECK] Public key is not available');
+      log.error(`[SIGNATURE CHECK] No public key available for ${serviceName}, even after fallback.`);
       return false;
+    }
+
+    if (!serviceKey && fallbackKey) {
+      log.warn(`[SIGNATURE CHECK] ${serviceName}_PUBLIC_KEY not found. Falling back to RSA public key.`);
     }
 
     // Validate signature with SHA256
@@ -92,7 +103,7 @@ export const validSignature = (req) => {
     sig.updateString(standardized_payload);
 
     const isValid = sig.verify(signatureBase64);
-    log.info('[SIGNATURE CHECK] Signature verification result:', isValid);
+    log.info(`[SIGNATURE CHECK] Signature verification for ${serviceName}: ${isValid}`);
     return isValid;
 
   } catch (err) {
