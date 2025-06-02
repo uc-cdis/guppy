@@ -59,58 +59,34 @@ export const loadPublicKey = () => {
 };
 
 export const validSignature = (req) => {
+  let isValid = false;
   try {
-    const signatureBase64 = headerParser.parseSignature(req);
+    const signature = headerParser.parseSignature(req);
 
-    // Make a copy of the config and plug in the private key we found
-    const serviceName = req.headers['gen3-service'] || '';
+    const { publicKey } = req.app.locals;
 
-    if (!signatureBase64 || !serviceName) {
-      log.warn('[SIGNATURE CHECK] Missing signature or service header');
-      return false;
-    }
+    // --- Build SignaturePayload equivalent ---
+    const method = req.method.toUpperCase();
+    const path = req.path;
+    const gen3Service = req.headers['gen3-service'];
 
-    // Reconstruct standardized payload
-    const payload = {
-      method: req.method.toUpperCase(),
-      path: req.originalUrl.split('?')[0],  // Ensure no query string
-      service: serviceName,
-      body: JSON.stringify(req.body || {}, null, 0),  // standardized JSON
-    };
+    const headerStr = `Gen3-Service: ${gen3Service}`;
+    const payloadStr = `${method} ${path}\n${headerStr}`;
 
-    // Serialize with consistent key order
-    const standardized_payload = JSON.stringify(payload, Object.keys(payload).sort());
+    // --- Signature check ---
+    const signature_new = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
+    signature_new.init(publicKey);
+    signature_new.updateString(payloadStr);
 
-    // Attempt to load service-specific key first
-    const serviceKey = req.app.locals?.[`${serviceName}_PUBLIC_KEY`];
-    const fallbackKey = req.app.locals?.publicKey || loadPublicKey();
-
-    // Get public key (ensure it's loaded)
-    const publicKey = serviceKey || fallbackKey;
-
-    if (!publicKey) {
-      log.error(`[SIGNATURE CHECK] No public key available for ${serviceName}, even after fallback.`);
-      return false;
-    }
-
-    if (!serviceKey && fallbackKey) {
-      log.warn(`[SIGNATURE CHECK] ${serviceName}_PUBLIC_KEY not found. Falling back to RSA public key.`);
-    }
-
-    // Validate signature with SHA256
-    const sig = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
-    sig.init(publicKey);
-    sig.updateString(standardized_payload);
-
-    const isValid = sig.verify(signatureBase64);
-    log.info(`[SIGNATURE CHECK] Signature verification for ${serviceName}: ${isValid}`);
-    return isValid;
-
+    isValid = signature_new.verify(signature);
   } catch (err) {
-    log.error('[SIGNATURE CHECK] Error verifying signature:', err);
+    log.error('[SIGNATURE CHECK] error when checking the signature of the payload', err);
     return false;
   }
+  log.info('The signature has been decoded: ', isValid);
+  return isValid;
 };
+
 
 /**
  * Convert from fields of graphql query produced by graphql library to list of querying fields
