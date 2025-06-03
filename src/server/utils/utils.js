@@ -61,22 +61,34 @@ export const loadPublicKey = () => {
 export const validSignature = (req) => {
   let isValid = false;
   try {
-    const signature = headerParser.parseSignature(req);
-
     const { publicKey } = req.app.locals;
 
-    // --- Build SignaturePayload equivalent ---
-    const method = req.method.toUpperCase();
-    const path = req.path;
+    const signature = headerParser.parseSignature(req);
     const gen3Service = req.headers['gen3-service'];
+    const path = req.path;
+    const method = req.method.toUpperCase();
+    const body = JSON.stringify(req.body);
 
+    // --- Build SignaturePayload equivalent ---
     const headerStr = `Gen3-Service: ${gen3Service}`;
-    const payloadStr = `${method} ${path}\n${headerStr}`;
+    let payloadStr = `${method} ${path}\n${headerStr}`;
+
+    if (["POST", "PUT", "PATCH"].includes(method) && body !== "" && body !== "{}" && body !== "null") {
+        payloadStr += "\n" + body
+    }
+
+    log.info("AAAAAAAAAAA");
+    log.info(payloadStr);
+    log.info(signature);
+    log.info(body)
+
+    const payloadBytes = new TextEncoder().encode(payloadStr);
+    const payloadHex = Array.from(payloadBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
     // --- Signature check ---
     const signature_new = new rs.KJUR.crypto.Signature({ alg: "SHA256withRSA" });
     signature_new.init(publicKey);
-    signature_new.updateString(payloadStr);
+    signature_new.updateHex(payloadHex);
 
     isValid = signature_new.verify(signature);
   } catch (err) {
