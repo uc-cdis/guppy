@@ -77,11 +77,6 @@ export const validSignature = (req) => {
         payloadStr += "\n" + body
     }
 
-    log.info("AAAAAAAAAAA");
-    log.info(payloadStr);
-    log.info(signature);
-    log.info(body)
-
     const payloadBytes = new TextEncoder().encode(payloadStr);
     const payloadHex = Array.from(payloadBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
