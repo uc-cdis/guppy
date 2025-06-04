@@ -18,6 +18,7 @@ jobs:
     uses: uc-cdis/gen3-code-vigil/.github/workflows/shared_integration_tests.yaml@feat/GPE-1747
     with:
       TEST_REPO_BRANCH: feat/GPE-1747
+      GEN3_INSTANCE_TYPE: HELM_LOCAL
       HELM_BRANCH: feat/ci-fixes
       SERVICE_TO_TEST: guppy
       WORKING_DIR: gen3-code-vigil/gen3-integration-tests
