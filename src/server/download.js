@@ -7,20 +7,20 @@ import config from './config';
 import CodedError from './utils/error';
 
 const downloadRouter = async (req, res, next) => {
-  const {
-    type, filter, sort, fields, accessibility,
-  } = req.body;
-
-  log.debug('[download] ', JSON.stringify(req.body, null, 4));
-  const esIndexConfig = esInstance.getESIndexConfigByType(type);
-  const tierAccessLevel = (config.tierAccessLevel
-    ? config.tierAccessLevel : esIndexConfig.tier_access_level);
-  const jwt = headerParser.parseJWT(req);
-  const authHelper = await getAuthHelperInstance(jwt);
-
-  const isValid = validSignature(req) || authHelper.isAdmin();
-
   try {
+    log.debug('[download] ', JSON.stringify(req.body, null, 4));
+    const {
+      type, filter, sort, fields, accessibility,
+    } = req.body;
+
+    const esIndexConfig = esInstance.getESIndexConfigByType(type);
+    const tierAccessLevel = config.tierAccessLevel
+      ? config.tierAccessLevel
+      : esIndexConfig.tier_access_level;
+    const jwt = headerParser.parseJWT(req);
+    const authHelper = await getAuthHelperInstance(jwt);
+    const isValid = validSignature(req) || authHelper.isAdmin();
+
     let appliedFilter;
     /**
      * Tier access strategy for download endpoint:
@@ -63,16 +63,21 @@ const downloadRouter = async (req, res, next) => {
       default:
         throw new Error(`Invalid TIER_ACCESS_LEVEL "${tierAccessLevel}"`);
     }
+
     const data = await esInstance.downloadData({
-      esIndex: esIndexConfig.index, esType: type, filter: appliedFilter, sort, fields,
+      esIndex: esIndexConfig.index,
+      esType: type,
+      filter: appliedFilter,
+      sort,
+      fields,
     });
+
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.send(data);
   } catch (err) {
     log.error(err);
     next(err);
   }
-  return 0;
 };
 
 export default downloadRouter;
