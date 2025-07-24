@@ -1,0 +1,55 @@
+name: Create Sync PR from CTDS
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"  # Weekly
+  workflow_dispatch:
+
+jobs:
+  sync_fork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Fork Repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set Git Identity  
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Add Original Repo as Upstream
+        run: |
+          git remote add upstream https://github.com/uc-cdis/guppy.git
+          git fetch upstream
+
+      - name: Create Sync Branch
+        run: |
+          git checkout pcdc_dev
+          git checkout -b sync-upstream
+          git merge upstream/master || exit 1
+          # if ! git merge upstream/master; then
+          #   echo "Merge conflicts detected. PR will be created for manual review."
+          # fi
+
+      - name: Push Sync Branch
+        if: success() || failure()
+        run: |
+          git push origin sync-upstream --force
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: sync-upstream
+          base: pcdc_dev
+          title: "Sync with CTDS"
+          body: "Automated (Github Action) sync PR to merge upstream changes from CTDS into the pcdc repo."
+          labels: "auto-generated"
+          reviewers: grugna
+
+
+
