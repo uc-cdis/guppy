@@ -402,7 +402,7 @@ class ES {
     return (this.arrayFields[esIndex] && this.arrayFields[esIndex].includes(field));
   }
 
-  filterData(
+  async filterData(
     { esIndex, esType },
     {
       filter, fields, sort, offset = 0, size,
@@ -424,7 +424,10 @@ class ES {
         queryBody._source = false;
       }
     }
-    return this.query(esIndex, esType, queryBody);
+    const results = await this.query(esIndex, esType, queryBody);
+    console.log('queryBody', queryBody);
+    console.log('results', results);
+    return results;
   }
 
   async getCount(esIndex, esType, filter) {

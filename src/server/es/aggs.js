@@ -175,6 +175,13 @@ export const numericGlobalStats = async (
       stats: {
         field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
       },
+      extended_stats: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+      },
+      percentiles: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+        percents: [25, 50, 75],
+      },
     },
   };
   if (nestedAggFields && nestedAggFields.termsFields) {
