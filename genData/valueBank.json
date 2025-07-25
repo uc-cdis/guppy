@@ -18,7 +18,13 @@
             "follow_ups": {
                 "days_to_follow_up": 1,
                 "follow_up_label": "flup_lbl_1"
-            }
+            },
+            "treatments_array_under_subjects": [
+                        {
+                            "submitter_id": "treatment_1",
+                            "dose_amount": 1
+                        }
+                    ]
         },
         {
             "days_to_visit": 2,
@@ -26,7 +32,13 @@
             "follow_ups": {
                 "days_to_follow_up": 2,
                 "follow_up_label": "flup_lbl_2"
-            }
+            },
+            "treatments_array_under_subjects": [
+                        {
+                            "submitter_id": "treatment_2",
+                            "dose_amount": 2
+                        }
+                    ]
         },
         {
             "days_to_visit": 3,
@@ -34,7 +46,13 @@
             "follow_ups": {
                 "days_to_follow_up": 3,
                 "follow_up_label": "flup_lbl_3"
-            }
+            },
+            "treatments_array_under_subjects": [
+                        {
+                            "submitter_id": "treatment_3",
+                            "dose_amount": 3
+                        }
+                    ]
         }
     ],
     "some_nested_array_field": [

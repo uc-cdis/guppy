@@ -55,7 +55,7 @@ function fakerType(key, value, arrayFields) {
       break;
     case 'nested':
       Object.entries(value.properties).forEach(([k, v]) => {
-        properties[k] = fakerType(k, v);
+        properties[k] = fakerType(k, v, arrayFields);
         required.push(k);
       });
       fieldType = {
