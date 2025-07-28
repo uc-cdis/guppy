@@ -26,11 +26,24 @@ export const resourcePathsWithServiceMethodCombination = (userAuthMapping, servi
 export const getAccessibleResourcesFromArboristasync = async (jwt) => {
   let data;
   if (config.internalLocalTest) {
+    log.info('debug');
     data = {
-      resources: [ // these are just for testing
-        '/programs/DEV/projects/test',
-        '/programs/jnkns/projects/jenkins',
-      ],
+      // these are just for testing
+      '/programs/DEV/projects/test': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/programs/jnkns/projects/jenkins': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/guppy_admin': [
+        {
+          service: 'guppy',
+          method: 'admin_access',
+        }],
     };
   } else {
     data = await arboristClient.listAuthMapping(jwt);
@@ -54,10 +67,22 @@ export const checkIfUserCanRefreshServer = async (passedData) => {
   let data = passedData;
   if (config.internalLocalTest) {
     data = {
-      resources: [ // these are just for testing
-        '/programs/DEV/projects/test',
-        '/programs/jnkns/projects/jenkins',
-      ],
+      // these are just for testing
+      '/programs/DEV/projects/test': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/programs/jnkns/projects/jenkins': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/guppy_admin': [
+        {
+          service: 'guppy',
+          method: 'admin_access',
+        }],
     };
   }
 
