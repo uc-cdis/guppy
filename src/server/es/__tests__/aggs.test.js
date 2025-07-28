@@ -1,5 +1,6 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
+import { log, error } from 'console';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
 import {
   appendAdditionalRangeQuery,
@@ -37,12 +38,13 @@ describe('could append range limitation onto ES query object', () => {
     },
   };
   test('with rangeStart, rangeEnd, and origin query', () => {
-    const result = appendAdditionalRangeQuery(field, exampleQuery, rangeStart, rangeEnd);
+    const result = appendAdditionalRangeQuery(field, undefined, exampleQuery, rangeStart, rangeEnd);
     const expectedResult = {
       bool: {
         must: [
+          expectedRangeStartPart,
+          expectedRangeEndPart,
           exampleQuery,
-          [expectedRangeStartPart, expectedRangeEndPart],
         ],
       },
     };
@@ -50,23 +52,23 @@ describe('could append range limitation onto ES query object', () => {
   });
 
   test('with either rangeStart or rangeEnd', () => {
-    const result1 = appendAdditionalRangeQuery(field, exampleQuery, rangeStart);
+    const result1 = appendAdditionalRangeQuery(field, undefined, exampleQuery, rangeStart);
     const expectedResult1 = {
       bool: {
         must: [
+          expectedRangeStartPart,
           exampleQuery,
-          [expectedRangeStartPart],
         ],
       },
     };
     expect(result1).toEqual(expectedResult1);
 
-    const result2 = appendAdditionalRangeQuery(field, exampleQuery, undefined, rangeEnd);
+    const result2 = appendAdditionalRangeQuery(field, undefined, exampleQuery, undefined, rangeEnd);
     const expectedResult2 = {
       bool: {
         must: [
+          expectedRangeEndPart,
           exampleQuery,
-          [expectedRangeEndPart],
         ],
       },
     };
@@ -74,7 +76,7 @@ describe('could append range limitation onto ES query object', () => {
   });
 
   test('with empty query', () => {
-    const result = appendAdditionalRangeQuery(field, undefined, rangeStart, rangeEnd);
+    const result = appendAdditionalRangeQuery(field, undefined, undefined, rangeStart, rangeEnd);
     const expectedResult = {
       bool: {
         must: [
@@ -86,7 +88,7 @@ describe('could append range limitation onto ES query object', () => {
     expect(result).toEqual(expectedResult);
 
     // all empty
-    const result2 = appendAdditionalRangeQuery(field, undefined);
+    const result2 = appendAdditionalRangeQuery(field, undefined, undefined);
     const expectedResult2 = undefined;
     expect(result2).toEqual(expectedResult2);
   });
@@ -859,6 +861,64 @@ describe('could aggregate for numeric fields, fixed bin count', () => {
         sum: 214.0,
       },
     ];
+    expect(result).toEqual(expectedResults);
+  });
+
+  test('fixed bin count, with nested field in query', async () => {
+    await esInstance.initialize();
+    const result = await numericHistogramWithFixedBinCount(
+      { esInstance, esIndex, esType },
+      {
+        field: 'days_to_follow_up', binCount: 4, nestedPath: 'visits.follow_ups',
+      },
+    );
+    const expectedResults = [
+      {
+        key: [
+          1,
+          1.75,
+        ],
+        count: 12,
+        min: 1,
+        max: 1,
+        avg: 1,
+        sum: 12,
+      },
+      {
+        key: [
+          2,
+          2.75,
+        ],
+        count: 19,
+        min: 2,
+        max: 2,
+        avg: 2,
+        sum: 38,
+      },
+      {
+        key: [
+          3,
+          3.75,
+        ],
+        count: 17,
+        min: 3,
+        max: 3,
+        avg: 3,
+        sum: 51,
+      },
+      {
+        key: [
+          4,
+          4.75,
+        ],
+        count: 6,
+        min: 4,
+        max: 4,
+        avg: 4,
+        sum: 24,
+      },
+    ];
+    error(JSON.stringify(result, null, 2));
     expect(result).toEqual(expectedResults);
   });
 });
