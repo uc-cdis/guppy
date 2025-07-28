@@ -1,6 +1,5 @@
 // eslint-disable-next-line
 import nock from 'nock'; // must import this to enable mock data by nock
-import { log, error } from 'console';
 import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
 import {
   appendAdditionalRangeQuery,
@@ -918,7 +917,6 @@ describe('could aggregate for numeric fields, fixed bin count', () => {
         sum: 24,
       },
     ];
-    error(JSON.stringify(result, null, 2));
     expect(result).toEqual(expectedResults);
   });
 });
