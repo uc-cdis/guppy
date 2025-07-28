@@ -149,6 +149,9 @@ export const appendAdditionalRangeQuery = (field, nestedPath, oldQuery, rangeSta
         oldQuery.bool.must.push(additionalRangeQuery);
         return oldQuery;
       }
+    } else {
+      additionalRangeQuery.bool.must.push(oldQuery);
+      return additionalRangeQuery;
     }
   }
   return oldQuery;
