@@ -26,7 +26,6 @@ export const resourcePathsWithServiceMethodCombination = (userAuthMapping, servi
 export const getAccessibleResourcesFromArboristasync = async (jwt) => {
   let data;
   if (config.internalLocalTest) {
-    log.info('debug');
     data = {
       // these are just for testing
       '/programs/DEV/projects/test': [
