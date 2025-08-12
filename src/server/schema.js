@@ -14,6 +14,7 @@ const esgqlTypeMapping = {
   scaled_float: 'Float',
   array: 'Object',
   nested: 'Object',
+  boolean: 'Int',
 };
 
 const histogramTypePrefix = 'RegularAccess';
@@ -68,6 +69,20 @@ const getQuerySchemaForType = (esType) => {
     ): [${esTypeObjName}]`;
 };
 
+const addMissingNestedFields = (fieldESTypeMap) => Object.keys(fieldESTypeMap).reduce((acc, field) => {
+  if ('properties' in fieldESTypeMap[field] && !('type' in fieldESTypeMap[field])) {
+    acc[field] = {
+      ...fieldESTypeMap[field],
+      type: 'nested',
+    };
+  } else {
+    acc[field] = {
+      ...fieldESTypeMap[field],
+    };
+  }
+  return acc;
+}, {});
+
 const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {
   const result = Object.keys(properties).map((field) => {
     const esFieldType = (properties[field].esType)
@@ -83,10 +98,13 @@ const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {
 
 const getFieldGQLTypeMapForOneIndex = (esInstance, esIndex) => {
   const fieldESTypeMap = esInstance.getESFieldTypeMappingByIndex(esIndex);
-  return getFieldGQLTypeMapForProperties(esInstance, esIndex, fieldESTypeMap);
+  // for each field, if it has properties, then it's a nested field' if there is no type field add one of type 'nested
+  const cleaned = addMissingNestedFields(fieldESTypeMap);
+  return getFieldGQLTypeMapForProperties(esInstance, esIndex, cleaned);
 };
 
 const getArgsByField = (fieldType, props) => {
+  console.log('getArgsByField', fieldType, props);
   const keys = Object.keys(props);
   const baseProps = [];
   keys.forEach((k) => {
@@ -123,7 +141,8 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
 
   while (queueTypes.length > 0) {
     const t = queueTypes.shift();
-    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties);
+    const cleaned = addMissingNestedFields(t.properties);
+    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, cleaned);
     gqlTypes.forEach((entry) => {
       if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
         queueTypes.push({ type: `${entry.field}`, properties: entry.properties });
@@ -201,12 +220,13 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
   while (fieldAggsNestedTypeMap.length > 0) {
     const entry = fieldAggsNestedTypeMap.shift();
     if (entry.field && entry.properties) {
-      AggsNestedTypeSchema += `type NestedHistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(entry.properties).map((propsKey) => {
-        const entryType = entry.properties[propsKey].type;
+      const properties = addMissingNestedFields(entry.properties);
+      AggsNestedTypeSchema += `type NestedHistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(properties).map((propsKey) => {
+        const entryType = properties[propsKey].type;
         if (entryType === 'nested') {
           fieldAggsNestedTypeMap.push({
             field: propsKey,
-            properties: entry.properties[propsKey].properties,
+            properties: properties[propsKey].properties,
           });
           return `
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
