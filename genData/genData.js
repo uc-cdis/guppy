@@ -154,6 +154,8 @@ async function run() {
   const { body: count } = await client.count({ index: esIndex });
   console.log(count);
 
+  console.log(arrayFields);
+
   if (configIndex) {
     const data = [
       {
