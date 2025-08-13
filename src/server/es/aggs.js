@@ -7,6 +7,7 @@ import {
   AGGS_QUERY_NAME,
 } from './const';
 import config from '../config';
+import log from '../logger';
 
 const PAGE_SIZE = 10000;
 
@@ -89,36 +90,69 @@ const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
  * This function appends extra range limitation onto a query body "oldQuery"
  * export for test
  * @param {string} field - which field to append range limitation to
+ * @param {string} nestedPath - the nested field path, if exists
  * @param {object} oldQuery  - the old query body to append
  * @param {number} rangeStart - the range start
  * @param {number} rangeEnd - the range end
  */
-export const appendAdditionalRangeQuery = (field, oldQuery, rangeStart, rangeEnd) => {
+export const appendAdditionalRangeQuery = (field, nestedPath, oldQuery, rangeStart, rangeEnd) => {
   const appendFilter = [];
+  let updatedFieldName = field;
+  if (nestedPath) {
+    updatedFieldName = `${nestedPath}.${field}`;
+  }
   if (typeof rangeStart !== 'undefined') {
     appendFilter.push({
       range: {
-        [field]: { gte: rangeStart },
+        [updatedFieldName]: { gte: rangeStart },
       },
     });
   }
   if (typeof rangeEnd !== 'undefined') {
     appendFilter.push({
       range: {
-        [field]: { lt: rangeEnd },
+        [updatedFieldName]: { lt: rangeEnd },
       },
     });
   }
   if (appendFilter.length > 0) {
-    const newQuery = {
+    let additionalRangeQuery = {
       bool: {
-        must: oldQuery ? [
-          oldQuery,
-          [...appendFilter],
-        ] : [...appendFilter],
+        must: [...appendFilter],
       },
     };
-    return newQuery;
+    // handle creating range query filter for nested fields
+    if (nestedPath) {
+      additionalRangeQuery = {
+        bool: {
+          must: [{
+            nested: {
+              path: nestedPath,
+              query: { ...additionalRangeQuery },
+            },
+          }],
+        },
+      };
+    }
+    if (!oldQuery) {
+      return additionalRangeQuery;
+    }
+    if ((oldQuery.bool || {}).must) {
+      if (!Array.isArray(oldQuery.bool.must)) {
+        log.debug(`Invalid query filter found during processing: ${JSON.stringify(oldQuery, null, 2)}`);
+        throw new GraphQLError('Invalid query filter found, check debug logging', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          },
+        });
+      } else {
+        oldQuery.bool.must.push(additionalRangeQuery);
+        return oldQuery;
+      }
+    } else {
+      additionalRangeQuery.bool.must.push(oldQuery);
+      return additionalRangeQuery;
+    }
   }
   return oldQuery;
 };
@@ -169,7 +203,7 @@ export const numericGlobalStats = async (
       defaultAuthFilter,
     );
   }
-  queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
+  queryBody.query = appendAdditionalRangeQuery(field, nestedPath, queryBody.query, rangeStart, rangeEnd);
   let aggsObj = {
     [AGGS_GLOBAL_STATS_NAME]: {
       stats: {
@@ -268,7 +302,7 @@ export const numericHistogramWithFixedRangeStep = async (
       nestedAggFields,
     );
   }
-  queryBody.query = appendAdditionalRangeQuery(field, queryBody.query, rangeStart, rangeEnd);
+  queryBody.query = appendAdditionalRangeQuery(field, nestedPath, queryBody.query, rangeStart, rangeEnd);
   const aggsObj = {
     [AGGS_GLOBAL_STATS_NAME]: {
       stats: {
