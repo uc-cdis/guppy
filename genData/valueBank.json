@@ -1,16 +1,79 @@
 {
-    "gender": ["male", "female", "unknown"],
-    "ethnicity": ["American Indian", "Pacific Islander", "Black", "Multi-racial", "White", "Haspanic" ],
-    "race": ["white", "black", "hispanic", "asian", "mixed", "not reported" ],
-    "vital_status": ["Alive", "Dead", "no data" ],
-    "file_type": ["mRNA Array", "Unaligned Reads", "Lipdomic MS", "Protionic MS", "1Gs Ribosomes", "Unknown" ],
-    "file_format": ["BEM", "BAM", "BED", "CSV", "FASTQ", "RAW", "TAR", "TSV", "TXT", "IDAT" ],
-    "auth_resource_path": ["/programs/jnkns/projects/jenkins", "/programs/DEV/projects/test", "/programs/external/projects/test"],
-    "sensitive": [ "true", "false" ],
-    "study": ["study_1", "study_2", "study_3"],
-    "file_id": ["file_id_1", "file_id_2", "file_id_3"],
-    "subject_id": ["subject_id_1", "subject_id_2", "subject_id_3"],
-    "project": ["jnkns-jenkins", "DEV-test", "external-test" ],
+    "gender": [
+        "male",
+        "female",
+        "unknown"
+    ],
+    "ethnicity": [
+        "American Indian",
+        "Pacific Islander",
+        "Black",
+        "Multi-racial",
+        "White",
+        "Haspanic"
+    ],
+    "race": [
+        "white",
+        "black",
+        "hispanic",
+        "asian",
+        "mixed",
+        "not reported"
+    ],
+    "vital_status": [
+        "Alive",
+        "Dead",
+        "no data"
+    ],
+    "file_type": [
+        "mRNA Array",
+        "Unaligned Reads",
+        "Lipdomic MS",
+        "Protionic MS",
+        "1Gs Ribosomes",
+        "Unknown"
+    ],
+    "file_format": [
+        "BEM",
+        "BAM",
+        "BED",
+        "CSV",
+        "FASTQ",
+        "RAW",
+        "TAR",
+        "TSV",
+        "TXT",
+        "IDAT"
+    ],
+    "auth_resource_path": [
+        "/programs/jnkns/projects/jenkins",
+        "/programs/DEV/projects/test",
+        "/programs/external/projects/test"
+    ],
+    "sensitive": [
+        "true",
+        "false"
+    ],
+    "study": [
+        "study_1",
+        "study_2",
+        "study_3"
+    ],
+    "file_id": [
+        "file_id_1",
+        "file_id_2",
+        "file_id_3"
+    ],
+    "subject_id": [
+        "subject_id_1",
+        "subject_id_2",
+        "subject_id_3"
+    ],
+    "project": [
+        "jnkns-jenkins",
+        "DEV-test",
+        "external-test"
+    ],
     "visits": [
         {
             "days_to_visit": 1,
@@ -20,11 +83,12 @@
                 "follow_up_label": "flup_lbl_1"
             },
             "treatments_array_under_subjects": [
-                        {
-                            "submitter_id": "treatment_1",
-                            "dose_amount": 1
-                        }
-                    ]
+                {
+                    "submitter_id": "treatment_1",
+                    "dose_amount": 1,
+                    "test_article_name_array_under_treatments": ["article_1a", "article_1b"]
+                }
+            ]
         },
         {
             "days_to_visit": 2,
@@ -34,11 +98,12 @@
                 "follow_up_label": "flup_lbl_2"
             },
             "treatments_array_under_subjects": [
-                        {
-                            "submitter_id": "treatment_2",
-                            "dose_amount": 2
-                        }
-                    ]
+                {
+                    "submitter_id": "treatment_2",
+                    "dose_amount": 2,
+                    "test_article_name_array_under_treatments": ["article_2a", "article_2b"]
+                }
+            ]
         },
         {
             "days_to_visit": 3,
@@ -48,43 +113,44 @@
                 "follow_up_label": "flup_lbl_3"
             },
             "treatments_array_under_subjects": [
-                        {
-                            "submitter_id": "treatment_3",
-                            "dose_amount": 3
-                        }
-                    ]
+                {
+                    "submitter_id": "treatment_3",
+                    "dose_amount": 3,
+                    "test_article_name_array_under_treatments": ["article_3a", "article_3b"]
+                }
+            ]
         }
     ],
     "some_nested_array_field": [
         [
             {
-              "some_integer_inside_nested": 1,
-              "some_string_inside_nested": "first"
+                "some_integer_inside_nested": 1,
+                "some_string_inside_nested": "first"
             },
             {
                 "some_integer_inside_nested": 2,
                 "some_string_inside_nested": "second"
-              }
+            }
         ],
         [
             {
-              "some_integer_inside_nested": 3,
-              "some_string_inside_nested": "third"
+                "some_integer_inside_nested": 3,
+                "some_string_inside_nested": "third"
             },
             {
                 "some_integer_inside_nested": 4,
                 "some_string_inside_nested": "forth"
-              }
+            }
         ],
         [
             {
-              "some_integer_inside_nested": 5,
-              "some_string_inside_nested": "fifth"
+                "some_integer_inside_nested": 5,
+                "some_string_inside_nested": "fifth"
             },
             {
                 "some_integer_inside_nested": 6,
                 "some_string_inside_nested": "sixth"
-              }
+            }
         ]
     ]
 }

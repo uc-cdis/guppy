@@ -10,11 +10,7 @@ function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
         fieldType = {
           type: 'array', items: { type: 'boolean', properties, required }, minItems: 0, maxItems: 10,
         };
-        if (nestedFieldKeys.length) {
-          arrayFields.push(nestedFieldKeys.join('.'));
-        } else {
-          arrayFields.push(key);
-        }
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'boolean' };
       }
@@ -30,11 +26,7 @@ function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
           minItems: 0,
           maxItems: 10,
         };
-        if (nestedFieldKeys.length) {
-          arrayFields.push(nestedFieldKeys.join('.'));
-        } else {
-          arrayFields.push(key);
-        }
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'string', faker: 'name.findName' };
       }
@@ -45,11 +37,7 @@ function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
         fieldType = {
           type: 'array', items: { type: 'number', properties, required }, minItems: 0, maxItems: 10,
         };
-        if (nestedFieldKeys.length) {
-          arrayFields.push(nestedFieldKeys.join('.'));
-        } else {
-          arrayFields.push(key);
-        }
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'number' };
       }
@@ -60,11 +48,7 @@ function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
         fieldType = {
           type: 'array', items: { type: 'integer', properties, required }, minItems: 0, maxItems: 10,
         };
-        if (nestedFieldKeys.length) {
-          arrayFields.push(nestedFieldKeys.join('.'));
-        } else {
-          arrayFields.push(key);
-        }
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'integer' };
       }
@@ -79,6 +63,7 @@ function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
         type: 'array', items: { type: 'object', properties, required }, minItems: 0, maxItems: 10,
       };
       if (key.includes('array')) {
+        // since we already pushed the current key into this array
         if (nestedFieldKeys.length) {
           arrayFields.push(nestedFieldKeys.join('.'));
         } else {
