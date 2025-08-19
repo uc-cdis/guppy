@@ -14,6 +14,7 @@ const esgqlTypeMapping = {
   scaled_float: 'Float',
   array: 'Object',
   nested: 'Object',
+  boolean: 'Int'
 };
 
 const histogramTypePrefix = 'RegularAccess';
