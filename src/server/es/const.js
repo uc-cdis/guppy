@@ -6,10 +6,12 @@ export const AGGS_ITEM_STATS_NAME = 'numeric_item_aggs_stats';
 export const NumericTextTypeTypeEnum = {
   ES_NUMERIC_TYPE: 1,
   ES_TEXT_TYPE: 2,
+  ES_BOOLEAN_TYPE: 3,
 };
 
 export const esFieldNumericTextTypeMapping = {
   keyword: NumericTextTypeTypeEnum.ES_TEXT_TYPE,
+  boolean: NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE,
   integer: NumericTextTypeTypeEnum.ES_NUMERIC_TYPE,
   long: NumericTextTypeTypeEnum.ES_NUMERIC_TYPE,
   short: NumericTextTypeTypeEnum.ES_NUMERIC_TYPE,
