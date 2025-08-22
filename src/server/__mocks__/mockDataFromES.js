@@ -325,6 +325,28 @@ const mockESMapping = () => {
                   },
                 },
               },
+              treatments_array_under_subjects: {
+                type: 'nested',
+                properties: {
+                  dose_amount: { type: 'integer' },
+                  test_article_name_array_under_treatments: {
+                    type: 'keyword',
+                    fields: {
+                      analyzed: {
+                        type: 'text', analyzer: 'ngram_analyzer', search_analyzer: 'search_analyzer', term_vector: 'with_positions_offsets',
+                      },
+                    },
+                  },
+                  submitter_id: {
+                    type: 'keyword',
+                    fields: {
+                      analyzed: {
+                        type: 'text', analyzer: 'ngram_analyzer', search_analyzer: 'search_analyzer', term_vector: 'with_positions_offsets',
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
           gender: {
@@ -393,7 +415,7 @@ const mockArrayConfig = () => {
           _id: 'gen3-dev-subject',
           _score: 1.0,
           _source: {
-            array: ['some_array_integer_field', 'some_array_string_field'],
+            array: ['some_array_integer_field', 'some_array_string_field', 'visits.treatments_array_under_subjects', 'visits.treatments_array_under_subjects.test_article_name_array_under_treatments'],
           },
         },
       ],
