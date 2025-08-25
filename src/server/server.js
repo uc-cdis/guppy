@@ -19,14 +19,11 @@ import headerParser from './utils/headerParser';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
-
-
 import { statusRouter, versionRouter } from './endpoints';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
   return makeExecutableSchema({ typeDefs, resolvers });
 }
-
 
 // set the prefix for each index schema
 function prefixForIndex(cfg) {
@@ -34,7 +31,7 @@ function prefixForIndex(cfg) {
   return cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());
 }
 
-// 3) Create subschemas with transforms
+// Create subschemas with transforms
 function buildSubschema(schema, prefix) {
 
   const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'Date', 'DateTime']);

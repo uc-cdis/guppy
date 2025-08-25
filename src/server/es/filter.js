@@ -316,6 +316,7 @@ const getFilterObj = (
 
     const filterRange = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
+      console.log("filterItem", filterItem);
       const filterObj = getFilterObj(
         esInstance,
         esIndex,
@@ -331,6 +332,8 @@ const getFilterObj = (
         } else {
           boolItemsList.push(filterObj);
         }
+      } else {
+        console.log("filterObj is null", filterItem);
       }
     });
 
