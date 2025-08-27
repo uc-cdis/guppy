@@ -45,6 +45,7 @@ const getNumericTextType = (
     throw new GraphQLError('Please check your syntax for input "filter" argument', {
       extensions: {
         code: 'BAD_USER_INPUT',
+        message: `Field ${field} does not exist in ES index ${esIndex}`,
       },
     });
   }
