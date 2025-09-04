@@ -159,9 +159,8 @@ const cardinalityResolver = async (parent, args) => {
 // Add a resolver for _totalCount that is nested-aware
 const totalCountResolver = async (parent) => {
   const {
-    field, filter, filterSelf, defaultAuthFilter, nestedPath,
+    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType
   } = parent;
-  const { esInstance, esIndex, esType } = parent;
 
   // Count the number of documents that have a value for the given field,
   // respecting nestedPath when provided.
