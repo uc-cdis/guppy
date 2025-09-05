@@ -115,26 +115,24 @@ const mockHistogramFixBinCount = () => {
       bool: {
         must: [
           {
+            range: {
+              file_count: {
+                gte: 2,
+              },
+            },
+          },
+          {
+            range: {
+              file_count: {
+                lt: 99,
+              },
+            },
+          },
+          {
             term: {
               gender: 'female',
             },
           },
-          [
-            {
-              range: {
-                file_count: {
-                  gte: 2,
-                },
-              },
-            },
-            {
-              range: {
-                file_count: {
-                  lt: 99,
-                },
-              },
-            },
-          ],
         ],
       },
     },
@@ -336,26 +334,27 @@ const mockHistogramFixBinCount = () => {
       bool: {
         must: [
           {
-            terms: {
-              gen3_resource_path: ['internal-project-1', 'internal-project-2'],
+            range: {
+              file_count: {
+                gte: 20,
+              },
             },
           },
-          [
-            {
-              range: {
-                file_count: {
-                  gte: 20,
-                },
+          {
+            range: {
+              file_count: {
+                lt: 81,
               },
             },
-            {
-              range: {
-                file_count: {
-                  lt: 81,
-                },
-              },
+          },
+          {
+            terms: {
+              gen3_resource_path: [
+                'internal-project-1',
+                'internal-project-2',
+              ],
             },
-          ],
+          },
         ],
       },
     },
@@ -442,6 +441,134 @@ const mockHistogramFixBinCount = () => {
     },
   };
   mockSearchEndpoint(fileCountHistogramFixBinCountQuery3, fileCountHistogramFixBinCountResult3);
+
+  // with nestedPath and binCount applied
+  const fileCountHistogramFixBinCountQuery4 = {
+    size: 0,
+    query: {
+      bool: {
+        must: [
+          {
+            nested: {
+              path: 'visits.follow_ups',
+              query: {
+                bool: {
+                  must: [
+                    {
+                      range: {
+                        'visits.follow_ups.days_to_follow_up': {
+                          gte: 1,
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        'visits.follow_ups.days_to_follow_up': {
+                          lt: 4,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      numeric_nested_aggs: {
+        nested: {
+          path: 'visits.follow_ups',
+        },
+        aggs: {
+          numeric_aggs_stats: {
+            stats: {
+              field: 'visits.follow_ups.days_to_follow_up',
+            },
+          },
+          numeric_aggs: {
+            histogram: {
+              field: 'visits.follow_ups.days_to_follow_up',
+              interval: 0.75,
+              offset: 0.25,
+            },
+            aggs: {
+              numeric_item_aggs_stats: {
+                stats: {
+                  field: 'visits.follow_ups.days_to_follow_up',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    track_total_hits: true,
+  };
+  const fileCountHistogramFixBinCountResult4 = {
+    aggregations: {
+      numeric_nested_aggs: {
+        doc_count: 31,
+        numeric_aggs: {
+          buckets: [
+            {
+              key: 1.0,
+              doc_count: 12,
+              numeric_item_aggs_stats: {
+                count: 12,
+                min: 1.0,
+                max: 1.0,
+                avg: 1.0,
+                sum: 12.0,
+              },
+            },
+            {
+              key: 2.0,
+              doc_count: 19,
+              numeric_item_aggs_stats: {
+                count: 19,
+                min: 2.0,
+                max: 2.0,
+                avg: 2.0,
+                sum: 38.0,
+              },
+            },
+            {
+              key: 3.0,
+              doc_count: 17,
+              numeric_item_aggs_stats: {
+                count: 17,
+                min: 3.0,
+                max: 3.0,
+                avg: 3.0,
+                sum: 51.0,
+              },
+            },
+            {
+              key: 4.0,
+              doc_count: 6,
+              numeric_item_aggs_stats: {
+                count: 6,
+                min: 4.0,
+                max: 4.0,
+                avg: 4.0,
+                sum: 24.0,
+              },
+            },
+          ],
+        },
+        numeric_aggs_stats: {
+          count: 54,
+          min: 1.0,
+          max: 4.0,
+          avg: 2.31481481481,
+          sum: 125.0,
+        },
+      },
+    },
+  };
+  mockSearchEndpoint(fileCountHistogramFixBinCountQuery4, fileCountHistogramFixBinCountResult4);
 };
 
 export default mockHistogramFixBinCount;
