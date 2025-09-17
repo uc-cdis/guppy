@@ -136,12 +136,19 @@ const textHistogramResolver = async (parent, args, context) => {
  * @param {object} args
  */
 // This resolver is used for _cardinalityCount
-const cardinalityResolver = async (parent, args) => {
+const cardinalityResolver = async (parent, args, context) => {
+  const { precision_threshold } = args; // eslint-disable-line camelcase
   const {
-    // eslint-disable-next-line camelcase
-    field, filter, filterSelf, defaultAuthFilter, precision_threshold, nestedPath,
-  } = args;
-  const { esInstance, esIndex, esType } = parent;
+    esInstance, esIndex, esType,
+    field, filter, filterSelf, nestedPath, accessibility, defaultAuthFilter: parentDefaultAuthFilter,
+  } = parent;
+
+  // Align behavior with other resolvers: compute defaultAuthFilter from accessibility if not provided
+  let defaultAuthFilter = parentDefaultAuthFilter;
+  if (!defaultAuthFilter && context && context.authHelper && typeof context.authHelper.getDefaultFilter === 'function') {
+    defaultAuthFilter = await context.authHelper.getDefaultFilter(accessibility);
+  }
+
   return esAggregator.textCardinalityCount(
     { esInstance, esIndex, esType },
     {
@@ -149,8 +156,7 @@ const cardinalityResolver = async (parent, args) => {
       field,
       filterSelf,
       defaultAuthFilter,
-      // eslint-disable-next-line camelcase
-      precision_threshold,
+      precision_threshold, // eslint-disable-line camelcase
       nestedPath,
     },
   );
