@@ -45,6 +45,7 @@ const getNumericTextType = (
     throw new GraphQLError('Please check your syntax for input "filter" argument', {
       extensions: {
         code: 'BAD_USER_INPUT',
+        message: `Field ${field} does not exist in ES index ${esIndex}`,
       },
     });
   }
@@ -204,6 +205,46 @@ const getFilterItemForNumbers = (op, pField, value, path) => {
   });
 };
 
+// Add boolean handler
+const getFilterItemForBoolean = (op, pField, value, path) => {
+  const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
+  switch (op) {
+    case '=':
+    case 'eq':
+    case 'EQ':
+      return {
+        term: {
+          [field]: value,
+        },
+      };
+    case 'in':
+    case 'IN':
+      return {
+        terms: {
+          [field]: value,
+        },
+      };
+    case '!=':
+      return {
+        bool: {
+          must_not: [
+            {
+              term: {
+                [field]: value,
+              },
+            },
+          ],
+        },
+      };
+    default:
+      throw new GraphQLError(`Invalid boolean operation "${op}" for field "${field}" in filter argument`, {
+        extensions: {
+          code: 'BAD_USER_INPUT',
+        },
+      });
+  }
+};
+
 const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
   let analyzedFields = [`*${config.analyzedTextFieldSuffix}`]; // search all fields by default
   if (typeof fields !== 'undefined') {
@@ -276,6 +317,7 @@ const getFilterObj = (
 
     const filterRange = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
+      console.log("filterItem", filterItem);
       const filterObj = getFilterObj(
         esInstance,
         esIndex,
@@ -291,6 +333,8 @@ const getFilterObj = (
         } else {
           boolItemsList.push(filterObj);
         }
+      } else {
+        console.log("filterObj is null", filterItem);
       }
     });
 
@@ -382,13 +426,29 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    const numericOrTextType = getNumericTextType(esInstance, esIndex, field, objPath);
-    if (numericOrTextType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
+    const numericOrTextOrBooleanType = getNumericTextType(esInstance, esIndex, field, objPath);
+    switch (numericOrTextOrBooleanType) {
+      case NumericTextTypeTypeEnum.ES_TEXT_TYPE:
+        resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
+        break;
+      case NumericTextTypeTypeEnum.ES_NUMERIC_TYPE:
+        resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
+        break;
+      case NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE:
+        resultFilterObj = getFilterItemForBoolean(topLevelOp, field, value, objPath);
+        break;
+      default:
+        throw new GraphQLError(`Invalid es field type ${numericOrTextOrBooleanType}`, {})
+    }
+    if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
-    } else if (numericOrTextType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
+    } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
       resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
+    // add boolean support
+    } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE) {
+      resultFilterObj = getFilterItemForBoolean(topLevelOp, field, value, objPath);
     } else {
-      throw new GraphQLError(`Invalid es field type ${numericOrTextType}`, {
+      throw new GraphQLError(`Invalid es field type ${numericOrTextOrBooleanType}`, {
         extensions: {
           code: 'INTERNAL_SERVER_ERROR',
         },

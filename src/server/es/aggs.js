@@ -725,3 +725,95 @@ export const textAggregation = async (
   }
   return finalResults;
 };
+
+/**
+ * Cardinality count for a text (or keyword) field.
+ * Supports nested fields via nestedPath and honors filterSelf/defaultAuthFilter semantics.
+ * @param {object} param0 - { esInstance, esIndex, esType }
+ * @param {object} param1 - args:
+ *   - filter
+ *   - field (required)
+ *   - filterSelf
+ *   - defaultAuthFilter
+ *   - precision_threshold (optional)
+ *   - nestedPath (optional)
+ * @returns {number} cardinality value
+ */
+export const textCardinalityCount = async (
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
+  {
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    precision_threshold, // eslint-disable-line camelcase
+    nestedPath,
+  },
+) => {
+  if (!field) {
+    throw new GraphQLError('textCardinalityCount requires "field" argument', {
+      extensions: { code: 'BAD_USER_INPUT' },
+    });
+  }
+
+  const queryBody = { size: 0 };
+
+  // Build filter with filterSelf/defaultAuthFilter semantics
+  const esFilter = getFilterObj(
+    esInstance,
+    esIndex,
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+  );
+  if (esFilter) {
+    queryBody.query = esFilter;
+  }
+
+  const targetField = nestedPath ? `${nestedPath}.${field}` : field;
+  const cardinalityAgg = {
+    cardinality: {
+      field: targetField,
+      // eslint-disable-next-line camelcase
+      ...(typeof precision_threshold !== 'undefined' ? { precision_threshold } : {}),
+    },
+  };
+
+  const aggsObj = {
+    [AGGS_GLOBAL_STATS_NAME]: cardinalityAgg,
+  };
+
+  if (nestedPath) {
+    queryBody.aggs = {
+      [AGGS_NESTED_QUERY_NAME]: {
+        nested: { path: nestedPath },
+        aggs: { ...aggsObj },
+      },
+    };
+  } else {
+    queryBody.aggs = aggsObj;
+  }
+
+  const result = await esInstance.query(esIndex, esType, queryBody);
+  const aggs = result && result.aggregations ? result.aggregations : undefined;
+
+  let node;
+  if (nestedPath) {
+    node = aggs
+      && aggs[AGGS_NESTED_QUERY_NAME]
+      && aggs[AGGS_NESTED_QUERY_NAME][AGGS_GLOBAL_STATS_NAME];
+  } else {
+    node = aggs && aggs[AGGS_GLOBAL_STATS_NAME];
+  }
+
+  if (!node || typeof node.value !== 'number') {
+    log.debug('[textCardinalityCount] Unexpected aggregation result:', JSON.stringify(result.aggregations, null, 2));
+    return 0;
+  }
+  return node.value;
+};

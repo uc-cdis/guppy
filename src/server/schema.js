@@ -14,6 +14,7 @@ const esgqlTypeMapping = {
   scaled_float: 'Float',
   array: 'Object',
   nested: 'Object',
+  boolean: 'Boolean',
 };
 
 const histogramTypePrefix = 'RegularAccess';
@@ -51,6 +52,8 @@ const gqlTypeToAggsHistogramName = {
   '[String]': EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
   '[Int]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
   '[Float]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
+  Boolean: EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
+  '[Boolean]': EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
 };
 
 const getAggsHistogramName = (gqlType) => {

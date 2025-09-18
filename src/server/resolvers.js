@@ -4,6 +4,7 @@ import _ from 'lodash';
 import log from './logger';
 import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
+import * as esAggregator from './es/aggs';
 
 /**
  * This is for getting raw data, by specific es index and es type
