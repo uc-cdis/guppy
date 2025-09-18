@@ -80,6 +80,14 @@ curl -iv -X PUT "${ESHOST}/${indexName}" \
                 "days_to_follow_up": { "type": "integer" },
                 "follow_up_label": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } }
               }
+            },
+            "treatments_array_under_subjects": {
+              "type": "nested",
+              "properties": {
+                "dose_amount": { "type": "integer" },
+                "test_article_name_array_under_treatments": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } },
+                "submitter_id": { "type": "keyword", "fields": { "analyzed": {"type": "text", "analyzer": "ngram_analyzer", "search_analyzer": "search_analyzer", "term_vector": "with_positions_offsets"} } }
+              }
             }
           }
         },
