@@ -902,3 +902,142 @@ export const textCardinalityCount = async (
   }
   return node.value;
 };
+
+/**
+ * This function does aggregation for text field, and returns histogram
+ * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
+ * @param {object} param1 - some graphql related arguments
+ * @param {object} param1.filter - filter (if any) to apply on aggregation
+ * @param {object} param1.field - field to aggregate. Required
+ * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
+ * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
+ *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
+ */
+export const topNAggregation = async (
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
+  {
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    nestedAggFields,
+    nestedPath,
+    size,
+    offset,
+  },
+) => {
+  const queryBody = { size: 0 };
+  if (!!filter || !!defaultAuthFilter) {
+    queryBody.query = getFilterObj(
+      esInstance,
+      esIndex,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+    );
+  }
+
+  // don't add missing alias to numeric field by default
+  // since the value of missing alias is a string
+  const aggsName = `${field}Aggs`;
+  const aggsObj = {};
+  let aggsNestedName;
+  let fieldNestedName;
+  if (nestedPath) {
+    aggsNestedName = `${field}NestedAggs`;
+    fieldNestedName = `${nestedPath}.${field}`;
+  }
+
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    aggsObj.aggs = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj.aggs);
+  }
+
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
+  }
+
+  // build up ES query if is nested aggregation
+  if (aggsNestedName) {
+    queryBody.aggs = {
+      [aggsNestedName]: {
+        nested: {
+          path: nestedPath,
+        },
+        aggs: {
+          [aggsName]: {
+            terms: {
+              field: fieldNestedName,
+              size: PAGE_SIZE,
+              order: {
+                _count: 'desc',
+              },
+            },
+            aggs: {
+              page: {
+                bucket_sort: {
+                  sort: [{ _count: { order: 'desc' } }],
+                  from: offset, // offset
+                  size, // page size
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  } else {
+    queryBody.aggs = {
+      [aggsName]: {
+        terms: {
+          field,
+          size: PAGE_SIZE,
+          order: {
+            _count: 'desc',
+          },
+        },
+        aggs: {
+          page: {
+            bucket_sort: {
+              sort: [{ _count: { order: 'desc' } }],
+              from: offset, // offset
+              size, // page size
+            },
+          },
+        },
+      },
+    };
+  }
+  let resultSize;
+  const finalResults = [];
+  /* eslint-disable */
+  do {
+    // parse ES query result based on whether is doing nested aggregation or not (if `aggsNestedName` is defined)
+    const result = await esInstance.query(esIndex, esType, queryBody);
+    resultSize = 0;
+
+    const resultBuckets = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].buckets : result.aggregations[aggsName].buckets;
+    resultBuckets.forEach((item) => {
+      const resultObj = processResultsForNestedAgg (nestedAggFields, item, {})
+      finalResults.push({
+        key: (fieldNestedName)? item.key[fieldNestedName] : item.key[field],
+        count: item.doc_count,
+        ...resultObj
+      });
+      resultSize += 1;
+    });
+    const afterKey = (aggsNestedName) ? result.aggregations[aggsNestedName][aggsName].after_key : result.aggregations[aggsName].after_key;
+    if (typeof afterKey === 'undefined') break;
+    (aggsNestedName) ? queryBody.aggs[aggsNestedName].aggs[aggsName].composite.after = afterKey : queryBody.aggs[aggsName].composite.after = afterKey;
+  } while (resultSize === PAGE_SIZE);
+  /* eslint-enable */
+
+  return finalResults;
+};

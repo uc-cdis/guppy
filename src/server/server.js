@@ -20,6 +20,7 @@ import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
 import { statusRouter, versionRouter } from './endpoints';
+import { buildCustomGeneSchema } from './resolvers/topGenes';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
   return makeExecutableSchema({ typeDefs, resolvers });
@@ -33,7 +34,6 @@ function prefixForIndex(cfg) {
 
 // Create subschemas with transforms
 function buildSubschema(schema, prefix) {
-
   const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'Date', 'DateTime']);
 
   return {
@@ -49,8 +49,11 @@ function buildSubschema(schema, prefix) {
 // 4) Stitch them all together
 function stitchIndexSchemas(indexSchemas) {
   return stitchSchemas({
-    subschemas: indexSchemas.map(({ schema, prefix }) => buildSubschema(schema, prefix)),
+    subschemas: [
+      ...indexSchemas.map(({ schema, prefix }) => buildSubschema(schema, prefix)),
+      { schema: buildCustomGeneSchema(), prefix: 'Gene' },
     // Optionally define top-level glue types/unions/interfaces or shared scalars here
+    ],
   });
 }
 
@@ -74,9 +77,9 @@ const startServer = async () => {
 
   const stitchedSchema = stitchIndexSchemas(perIndex);
 
-/// /  const typeDefs = getSchema(config.esConfig, esInstance);
-/// /  const resolvers = getResolver(config.esConfig, esInstance);
- /// const schema = makeExecutableSchema({ typeDefs, resolvers });
+  /// /  const typeDefs = getSchema(config.esConfig, esInstance);
+  /// /  const resolvers = getResolver(config.esConfig, esInstance);
+  /// const schema = makeExecutableSchema({ typeDefs, resolvers });
   const schemaWithMiddleware = applyMiddleware(stitchedSchema, ...middlewares);
   // create graphql server instance
   server = new ApolloServer({

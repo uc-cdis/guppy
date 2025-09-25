@@ -242,7 +242,8 @@ const getNumberHistogramSchema = (isRegularAccess) => `
         rangeStep: Int,
         binCount: Int,
       ): [BucketsForNestedNumberAgg],
-      asTextHistogram: [BucketsForNestedStringAgg]
+      asTextHistogram: [BucketsForNestedStringAgg],
+      topN(offset: Int = 0, size: Int = 10): [BucketsForNestedStringAgg]
     }
   `;
 
@@ -251,7 +252,8 @@ const getTextHistogramSchema = (isRegularAccess) => `
       _totalCount: Int,
       _cardinalityCount(precision_threshold: Int = 3000): Int,
       histogram: [BucketsForNestedStringAgg],
-      asTextHistogram: [BucketsForNestedStringAgg]
+      asTextHistogram: [BucketsForNestedStringAgg],
+      topN(offset: Int = 0, size: Int = 10): [BucketsForNestedStringAgg]
     }
   `;
 

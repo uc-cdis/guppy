@@ -5,6 +5,8 @@ import log from './logger';
 import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
 import * as esAggregator from './es/aggs';
+// eslint-disable-next-line no-unused-vars
+import { topNAggregation } from './es/aggs';
 
 /**
  * This is for getting raw data, by specific es index and es type
@@ -129,6 +131,38 @@ const textHistogramResolver = async (parent, args, context) => {
 };
 
 /**
+ * This resolver is for text aggregation.
+ * It inherits arguments from its parent,
+ * and then calls text aggregation function, and finally returns response
+ * @param {object} parent
+ * @param {object} args
+ * @param {object} context
+ */
+// eslint-disable-next-line no-unused-vars
+const topNResolver = async (parent, args, context) => {
+  log.debug('[resolver.textHistogramResolver] args', args);
+  const {
+    esInstance, esIndex, esType,
+    filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, offset, size,
+  } = parent;
+  log.debug('[resolver.textHistogramResolver] parent', parent);
+  const { authHelper } = context;
+  const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
+  return esInstance.topNAggregation({
+    esIndex,
+    esType,
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    nestedAggFields,
+    nestedPath,
+    offset,
+    size,
+  });
+};
+
+/**
  * This resolver is for Cardinality.
  * It inherits arguments from its parent,
  * and uses "field" from parent and args "precision_threshold" to get the cardinality count
@@ -165,7 +199,7 @@ const cardinalityResolver = async (parent, args, context) => {
 // Add a resolver for _totalCount that is nested-aware
 const totalCountResolver = async (parent) => {
   const {
-    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType
+    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType,
   } = parent;
 
   // Count the number of documents that have a value for the given field,
@@ -299,6 +333,27 @@ const getResolver = (esConfig, esInstance) => {
     return acc;
   }, {});
 
+  const typeTopNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
+    const { fields } = esInstance.getESFields(cfg.index);
+    const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
+
+    // similar level by level "flatten" logic as for schema
+    while (nestedFieldsArray.length > 0) {
+      const nestedFields = nestedFieldsArray.shift();
+      const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
+      acc[typeNestedAggsName] = {};
+      if (nestedFields.type === 'nested' && nestedFields.nestedProps) {
+        nestedFields.nestedProps.forEach((props) => {
+          if (props.type === 'nested') {
+            nestedFieldsArray.push(props);
+          }
+          acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
+        });
+      }
+    }
+    return acc;
+  }, {});
+
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
     log.debug(`${cfg.index} `, esInstance.getESFields(cfg.index));
     acc[cfg.type] = filterFieldMapping(
@@ -323,29 +378,34 @@ const getResolver = (esConfig, esInstance) => {
     },
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
+    ...typeTopNestedAggregationResolvers,
     HistogramForString: {
       _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
       asTextHistogram: textHistogramResolver,
+      topN: topNResolver,
     },
     RegularAccessHistogramForString: {
       _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
       asTextHistogram: textHistogramResolver,
+      topN: topNResolver,
     },
     HistogramForNumber: {
       _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
+      topN: topNResolver,
     },
     RegularAccessHistogramForNumber: {
       _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
+      topN: topNResolver,
     },
     Mapping: {
       ...mappingResolvers,

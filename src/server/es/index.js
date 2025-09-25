@@ -9,6 +9,7 @@ import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
 import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
+import { topNAggregation } from './aggs';
 
 class ES {
   constructor(esConfig = config.esConfig) {
@@ -424,6 +425,17 @@ class ES {
         queryBody._source = false;
       }
     }
+
+    // Enable score computation when sorting by fields other than _score
+    // ES only computes and returns scores by default when no sort is specified,
+    // so request tracking if the client may need _score values.
+    if (Array.isArray(queryBody.sort) && queryBody.sort.length > 0) {
+      const sortsByScoreOnly = queryBody.sort.every((s) => Object.prototype.hasOwnProperty.call(s, '_score'));
+      if (!sortsByScoreOnly) {
+        queryBody.track_scores = true;
+      }
+    }
+
     return this.query(esIndex, esType, queryBody);
   }
 
@@ -501,7 +513,11 @@ class ES {
     const hitsWithMatchedResults = hits.map((h) => {
       if (!('highlight' in h)) {
         // ES doesn't returns "highlight"
-        return h._source;
+        return {
+          ...h._source,
+          // expose ES score when available
+          score: typeof h._score === 'number' ? h._score : null,
+        };
       }
       // ES returns highlight, transfer them into "_matched" schema
       const matchedList = Object.keys(h.highlight).map((f) => {
@@ -520,6 +536,8 @@ class ES {
       return {
         ...h._source,
         _matched: matchedList,
+        // expose ES score when available
+        score: typeof h._score === 'number' ? h._score : null,
       };
     });
     return hitsWithMatchedResults;
@@ -598,6 +616,37 @@ class ES {
         nestedAggFields,
         nestedPath,
         isNumericField,
+      },
+    );
+  }
+
+  topTermsAggregation({
+    esIndex,
+    esType,
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    nestedAggFields,
+    nestedPath,
+    offset,
+    size,
+  }) {
+    return esAggregator.topNAggregation(
+      {
+        esInstance: this,
+        esIndex,
+        esType,
+      },
+      {
+        filter,
+        field,
+        filterSelf,
+        defaultAuthFilter,
+        nestedAggFields,
+        nestedPath,
+        offset,
+        size,
       },
     );
   }

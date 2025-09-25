@@ -444,7 +444,6 @@ const getFilterObj = (
       resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
     } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
       resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
-    // add boolean support
     } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE) {
       resultFilterObj = getFilterItemForBoolean(topLevelOp, field, value, objPath);
     } else {
