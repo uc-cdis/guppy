@@ -28,8 +28,8 @@ async function fetchTopGenes({ first, offset, filter, accessibility }, context) 
     { esIndex, esType: 'gene' },
     {
       filter: defaultAuthFilter,
-      fields: ['gene_id', 'gene_symbol', 'gene_name'],
-      sort: [{ _score: 'desc' }], // adjust if you have a better metric
+      fields: geneFields,
+      //sort: [{ _score: 'desc' }], // adjust if you have a better metric
       offset: offset || 0,
       size: first || 20,
     },

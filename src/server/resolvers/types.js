@@ -4,8 +4,7 @@ export const geneTypes = `
   scalar JSON
 
   type TopGeneItem {
-    filter: JSON
-    first: Int
-    offset: Int
+    genes: JSON
+    total: Int
   }
 `;
