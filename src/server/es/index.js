@@ -10,6 +10,40 @@ import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
 import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
 
+function processArrayConfig(arrayConfig, fieldTypes) {
+  const arrayFields = [];
+
+  arrayConfig.forEach((doc) => {
+    const index = doc._id;
+    if (!fieldTypes[index]) {
+      const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
+      log.error(errMsg);
+      return;
+    }
+    const fields = doc._source.array;
+    fields.forEach((field) => {
+      const fieldArr = field.split('.');
+      if (!(fieldTypes[index][field]
+        || (
+          fieldArr.length > 1
+          && _.has(
+            fieldTypes[index],
+            fieldArr.join('.properties.'),
+          )
+        )
+      )) {
+        const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
+        log.error(errMsg);
+        return;
+      }
+      if (!arrayFields[index]) arrayFields[index] = [];
+      arrayFields[index].push(field);
+    });
+  });
+
+  return arrayFields;
+}
+
 class ES {
   constructor(esConfig = config.esConfig) {
     this.config = esConfig;
@@ -208,7 +242,7 @@ class ES {
     if (!this.fieldTypes) {
       return {};
     }
-    const arrayFields = {};
+    let arrayFields = {};
     log.info(`[ES.initialize] getting array fields from es config index "${this.config.configIndex}"...`);
     return this.client.search({
       index: this.config.configIndex,
@@ -221,33 +255,7 @@ class ES {
       },
     }).then((resp) => {
       try {
-        resp.body.hits.hits.forEach((doc) => {
-          const index = doc._id;
-          if (!this.fieldTypes[index]) {
-            const errMsg = `[ES.initialize] wrong array entry from config index: index "${index}" not found, skipped.`;
-            log.error(errMsg);
-            return;
-          }
-          const fields = doc._source.array;
-          fields.forEach((field) => {
-            const fieldArr = field.split('.');
-            if (!(this.fieldTypes[index][field]
-              || (
-                fieldArr.length > 1
-                && _.has(
-                  this.fieldTypes[index],
-                  fieldArr.join('.properties.'),
-                )
-              )
-            )) {
-              const errMsg = `[ES.initialize] wrong array entry from config: field "${field}" not found in index ${index}, skipped.`;
-              log.error(errMsg);
-              return;
-            }
-            if (!arrayFields[index]) arrayFields[index] = [];
-            arrayFields[index].push(field);
-          });
-        });
+        arrayFields = processArrayConfig(resp.body.hits.hits, this.fieldTypes);
         log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
       } catch (err) {
         throw new Error(err);
