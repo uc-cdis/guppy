@@ -11,6 +11,7 @@ import CodedError from '../utils/error';
 import {
   fromFieldsToSource, buildNestedField, processNestedFieldNames, ElasticsearchPathHandler,
 } from '../utils/utils';
+import { FieldPathResolver } from './fieldResolver';
 
 function processArrayConfig(arrayConfig, fieldTypes) {
   const arrayFields = {};
@@ -258,7 +259,9 @@ class ES {
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got nestings from elasticsearch');
     resultList.forEach((res) => {
-      nestings[res.index] = new ElasticsearchPathHandler(res.fieldTypes);
+      const pathResolver = new FieldPathResolver(res.fieldTypes);
+      pathResolver.initialize();
+      nestings[res.index] = pathResolver;
     });
     // log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
     return nestings;

@@ -636,6 +636,10 @@ export const textAggregation = async (
     aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
   }
 
+  const pathResolver = esInstance.paths[esIndex];
+
+  console.log(pathResolver.resolve(field));
+
   // build up ES query if is nested aggregation
   if (aggsNestedName) {
     queryBody.aggs = {

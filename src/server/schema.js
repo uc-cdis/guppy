@@ -209,15 +209,12 @@ export const getAggregationSchema = (esConfig) => `
 const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
   const esIndex = esDict.index;
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
-  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
+  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => (f.esType === 'nested' || f.esType === 'jsonObject'));
   const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esDict, 'tier_access_level') && esDict.tier_access_level === 'regular';
   let AggsNestedTypeSchema = '';
   while (fieldAggsNestedTypeMap.length > 0) {
     const entry = fieldAggsNestedTypeMap.shift();
     if (entry.field && entry.properties) {
-      if (entry.field === 'program') {
-        console.log(entry.properties);
-      }
       AggsNestedTypeSchema += `type ${entry.esType === 'nested' ? 'Nested' : 'Object'}HistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(entry.properties).map((propsKey) => {
         const entryType = entry.properties[propsKey].type;
         if (entryType === 'nested' || entryType === 'array' || entryType === 'jsonObject') {

@@ -60,6 +60,17 @@ const aggsTotalQueryResolver = (parent) => {
   return esInstance.getCount(esIndex, esType, filter);
 };
 
+function extractNestedPath(path) {
+  if (path.prev) {
+    return `${extractNestedPath(path.prev)}.${path.key}`;
+  }
+
+  if (path.key) {
+    return path.key;
+  }
+  return '';
+}
+
 /**
  * This resolver is for numeric aggregation.
  * It inherits some arguments from its parent, also parses its arguments,
@@ -80,6 +91,9 @@ const numericHistogramResolver = async (parent, args, context) => {
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
+
+
+
 
   return esInstance.numericAggregation({
     esIndex,
@@ -105,13 +119,19 @@ const numericHistogramResolver = async (parent, args, context) => {
  * @param {object} args
  * @param {object} context
  */
-const textHistogramResolver = async (parent, args, context) => {
+const textHistogramResolver = async (parent, args, context, info) => {
   log.debug('[resolver.textHistogramResolver] args', args);
   const {
     esInstance, esIndex, esType,
     filter, field, nestedAggFields, filterSelf, accessibility, nestedPath, isNumericField,
   } = parent;
-  log.debug('[resolver.textHistogramResolver] parent', parent);
+  const path = extractNestedPath(info.path.prev, '');
+  let queryPath = '';
+  if (path) {
+   queryPath = path.split('.').slice(2, -1).join('.');
+  }
+
+  log.debug('[resolver.textHistogramResolver] parent', path);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   return esInstance.textAggregation({
@@ -124,6 +144,7 @@ const textHistogramResolver = async (parent, args, context) => {
     nestedAggFields,
     nestedPath,
     isNumericField,
+    queryPath,
   });
 };
 
@@ -253,12 +274,14 @@ const getResolver = (esConfig, esInstance) => {
 
   const typeNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
     const { fields } = esInstance.getESFields(cfg.index);
-    const nestedFieldsArray = fields.filter((entry) => entry.type === 'nested');
+    const nestedFieldsArray = fields.filter((entry) => (entry.type === 'nested' || entry.type === 'jsonObject'));
 
     // similar level by level "flatten" logic as for schema
     while (nestedFieldsArray.length > 0) {
       const nestedFields = nestedFieldsArray.shift();
-      const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
+      const typeNestedAggsName = nestedFields.type === 'nested'
+        ? `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`
+        : `ObjectHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
       acc[typeNestedAggsName] = {};
       if ((nestedFields.type === 'nested' || nestedFields.type === 'jsonObject') && nestedFields.nestedProps) {
         nestedFields.nestedProps.forEach((props) => {
@@ -272,34 +295,17 @@ const getResolver = (esConfig, esInstance) => {
     return acc;
   }, {});
 
-  const typedNonNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
-    const { fields } = esInstance.getESFields(cfg.index);
-
-    const flatFieldsArray = fields.filter((entry) => entry.type === 'jsonObject');
-
-    // similar level by level "flatten" logic as for schema
-    while (flatFieldsArray.length > 0) {
-      const nestedFields = flatFieldsArray.shift();
-      const typeNestedAggsName = `ObjectHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
-      acc[typeNestedAggsName] = {};
-      if (nestedFields.nestedProps) {
-        nestedFields.nestedProps.forEach((props) => {
-          if (props.type === 'nested' || props.type === 'jsonObject') {
-            flatFieldsArray.push(props);
-          }
-          acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
-        });
-      }
-    }
-    return acc;
-  }, {});
-
   const mappingResolvers = esConfig.indices.reduce((acc, cfg) => {
     log.debug(`${cfg.index} `, esInstance.getESFields(cfg.index));
     acc[cfg.type] = filterFieldMapping(
       _.flattenDeep(
         esInstance.getESFields(cfg.index).fields.map(
-          (f) => buildNestedFieldMapping(f),
+          (f) => {
+            if (f.type === 'jsonObject') {
+              return buildNestedFieldMapping(f);
+            }
+            return buildNestedFieldMapping(f);
+          },
         ),
       ),
     );
@@ -319,7 +325,6 @@ const getResolver = (esConfig, esInstance) => {
     },
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
-    ...typedNonNestedAggregationResolvers,
     HistogramForNumber: {
       _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,
