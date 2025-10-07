@@ -8,10 +8,12 @@ import * as esAggregator from './aggs';
 import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
-import { fromFieldsToSource, buildNestedField, processNestedFieldNames } from '../utils/utils';
+import {
+  fromFieldsToSource, buildNestedField, processNestedFieldNames, ElasticsearchPathHandler,
+} from '../utils/utils';
 
 function processArrayConfig(arrayConfig, fieldTypes) {
-  const arrayFields = [];
+  const arrayFields = {};
 
   arrayConfig.forEach((doc) => {
     const index = doc._id;
@@ -223,10 +225,43 @@ class ES {
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got mapping from elasticsearch');
     resultList.forEach((res) => {
-      fieldTypes[res.index] = res.fieldTypes;
+      fieldTypes[res.index] = Object.entries(res.fieldTypes).reduce((acc, [key, item]) => {
+        if (item.properties) {
+          if (item.type === 'nested') {
+            acc[key] = item;
+          } else {
+            acc[key] = {
+              type: 'jsonObject',
+              properties: item.properties,
+            };
+          }
+          return acc;
+        }
+        acc[key] = item;
+        return acc;
+      }, {});
     });
     log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
     return fieldTypes;
+  }
+
+  async _getNestingForAllIndices() {
+    if (!this.config.indices || this.config.indices === 0) {
+      const errMsg = '[ES.initialize] Error when initializing: empty "config.indices" block';
+      throw new Error(errMsg);
+    }
+    const nestings = {};
+    log.info('[ES.initialize] getting mapping from elasticsearch...');
+    const promiseList = this.config.indices
+      .map((cfg) => this._getESFieldsTypes(cfg.index).then((res) => ({ index: cfg.index, fieldTypes: res })));
+
+    const resultList = await Promise.all(promiseList);
+    log.info('[ES.initialize] got nestings from elasticsearch');
+    resultList.forEach((res) => {
+      nestings[res.index] = new ElasticsearchPathHandler(res.fieldTypes);
+    });
+    // log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
+    return nestings;
   }
 
   /**
@@ -266,6 +301,31 @@ class ES {
     });
   }
 
+  async _getArrayFieldsFromConfigObject() {
+    if (typeof this.config.arrayConfig === 'undefined') {
+      log.info('[ES.initialize] no array fields from es config index.');
+      return Promise.resolve({});
+    }
+    if (!this.fieldTypes) {
+      return {};
+    }
+    let arrayFields = {};
+    try {
+      const remapped = this.config.arrayConfig.map((item) => ({
+        _id: item.index,
+        _source: {
+          array: item.array,
+        },
+      }));
+      arrayFields = processArrayConfig(remapped, this.fieldTypes);
+
+      log.info('[ES.initialize] got array fields from es config index:', JSON.stringify(arrayFields, null, 4));
+    } catch (err) {
+      throw new Error(err);
+    }
+    return arrayFields;
+  }
+
   /**
    * We do following things when initializing:
    * 1. get mappings from all indices, and save to "this.fieldTypes":
@@ -285,7 +345,12 @@ class ES {
    */
   async initialize() {
     this.fieldTypes = await this._getMappingsForAllIndices();
-    this.arrayFields = await this._getArrayFieldsFromConfigIndex();
+    this.paths = await this._getNestingForAllIndices();
+    if (this.config.arrayConfig) {
+      this.arrayFields = await this._getArrayFieldsFromConfigObject();
+    } else {
+      this.arrayFields = await this._getArrayFieldsFromConfigIndex();
+    }
   }
 
   /**
@@ -310,10 +375,12 @@ class ES {
         type: cfg.type,
         fields: Object.entries(this.fieldTypes[cfg.index]).map(([key, value]) => {
           let r;
-          if (value.type !== 'nested') {
-            r = { name: key, type: value.type };
-          } else {
+          if (value.type === 'nested') {
             r = buildNestedField(key, value);
+          } else if ('properties' in value) {
+            r = buildNestedField(key, value);
+          } else {
+            r = { name: key, type: value.type };
           }
           return r;
         }),

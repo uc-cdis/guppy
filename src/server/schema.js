@@ -14,6 +14,7 @@ const esgqlTypeMapping = {
   scaled_float: 'Float',
   array: 'Object',
   nested: 'Object',
+  jsonObject: 'Object',
   boolean: 'Boolean',
 };
 
@@ -29,10 +30,10 @@ const getGQLType = (esInstance, esIndex, field, esFieldType, nestedFieldKeys = [
     fieldForArrayCheck = `${nestedFieldKeys.join('.')}.${field}`;
   }
   const isArrayField = esInstance.isArrayField(esIndex, fieldForArrayCheck);
-  if (isArrayField && esFieldType !== 'nested') {
+  if (isArrayField && (esFieldType !== 'nested' || esFieldType === 'jsonObject')) {
     return `[${gqlType}]`;
   }
-  if (esFieldType === 'nested') {
+  if (esFieldType === 'nested' || esFieldType === 'jsonObject') {
     if (isArrayField) {
       return `[${field}]`;
     }
@@ -77,8 +78,11 @@ const getQuerySchemaForType = (esType) => {
 
 const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties, nestedFieldKeys = []) => {
   const result = Object.keys(properties).map((field) => {
-    const esFieldType = (properties[field].esType)
+    let esFieldType = (properties[field].esType)
       ? properties[field].esType : properties[field].type;
+    if (esFieldType === undefined && 'properties' in properties[field]) {
+      esFieldType = 'jsonObject';
+    }
     const gqlType = getGQLType(esInstance, esIndex, field, esFieldType, nestedFieldKeys);
 
     return {
@@ -97,7 +101,7 @@ const getArgsByField = (fieldType, props) => {
   const keys = Object.keys(props);
   const baseProps = [];
   keys.forEach((k) => {
-    if (props[k].type !== 'nested') baseProps.push({ field: k, type: esgqlTypeMapping[props[k].type] });
+    if (props[k].type !== 'nested' || props[k].type !== 'jsonObject') baseProps.push({ field: k, type: esgqlTypeMapping[props[k].type] });
   });
   return `(${baseProps.map((entry) => `${entry.field}: [${entry.type}]`).join(',')})`;
 };
@@ -114,10 +118,13 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
   const queueTypes = [];
   Object.keys(fieldESTypeMap).forEach((fieldKey) => {
     const esFieldType = fieldESTypeMap[fieldKey].type;
-    if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
+    if ((esFieldType === 'nested' || esFieldType === 'jsonObject') && !existingFields.has(fieldKey)) {
       const { properties } = fieldESTypeMap[fieldKey];
       queueTypes.push({ type: `${fieldKey}`, properties, nestedFieldKeys: [fieldKey] });
       existingFields.add(fieldKey);
+      if (fieldKey === 'program') {
+        console.log(fieldKey, properties);
+      }
     }
   });
 
@@ -132,7 +139,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     const t = queueTypes.shift();
     const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties, t.nestedFieldKeys);
     gqlTypes.forEach((entry) => {
-      if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
+      if ((entry.esType === 'nested' || entry.esType === 'jsonObject') && !existingFields.has(entry.field)) {
         queueTypes.push({ type: `${entry.field}`, properties: entry.properties, nestedFieldKeys: [...t.nestedFieldKeys, entry.field] });
         existingFields.add(entry.field);
         fieldToArgs[entry.field] = getArgsByField(entry.field, entry.properties);
@@ -160,15 +167,15 @@ const getAggregationSchemaForOneIndex = (esInstance, esConfigElement) => {
   const includeHistogramPrefix = Object.prototype.hasOwnProperty.call(esConfigElement, 'tier_access_level') && esConfigElement.tier_access_level === 'regular';
   const esTypeObjName = firstLetterUpperCase(esType);
   const fieldGQLTypeMap = getFieldGQLTypeMapForOneIndex(esInstance, esIndex);
-  const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => f.esType !== 'nested').map((entry) => ({
+  const fieldAggsTypeMap = fieldGQLTypeMap.filter((f) => (f.esType !== 'nested' && f.esType !== 'array' && f.esType !== 'jsonObject')).map((entry) => ({
     field: entry.field,
     aggType: (includeHistogramPrefix ? histogramTypePrefix : '') + getAggsHistogramName(entry.type),
   }));
-  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => f.esType === 'nested');
+  const fieldAggsNestedTypeMap = fieldGQLTypeMap.filter((f) => (f.esType === 'nested' || f.esType === 'jsonObject'));
   return `type ${esTypeObjName}Aggregation {
     _totalCount: Int,
     ${fieldAggsTypeMap.map((entry) => `${getAggregationType(entry)}`).join('\n')}
-    ${fieldAggsNestedTypeMap.map((entry) => `${entry.field}: NestedHistogramFor${firstLetterUpperCase(entry.field)}`).join('\n')}
+    ${fieldAggsNestedTypeMap.map((entry) => (entry.esType === 'nested' ? `${entry.field}: NestedHistogramFor${firstLetterUpperCase(entry.field)}` : `${entry.field}: ObjectHistogramFor${firstLetterUpperCase(entry.field)}`)).join('\n')}
   }`;
 };
 
@@ -208,16 +215,32 @@ const getAggregationSchemaForOneNestedIndex = (esInstance, esDict) => {
   while (fieldAggsNestedTypeMap.length > 0) {
     const entry = fieldAggsNestedTypeMap.shift();
     if (entry.field && entry.properties) {
-      AggsNestedTypeSchema += `type NestedHistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(entry.properties).map((propsKey) => {
+      if (entry.field === 'program') {
+        console.log(entry.properties);
+      }
+      AggsNestedTypeSchema += `type ${entry.esType === 'nested' ? 'Nested' : 'Object'}HistogramFor${firstLetterUpperCase(entry.field)} {${Object.keys(entry.properties).map((propsKey) => {
         const entryType = entry.properties[propsKey].type;
-        if (entryType === 'nested') {
+        if (entryType === 'nested' || entryType === 'array' || entryType === 'jsonObject') {
           fieldAggsNestedTypeMap.push({
             field: propsKey,
             properties: entry.properties[propsKey].properties,
+            esType: entry.properties[propsKey].type,
           });
           return `
       ${propsKey}: NestedHistogramFor${firstLetterUpperCase(propsKey)}`;
         }
+        // have properties but no type, this is a jsonObject
+        if (entryType === undefined && 'properties' in entry.properties[propsKey]) {
+          fieldAggsNestedTypeMap.push({
+            field: propsKey,
+            properties: entry.properties[propsKey].properties,
+            esType: 'jsonObject',
+          });
+
+          return `
+      ${propsKey}: ObjectHistogramFor${firstLetterUpperCase(propsKey)}`;
+        }
+        // non-nested type, just return the type
         return `
     ${propsKey}: ${(includeHistogramPrefix ? histogramTypePrefix : '') + getAggsHistogramName(esgqlTypeMapping[entryType])}`;
       })}
@@ -365,6 +388,7 @@ export const buildSchemaString = (esConfig, esInstance) => {
 
   const schemaStr = `
   scalar JSON
+  scalar JSONObject
   ${matchedItemSchema}
   ${querySchema}
   ${accessibilityEnum}

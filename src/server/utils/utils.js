@@ -82,12 +82,24 @@ export const buildNestedField = (key, value) => {
   let builtObj = {};
   if (value.type === 'nested') {
     const nestedProps = [];
-    Object.keys(value.properties).forEach((propsKey) => {
-      nestedProps.push(buildNestedField(propsKey, value.properties[propsKey]));
-    });
+    Object.keys(value.properties)
+      .forEach((propsKey) => {
+        nestedProps.push(buildNestedField(propsKey, value.properties[propsKey]));
+      });
     builtObj = {
       name: key,
       type: value.type,
+      nestedProps,
+    };
+  } else if (value.properties) {
+    const nestedProps = [];
+    Object.keys(value.properties)
+      .forEach((propsKey) => {
+        nestedProps.push(buildNestedField(propsKey, value.properties[propsKey]));
+      });
+    builtObj = {
+      name: key,
+      type: 'jsonObject',
       nestedProps,
     };
   } else {
@@ -138,3 +150,164 @@ export const filterFieldMapping = (fieldArray) => (parent, args) => {
   const resultArray = fieldArray.filter((field) => regEx.test(field));
   return resultArray;
 };
+
+
+/**
+ * Elasticsearch Field Path Handler
+ * Seamlessly handles nested and non-nested object aggregations/queries
+ */
+
+export class ElasticsearchPathHandler {
+  constructor(mapping) {
+    this.mapping = mapping;
+    this.nestedPaths = this.extractNestedPaths(mapping);
+  }
+
+  /**
+   * Extract all nested paths from mapping
+   */
+  extractNestedPaths(mapping, currentPath = '') {
+    const nested = new Set();
+
+    const traverse = (props, path) => {
+      for (const [key, value] of Object.entries(props)) {
+        const fullPath = path ? `${path}.${key}` : key;
+
+        if (value.type === 'nested') {
+          nested.add(fullPath);
+          if (value.properties) {
+            traverse(value.properties, fullPath);
+          }
+        } else if (value.properties) {
+          traverse(value.properties, fullPath);
+        }
+      }
+    };
+
+    if (mapping) {
+      traverse(mapping, '');
+    }
+
+    return nested;
+  }
+
+  /**
+   * Find the nearest nested parent path for a given field path
+   */
+  findNestedParent(fieldPath) {
+    const parts = fieldPath.split('.');
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const testPath = parts.slice(0, i + 1).join('.');
+      if (this.nestedPaths.has(testPath)) {
+        return testPath;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Create aggregation for any field path (nested or not)
+   */
+  createAggregation(fieldPath, aggName, aggType = 'terms', aggOptions = {}) {
+    const nestedParent = this.findNestedParent(fieldPath);
+
+    const baseAgg = {
+      [aggType]: {
+        field: fieldPath,
+        ...aggOptions
+      }
+    };
+
+    if (!nestedParent) {
+      // Simple non-nested aggregation
+      return {
+        [aggName]: baseAgg
+      };
+    }
+
+    // Nested aggregation with reverse_nested for counts
+    return {
+      [aggName]: {
+        nested: {
+          path: nestedParent
+        },
+        aggs: {
+          [`${aggName}_inner`]: {
+            ...baseAgg,
+            aggs: {
+              [`${aggName}_reverse`]: {
+                reverse_nested: {}
+              }
+            }
+          }
+        }
+      }
+    };
+  }
+
+  /**
+   * Create a query/filter for any field path
+   */
+  createTermQuery(fieldPath, value) {
+    const nestedParent = this.findNestedParent(fieldPath);
+
+    const termQuery = {
+      term: {
+        [fieldPath]: value
+      }
+    };
+
+    if (!nestedParent) {
+      return termQuery;
+    }
+
+    // Wrap in nested query
+    return {
+      nested: {
+        path: nestedParent,
+        query: termQuery
+      }
+    };
+  }
+
+  /**
+   * Create multiple aggregations from field paths
+   */
+  createMultipleAggregations(fields) {
+    const aggs = {};
+
+    fields.forEach(({ path, name, type = 'terms', options = {} }) => {
+      const aggName = name || path.replace(/\./g, '_');
+      Object.assign(aggs, this.createAggregation(path, aggName, type, options));
+    });
+
+    return aggs;
+  }
+
+  /**
+   * Parse aggregation results (handles nested structure)
+   */
+  parseAggregationResults(results, aggName) {
+    const agg = results.aggregations?.[aggName];
+
+    if (!agg) return null;
+
+    // Check if it's a nested aggregation
+    if (agg.doc_count !== undefined && agg[`${aggName}_inner`]) {
+      const innerAgg = agg[`${aggName}_inner`];
+      return {
+        buckets: innerAgg.buckets?.map(bucket => ({
+          key: bucket.key,
+          doc_count: bucket[`${aggName}_reverse`]?.doc_count || bucket.doc_count
+        })) || []
+      };
+    }
+
+    // Regular aggregation
+    return {
+      buckets: agg.buckets || []
+    };
+  }
+}

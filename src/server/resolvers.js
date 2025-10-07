@@ -1,10 +1,9 @@
-import GraphQLJSON from 'graphql-type-json';
+import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
 import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
-import * as esAggregator from './es/aggs';
 
 /**
  * This is for getting raw data, by specific es index and es type
@@ -154,13 +153,20 @@ const getFieldAggregationResolverMappingsByField = (field) => {
   if (esFieldNumericTextTypeMapping[field.type] === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
     isNumericField = true;
   }
-  if (field.type !== 'nested') {
-    return ((parent) => ({ ...parent, field: field.name, isNumericField }));
-  }
   // if field is nested type, update nestedPath info with parent's nestedPath and pass down
-  return ((parent) => ({
-    ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, isNumericField,
-  }));
+  if (field.type === 'nested') {
+    return ((parent) => ({
+      ...parent, field: field.name, nestedPath: (parent.nestedPath) ? `${parent.nestedPath}.${field.name}` : `${field.name}`, isNumericField,
+    }));
+  }
+
+  if (field.type === 'jsonObject') {
+    return ((parent) => ({
+      ...parent, field: `${parent.nestedPath}.${field.name}`, isNumericField,
+    }));
+  }
+
+  return ((parent) => ({ ...parent, field: field.name, isNumericField }));
 };
 
 // this spreads all fields out into individual resolvers and
@@ -254,10 +260,32 @@ const getResolver = (esConfig, esInstance) => {
       const nestedFields = nestedFieldsArray.shift();
       const typeNestedAggsName = `NestedHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
       acc[typeNestedAggsName] = {};
-      if (nestedFields.type === 'nested' && nestedFields.nestedProps) {
+      if ((nestedFields.type === 'nested' || nestedFields.type === 'jsonObject') && nestedFields.nestedProps) {
         nestedFields.nestedProps.forEach((props) => {
-          if (props.type === 'nested') {
+          if (props.type === 'nested' || props.type === 'jsonObject') {
             nestedFieldsArray.push(props);
+          }
+          acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
+        });
+      }
+    }
+    return acc;
+  }, {});
+
+  const typedNonNestedAggregationResolvers = esConfig.indices.reduce((acc, cfg) => {
+    const { fields } = esInstance.getESFields(cfg.index);
+
+    const flatFieldsArray = fields.filter((entry) => entry.type === 'jsonObject');
+
+    // similar level by level "flatten" logic as for schema
+    while (flatFieldsArray.length > 0) {
+      const nestedFields = flatFieldsArray.shift();
+      const typeNestedAggsName = `ObjectHistogramFor${firstLetterUpperCase(nestedFields.name)}`;
+      acc[typeNestedAggsName] = {};
+      if (nestedFields.nestedProps) {
+        nestedFields.nestedProps.forEach((props) => {
+          if (props.type === 'nested' || props.type === 'jsonObject') {
+            flatFieldsArray.push(props);
           }
           acc[typeNestedAggsName][props.name] = getFieldAggregationResolverMappingsByField(props);
         });
@@ -280,6 +308,7 @@ const getResolver = (esConfig, esInstance) => {
 
   const resolver = {
     JSON: GraphQLJSON,
+    JSONObject: GraphQLJSONObject,
     Query: {
       ...typeResolverMappings,
       _aggregation: (parent) => ({ ...parent }),
@@ -290,6 +319,7 @@ const getResolver = (esConfig, esInstance) => {
     },
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
+    ...typedNonNestedAggregationResolvers,
     HistogramForNumber: {
       _totalCount: aggsTotalQueryResolver,
       _cardinalityCount: cardinalityResolver,

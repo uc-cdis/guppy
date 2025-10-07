@@ -34,12 +34,14 @@ const config = {
         ? true
         : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
+    arrayConfig: inputConfig.arrayConfig || undefined,
   },
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
+
   tierAccessSensitiveRecordExclusionField:
     inputConfig.tier_access_sensitive_record_exclusion_field,
   logLevel: inputConfig.log_level || 'INFO',
