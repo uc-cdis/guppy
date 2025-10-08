@@ -597,6 +597,7 @@ export const textAggregation = async (
     nestedAggFields,
     nestedPath,
     isNumericField,
+    queryPath,
   },
 ) => {
   const queryBody = { size: 0 };
@@ -638,7 +639,7 @@ export const textAggregation = async (
 
   const pathResolver = esInstance.paths[esIndex];
 
-  console.log(pathResolver.resolve(field));
+  const isNested = pathResolver.resolve(queryPath);
 
   // build up ES query if is nested aggregation
   if (aggsNestedName) {
@@ -675,7 +676,7 @@ export const textAggregation = async (
             {
               [field]: {
                 terms: {
-                  field,
+                  field: isNested.nestedPath == null ? queryPath : field,
                   ...missingAlias,
                 },
               },

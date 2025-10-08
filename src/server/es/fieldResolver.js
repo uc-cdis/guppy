@@ -37,6 +37,17 @@ export class FieldPathResolver {
     });
   }
 
+  markNestedChildren(properties, parentPath, nestedRoot) {
+    Object.entries(properties).forEach(([key, value]) => {
+      const currentPath = `${parentPath}.${key}`;
+      this.nestedPathMap.set(currentPath, nestedRoot);
+
+      if (value.properties) {
+        this.markNestedChildren(value.properties, currentPath, nestedRoot);
+      }
+    });
+  }
+
   resolve(field, providedNestedPath) {
     if (providedNestedPath) {
       return {

@@ -128,10 +128,8 @@ const textHistogramResolver = async (parent, args, context, info) => {
   const path = extractNestedPath(info.path.prev, '');
   let queryPath = '';
   if (path) {
-   queryPath = path.split('.').slice(2, -1).join('.');
+   queryPath = path.split('.').slice(2).join('.');
   }
-
-  log.debug('[resolver.textHistogramResolver] parent', path);
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   return esInstance.textAggregation({

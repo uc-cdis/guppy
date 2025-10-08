@@ -661,6 +661,7 @@ class ES {
     nestedAggFields,
     nestedPath,
     isNumericField,
+    queryPath,
   }) {
     return esAggregator.textAggregation(
       {
@@ -676,6 +677,7 @@ class ES {
         nestedAggFields,
         nestedPath,
         isNumericField,
+        queryPath,
       },
     );
   }
