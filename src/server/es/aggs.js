@@ -646,7 +646,7 @@ export const textAggregation = async (
   }
 
   const { isNested } = pathInfo;
-  // build up ES query if is nested aggregation
+  // build up ES query if is a nested aggregation
   if (aggsNestedName) {
     queryBody.aggs = {
       [aggsNestedName]: {

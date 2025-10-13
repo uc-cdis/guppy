@@ -11,7 +11,7 @@ import CodedError from '../utils/error';
 import {
   fromFieldsToSource, buildNestedField, processNestedFieldNames,
 } from '../utils/utils';
-import { ElasticsearchFieldIndexer } from './fieldResolver2';
+import { ElasticsearchFieldIndexer } from './fieldResolver';
 
 function processArrayConfig(arrayConfig, fieldTypes) {
   const arrayFields = {};
@@ -330,7 +330,7 @@ class ES {
 
   /**
    * We do following things when initializing:
-   * 1. get mappings from all indices, and save to "this.fieldTypes":
+   * 1. get mappings from all indices and save to "this.fieldTypes":
    * {
    *    <index1>: {
    *      <field1>: <type1>

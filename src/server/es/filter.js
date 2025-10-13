@@ -3,29 +3,24 @@ import { GraphQLError } from 'graphql';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
 
-function getRightmostSubstring(input) {
-  const parts = input.split('.');
-  return parts[parts.length - 1];
-}
-
-const fromPathToNode = (esInstance, esIndex, path) => {
-  let node = esInstance.fieldTypes[esIndex];
-  if (path !== null && path !== undefined) {
-    const nodes = path.split('.');
-    nodes.forEach((n) => {
-      if (n in node) {
-        node = node[n].properties;
-      } else {
-        throw new GraphQLError(`Field ${n} does not exist in ES index`, {
-          extensions: {
-            code: 'BAD_USER_INPUT',
-          },
-        });
-      }
-    });
-  }
-  return node;
-};
+// const fromPathToNode = (esInstance, esIndex, path) => {
+//   let node = esInstance.fieldTypes[esIndex];
+//   if (path !== null && path !== undefined) {
+//     const nodes = path.split('.');
+//     nodes.forEach((n) => {
+//       if (n in node) {
+//         node = node[n].properties;
+//       } else {
+//         throw new GraphQLError(`Field ${n} does not exist in ES index`, {
+//           extensions: {
+//             code: 'BAD_USER_INPUT',
+//           },
+//         });
+//       }
+//     });
+//   }
+//   return node;
+// };
 
 const mergeRangeOperations = (a, b) => {
   const merged = { ...a, ...b };
@@ -39,32 +34,32 @@ const mergeRangeOperations = (a, b) => {
   return merged;
 };
 
-const getNumericTextType = (
-  esInstance,
-  esIndex,
-  field,
-  path,
-) => {
-  // got a field with
-  const node = fromPathToNode(esInstance, esIndex, path);
-  if (!esInstance.fieldTypes[esIndex] || !node[field]) {
-    throw new GraphQLError('Please check your syntax for input "filter" argument', {
-      extensions: {
-        code: 'BAD_USER_INPUT',
-        message: `Field ${field} does not exist in ES index ${esIndex}`,
-      },
-    });
-  }
-  const numericTextType = esFieldNumericTextTypeMapping[node[field].type];
-  if (typeof numericTextType === 'undefined') {
-    throw new GraphQLError(`ES type ${node[field].type} not supported.`, {
-      extensions: {
-        code: 'INTERNAL_SERVER_ERROR',
-      },
-    });
-  }
-  return numericTextType;
-};
+// const getNumericTextType = (
+//   esInstance,
+//   esIndex,
+//   field,
+//   path,
+// ) => {
+//   // got a field with
+//   const node = fromPathToNode(esInstance, esIndex, path);
+//   if (!esInstance.fieldTypes[esIndex] || !node[field]) {
+//     throw new GraphQLError('Please check your syntax for input "filter" argument', {
+//       extensions: {
+//         code: 'BAD_USER_INPUT',
+//         message: `Field ${field} does not exist in ES index ${esIndex}`,
+//       },
+//     });
+//   }
+//   const numericTextType = esFieldNumericTextTypeMapping[node[field].type];
+//   if (typeof numericTextType === 'undefined') {
+//     throw new GraphQLError(`ES type ${node[field].type} not supported.`, {
+//       extensions: {
+//         code: 'INTERNAL_SERVER_ERROR',
+//       },
+//     });
+//   }
+//   return numericTextType;
+// };
 
 const getFilterItemForString = (op, pField, value, path) => {
   const field = (path !== null && path !== undefined) ? `${path}.${pField}` : pField;
@@ -432,29 +427,12 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    // given the field determine it's full path
-    const fieldName = getRightmostSubstring(field);
 
     const fieldInfo = esInstance.paths[esIndex].getFieldInfo(field);
     if (!fieldInfo) {
       throw new GraphQLError(`Invalid es field type ${field}`, {});
     }
     const numericOrTextOrBooleanType = esFieldNumericTextTypeMapping[fieldInfo.type];
-
-   //  const numericOrTextOrBooleanType = getNumericTextType(esInstance, esIndex, field, objPath);
-    // switch (numericOrTextOrBooleanType) {
-    //   case NumericTextTypeTypeEnum.ES_TEXT_TYPE:
-    //     resultFilterObj = getFilterItemForString(topLevelOp, fieldName, value, objPath);
-    //     break;
-    //   case NumericTextTypeTypeEnum.ES_NUMERIC_TYPE:
-    //     resultFilterObj = getFilterItemForNumbers(topLevelOp, fieldName, value, objPath);
-    //     break;
-    //   case NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE:
-    //     resultFilterObj = getFilterItemForBoolean(topLevelOp, fieldName, value, objPath);
-    //     break;
-    //   default:
-    //     throw new GraphQLError(`Invalid es field type ${numericOrTextOrBooleanType}`, {})
-    // }
     if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
     } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -469,9 +447,16 @@ const getFilterObj = (
         },
       });
     }
+    // if nested, add a nested filter here
+    if (fieldInfo && fieldInfo.nearestNestedParent) {
+      resultFilterObj = {
+        nested: {
+          path: fieldInfo.nearestNestedParent,
+          query: resultFilterObj,
+        },
+      };
+    }
   }
-  // inject a query path here
-
   return resultFilterObj;
 };
 

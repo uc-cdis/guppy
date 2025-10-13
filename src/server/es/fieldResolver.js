@@ -1,65 +1,278 @@
+/**
+ * Elasticsearch Field Path Indexer and Query Builder
+ * Indexes all fields with their nesting properties and builds queries/aggs
+ */
 // eslint-disable-next-line import/prefer-default-export
-export class FieldPathResolver {
+export class ElasticsearchFieldIndexer {
   constructor(mapping) {
-    this.mapping = mapping;
-    this.nestedPathMap = null;
+    this.fieldIndex = null;
+    this.buildFieldIndex(mapping);
   }
 
-  async initialize() {
-    if (this.nestedPathMap) return;
-    this.nestedPathMap = new Map();
+  /**
+   * Build a comprehensive field index with nesting information
+   */
+  buildFieldIndex(mapping) {
+    const index = new Map();
+    const nestedPaths = new Set();
 
-    // Build a map of all fields to their nearest nested parent
-    this.buildNestedPathMap(this.mapping, '');
-  }
+    /**
+     * Traverse mapping and index all fields
+     */
+    const traverse = (properties, currentPath = '', ancestorNested = []) => {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [fieldName, fieldDef] of Object.entries(properties)) {
+        const fieldPath = currentPath ? `${currentPath}.${fieldName}` : fieldName;
 
-  buildNestedPathMap(obj, parentPath) {
-    Object.entries(obj).forEach(([key, value]) => {
-      const currentPath = parentPath ? `${parentPath}.${key}` : key;
+        // Determine if this field is nested
+        const isNested = fieldDef.type === 'nested';
 
-      if (value.type === 'nested') {
-        // Mark this path and all children as belonging to this nested parent
-        this.markNestedChildren(value.properties, currentPath, currentPath);
-      } else if (value.properties) {
-        this.buildNestedPathMap(value.properties, currentPath);
+        // Track nested ancestors for this field
+        const nestedAncestors = isNested
+          ? [...ancestorNested, fieldPath]
+          : ancestorNested;
+
+        // Determine field classification
+        let classification;
+        if (isNested) {
+          classification = 'nested';
+          nestedPaths.add(fieldPath);
+        } else if (ancestorNested.length > 0) {
+          classification = 'within_nested';
+        } else if (fieldDef.properties) {
+          classification = 'object';
+        } else {
+          classification = 'leaf';
+        }
+
+        // Index this field
+        index.set(fieldPath, {
+          path: fieldPath,
+          type: fieldDef.type || 'object',
+          classification,
+          isNested,
+          hasProperties: !!fieldDef.properties,
+          nearestNestedParent: ancestorNested[ancestorNested.length - 1] || null,
+          allNestedAncestors: [...ancestorNested],
+          depth: fieldPath.split('.').length,
+          properties: fieldDef.properties || null,
+          // Include raw field definition for reference
+          fieldDef,
+        });
+
+        // Recursively process nested properties
+        if (fieldDef.properties) {
+          traverse(fieldDef.properties, fieldPath, nestedAncestors);
+        }
       }
-    });
+    };
+
+    if (mapping) {
+      traverse(mapping);
+    }
+
+    this.fieldIndex = index;
+    this.nestedPaths = nestedPaths;
+
+    return index;
   }
 
-  markNestedChildren(properties, parentPath, nestedRoot) {
-    Object.entries(properties).forEach(([key, value]) => {
-      const currentPath = `${parentPath}.${key}`;
-      this.nestedPathMap.set(currentPath, nestedRoot);
+  /**
+   * Get field information from index
+   */
+  getFieldInfo(fieldPath) {
+    if (!this.fieldIndex) {
+      throw new Error('Field index not built. Call buildFieldIndex() first.');
+    }
 
-      if (value.properties) {
-        this.markNestedChildren(value.properties, currentPath, nestedRoot);
+    const info = this.fieldIndex.get(fieldPath);
+    if (!info) {
+      throw new Error(`Field path not found: ${fieldPath}`);
+    }
+
+    return info;
+  }
+
+  /**
+   * Get all fields matching a pattern
+   */
+  findFields(pattern) {
+    if (!this.fieldIndex) {
+      throw new Error('Field index not built. Call buildFieldIndex() first.');
+    }
+
+    const regex = new RegExp(pattern);
+    const matches = [];
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [path, info] of this.fieldIndex.entries()) {
+      if (regex.test(path)) {
+        matches.push(info);
       }
-    });
+    }
+
+    return matches;
   }
 
-  markNestedChildren(properties, parentPath, nestedRoot) {
-    Object.entries(properties).forEach(([key, value]) => {
-      const currentPath = `${parentPath}.${key}`;
-      this.nestedPathMap.set(currentPath, nestedRoot);
+  /**
+   * Get all leaf fields (actual queryable fields)
+   */
+  getLeafFields() {
+    if (!this.fieldIndex) {
+      throw new Error('Field index not built. Call buildFieldIndex() first.');
+    }
 
-      if (value.properties) {
-        this.markNestedChildren(value.properties, currentPath, nestedRoot);
-      }
-    });
+    return Array.from(this.fieldIndex.values()).filter(
+      (field) => field.classification === 'leaf' || field.classification === 'within_nested',
+    );
   }
 
-  resolve(field, providedNestedPath) {
-    if (providedNestedPath) {
+  /**
+   * Build query for a field path
+   */
+  buildQuery(fieldPath, queryDsl) {
+    const fieldInfo = this.getFieldInfo(fieldPath);
+
+    // If field is not within a nested structure, return query as-is
+    if (!fieldInfo.nearestNestedParent) {
+      return queryDsl;
+    }
+
+    // Wrap in nested query
+    return {
+      nested: {
+        path: fieldInfo.nearestNestedParent,
+        query: queryDsl,
+      },
+    };
+  }
+
+  /**
+   * Build aggregation for a field path
+   */
+  buildAggregation(fieldPath, aggName, aggType = 'terms', aggOptions = {}) {
+    const fieldInfo = this.getFieldInfo(fieldPath);
+
+    const baseAgg = {
+      [aggType]: {
+        field: fieldPath,
+        ...aggOptions,
+      },
+    };
+
+    // Non-nested field - simple aggregation
+    if (!fieldInfo.nearestNestedParent) {
       return {
-        fieldName: `${providedNestedPath}.${field}`,
-        nestedPath: providedNestedPath,
+        [aggName]: baseAgg,
       };
     }
 
-    const detectedPath = this.nestedPathMap.get(field);
+    // Nested field - wrap with nested and reverse_nested
     return {
-      fieldName: field,
-      nestedPath: detectedPath || null,
+      [aggName]: {
+        nested: {
+          path: fieldInfo.nearestNestedParent,
+        },
+        aggs: {
+          [`${aggName}_inner`]: {
+            ...baseAgg,
+            aggs: {
+              [`${aggName}_reverse`]: {
+                reverse_nested: {},
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  /**
+   * Build multiple aggregations from field paths
+   */
+  buildAggregations(fields) {
+    const aggs = {};
+
+    fields.forEach((field) => {
+      let fieldPath; let aggName; let aggType; let
+        aggOptions;
+
+      if (typeof field === 'string') {
+        fieldPath = field;
+        aggName = field.replace(/\./g, '_');
+        aggType = 'terms';
+        aggOptions = {};
+      } else {
+        fieldPath = field.path;
+        aggName = field.name || field.path.replace(/\./g, '_');
+        aggType = field.type || 'terms';
+        aggOptions = field.options || {};
+      }
+
+      Object.assign(aggs, this.buildAggregation(fieldPath, aggName, aggType, aggOptions));
+    });
+
+    return aggs;
+  }
+
+  /**
+   * Print field index summary
+   */
+  printFieldIndex() {
+    if (!this.fieldIndex) {
+      console.log('Field index not built yet.');
+      return;
+    }
+
+    console.log('\n========== FIELD INDEX SUMMARY ==========\n');
+    console.log(`Total fields: ${this.fieldIndex.size}`);
+    console.log(`Nested paths: ${this.nestedPaths.size}`);
+
+    const byClassification = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const field of this.fieldIndex.values()) {
+      byClassification[field.classification] = (byClassification[field.classification] || 0) + 1;
+    }
+
+    console.log('\nBy classification:');
+    Object.entries(byClassification).forEach(([type, count]) => {
+      console.log(`  ${type}: ${count}`);
+    });
+
+    console.log('\n========== ALL FIELDS ==========\n');
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [path, info] of this.fieldIndex.entries()) {
+      const nestedInfo = info.nearestNestedParent
+        ? ` [nested: ${info.nearestNestedParent}]`
+        : '';
+      console.log(`${path} (${info.classification}${nestedInfo})`);
+    }
+  }
+
+  /**
+   * Get field index as JSON
+   */
+  getFieldIndexAsJSON() {
+    if (!this.fieldIndex) {
+      return null;
+    }
+
+    const fields = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [path, info] of this.fieldIndex.entries()) {
+      fields[path] = {
+        type: info.type,
+        classification: info.classification,
+        nearestNestedParent: info.nearestNestedParent,
+        allNestedAncestors: info.allNestedAncestors,
+        depth: info.depth,
+      };
+    }
+
+    return {
+      totalFields: this.fieldIndex.size,
+      nestedPaths: Array.from(this.nestedPaths),
+      fields,
     };
   }
 }
