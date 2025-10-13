@@ -639,8 +639,13 @@ export const textAggregation = async (
 
   const pathResolver = esInstance.paths[esIndex];
 
-  const isNested = pathResolver.resolve(queryPath);
+  const pathInfo = pathResolver.getFieldInfo(queryPath);
+  if (!pathInfo) {
+    console.error(`${queryPath} not found.`);
+    return null;
+  }
 
+  const { isNested } = pathInfo;
   // build up ES query if is nested aggregation
   if (aggsNestedName) {
     queryBody.aggs = {

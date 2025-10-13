@@ -3,6 +3,11 @@ import { GraphQLError } from 'graphql';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './const';
 import config from '../config';
 
+function getRightmostSubstring(input) {
+  const parts = input.split('.');
+  return parts[parts.length - 1];
+}
+
 const fromPathToNode = (esInstance, esIndex, path) => {
   let node = esInstance.fieldTypes[esIndex];
   if (path !== null && path !== undefined) {
@@ -40,6 +45,7 @@ const getNumericTextType = (
   field,
   path,
 ) => {
+  // got a field with
   const node = fromPathToNode(esInstance, esIndex, path);
   if (!esInstance.fieldTypes[esIndex] || !node[field]) {
     throw new GraphQLError('Please check your syntax for input "filter" argument', {
@@ -317,7 +323,7 @@ const getFilterObj = (
 
     const filterRange = [];
     graphqlFilterObj[topLevelOp].forEach((filterItem) => {
-      console.log("filterItem", filterItem);
+      console.log('filterItem', filterItem);
       const filterObj = getFilterObj(
         esInstance,
         esIndex,
@@ -334,7 +340,7 @@ const getFilterObj = (
           boolItemsList.push(filterObj);
         }
       } else {
-        console.log("filterObj is null", filterItem);
+        console.log('filterObj is null', filterItem);
       }
     });
 
@@ -426,20 +432,29 @@ const getFilterObj = (
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
     }
     const value = graphqlFilterObj[topLevelOp][field];
-    const numericOrTextOrBooleanType = getNumericTextType(esInstance, esIndex, field, objPath);
-    switch (numericOrTextOrBooleanType) {
-      case NumericTextTypeTypeEnum.ES_TEXT_TYPE:
-        resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
-        break;
-      case NumericTextTypeTypeEnum.ES_NUMERIC_TYPE:
-        resultFilterObj = getFilterItemForNumbers(topLevelOp, field, value, objPath);
-        break;
-      case NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE:
-        resultFilterObj = getFilterItemForBoolean(topLevelOp, field, value, objPath);
-        break;
-      default:
-        throw new GraphQLError(`Invalid es field type ${numericOrTextOrBooleanType}`, {})
+    // given the field determine it's full path
+    const fieldName = getRightmostSubstring(field);
+
+    const fieldInfo = esInstance.paths[esIndex].getFieldInfo(field);
+    if (!fieldInfo) {
+      throw new GraphQLError(`Invalid es field type ${field}`, {});
     }
+    const numericOrTextOrBooleanType = esFieldNumericTextTypeMapping[fieldInfo.type];
+
+   //  const numericOrTextOrBooleanType = getNumericTextType(esInstance, esIndex, field, objPath);
+    // switch (numericOrTextOrBooleanType) {
+    //   case NumericTextTypeTypeEnum.ES_TEXT_TYPE:
+    //     resultFilterObj = getFilterItemForString(topLevelOp, fieldName, value, objPath);
+    //     break;
+    //   case NumericTextTypeTypeEnum.ES_NUMERIC_TYPE:
+    //     resultFilterObj = getFilterItemForNumbers(topLevelOp, fieldName, value, objPath);
+    //     break;
+    //   case NumericTextTypeTypeEnum.ES_BOOLEAN_TYPE:
+    //     resultFilterObj = getFilterItemForBoolean(topLevelOp, fieldName, value, objPath);
+    //     break;
+    //   default:
+    //     throw new GraphQLError(`Invalid es field type ${numericOrTextOrBooleanType}`, {})
+    // }
     if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_TEXT_TYPE) {
       resultFilterObj = getFilterItemForString(topLevelOp, field, value, objPath);
     } else if (numericOrTextOrBooleanType === NumericTextTypeTypeEnum.ES_NUMERIC_TYPE) {
@@ -455,6 +470,8 @@ const getFilterObj = (
       });
     }
   }
+  // inject a query path here
+
   return resultFilterObj;
 };
 

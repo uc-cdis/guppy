@@ -9,9 +9,9 @@ import log from '../logger';
 import { SCROLL_PAGE_SIZE } from './const';
 import CodedError from '../utils/error';
 import {
-  fromFieldsToSource, buildNestedField, processNestedFieldNames, ElasticsearchPathHandler,
+  fromFieldsToSource, buildNestedField, processNestedFieldNames,
 } from '../utils/utils';
-import { FieldPathResolver } from './fieldResolver';
+import { ElasticsearchFieldIndexer } from './fieldResolver2';
 
 function processArrayConfig(arrayConfig, fieldTypes) {
   const arrayFields = {};
@@ -259,8 +259,7 @@ class ES {
     const resultList = await Promise.all(promiseList);
     log.info('[ES.initialize] got nestings from elasticsearch');
     resultList.forEach((res) => {
-      const pathResolver = new FieldPathResolver(res.fieldTypes);
-      pathResolver.initialize();
+      const pathResolver = new ElasticsearchFieldIndexer(res.fieldTypes);
       nestings[res.index] = pathResolver;
     });
     // log.debug('[ES.initialize]', JSON.stringify(fieldTypes, null, 4));
