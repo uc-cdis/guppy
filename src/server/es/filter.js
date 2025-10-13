@@ -280,8 +280,8 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
 
 /**
  * This function transfer graphql filter arg to ES filter object
- * It first parse graphql filter object recursively from top to down,
- * until reach the bottom level, it translate gql filter unit to ES filter unit.
+ * It first parses a graphql filter object recursively from top to down,
+ * until reach the bottom level, it translates gql filter unit to ES filter unit.
  * And finally combines all filter units from down to top.
  * @param {ES} esInstance
  * @param {string} esIndex
@@ -291,7 +291,7 @@ const getESSearchFilterFragment = (esInstance, esIndex, fields, keyword) => {
  *                               only need for agg queries
  * @param {object} defaultAuthFilter - once graphqlFilterObj is empty,
  *                this function transfers and returns this auth filter as default
- * @param objPath: path to object
+ * @param objPath - passed when a nested filter is in the filter path
  */
 const getFilterObj = (
   esInstance,
