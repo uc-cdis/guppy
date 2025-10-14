@@ -1,0 +1,268 @@
+{ "indices": [
+  { "index": "dr43_active_v8_case", "type": "case" },
+  { "index": "dr43_active_v8_file", "type": "file" },
+  { "index": "dr43_viz_open_v8__case_centric", "type": "case_centric" },
+  { "index": "dr43_active_v8_project", "type": "project" },
+  { "index": "dr43_active_v8_annotation", "type": "annotation" },
+  { "index": "dr43_viz_open_v8__gene_centric", "type": "gene_centric" },
+  { "index": "dr43_viz_open_v8__ssm_centric", "type": "ssm_centric" },
+  { "index": "dr43_viz_open_v8__ssm_occurrence_centric", "type": "ssm_occurrence_centric" },
+  { "index": "dr43_viz_open_v8__cnv_occurrence_centric", "type": "cnv_occurrence_centric" },
+  { "index": "dr43_viz_open_v8__cnv_centric", "type": "cnv_centric" },
+  { "index": "dr43_viz_open_v8__segment_cnv_occurrence_centric", "type": "segment_cnv_occurrence_centric" },
+  { "index": "dr43_viz_open_v8__segment_cnv_centric", "type": "segment_cnv_centric" }
+], "tierAccessLevel": "libre",
+  "arrayConfig" :[
+    {
+      "index": "dr43_active_v8_case",
+      "array": [
+        "aliquot_ids",
+        "analyte_ids",
+        "diagnoses",
+        "diagnoses.sites_of_involvement",
+        "diagnoses.treatments",
+        "diagnosis_ids",
+        "exposures",
+        "family_histories",
+        "files",
+        "files.acl",
+        "files.analysis.metadata.read_groups",
+        "files.downstream_analyses",
+        "files.downstream_analyses.output_files",
+        "files.index_files",
+        "follow_ups",
+        "follow_ups.molecular_tests",
+        "follow_ups.other_clinical_attributes",
+        "follow_ups.other_clinical_attributes.comorbidities",
+        "follow_ups.other_clinical_attributes.risk_factors",
+        "portion_ids",
+        "project.disease_type",
+        "project.primary_site",
+        "sample_ids",
+        "samples",
+        "samples.portions",
+        "samples.portions.analytes",
+        "samples.portions.analytes.aliquots",
+        "samples.portions.slides",
+        "slide_ids",
+        "submitter_aliquot_ids",
+        "submitter_analyte_ids",
+        "submitter_diagnosis_ids",
+        "submitter_portion_ids",
+        "submitter_sample_ids",
+        "submitter_slide_ids"
+      ]
+    },
+    {
+      "index": "dr43_active_v8_file",
+      "array": [
+        "acl",
+        "analysis.metadata.read_groups",
+        "associated_entities",
+        "cases",
+        "cases.diagnoses",
+        "cases.diagnoses.sites_of_involvement",
+        "cases.diagnoses.treatments",
+        "cases.exposures",
+        "cases.family_histories",
+        "cases.follow_ups",
+        "cases.follow_ups.molecular_tests",
+        "cases.follow_ups.other_clinical_attributes",
+        "cases.follow_ups.other_clinical_attributes.comorbidities",
+        "cases.follow_ups.other_clinical_attributes.risk_factors",
+        "cases.samples",
+        "cases.project.disease_type",
+        "cases.project.primary_site",
+        "cases.samples.portions",
+        "cases.samples.portions.analytes",
+        "cases.samples.portions.analytes.aliquots",
+        "cases.samples.portions.slides",
+        "downstream_analyses",
+        "downstream_analyses.output_files",
+        "index_files"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__case_centric",
+      "array": [
+        "aliquot_ids",
+        "analyte_ids",
+        "annotations",
+        "available_variation_data",
+        "diagnoses",
+        "diagnoses.sites_of_involvement",
+        "diagnoses.treatments",
+        "diagnosis_ids",
+        "exposures",
+        "family_histories",
+        "files",
+        "files.acl",
+        "files.analysis.metadata.read_groups",
+        "files.downstream_analyses",
+        "files.downstream_analyses.output_files",
+        "files.index_files",
+        "follow_ups",
+        "follow_ups.molecular_tests",
+        "follow_ups.other_clinical_attributes",
+        "follow_ups.other_clinical_attributes.comorbidities",
+        "follow_ups.other_clinical_attributes.risk_factors",
+        "gene",
+        "portion_ids",
+        "project.disease_type",
+        "project.primary_site",
+        "sample_ids",
+        "samples",
+        "samples.portions",
+        "samples.portions.analytes",
+        "samples.portions.analytes.aliquots",
+        "samples.portions.slides",
+        "segment_cnv",
+        "segment_cnv.observation",
+        "slide_ids",
+        "submitter_aliquot_ids",
+        "submitter_analyte_ids",
+        "submitter_diagnosis_ids",
+        "submitter_portion_ids",
+        "submitter_sample_ids",
+        "submitter_slide_ids"
+
+      ]
+    },
+    {
+      "index": "dr43_active_v8_project",
+      "array": [
+        "disease_type",
+        "primary_site"
+      ]
+    },
+    {
+      "index": "dr43_active_v8_annotation",
+      "array": [
+        "project.disease_type",
+        "project.primary_site"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__gene_centric",
+      "array": [
+        "case",
+        "cytoband",
+        "external_db_ids.entrez_gene",
+        "external_db_ids.hgnc",
+        "external_db_ids.omim_gene",
+        "external_db_ids.uniprotkb_swissprot",
+        "synonyms",
+        "transcripts",
+        "transcripts.domains",
+        "transcripts.exons",
+        "diagnoses.treatments"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__ssm_centric",
+      "array": [
+        "consequence",
+        "consequence.transcript.gene.cytoband",
+        "consequence.transcript.gene.external_db_ids.entrez_gene",
+        "consequence.transcript.gene.external_db_ids.hgnc",
+        "consequence.transcript.gene.external_db_ids.omim_gene",
+        "consequence.transcript.gene.external_db_ids.uniprotkb_swissprot",
+        "consequence.transcript.gene.synonyms",
+        "cosmic_id",
+        "gene_aa_change",
+        "occurrence",
+        "occurrence.case.available_variation_data",
+        "occurrence.case.diagnoses",
+        "occurrence.case.diagnoses.treatments",
+        "occurrence.case.exposures",
+        "occurrence.case.family_histories",
+        "occurrence.case.observation",
+        "occurrence.case.project.disease_type",
+        "occurrence.case.project.primary_site",
+        "occurrence.case.samples"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__ssm_occurrence_centric",
+      "array": [
+        "case.available_variation_data",
+        "case.diagnoses",
+        "case.diagnoses.treatments",
+        "case.exposures",
+        "case.family_histories",
+        "case.observation",
+        "case.project.disease_type",
+        "case.project.primary_site",
+        "case.samples",
+        "ssm.consequence",
+        "ssm.consequence.transcript.gene.cytoband",
+        "ssm.consequence.transcript.gene.external_db_ids.entrez_gene",
+        "ssm.consequence.transcript.gene.external_db_ids.hgnc",
+        "ssm.consequence.transcript.gene.external_db_ids.omim_gene",
+        "ssm.consequence.transcript.gene.external_db_ids.uniprotkb_swissprot",
+        "ssm.consequence.transcript.gene.synonyms",
+        "ssm.cosmic_id"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__cnv_occurrence_centric",
+      "array": [
+        "case.available_variation_data",
+        "case.diagnoses",
+        "case.diagnoses.treatments",
+        "case.exposures",
+        "case.family_histories",
+        "case.observation",
+        "case.project.disease_type",
+        "case.project.primary_site",
+        "case.samples",
+        "cnv.consequence"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__cnv_centric",
+      "array": [
+        "consequence",
+        "occurrence",
+        "occurrence.case.available_variation_data",
+        "occurrence.case.diagnoses",
+        "occurrence.case.diagnoses.treatments",
+        "occurrence.case.exposures",
+        "occurrence.case.family_histories",
+        "occurrence.case.observation",
+        "occurrence.case.project.disease_type",
+        "occurrence.case.project.primary_site",
+        "occurrence.case.samples"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__segment_cnv_occurrence_centric",
+      "array": [
+        "case.available_variation_data",
+        "case.diagnoses",
+        "case.diagnoses.treatments",
+        "case.exposures",
+        "case.family_histories",
+        "case.observation",
+        "case.project.disease_type",
+        "case.project.primary_site",
+        "case.samples"
+      ]
+    },
+    {
+      "index": "dr43_viz_open_v8__segment_cnv_centric",
+      "array": [
+        "occurrence",
+        "occurrence.case.available_variation_data",
+        "occurrence.case.diagnoses",
+        "occurrence.case.diagnoses.treatments",
+        "occurrence.case.exposures",
+        "occurrence.case.family_histories",
+        "occurrence.case.observation",
+        "occurrence.case.project.disease_type",
+        "occurrence.case.project.primary_site",
+        "occurrence.case.samples"
+      ]
+    }
+  ],
+  "auth_filter_field": null }

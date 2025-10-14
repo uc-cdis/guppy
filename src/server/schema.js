@@ -122,9 +122,6 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
       const { properties } = fieldESTypeMap[fieldKey];
       queueTypes.push({ type: `${fieldKey}`, properties, nestedFieldKeys: [fieldKey] });
       existingFields.add(fieldKey);
-      if (fieldKey === 'program') {
-        console.log(fieldKey, properties);
-      }
     }
   });
 

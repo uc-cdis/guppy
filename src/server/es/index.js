@@ -257,7 +257,7 @@ class ES {
       .map((cfg) => this._getESFieldsTypes(cfg.index).then((res) => ({ index: cfg.index, fieldTypes: res })));
 
     const resultList = await Promise.all(promiseList);
-    log.info('[ES.initialize] got nestings from elasticsearch');
+    log.info('[ES.initialize] got nesting from elasticsearch');
     resultList.forEach((res) => {
       const pathResolver = new ElasticsearchFieldIndexer(res.fieldTypes);
       nestings[res.index] = pathResolver;
