@@ -11,7 +11,7 @@ import { RenameTypes, RenameRootFields } from '@graphql-tools/wrap';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import esInstance from './es/index';
 import getResolver from './resolvers';
-import getSchema from './schema';
+import getSchema, { buildGlobalSchema } from './schema';
 import config from './config';
 import log from './logger';
 import middlewares from './middlewares';
@@ -22,7 +22,7 @@ import CodedError from './utils/error';
 import { statusRouter, versionRouter } from './endpoints';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
-  return makeExecutableSchema({ typeDefs, resolvers });
+  return makeExecutableSchema({ typeDefs  , resolvers });
 }
 
 // set the prefix for each index schema
@@ -34,7 +34,8 @@ function prefixForIndex(cfg) {
 // Create subschemas with transforms
 function buildSubschema(schema, prefix) {
 
-  const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'Date', 'DateTime']);
+  const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'JSONObject', 'Date', 'DateTime', 'Accessibility', 'Format', 'BucketsForNestedStringAgg',
+    'BucketsForNestedNumberAgg', 'BucketsForNestedMissingFields', 'BucketsForNestedTermsFields', 'BucketsForString']);
 
   return {
     schema,
@@ -46,11 +47,9 @@ function buildSubschema(schema, prefix) {
   };
 }
 
-// 4) Stitch them all together
 function stitchIndexSchemas(indexSchemas) {
   return stitchSchemas({
     subschemas: indexSchemas.map(({ schema, prefix }) => buildSubschema(schema, prefix)),
-    // Optionally define top-level glue types/unions/interfaces or shared scalars here
   });
 }
 
@@ -64,11 +63,13 @@ const startServer = async () => {
   // build schema and resolvers by parsing elastic search fields and types,
   let schemaWithMiddleware;
   if (config.esConfig.useNamespace) {
+    const globalTypes = buildGlobalSchema();
+
     const perIndex = config.esConfig.indices.map((cfg) => {
       const singleIndexConfig = { ...config.esConfig, indices: [cfg] };
       const typeDefs = getSchema(singleIndexConfig, esInstance);
       const resolvers = getResolver(singleIndexConfig, esInstance);
-      const schema = buildIndexSchema({ typeDefs, resolvers });
+      const schema = buildIndexSchema({ typeDefs: `${typeDefs}${globalTypes}`, resolvers });
       const prefix = prefixForIndex(cfg);
       return { schema, prefix };
     });
