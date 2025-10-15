@@ -508,7 +508,7 @@ class ES {
         let field = f;
         if (f.endsWith(config.analyzedTextFieldSuffix)) {
           // remove ".analyzed" suffix from field name
-          field = f.substr(0, f.length - config.analyzedTextFieldSuffix.length);
+          field = f.substring(0, f.length - config.analyzedTextFieldSuffix.length);
         }
         return {
           field,
