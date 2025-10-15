@@ -35,12 +35,14 @@ const config = {
         : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
     arrayConfig: inputConfig.arrayConfig || undefined,
+    useNamespace: inputConfig.useNamespace || false,
   },
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
+
 
   tierAccessSensitiveRecordExclusionField:
     inputConfig.tier_access_sensitive_record_exclusion_field,
@@ -70,6 +72,10 @@ if (!config.esConfig.host.startsWith('http')) {
 
 if (process.env.GEN3_ARBORIST_ENDPOINT) {
   config.arboristEndpoint = process.env.GEN3_ARBORIST_ENDPOINT;
+}
+
+if (process.env.USE_NAMEDSPACE) {
+  config.esConfig.useNameDSPACE = process.env.USE_NAMEDSPACE;
 }
 
 if (process.env.GUPPY_PORT) {

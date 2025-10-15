@@ -12,6 +12,7 @@
   { "index": "dr43_viz_open_v8__segment_cnv_occurrence_centric", "type": "segment_cnv_occurrence_centric" },
   { "index": "dr43_viz_open_v8__segment_cnv_centric", "type": "segment_cnv_centric" }
 ], "tierAccessLevel": "libre",
+  "useNamespace" : true,
   "arrayConfig" :[
     {
       "index": "dr43_active_v8_case",
@@ -178,8 +179,7 @@
         "occurrence.case.family_histories",
         "occurrence.case.observation",
         "occurrence.case.project.disease_type",
-        "occurrence.case.project.primary_site",
-        "occurrence.case.samples"
+        "occurrence.case.project.primary_site"
       ]
     },
     {

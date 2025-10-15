@@ -30,7 +30,10 @@ const getGQLType = (esInstance, esIndex, field, esFieldType, nestedFieldKeys = [
     fieldForArrayCheck = `${nestedFieldKeys.join('.')}.${field}`;
   }
   const isArrayField = esInstance.isArrayField(esIndex, fieldForArrayCheck);
-  if (isArrayField && (esFieldType !== 'nested' || esFieldType === 'jsonObject')) {
+  if (isArrayField && esFieldType !== 'nested' && esFieldType !== 'jsonObject') {
+    if (gqlType === 'Object') {
+      console.warn(`Object type ${esFieldType} for field ${field}.`);
+    }
     return `[${gqlType}]`;
   }
   if (esFieldType === 'nested' || esFieldType === 'jsonObject') {

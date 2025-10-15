@@ -4,6 +4,7 @@ import _ from 'lodash';
 import log from './logger';
 import { buildNestedFieldMapping, filterFieldMapping, firstLetterUpperCase } from './utils/utils';
 import { esFieldNumericTextTypeMapping, NumericTextTypeTypeEnum } from './es/const';
+import * as esAggregator from './es/aggs';
 
 /**
  * This is for getting raw data, by specific es index and es type
@@ -153,18 +154,51 @@ const textHistogramResolver = async (parent, args, context, info) => {
  * @param {object} parent
  * @param {object} args
  */
-const cardinalityResolver = async (parent, args) => {
-  log.debug('[resolver.cardinalityResolver] args', args);
-  log.debug('[resolver.cardinalityResolver] parent', parent);
-  // TODO make work with nested
+// This resolver is used for _cardinalityCount
+const cardinalityResolver = async (parent, args, context) => {
+  const { precision_threshold } = args; // eslint-disable-line camelcase
   const {
-    esInstance, esIndex, esType, filter, field,
+    esInstance, esIndex, esType,
+    field, filter, filterSelf, nestedPath, accessibility, defaultAuthFilter: parentDefaultAuthFilter,
   } = parent;
 
-  // eslint-disable-next-line camelcase
-  const { precision_threshold } = args;
+  // Align behavior with other resolvers: compute defaultAuthFilter from accessibility if not provided
+  let defaultAuthFilter = parentDefaultAuthFilter;
+  if (!defaultAuthFilter && context && context.authHelper && typeof context.authHelper.getDefaultFilter === 'function') {
+    defaultAuthFilter = await context.authHelper.getDefaultFilter(accessibility);
+  }
 
-  return esInstance.getCardinalityCount(esIndex, esType, filter, field, precision_threshold);
+  return esAggregator.textCardinalityCount(
+    { esInstance, esIndex, esType },
+    {
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+      precision_threshold, // eslint-disable-line camelcase
+      nestedPath,
+    },
+  );
+};
+
+// Add a resolver for _totalCount that is nested-aware
+const totalCountResolver = async (parent) => {
+  const {
+    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType
+  } = parent;
+
+  // Count the number of documents that have a value for the given field,
+  // respecting nestedPath when provided.
+  return esAggregator.fieldValueCount(
+    { esInstance, esIndex, esType },
+    {
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+      nestedPath,
+    },
+  );
 };
 
 const getFieldAggregationResolverMappingsByField = (field) => {
@@ -324,25 +358,25 @@ const getResolver = (esConfig, esInstance) => {
     ...typeAggregationResolvers,
     ...typeNestedAggregationResolvers,
     HistogramForNumber: {
-      _totalCount: aggsTotalQueryResolver,
+      _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     HistogramForString: {
-      _totalCount: aggsTotalQueryResolver,
+      _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForNumber: {
-      _totalCount: aggsTotalQueryResolver,
+      _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: numericHistogramResolver,
       asTextHistogram: textHistogramResolver,
     },
     RegularAccessHistogramForString: {
-      _totalCount: aggsTotalQueryResolver,
+      _totalCount: totalCountResolver,
       _cardinalityCount: cardinalityResolver,
       histogram: textHistogramResolver,
       asTextHistogram: textHistogramResolver,

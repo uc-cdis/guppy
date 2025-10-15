@@ -158,6 +158,91 @@ export const appendAdditionalRangeQuery = (field, nestedPath, oldQuery, rangeSta
 };
 
 /**
+ * Count number of documents that have a value for the given field.
+ * Supports nested fields via nestedPath.
+ * Exported for use by resolvers' _totalCount on histogram types.
+ * @param {object} param0 - { esInstance, esIndex, esType }
+ * @param {object} param1 - args for the aggregation:
+ *   - filter: GraphQL filter
+ *   - field: the field to count values for (required)
+ *   - filterSelf: whether to avoid filtering on this same field
+ *   - defaultAuthFilter: fallback auth filter if filter is empty
+ *   - nestedPath: nested path (e.g., 'visits.follow_ups') for nested fields
+ * @returns {number} value_count of the field
+ */
+export const fieldValueCount = async (
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
+  {
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    nestedPath,
+  },
+) => {
+  if (!field) {
+    throw new GraphQLError('fieldValueCount requires "field" argument', {
+      extensions: { code: 'BAD_USER_INPUT' },
+    });
+  }
+
+  const queryBody = { size: 0 };
+
+  // Apply filters (respecting filterSelf semantics)
+  const esFilter = getFilterObj(
+    esInstance,
+    esIndex,
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+  );
+  if (esFilter) {
+    queryBody.query = esFilter;
+  }
+
+  const targetField = nestedPath ? `${nestedPath}.${field}` : field;
+  const aggsObj = {
+    [AGGS_GLOBAL_STATS_NAME]: {
+      value_count: { field: targetField },
+    },
+  };
+
+  if (nestedPath) {
+    queryBody.aggs = {
+      [AGGS_NESTED_QUERY_NAME]: {
+        nested: { path: nestedPath },
+        aggs: { ...aggsObj },
+      },
+    };
+  } else {
+    queryBody.aggs = aggsObj;
+  }
+
+  const result = await esInstance.query(esIndex, esType, queryBody);
+  // Replace optional chaining with defensive checks for plain JavaScript
+  const aggs = result && result.aggregations ? result.aggregations : undefined;
+  let countNode;
+  if (nestedPath) {
+    countNode = aggs
+      && aggs[AGGS_NESTED_QUERY_NAME]
+      && aggs[AGGS_NESTED_QUERY_NAME][AGGS_GLOBAL_STATS_NAME];
+  } else {
+    countNode = aggs && aggs[AGGS_GLOBAL_STATS_NAME];
+  }
+
+  if (!countNode || typeof countNode.value !== 'number') {
+    log.debug('[fieldValueCount] Unexpected aggregation result:', JSON.stringify(result.aggregations, null, 2));
+    return 0;
+  }
+  return countNode.value;
+};
+
+/**
  * get global stats for a field
  * Export for test
  * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType

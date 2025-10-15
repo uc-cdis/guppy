@@ -4,9 +4,11 @@ import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import { makeExecutableSchema } from 'graphql-tools';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
+import { stitchSchemas } from '@graphql-tools/stitch';
+import { RenameTypes, RenameRootFields } from '@graphql-tools/wrap';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 import esInstance from './es/index';
 import getResolver from './resolvers';
 import getSchema from './schema';
@@ -19,6 +21,39 @@ import downloadRouter from './download';
 import CodedError from './utils/error';
 import { statusRouter, versionRouter } from './endpoints';
 
+function buildIndexSchema({ typeDefs, resolvers }) {
+  return makeExecutableSchema({ typeDefs, resolvers });
+}
+
+// set the prefix for each index schema
+function prefixForIndex(cfg) {
+  // e.g., 'file' -> 'File', 'case_centric' -> 'CaseCentric'
+  return cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());
+}
+
+// Create subschemas with transforms
+function buildSubschema(schema, prefix) {
+
+  const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'Date', 'DateTime']);
+
+  return {
+    schema,
+    transforms: [
+      new RenameTypes((name) => (skipTypes.has(name) ? name : `${prefix}_${name}`)),
+      // Optional: namespace root fields
+      new RenameRootFields((operation, name) => `${prefix}_${name}`),
+    ],
+  };
+}
+
+// 4) Stitch them all together
+function stitchIndexSchemas(indexSchemas) {
+  return stitchSchemas({
+    subschemas: indexSchemas.map(({ schema, prefix }) => buildSubschema(schema, prefix)),
+    // Optionally define top-level glue types/unions/interfaces or shared scalars here
+  });
+}
+
 let server;
 const app = express();
 app.use(cors());
@@ -27,10 +62,28 @@ app.use(bodyParser.json({ limit: '50mb' }));
 
 const startServer = async () => {
   // build schema and resolvers by parsing elastic search fields and types,
-  const typeDefs = getSchema(config.esConfig, esInstance);
-  const resolvers = getResolver(config.esConfig, esInstance);
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
-  const schemaWithMiddleware = applyMiddleware(schema, ...middlewares);
+  let schemaWithMiddleware;
+  if (config.esConfig.useNamespace) {
+    const perIndex = config.esConfig.indices.map((cfg) => {
+      const singleIndexConfig = { ...config.esConfig, indices: [cfg] };
+      const typeDefs = getSchema(singleIndexConfig, esInstance);
+      const resolvers = getResolver(singleIndexConfig, esInstance);
+      const schema = buildIndexSchema({ typeDefs, resolvers });
+      const prefix = prefixForIndex(cfg);
+      return { schema, prefix };
+    });
+    const stitchedSchema = stitchIndexSchemas(perIndex);
+    schemaWithMiddleware = applyMiddleware(stitchedSchema, ...middlewares);
+  } else {
+    /* if non-namespaced */
+    const typeDefs = getSchema(config.esConfig, esInstance);
+    const resolvers = getResolver(config.esConfig, esInstance);
+    const schema = makeExecutableSchema({
+      typeDefs,
+      resolvers,
+    });
+    schemaWithMiddleware = applyMiddleware(schema, ...middlewares);
+  }
   // create graphql server instance
   server = new ApolloServer({
     mocks: false,
