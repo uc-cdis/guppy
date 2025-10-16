@@ -297,13 +297,17 @@ export const getHistogramSchemas = () => {
   return histogramSchemas;
 };
 
-export const buildGlobalSchema = () => {
+export const buildSchemaString = (esConfig, esInstance) => {
+  const querySchema = getQuerySchema(esConfig);
+
   const matchedItemSchema = `
     type MatchedItem {
       field: String
       highlights: [String]
     }
   `;
+
+  const typesSchemas = getTypesSchemas(esConfig, esInstance);
 
   const accessibilityEnum = `
     enum Accessibility {
@@ -320,6 +324,17 @@ export const buildGlobalSchema = () => {
       csv
     }
   `;
+
+  const aggregationSchema = getAggregationSchema(esConfig);
+
+  const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
+
+  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(
+    esConfig,
+    esInstance,
+  );
+
+  const histogramSchemas = getHistogramSchemas();
 
   const textHistogramBucketSchema = `
     type BucketsForNestedStringAgg {
@@ -365,39 +380,26 @@ export const buildGlobalSchema = () => {
       count: Int
     }
   `;
+
+  const mappingSchema = getMappingSchema(esConfig);
+
   const schemaStr = `
   scalar JSON
   scalar JSONObject
   ${matchedItemSchema}
+  ${querySchema}
   ${accessibilityEnum}
   ${formatEnum}
-  ${textHistogramBucketSchema}
-  ${nestedMissingFieldsBucketSchema}
-  ${nestedTermsFieldsBucketSchema}
-  ${stringBucketSchema}
-  ${numberHistogramBucketSchema}
- `;
-  return schemaStr;
-};
-
-export const buildSchemaString = (esConfig, esInstance) => {
-  const querySchema = getQuerySchema(esConfig);
-  const typesSchemas = getTypesSchemas(esConfig, esInstance);
-  const aggregationSchema = getAggregationSchema(esConfig);
-  const aggregationSchemasForEachType = getAggregationSchemaForEachType(esConfig, esInstance);
-  const aggregationSchemasForEachNestedType = getAggregationSchemaForEachNestedType(
-    esConfig,
-    esInstance,
-  );
-  const histogramSchemas = getHistogramSchemas();
-  const mappingSchema = getMappingSchema(esConfig);
-  const schemaStr = `
-  ${querySchema}
   ${typesSchemas}
   ${aggregationSchema}
   ${aggregationSchemasForEachType}
   ${aggregationSchemasForEachNestedType}
   ${histogramSchemas}
+  ${textHistogramBucketSchema}
+  ${nestedMissingFieldsBucketSchema}
+  ${nestedTermsFieldsBucketSchema}
+  ${stringBucketSchema}
+  ${numberHistogramBucketSchema}
   ${mappingSchema}
 `;
   log.info('[schema] graphql schema generated.');

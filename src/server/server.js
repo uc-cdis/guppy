@@ -19,16 +19,11 @@ import headerParser from './utils/headerParser';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
+import { prefixForIndex} from './utils/utils';
 import { statusRouter, versionRouter } from './endpoints';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
   return makeExecutableSchema({ typeDefs  , resolvers });
-}
-
-// set the prefix for each index schema
-function prefixForIndex(cfg) {
-  // e.g., 'file' -> 'File', 'case_centric' -> 'CaseCentric'
-  return cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());
 }
 
 // Create subschemas with transforms
@@ -63,13 +58,12 @@ const startServer = async () => {
   // build schema and resolvers by parsing elastic search fields and types,
   let schemaWithMiddleware;
   if (config.esConfig.useNamespace) {
-    const globalTypes = buildGlobalSchema();
 
     const perIndex = config.esConfig.indices.map((cfg) => {
       const singleIndexConfig = { ...config.esConfig, indices: [cfg] };
       const typeDefs = getSchema(singleIndexConfig, esInstance);
       const resolvers = getResolver(singleIndexConfig, esInstance);
-      const schema = buildIndexSchema({ typeDefs: `${typeDefs}${globalTypes}`, resolvers });
+      const schema = buildIndexSchema({ typeDefs: `${typeDefs}`, resolvers });
       const prefix = prefixForIndex(cfg);
       return { schema, prefix };
     });

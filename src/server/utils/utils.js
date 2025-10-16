@@ -151,6 +151,11 @@ export const filterFieldMapping = (fieldArray) => (parent, args) => {
   return resultArray;
 };
 
+// set the prefix for each index schema
+export const prefixForIndex = (cfg) => {
+  // e.g., 'file' -> 'File', 'case_centric' -> 'CaseCentric'
+  return cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());
+}
 
 /**
  * Elasticsearch Field Path Handler

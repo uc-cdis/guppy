@@ -75,7 +75,7 @@ if (process.env.GEN3_ARBORIST_ENDPOINT) {
 }
 
 if (process.env.USE_NAMEDSPACE) {
-  config.esConfig.useNameDSPACE = process.env.USE_NAMEDSPACE;
+  config.esConfig.useNamespace = process.env.USE_NAMEDSPACE;
 }
 
 if (process.env.GUPPY_PORT) {
