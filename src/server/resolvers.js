@@ -1,4 +1,4 @@
-import GraphQLJSON, { GraphQLJSONObject } from 'graphql-type-json';
+import GraphQLJSON from 'graphql-type-json';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import _ from 'lodash';
 import log from './logger';
@@ -92,9 +92,6 @@ const numericHistogramResolver = async (parent, args, context) => {
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
   log.debug('[resolver.numericHistogramResolver] args', args);
-
-
-
 
   return esInstance.numericAggregation({
     esIndex,
@@ -346,7 +343,6 @@ const getResolver = (esConfig, esInstance) => {
 
   const resolver = {
     JSON: GraphQLJSON,
-    JSONObject: GraphQLJSONObject,
     Query: {
       ...typeResolverMappings,
       _aggregation: (parent) => ({ ...parent }),

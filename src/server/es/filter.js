@@ -421,7 +421,7 @@ const getFilterObj = (
     }
   } else {
     const field = Object.keys(graphqlFilterObj[topLevelOp])[0];
-    if (aggsField === field && !filterSelf) {
+    if ((aggsField === field || field.includes(aggsField)) && !filterSelf) {
       // if `filterSelf` flag is false, should not filter the target field itself,
       // instead, only apply an auth filter if exists
       return getFilterObj(esInstance, esIndex, defaultAuthFilter);
