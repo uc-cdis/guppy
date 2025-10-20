@@ -40,6 +40,7 @@ const updateAggObjectForMissingFields = (missingFields, aggsObj) => {
 
 const processResultsForNestedAgg = (nestedAggFields, item, resultObj) => {
   let missingFieldResult;
+
   if (nestedAggFields && nestedAggFields.missingFields) {
     missingFieldResult = [];
     nestedAggFields.missingFields.forEach((element) => {
@@ -667,6 +668,8 @@ export const numericAggregation = async (
  * @param {object} param1.nestedAggFields - fields for sub-aggregations
  *                                          (terms and/or missing aggregation)
  * @param {object} param1.nestedPath - path info used by nested aggregation
+ * @param {object} param1.isNumericField - whether the field is numeric field
+ * @param {object} param1.queryPath - path to the field in the query from the query repository
  */
 export const textAggregation = async (
   {
@@ -745,7 +748,7 @@ export const textAggregation = async (
                 {
                   [fieldNestedName]: {
                     terms: {
-                      field: fieldNestedName,
+                      field: isNested.nestedPath == null ? queryPath : field,
                       ...missingAlias,
                     },
                   },
@@ -816,6 +819,115 @@ export const textAggregation = async (
     if (missingDataItem !== undefined && missingDataItem.key === null) {
       missingDataItem.key = config.esConfig.missingDataAlias;
       finalResults[lastIndex] = missingDataItem;
+    }
+  }
+  return finalResults;
+};
+
+/**
+ * This function does aggregation for text field, and returns histogram
+ * @param {object} param0 - some ES related arguments: esInstance, esIndex, and esType
+ * @param {object} param1 - some graphql related arguments
+ * @param {object} param1.filter - filter (if any) to apply on aggregation
+ * @param {object} param1.field - field to aggregate. Required
+ * @param {object} param1.filterSelf - only valid if to avoid filtering the same aggregation field
+ * @param {object} param1.defaultAuthFilter - once param1.filter is empty,
+ *                                            use this auth related filter instead
+ * @param {object} param1.nestedAggFields - fields for sub-aggregations
+ *                                          (terms and/or missing aggregation)
+ * @param {object} param1.nestedPath - path info used by nested aggregation
+ * @param {object} param1.isNumericField - whether the field is numeric field
+ * @param {object} param1.queryPath - path to the field in the query from the query repository
+ */
+export const textAggregationUsingReversAgg = async (
+  {
+    esInstance,
+    esIndex,
+    esType,
+  },
+  {
+    filter,
+    field,
+    filterSelf,
+    defaultAuthFilter,
+    nestedAggFields,
+    // eslint-disable-next-line no-unused-vars
+    nestedPath,
+    isNumericField,
+    queryPath,
+  },
+) => {
+  const queryBody = { size: 0 };
+  if (!!filter || !!defaultAuthFilter) {
+    queryBody.query = getFilterObj(
+      esInstance,
+      esIndex,
+      filter,
+      field,
+      filterSelf,
+      defaultAuthFilter,
+    );
+  }
+
+  const aggsName = `${field}Aggs`;
+  const aggsObj = {};
+
+  let missingAlias = {
+  };
+
+  const pathResolver = esInstance.paths[esIndex];
+  const pathInfo = pathResolver.getFieldInfo(queryPath);
+  if (!pathInfo) {
+    console.error(`${queryPath} not found.`);
+    return null;
+  }
+
+  // don't add missing alias to numeric field by default
+  // since the value of missing alias is a string
+  if (config.esConfig.aggregationIncludeMissingData && !isNumericField && !pathInfo.type === 'boolean') {
+    missingAlias = {
+      missing: 'N/A',
+    };
+  }
+
+  if (nestedAggFields && nestedAggFields.termsFields) {
+    missingAlias = {};
+    aggsObj.aggs = updateAggObjectForTermsFields(nestedAggFields.termsFields, aggsObj.aggs);
+  }
+
+  if (nestedAggFields && nestedAggFields.missingFields) {
+    missingAlias = {};
+    aggsObj.aggs = updateAggObjectForMissingFields(nestedAggFields.missingFields, aggsObj.aggs);
+  }
+
+  queryBody.aggs = pathResolver.buildAggregation(queryPath, aggsName, 'terms', missingAlias);
+  const finalResults = [];
+
+  // parse ES query result based on whether is doing nested aggregation or not (if `aggsNestedName` is defined)
+  const result = await esInstance.query(esIndex, esType, queryBody);
+  let missingDataItem;
+
+  const resultBuckets = !pathInfo.nearestNestedParent ? result.aggregations[aggsName].buckets : result.aggregations[aggsName][`${aggsName}_inner`].buckets;
+  resultBuckets.forEach((bucket) => {
+    const { key } = bucket;
+    const count = !pathInfo.nearestNestedParent ? bucket.doc_count : bucket[`${aggsName}_reverse`].doc_count;
+    if (key === '') {
+      missingDataItem = {
+        key: config.esConfig.missingDataAlias,
+        count,
+      };
+    } else {
+      finalResults.push({
+        key,
+        count,
+      });
+    }
+  });
+
+  // make the missing data bucket to the bottom of the list
+  if (config.esConfig.aggregationIncludeMissingData) {
+    if (missingDataItem !== undefined) {
+      finalResults.push(missingDataItem);
     }
   }
   return finalResults;

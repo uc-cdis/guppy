@@ -111,8 +111,8 @@ const numericHistogramResolver = async (parent, args, context) => {
 
 /**
  * This resolver is for text aggregation.
- * It inherits arguments from its parent,
- * and then calls text aggregation function, and finally returns response
+ * It inherits arguments from its parent
+ * and then calls text aggregation function and finally returns a response
  * @param {object} parent
  * @param {object} args
  * @param {object} context
@@ -125,8 +125,8 @@ const textHistogramResolver = async (parent, args, context, info) => {
   } = parent;
   const path = extractNestedPath(info.path.prev, '');
   let queryPath = '';
-  if (path) {
-   queryPath = path.split('.').slice(2).join('.');
+  if (path) { // remove the first two elements of path, which are the aggregation name and the index name
+    queryPath = path.split('.').slice(2).join('.');
   }
   const { authHelper } = context;
   const defaultAuthFilter = await authHelper.getDefaultFilter(accessibility);
@@ -181,7 +181,7 @@ const cardinalityResolver = async (parent, args, context) => {
 // Add a resolver for _totalCount that is nested-aware
 const totalCountResolver = async (parent) => {
   const {
-    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType
+    field, filter, filterSelf, defaultAuthFilter, nestedPath, esInstance, esIndex, esType,
   } = parent;
 
   // Count the number of documents that have a value for the given field,
@@ -329,12 +329,7 @@ const getResolver = (esConfig, esInstance) => {
     acc[cfg.type] = filterFieldMapping(
       _.flattenDeep(
         esInstance.getESFields(cfg.index).fields.map(
-          (f) => {
-            if (f.type === 'jsonObject') {
-              return buildNestedFieldMapping(f);
-            }
-            return buildNestedFieldMapping(f);
-          },
+          (f) => buildNestedFieldMapping(f),
         ),
       ),
     );

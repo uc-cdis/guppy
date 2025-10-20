@@ -2,6 +2,7 @@
  * Elasticsearch Field Path Indexer and Query Builder
  * Indexes all fields with their nesting properties and builds queries/aggs
  */
+
 // eslint-disable-next-line import/prefer-default-export
 export class ElasticsearchFieldIndexer {
   constructor(mapping) {
@@ -179,6 +180,14 @@ export class ElasticsearchFieldIndexer {
             aggs: {
               [`${aggName}_reverse`]: {
                 reverse_nested: {},
+                aggs: {
+                  parent_count: {
+                    value_count: {
+                      field: '_index',
+                    },
+                  },
+                },
+
               },
             },
           },

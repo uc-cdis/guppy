@@ -662,7 +662,7 @@ class ES {
     isNumericField,
     queryPath,
   }) {
-    return esAggregator.textAggregation(
+    return esAggregator.textAggregationUsingReversAgg(
       {
         esInstance: this,
         esIndex,
