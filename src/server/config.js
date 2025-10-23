@@ -35,7 +35,7 @@ const config = {
         : inputConfig.aggs_include_missing_data,
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
     arrayConfig: inputConfig.arrayConfig || undefined,
-    useNamespace: inputConfig.useNamespace || false,
+    useNamespace: inputConfig.useNamespace || true,
   },
   port: 80,
   path: '/graphql',

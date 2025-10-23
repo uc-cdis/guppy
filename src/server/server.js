@@ -58,7 +58,6 @@ const startServer = async () => {
   // build schema and resolvers by parsing elastic search fields and types,
   let schemaWithMiddleware;
   if (config.esConfig.useNamespace) {
-
     const perIndex = config.esConfig.indices.map((cfg) => {
       const singleIndexConfig = { ...config.esConfig, indices: [cfg] };
       const typeDefs = getSchema(singleIndexConfig, esInstance);
