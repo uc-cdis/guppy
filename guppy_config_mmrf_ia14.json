@@ -1,0 +1,13 @@
+{ "indices": [
+  { "index": "ia14-20251017_case", "type": "case" },
+  { "index": "ia14-20251017_file", "type": "file" },
+  { "index": "mmrf-commpass-ia14_viz_open_1__case_centric", "type": "case_centric" },
+  { "index": "ia14-20251017_project", "type": "project" },
+  { "index": "ia14-20251017_annotation", "type": "annotation" },
+  { "index": "mmrf-commpass-ia14_viz_open_1__gene_centric", "type": "gene_centric" },
+  { "index": "mmrf-commpass-ia14_viz_open_1__ssm_centric", "type": "ssm_centric" },
+  { "index": "mmrf-commpass-ia14_viz_open_1__ssm_occurrence_centric", "type": "ssm_occurrence_centric" }
+], "tierAccessLevel": "libre",
+  "useNamespace" : true,
+  "config_index": "ia14-config",
+  "auth_filter_field": null }

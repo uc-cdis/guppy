@@ -1,0 +1,12 @@
+{ "indices": [
+  { "index": "release-ia24-20251031-001_case", "type": "case" },
+  { "index": "release-ia24-20251031-001_file", "type": "file" },
+  { "index": "ia24-20251023_project", "type": "project" },
+  { "index": "release-ia24-202511102-001-mi_viz_open_1__case_centric", "type": "case_centric" },
+  { "index": "release-ia24-202511102-001-mi_viz_open_1__gene_centric", "type": "gene_centric" },
+  { "index": "release-ia24-202511102-001-mi_viz_open_1__ssm_centric", "type": "ssm_centric" },
+  { "index": "release-ia24-202511102-001-mi_viz_open_1__ssm_occurrence_centric", "type": "ssm_occurrence_centric" }
+], "tierAccessLevel": "libre",
+  "config_index": "ia24-config_11_11_2025",
+  "useNamespace" : true,
+  "auth_filter_field": null }

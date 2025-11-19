@@ -58,6 +58,7 @@
       "index": "dr43_active_v8_file",
       "array": [
         "acl",
+        "analysis.input_files",
         "analysis.metadata.read_groups",
         "associated_entities",
         "cases",

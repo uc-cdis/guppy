@@ -2,6 +2,7 @@
  * Elasticsearch Field Path Indexer and Query Builder
  * Indexes all fields with their nesting properties and builds queries/aggs
  */
+import { SCROLL_PAGE_SIZE } from './const';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ElasticsearchFieldIndexer {
@@ -158,6 +159,7 @@ export class ElasticsearchFieldIndexer {
       [aggType]: {
         field: fieldPath,
         ...aggOptions,
+        size: SCROLL_PAGE_SIZE,
       },
     };
 
