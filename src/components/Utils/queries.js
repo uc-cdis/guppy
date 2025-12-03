@@ -412,12 +412,13 @@ export const askGuppyForTotalCounts = (
   }).then((response) => response.json())
     .then((response) => {
       if (response.errors) {
-        throw new Error(`Error during download ${response.errors}`);
+        err_msgs = response.errors.map(e => e.message).join('; ')
+        throw new Error(`Error during download: ${err_msgs}`);
       }
       return response.data._aggregation[type]._totalCount;
     })
     .catch((err) => {
-      throw new Error(`Error during download ${err}`);
+      throw new Error(`Error during download: ${err}`);
     });
 };
 
