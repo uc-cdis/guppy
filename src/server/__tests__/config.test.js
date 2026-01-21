@@ -110,4 +110,14 @@ describe('config', () => {
     const config = require('../config').default;
     expect(config.allowRefresh).toBe(false);
   });
+
+  test('could ignoredFields fields from mapping', async () => {
+    const config = require('../config').default;
+    expect(config.ignoredFields).toEqual(['@version']);
+  });
+
+  test('could remap "__field" from to "prefix__field"', async () => {
+    const config = require('../config').default;
+    expect(config.doubleUnderscorePrefix).toEqual('x__');
+  });
 });
