@@ -2,12 +2,21 @@ name: Integration Tests
 
 on: pull_request
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   integration_tests:
     name: Integration tests
-    uses: uc-cdis/.github/.github/workflows/integration_tests.yaml@master
+    uses: uc-cdis/gen3-code-vigil/.github/workflows/shared_integration_tests.yaml@feat/GPE-1747
     with:
+      TEST_REPO_BRANCH: feat/GPE-1747
+      GEN3_INSTANCE_TYPE: HELM_LOCAL
       SERVICE_TO_TEST: guppy
+      WORKING_DIR: gen3-code-vigil/gen3-integration-tests
     secrets:
       CI_TEST_ORCID_USERID: ${{ secrets.CI_TEST_ORCID_USERID }}
       CI_TEST_ORCID_PASSWORD: ${{ secrets.CI_TEST_ORCID_PASSWORD }}
