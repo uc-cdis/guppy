@@ -10,6 +10,7 @@ const esgqlTypeMapping = {
   byte: 'Int',
   double: 'Float',
   float: 'Float',
+  boolean: 'Boolean',
   half_float: 'Float',
   scaled_float: 'Float',
   array: 'Object',
@@ -43,14 +44,17 @@ const getGQLType = (esInstance, esIndex, field, esFieldType, nestedFieldKeys = [
 const EnumAggsHistogramName = {
   HISTOGRAM_FOR_STRING: 'HistogramForString',
   HISTOGRAM_FOR_NUMBER: 'HistogramForNumber',
+  HISTOGRAM_FOR_BOOLEAN: 'HistogramForBoolean',
 };
 const gqlTypeToAggsHistogramName = {
   String: EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
   Int: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
   Float: EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
+  Boolean: EnumAggsHistogramName.HISTOGRAM_FOR_BOOLEAN,
   '[String]': EnumAggsHistogramName.HISTOGRAM_FOR_STRING,
   '[Int]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
   '[Float]': EnumAggsHistogramName.HISTOGRAM_FOR_NUMBER,
+  '[Boolean]': EnumAggsHistogramName.HISTOGRAM_FOR_BOOLEAN,
 };
 
 const getAggsHistogramName = (gqlType) => {
@@ -252,6 +256,12 @@ const getTextHistogramSchema = (isRegularAccess) => `
     }
   `;
 
+const getBooleanHistogramSchema = (isRegularAccess) => `
+    type ${(isRegularAccess ? histogramTypePrefix : '') + EnumAggsHistogramName.HISTOGRAM_FOR_BOOLEAN} {
+      histogram: [BucketsForNestedStringAgg]
+    }
+  `;
+
 export const getMappingSchema = (esConfig) => `
     type Mapping {
       ${esConfig.indices.map((cfg) => `${cfg.type} (
@@ -263,13 +273,20 @@ export const getMappingSchema = (esConfig) => `
 export const getHistogramSchemas = () => {
   const textHistogramSchema = getTextHistogramSchema(false);
 
+  const booleanHistogramSchema = getBooleanHistogramSchema(false);
+
   const regularAccessTextHistogramSchema = getTextHistogramSchema(true);
+
+  const regularAccessBooleanHistogramSchema = getBooleanHistogramSchema(true);
 
   const numberHistogramSchema = getNumberHistogramSchema(false);
 
   const regularAccessNumberHistogramSchema = getNumberHistogramSchema(true);
 
-  const histogramSchemas = [textHistogramSchema, regularAccessTextHistogramSchema, numberHistogramSchema, regularAccessNumberHistogramSchema].join('\n');
+  const histogramSchemas = [
+    textHistogramSchema, regularAccessTextHistogramSchema, booleanHistogramSchema,
+    regularAccessBooleanHistogramSchema, numberHistogramSchema, regularAccessNumberHistogramSchema,
+  ].join('\n');
 
   return histogramSchemas;
 };
