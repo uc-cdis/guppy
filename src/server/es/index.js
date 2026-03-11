@@ -95,6 +95,7 @@ class ES {
     return this.client.search({
       index: esIndex,
       body: validatedQueryBody,
+      request_cache: true,
     }).then((resp) => resp.body, (err) => {
       log.error(`[ES.query] error during querying: ${err.message}`);
       throw new Error(err.message);
@@ -159,6 +160,7 @@ class ES {
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort: sortStringList,
+          request_cache: true,
         }).then((resp) => resp, (err) => {
           log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
@@ -290,6 +292,7 @@ class ES {
           },
         },
       },
+      request_cache: true,
     }).then((resp) => {
       try {
         arrayFields = processArrayConfig(resp.body.hits.hits, this.fieldTypes);

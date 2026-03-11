@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from '@apollo/server';
+import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 import { expressMiddleware } from '@apollo/server/express4';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
@@ -11,7 +12,7 @@ import { RenameTypes, RenameRootFields } from '@graphql-tools/wrap';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import esInstance from './es/index';
 import getResolver from './resolvers';
-import getSchema, { buildGlobalSchema } from './schema';
+import getSchema from './schema';
 import config from './config';
 import log from './logger';
 import middlewares from './middlewares';
@@ -19,7 +20,7 @@ import headerParser from './utils/headerParser';
 import getAuthHelperInstance from './auth/authHelper';
 import downloadRouter from './download';
 import CodedError from './utils/error';
-import { prefixForIndex} from './utils/utils';
+import { prefixForIndex } from './utils/utils';
 import { statusRouter, versionRouter } from './endpoints';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
@@ -83,6 +84,13 @@ const startServer = async () => {
     mocks: false,
     schema: schemaWithMiddleware,
     validationRules: [depthLimit(10)],
+    allowBatchedHttpRequests: true,
+    cache: new InMemoryLRUCache({
+    // ~100MiB
+      maxSize: 2 ** 20 * 100,
+      // 5 minutes (in seconds)
+      ttl: 300,
+    }),
   });
 
   await server.start();
