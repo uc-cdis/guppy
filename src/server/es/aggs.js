@@ -9,7 +9,7 @@ import {
 import config from '../config';
 import log from '../logger';
 
-const PAGE_SIZE = 10000;
+const PAGE_SIZE = 50000;
 
 const updateAggObjectForTermsFields = (termsFields, aggsObj) => {
   const newAggsObj = { ...aggsObj };

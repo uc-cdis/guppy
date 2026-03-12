@@ -359,7 +359,7 @@ export const downloadDataFromGuppy = (
   },
   csrfToken = '',
 ) => {
-  const SCROLL_SIZE = 10000;
+  const SCROLL_SIZE = 50000;
   const JSON_FORMAT = (format === 'json' || format === undefined);
   if (totalCount > SCROLL_SIZE) {
     const queryBody = { type };

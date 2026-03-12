@@ -160,7 +160,6 @@ class ES {
           size: SCROLL_PAGE_SIZE,
           _source: fields,
           sort: sortStringList,
-          request_cache: true,
         }).then((resp) => resp, (err) => {
           log.error('[ES.query] error when query', err.message);
           throw new Error(err.message);
