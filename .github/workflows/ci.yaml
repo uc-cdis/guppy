@@ -31,7 +31,7 @@ jobs:
     name: NPM Unit Test
     uses: uc-cdis/.github/.github/workflows/npm_unit_test.yaml@master
     with:
-      node-version: '16'
-      npm-version: '8'
+      node-version: '22.11.0'
+      npm-version: '10.9.0'
       pre-test: 'COMMIT=`git rev-parse HEAD` && echo "export const gitCommit = \"${COMMIT}\";" >server/version.js && VERSION=`git describe --always --tags` && echo "export const gitVersion =\"${VERSION}\";" >>server/version.js'
       post-test: 'npm run eslint'
