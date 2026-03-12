@@ -15,12 +15,18 @@ jobs:
     name: Security Pipeline
     uses: uc-cdis/.github/.github/workflows/securitypipeline.yaml@master
     with:
+      node-version: '22.11.0'
+      npm-version: '10.9.0'
+    with:
       python-poetry: 'false'
     secrets: inherit
 
   ci:
     name: Build Image and Push
     uses: uc-cdis/.github/.github/workflows/image_build_push_native.yaml@master
+    with:
+      node-version: '22.11.0'
+      npm-version: '10.9.0'
     secrets:
       ECR_AWS_ACCESS_KEY_ID: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
       ECR_AWS_SECRET_ACCESS_KEY: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
