@@ -29,7 +29,6 @@
   "homepage": "https://github.com/uc-cdis/guppy#readme",
   "dependencies": {
     "@apollo/server": "^4.10.3",
-    "@apollo/utils.keyvaluecache": "^4.0.0",
     "@elastic/elasticsearch": "~7.13.0",
     "@gen3/ui-component": "^0.11.4",
     "@graphql-tools/schema": "^10.0.25",

@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from '@apollo/server';
-import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 import { expressMiddleware } from '@apollo/server/express4';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
@@ -24,12 +23,11 @@ import { prefixForIndex } from './utils/utils';
 import { statusRouter, versionRouter } from './endpoints';
 
 function buildIndexSchema({ typeDefs, resolvers }) {
-  return makeExecutableSchema({ typeDefs  , resolvers });
+  return makeExecutableSchema({ typeDefs, resolvers });
 }
 
 // Create subschemas with transforms
 function buildSubschema(schema, prefix) {
-
   const skipTypes = new Set(['Query', 'Mutation', 'Subscription', 'JSON', 'JSONObject', 'Date', 'DateTime', 'Accessibility', 'Format', 'BucketsForNestedStringAgg',
     'BucketsForNestedNumberAgg', 'BucketsForNestedMissingFields', 'BucketsForNestedTermsFields', 'BucketsForString']);
 
@@ -85,12 +83,6 @@ const startServer = async () => {
     schema: schemaWithMiddleware,
     validationRules: [depthLimit(10)],
     allowBatchedHttpRequests: true,
-    cache: new InMemoryLRUCache({
-    // ~100MiB
-      maxSize: 2 ** 20 * 100,
-      // 5 minutes (in seconds)
-      ttl: 300,
-    }),
   });
 
   await server.start();
