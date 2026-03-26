@@ -152,7 +152,5 @@ export const filterFieldMapping = (fieldArray) => (parent, args) => {
 };
 
 // set the prefix for each index schema
-export const prefixForIndex = (cfg) => {
-  // e.g., 'file' -> 'File', 'case_centric' -> 'CaseCentric'
-  return cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());
-};
+// e.g., 'file' -> 'File', 'case_centric' -> 'CaseCentric'
+export const prefixForIndex = (cfg) => cfg.type.replace(/(^|[_-])(\w)/g, (_, __, c) => c.toUpperCase());

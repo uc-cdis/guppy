@@ -52,7 +52,8 @@ class ES {
     this.config = esConfig;
     this.client = new Client({
       node: this.config.host,
-      // log: 'trace'
+      requestTimeout: config.esConfig.requestTimeout || 60000,
+      maxRetries: config.esConfig.requestTimeout || 3,
     });
     this.client.ping({}, (error) => {
       if (error) {

@@ -26,7 +26,7 @@ if (config.esConfig.useNamespace) {
       _totalCount: hideNumberResolver(true),
     };
 
-    tierAccessMiddleware['Query'] = { ...queryTypeMapping };
+    tierAccessMiddleware.Query = { ...queryTypeMapping };
     tierAccessMiddleware[`${prefix}_HistogramForNumber`] = {
       histogram: hideNumberResolver(false),
       asTextHistogram: hideNumberResolver(false),
