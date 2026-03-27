@@ -36,13 +36,14 @@ const config = {
     missingDataAlias: inputConfig.missing_data_alias || 'no data',
     arrayConfig: inputConfig.arrayConfig || undefined,
     useNamespace: inputConfig.useNamespace || true,
+    maxRetries: inputConfig.maxRetries || 3,
+    esTimeout: inputConfig.esTimeout || 60000,
   },
   port: 80,
   path: '/graphql',
   arboristEndpoint: 'http://arborist-service',
   tierAccessLevel: 'private',
   tierAccessLimit: 1000,
-
 
   tierAccessSensitiveRecordExclusionField:
     inputConfig.tier_access_sensitive_record_exclusion_field,

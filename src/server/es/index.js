@@ -52,7 +52,8 @@ class ES {
     this.config = esConfig;
     this.client = new Client({
       node: this.config.host,
-      // log: 'trace'
+      requestTimeout: config.esConfig.requestTimeout || 60000,
+      maxRetries: config.esConfig.maxRetries || 3,
     });
     this.client.ping({}, (error) => {
       if (error) {
@@ -78,18 +79,18 @@ class ES {
         validatedQueryBody[key] = queryBody[key];
       }
     });
-    validatedQueryBody.highlight = {
-      pre_tags: [
-        `<${config.matchedTextHighlightTagName}>`,
-      ],
-      post_tags: [
-        `</${config.matchedTextHighlightTagName}>`,
-      ],
-      fields: {
-        [`*${config.analyzedTextFieldSuffix}`]: {},
-      },
-    };
-    validatedQueryBody.track_total_hits = true;
+    // validatedQueryBody.highlight = {
+    //   pre_tags: [
+    //     `<${config.matchedTextHighlightTagName}>`,
+    //   ],
+    //   post_tags: [
+    //     `</${config.matchedTextHighlightTagName}>`,
+    //   ],
+    //   fields: {
+    //     [`*${config.analyzedTextFieldSuffix}`]: {},
+    //   },
+    // };
+    // validatedQueryBody.track_total_hits = true;
 
     const start = Date.now();
     return this.client.search({

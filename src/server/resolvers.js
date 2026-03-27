@@ -146,7 +146,7 @@ const textHistogramResolver = async (parent, args, context, info) => {
 
 /**
  * This resolver is for Cardinality.
- * It inherits arguments from its parent,
+ * It inherits arguments from its parent
  * and uses "field" from parent and args "precision_threshold" to get the cardinality count
  * @param {object} parent
  * @param {object} args

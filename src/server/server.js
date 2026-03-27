@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express4';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import { stitchSchemas } from '@graphql-tools/stitch';
