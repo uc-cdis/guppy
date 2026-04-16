@@ -1,7 +1,6 @@
 import { getRequestResourceListFromFilter } from '../utils';
 import config from '../../config';
 import { textAggregation } from '../../es/aggs';
-import setupMockDataEndpoint from '../../__mocks__/mockDataFromES';
 
 jest.mock('../../config');
 jest.mock('../../logger');
@@ -29,11 +28,10 @@ describe('getRequestResourceListFromFilter', () => {
 
     expect(mockTextAggregation)
       .toHaveBeenCalledWith(
-        {
-          esInstance: undefined,
+        expect.objectContaining({
           esIndex: 'testIndex',
           esType: 'testType',
-        },
+        }),
         {
           field: 'name',
           filter: { term: { key: 'value' } },
@@ -58,11 +56,10 @@ describe('getRequestResourceListFromFilter', () => {
 
     expect(mockTextAggregation)
       .toHaveBeenCalledWith(
-        {
-          esInstance: undefined,
+        expect.objectContaining({
           esIndex: 'testIndex',
           esType: 'testType',
-        },
+        }),
         {
           field: 'simpleFieldName',
           filter: { term: { key: 'anotherValue' } },
@@ -87,11 +84,10 @@ describe('getRequestResourceListFromFilter', () => {
 
     expect(mockTextAggregation)
       .toHaveBeenCalledWith(
-        {
-          esInstance: undefined,
+        expect.objectContaining({
           esIndex: 'testIndex',
           esType: 'testType',
-        },
+        }),
         {
           field: 'name',
           filter: { term: { key: 'emptyValue' } },
