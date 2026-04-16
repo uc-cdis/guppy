@@ -124,13 +124,13 @@ export const getRequestResourceListFromFilter = async (
 
 export const buildFilterWithResourceList = (resourceList = []) => {
   const authField = config.esConfig.authFilterField;
-  const { nestedPath } = parseAuthField(authField);
+  const { nestedPath, field } = parseAuthField(authField);
   if (nestedPath) {
     return {
       nested: {
         path: nestedPath,
         IN: {
-          [authField]: [...resourceList],
+          [field]: [...resourceList],
         },
       },
     };
