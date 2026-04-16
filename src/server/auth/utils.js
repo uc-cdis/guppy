@@ -99,28 +99,33 @@ export const checkIfUserCanRefreshServer = async (passedData) => {
   return adminAccess.resources ? adminAccess.resources.includes('/guppy_admin') : false;
 };
 
+const parseAuthField = (authField) => {
+  const dotIdx = authField.lastIndexOf('.');
+  return {
+    field: dotIdx >= 0 ? authField.slice(dotIdx + 1) : authField,
+    nestedPath: dotIdx >= 0 ? authField.slice(0, dotIdx) : undefined,
+  };
+};
+
 export const getRequestResourceListFromFilter = async (
   esIndex,
   esType,
   filter,
   filterSelf,
 ) => {
-  const authField = config.esConfig.authFilterField;
-  const dotIdx = authField.lastIndexOf('.');
-  const field = dotIdx >= 0 ? authField.slice(dotIdx + 1) : authField;
-  const nestedPath = dotIdx >= 0 ? authField.slice(0, dotIdx) : undefined;
-
+  const { field, nestedPath } = parseAuthField(config.esConfig.authFilterField);
   return textAggregation(
     { esInstance, esIndex, esType },
-    { field, filter, filterSelf, nestedPath },
+    {
+      field, filter, filterSelf, nestedPath,
+    },
   ).then((res) => res.map((item) => item.key));
 };
 
 export const buildFilterWithResourceList = (resourceList = []) => {
   const authField = config.esConfig.authFilterField;
-  const dotIdx = authField.lastIndexOf('.');
-  if (dotIdx >= 0) {
-    const nestedPath = authField.slice(0, dotIdx);
+  const { nestedPath } = parseAuthField(authField);
+  if (nestedPath) {
     return {
       nested: {
         path: nestedPath,
