@@ -104,16 +104,35 @@ export const getRequestResourceListFromFilter = async (
   esType,
   filter,
   filterSelf,
-) => textAggregation(
-  { esInstance, esIndex, esType },
-  { field: config.esConfig.authFilterField, filter, filterSelf },
-).then((res) => (res.map((item) => item.key)));
+) => {
+  const authField = config.esConfig.authFilterField;
+  const dotIdx = authField.lastIndexOf('.');
+  const field = dotIdx >= 0 ? authField.slice(dotIdx + 1) : authField;
+  const nestedPath = dotIdx >= 0 ? authField.slice(0, dotIdx) : undefined;
+
+  return textAggregation(
+    { esInstance, esIndex, esType },
+    { field, filter, filterSelf, nestedPath },
+  ).then((res) => res.map((item) => item.key));
+};
 
 export const buildFilterWithResourceList = (resourceList = []) => {
-  const filter = {
+  const authField = config.esConfig.authFilterField;
+  const dotIdx = authField.lastIndexOf('.');
+  if (dotIdx >= 0) {
+    const nestedPath = authField.slice(0, dotIdx);
+    return {
+      nested: {
+        path: nestedPath,
+        IN: {
+          [authField]: [...resourceList],
+        },
+      },
+    };
+  }
+  return {
     IN: {
-      [config.esConfig.authFilterField]: [...resourceList],
+      [authField]: [...resourceList],
     },
   };
-  return filter;
 };
