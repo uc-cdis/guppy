@@ -164,6 +164,12 @@ describe('Schema', () => {
     histogram: [BucketsForNestedStringAgg],
     asTextHistogram: [BucketsForNestedStringAgg]
   }
+  type HistogramForBoolean {
+    histogram: [BucketsForNestedStringAgg]
+  }
+  type RegularAccessHistogramForBoolean {
+    histogram: [BucketsForNestedStringAgg]
+  }
   type HistogramForNumber {
     _totalCount: Int,
     _cardinalityCount(precision_threshold:Int=3000): Int,
