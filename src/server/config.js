@@ -56,6 +56,8 @@ const config = {
   analyzedTextFieldSuffix: '.analyzed',
   matchedTextHighlightTagName: 'em',
   allowedMinimumSearchLen: 2,
+  ignoredFields: ['@version'],
+  doubleUnderscorePrefix: 'x__',
   allowRefresh: inputConfig.allowRefresh || false,
 };
 
@@ -72,6 +74,18 @@ if (process.env.GEN3_ARBORIST_ENDPOINT) {
 
 if (process.env.GUPPY_PORT) {
   config.port = process.env.GUPPY_PORT;
+}
+
+if (process.env.DOUBLE_UNDERSCORE) {
+  config.doubleUnderscorePrefix = process.env.DOUBLE_UNDERSCORE;
+}
+
+// comma separated string of fields to ignore
+if (process.env.IGNORED_FIELDS) {
+  if (typeof process.env.IGNORED_FIELDS !== 'string') {
+    throw new Error('IGNORED_FIELDS must be a comma separated string');
+  }
+  config.ignoredFields = process.env.IGNORED_FIELDS.split(',');
 }
 
 const allowedTierAccessLevels = ['private', 'regular', 'libre'];

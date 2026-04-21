@@ -3,6 +3,7 @@ import { firstLetterUpperCase } from './utils/utils';
 
 const esgqlTypeMapping = {
   text: 'String',
+  date: 'String',
   keyword: 'String',
   integer: 'Int',
   long: 'Float',
