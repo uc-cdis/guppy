@@ -24,6 +24,22 @@ const config = {
         index: 'gen3-dev-file',
         type: 'file',
       },
+      {
+        index: 'omop_etl_index_cohortb_20251119',
+        type: 'cohort_b_patients',
+      },
+      {
+        index: 'omop_etl_index_cohorta_20260311',
+        type: 'cohort_a_patients',
+      },
+      {
+        index: 'test_omop_etl_index_cohortb_20251119',
+        type: 'test_cohort_b_patients',
+      },
+      {
+        index: 'test_omop_etl_index_cohorta_20260311',
+        type: 'test_cohort_a_patients',
+      },
     ],
     configIndex: inputConfig.indices
       ? inputConfig.config_index
