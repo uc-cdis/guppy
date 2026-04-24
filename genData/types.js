@@ -1,4 +1,4 @@
-function fakerType(key, value, arrayFields) {
+function fakerType(key, value, arrayFields, nestedFieldKeys = []) {
   let fieldType;
   const properties = {};
   const required = [];
@@ -10,7 +10,7 @@ function fakerType(key, value, arrayFields) {
         fieldType = {
           type: 'array', items: { type: 'boolean', properties, required }, minItems: 0, maxItems: 10,
         };
-        arrayFields.push(key);
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'boolean' };
       }
@@ -26,7 +26,7 @@ function fakerType(key, value, arrayFields) {
           minItems: 0,
           maxItems: 10,
         };
-        arrayFields.push(key);
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'string', faker: 'name.findName' };
       }
@@ -37,7 +37,7 @@ function fakerType(key, value, arrayFields) {
         fieldType = {
           type: 'array', items: { type: 'number', properties, required }, minItems: 0, maxItems: 10,
         };
-        arrayFields.push(key);
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'number' };
       }
@@ -48,21 +48,27 @@ function fakerType(key, value, arrayFields) {
         fieldType = {
           type: 'array', items: { type: 'integer', properties, required }, minItems: 0, maxItems: 10,
         };
-        arrayFields.push(key);
+        arrayFields.push(`${nestedFieldKeys.join('.')}.${key}`);
       } else {
         fieldType = { type: 'integer' };
       }
       break;
     case 'nested':
+      nestedFieldKeys.push(key);
       Object.entries(value.properties).forEach(([k, v]) => {
-        properties[k] = fakerType(k, v);
+        properties[k] = fakerType(k, v, arrayFields, [...nestedFieldKeys]);
         required.push(k);
       });
       fieldType = {
         type: 'array', items: { type: 'object', properties, required }, minItems: 0, maxItems: 10,
       };
       if (key.includes('array')) {
-        arrayFields.push(key);
+        // since we already pushed the current key into this array
+        if (nestedFieldKeys.length) {
+          arrayFields.push(nestedFieldKeys.join('.'));
+        } else {
+          arrayFields.push(key);
+        }
       }
       break;
     default:

@@ -65,13 +65,19 @@ describe('Schema', () => {
       _matched:[MatchedItem]
     }
     type visits {
-      days_to_visit:Int,
-      visit_label:String,
-      follow_ups:follow_ups,
+      days_to_visit: Int,
+      visit_label: String,
+      follow_ups: follow_ups,
+      treatments_array_under_subjects: [treatments_array_under_subjects],
     }
     type follow_ups {
-      days_to_follow_up:Int,
-      follow_up_label:String,
+      days_to_follow_up: Int,
+      follow_up_label: String,
+    }
+    type treatments_array_under_subjects {
+      dose_amount: Int,
+      test_article_name_array_under_treatments: [String],
+      submitter_id: String,
     }
     type File {
       gen3_resource_path: String,

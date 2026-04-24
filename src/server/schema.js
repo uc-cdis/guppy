@@ -18,12 +18,16 @@ const esgqlTypeMapping = {
 
 const histogramTypePrefix = 'RegularAccess';
 
-const getGQLType = (esInstance, esIndex, field, esFieldType) => {
+const getGQLType = (esInstance, esIndex, field, esFieldType, nestedFieldKeys = []) => {
   const gqlType = esgqlTypeMapping[esFieldType];
   if (!gqlType) {
     throw new Error(`Invalid type ${esFieldType} for field ${field} in index ${esIndex}`);
   }
-  const isArrayField = esInstance.isArrayField(esIndex, field);
+  let fieldForArrayCheck = field;
+  if (nestedFieldKeys.length) {
+    fieldForArrayCheck = `${nestedFieldKeys.join('.')}.${field}`;
+  }
+  const isArrayField = esInstance.isArrayField(esIndex, fieldForArrayCheck);
   if (isArrayField && esFieldType !== 'nested') {
     return `[${gqlType}]`;
   }
@@ -68,11 +72,11 @@ const getQuerySchemaForType = (esType) => {
     ): [${esTypeObjName}]`;
 };
 
-const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties) => {
+const getFieldGQLTypeMapForProperties = (esInstance, esIndex, properties, nestedFieldKeys = []) => {
   const result = Object.keys(properties).map((field) => {
     const esFieldType = (properties[field].esType)
       ? properties[field].esType : properties[field].type;
-    const gqlType = getGQLType(esInstance, esIndex, field, esFieldType);
+    const gqlType = getGQLType(esInstance, esIndex, field, esFieldType, nestedFieldKeys);
 
     return {
       field, type: gqlType, esType: esFieldType, properties: properties[field].properties,
@@ -109,7 +113,7 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
     const esFieldType = fieldESTypeMap[fieldKey].type;
     if (esFieldType === 'nested' && !existingFields.has(fieldKey)) {
       const { properties } = fieldESTypeMap[fieldKey];
-      queueTypes.push({ type: `${fieldKey}`, properties });
+      queueTypes.push({ type: `${fieldKey}`, properties, nestedFieldKeys: [fieldKey] });
       existingFields.add(fieldKey);
     }
   });
@@ -123,10 +127,10 @@ const getTypeSchemaForOneIndex = (esInstance, esIndex, esType) => {
 
   while (queueTypes.length > 0) {
     const t = queueTypes.shift();
-    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties);
+    const gqlTypes = getFieldGQLTypeMapForProperties(esInstance, esIndex, t.properties, t.nestedFieldKeys);
     gqlTypes.forEach((entry) => {
       if (entry.esType === 'nested' && !existingFields.has(entry.field)) {
-        queueTypes.push({ type: `${entry.field}`, properties: entry.properties });
+        queueTypes.push({ type: `${entry.field}`, properties: entry.properties, nestedFieldKeys: [...t.nestedFieldKeys, entry.field] });
         existingFields.add(entry.field);
         fieldToArgs[entry.field] = getArgsByField(entry.field, entry.properties);
       }

@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import depthLimit from 'graphql-depth-limit';
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from 'graphql-tools';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
@@ -35,6 +35,7 @@ const startServer = async () => {
   server = new ApolloServer({
     mocks: false,
     schema: schemaWithMiddleware,
+    introspection: true,
     validationRules: [depthLimit(10)],
   });
 
