@@ -85,6 +85,7 @@ const getFilterItemForString = (op, pField, value, path) => {
           [field]: value,
         },
       };
+    case 'contains_any':
     case 'CONTAINS_ANY':
     case 'in':
     case 'IN':
@@ -122,6 +123,7 @@ const getFilterItemForString = (op, pField, value, path) => {
           [field]: value,
         },
       };
+    case 'contains_all':
     case 'CONTAINS_ALL':
       return {
         bool: {
@@ -131,6 +133,7 @@ const getFilterItemForString = (op, pField, value, path) => {
         },
       };
     case '!=':
+    case 'excludes_any':
     case 'EXCLUDES_ANY':
       return {
         bool: {
@@ -139,6 +142,7 @@ const getFilterItemForString = (op, pField, value, path) => {
           })),
         },
       };
+    case 'excludes_all':
     case 'EXCLUDES_ALL':
       return {
         bool: {
