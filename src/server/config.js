@@ -43,7 +43,7 @@ const config = {
     ],
     configIndex: inputConfig.indices
       ? inputConfig.config_index
-      : 'gen3-dev-config',
+      : 'etl_mickey_array-config',
     authFilterField: inputConfig.auth_filter_field || 'auth_resource_path',
     aggregationIncludeMissingData:
       typeof inputConfig.aggs_include_missing_data === 'undefined'
