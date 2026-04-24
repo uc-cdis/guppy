@@ -23,7 +23,7 @@ const config = {
       {
         index: 'gen3-dev-file',
         type: 'file',
-      }
+      },
     ],
     configIndex: inputConfig.indices
       ? inputConfig.config_index
