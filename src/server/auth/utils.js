@@ -99,21 +99,45 @@ export const checkIfUserCanRefreshServer = async (passedData) => {
   return adminAccess.resources ? adminAccess.resources.includes('/guppy_admin') : false;
 };
 
+const parseAuthField = (authField) => {
+  const dotIdx = authField.lastIndexOf('.');
+  return {
+    field: dotIdx >= 0 ? authField.slice(dotIdx + 1) : authField,
+    nestedPath: dotIdx >= 0 ? authField.slice(0, dotIdx) : undefined,
+  };
+};
+
 export const getRequestResourceListFromFilter = async (
   esIndex,
   esType,
   filter,
   filterSelf,
-) => textAggregation(
-  { esInstance, esIndex, esType },
-  { field: config.esConfig.authFilterField, filter, filterSelf },
-).then((res) => (res.map((item) => item.key)));
+) => {
+  const { field, nestedPath } = parseAuthField(config.esConfig.authFilterField);
+  return textAggregation(
+    { esInstance, esIndex, esType },
+    {
+      field, filter, filterSelf, nestedPath,
+    },
+  ).then((res) => res.map((item) => item.key));
+};
 
 export const buildFilterWithResourceList = (resourceList = []) => {
-  const filter = {
+  const authField = config.esConfig.authFilterField;
+  const { nestedPath, field } = parseAuthField(authField);
+  if (nestedPath) {
+    return {
+      nested: {
+        path: nestedPath,
+        IN: {
+          [field]: [...resourceList],
+        },
+      },
+    };
+  }
+  return {
     IN: {
-      [config.esConfig.authFilterField]: [...resourceList],
+      [authField]: [...resourceList],
     },
   };
-  return filter;
 };
