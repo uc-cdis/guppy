@@ -65,7 +65,7 @@
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-stage-0": "^7.8.3",
     "@babel/runtime-corejs3": "^7.22.6",
-    "@storybook/addon-actions": "^7.0.26",
+    "@storybook/addon-actions": "^9.0.8",
     "@storybook/addon-links": "^7.0.26",
     "@storybook/react": "^7.0.26",
     "@storybook/react-webpack5": "^7.0.26",
