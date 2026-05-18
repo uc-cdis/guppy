@@ -870,8 +870,10 @@ Currently we support following operators:
 | operator     | meaning                  | support field type | example                                                          |
 |--------------|--------------------------|--------------------|------------------------------------------------------------------|
 | eq, EQ, =    | equal                    | string, number     | {"eq": {"gender": "female"}}                                     |
-| in, IN       | inside                   | string, number     | {"in": {"gender": ["female", "F"]}}                              |
-| !=           | is not                   | string, number     | {"!=": {"gender": "male"}}                                       |
+| in, IN, contains_any, CONTAINS_ANY | contains any selected values | string, number | {"CONTAINS_ANY": {"gender": ["female", "F"]}} |
+| contains_all, CONTAINS_ALL | contains all selected values | string | {"CONTAINS_ALL": {"tags": ["A", "B"]}} |
+| !=, exclude_any, EXCLUDES_ANY | excludes records containing any selected values | string, number | {"EXCLUDES_ANY": {"gender": ["male", "unknown"]}} |
+| exclude_all, EXCLUDES_ALL | excludes records only when all selected values are present | string | {"EXCLUDES_ALL": {"tags": ["A", "B"]}} |
 | gt, GT, >    | greater than             | number             | {">": {"age": 50}}                                               |
 | gte, GTE, >= | greater than or equal to | number             | {">=": {"age": 50}}                                              |
 | lt, LT, <    | less then                | number             | {"<": {"age": 50}}                                               |

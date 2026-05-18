@@ -85,6 +85,8 @@ const getFilterItemForString = (op, pField, value, path) => {
           [field]: value,
         },
       };
+    case 'contains_any':
+    case 'CONTAINS_ANY':
     case 'in':
     case 'IN':
       // if using missingDataAlias, we need to remove the missingDataAlias from filter values
@@ -121,13 +123,35 @@ const getFilterItemForString = (op, pField, value, path) => {
           [field]: value,
         },
       };
+    case 'contains_all':
+    case 'CONTAINS_ALL':
+      return {
+        bool: {
+          must: value.map((v) => ({
+            term: { [field]: v },
+          })),
+        },
+      };
     case '!=':
+    case 'excludes_any':
+    case 'EXCLUDES_ANY':
+      return {
+        bool: {
+          must_not: value.map((v) => ({
+            term: { [field]: v },
+          })),
+        },
+      };
+    case 'excludes_all':
+    case 'EXCLUDES_ALL':
       return {
         bool: {
           must_not: [
             {
-              term: {
-                [field]: value,
+              bool: {
+                must: value.map((v) => ({
+                  term: { [field]: v },
+                })),
               },
             },
           ],
