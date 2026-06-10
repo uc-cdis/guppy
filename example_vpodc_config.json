@@ -17,12 +17,25 @@
       "type": "cohort_a_patients"
     },
     {
+      "index": "omop_etl_index_cohortf_20260408",
+      "type": "cohort_f_patients"
+    },
+    {
       "index": "test_omop_etl_index_cohortb_20251119",
       "type": "test_cohort_b_patients"
     },
     {
       "index": "test_omop_etl_index_cohorta_20260311",
       "type": "test_cohort_a_patients"
+    },
+    {
+      "index": "test_omop_etl_index_cohortf_20260408",
+      "type": "test_cohort_f_patients"
+    },
+    {
+      "index": "test_vpodc_patients",
+      "type": "test_vpodc_patients"
+
     }
   ],
   "config_index": "etl_mickey_array-config",

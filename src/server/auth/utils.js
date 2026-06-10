@@ -53,6 +53,21 @@ export const getAccessibleResourcesFromArboristasync = async (jwt) => {
           service: '*',
           method: 'read',
         }],
+      '/programs/VA/projects/TEST-COHORT-A': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/programs/VA/projects/TEST-COHORT-B': [
+        {
+          service: '*',
+          method: 'read',
+        }],
+      '/programs/VA/projects/TEST-COHORT-F': [
+        {
+          service: '*',
+          method: 'read',
+        }],
       '/guppy_admin': [
         {
           service: 'guppy',
