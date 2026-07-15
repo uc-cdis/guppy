@@ -1,4 +1,4 @@
-FROM 707767160287.dkr.ecr.us-east-1.amazonaws.com/gen3/nodejs-base:master
+FROM 707767160287.dkr.ecr.us-east-1.amazonaws.com/gen3/amazonlinux-base:nodejs24-base
 
 COPY . /guppy/
 WORKDIR /guppy
