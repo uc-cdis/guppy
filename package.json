@@ -30,7 +30,7 @@
     "@apollo/server": "^5.5.0",
     "@as-integrations/express4": "^1.1.2",
     "@elastic/elasticsearch": "~7.13.0",
-    "@gen3/ui-component": "^0.11.4",
+    "@gen3/ui-component": "github:uc-cdis/gen3-ui-component#969d8cca3f1940fc9b2065f85d4f278d245bdb39",
     "array.prototype.flat": "^1.3.2",
     "array.prototype.flatmap": "^1.3.2",
     "body-parser": "^1.20.3",
@@ -51,9 +51,9 @@
     "node-fetch": "^2.7.0",
     "papaparse": "^5.4.1",
     "prop-types": "^15.8.1",
-    "uuid": "^11.1.1",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.22.6",
@@ -66,35 +66,20 @@
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-stage-0": "^7.8.3",
     "@babel/runtime-corejs3": "^7.22.6",
-    "@storybook/addon-actions": "^9.0.0",
-    "@storybook/addon-links": "^7.0.26",
-    "@storybook/react": "^7.0.26",
-    "@storybook/react-webpack5": "^7.0.26",
+    "@storybook/addon-webpack5-compiler-babel": "^4.0.1",
+    "@storybook/react-webpack5": "^10.5.4",
     "antd": "^4.24.11",
     "babel-jest": "^29.6.1",
     "babel-loader": "^9.1.2",
     "commander": "^3.0.2",
     "eslint": "^8.44.0",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-storybook": "^0.6.12",
+    "eslint-plugin-storybook": "^10.5.4",
     "jest": "^29.6.1",
     "json-schema-faker": "^0.5.3",
     "nock": "^13.3.1",
     "nodemon": "^2.0.22",
-    "storybook": "^7.0.26"
-  },
-  "overrides": {
-    "glob-parent": "^5.1.2",
-    "semver": "^7.5.2",
-    "@storybook/react": {
-      "strip-ansi": "6.0.1",
-      "trim": "0.0.3"
-    },
-    "default-browser-id": {
-      "meow": "6.1.0"
-    }
+    "storybook": "^10.5.4"
   }
 }
