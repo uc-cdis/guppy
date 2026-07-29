@@ -16,7 +16,11 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  plugins: ['react'],
+  plugins: [
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
   rules: {
     'no-underscore-dangle': 'off',
     'react/destructuring-assignment': 'off',
