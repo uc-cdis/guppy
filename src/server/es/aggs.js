@@ -209,6 +209,13 @@ export const numericGlobalStats = async (
       stats: {
         field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
       },
+      extended_stats: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+      },
+      percentiles: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+        percents: [25, 50, 75],
+      },
     },
   };
   if (nestedAggFields && nestedAggFields.termsFields) {
@@ -301,6 +308,13 @@ export const numericHistogramWithFixedRangeStep = async (
       stats: {
         field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
       },
+      extended_stats: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+      },
+      percentiles: {
+        field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+        percents: [25, 50, 75],
+      },
     },
   };
   aggsObj[AGGS_QUERY_NAME] = {
@@ -312,6 +326,13 @@ export const numericHistogramWithFixedRangeStep = async (
       [AGGS_ITEM_STATS_NAME]: {
         stats: {
           field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+        },
+        extended_stats: {
+          field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+        },
+        percentiles: {
+          field: (nestedPath) ? `${nestedPath}.${field}` : `${field}`,
+          percents: [25, 50, 75],
         },
       },
     },
