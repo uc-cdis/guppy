@@ -97,17 +97,20 @@ describe('can update a small set of tabs with new counts', () => {
 
   const filtersApplied = { annotated_sex: { selectedValues: ['silver'] } };
 
-  // Silver has a count of zero, but it is in the filter, so it should remain visible
+  // Initial options remain visible with zero counts when absent from the current response.
   const expectedUpdatedTabsOptions = {
     annotated_sex: {
       histogram: [
         { key: 'yellow', count: 1 },
         { key: 'orange', count: 107574 },
+        { key: 'pink', count: 0 },
         { key: 'silver', count: 0 },
       ],
     },
     extra_data: {
-      histogram: [],
+      histogram: [
+        { key: 'a', count: 0 },
+      ],
     },
   };
 
@@ -122,6 +125,46 @@ describe('can update a small set of tabs with new counts', () => {
   test('update tab counts', async () => {
     expect(actualUpdatedTabsOptions)
       .toEqual(expectedUpdatedTabsOptions);
+  });
+});
+
+describe('keeps options that appear only after a filter change', () => {
+  const allFilterValues = ['initiative'];
+  const initialTabsOptions = {
+    initiative: {
+      histogram: [
+        { key: 'small_a', count: 10 },
+        { key: 'small_b', count: 5 },
+      ],
+    },
+  };
+  const processedTabsOptions = {
+    initiative: {
+      histogram: [
+        { key: 'big_one', count: 1468 },
+        { key: 'small_a', count: 3 },
+      ],
+    },
+  };
+
+  const actualUpdatedTabsOptions = updateCountsInInitialTabsOptions(
+    initialTabsOptions,
+    processedTabsOptions,
+    {},
+    undefined,
+    allFilterValues,
+  );
+
+  test('unions current options with the frozen baseline', () => {
+    expect(actualUpdatedTabsOptions).toEqual({
+      initiative: {
+        histogram: [
+          { key: 'big_one', count: 1468 },
+          { key: 'small_a', count: 3 },
+          { key: 'small_b', count: 0 },
+        ],
+      },
+    });
   });
 });
 
@@ -172,12 +215,14 @@ describe('can update a small set of tabs with new counts, test with ranger slide
     },
   };
 
-  // option2 has a count of zero, but it is in the filter, so it should remain visible
+  // Initial options remain visible with zero counts when absent from the current response.
   const expectedUpdatedTabsOptions = {
     field1: {
       histogram: [
         { key: 'option3', count: 30 },
+        { key: 'option1', count: 0 },
         { key: 'option2', count: 0 },
+        { key: 'option4', count: 0 },
       ],
     },
     field2: {
