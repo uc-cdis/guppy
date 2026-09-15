@@ -30,11 +30,13 @@ const tierAccessMiddleware = {
     histogram: hideNumberResolver(false),
     asTextHistogram: hideNumberResolver(false),
     _totalCount: hideNumberResolver(true),
+    _cardinalityCount: hideNumberResolver(true),
   },
   HistogramForString: {
     histogram: hideNumberResolver(false),
     asTextHistogram: hideNumberResolver(false),
     _totalCount: hideNumberResolver(true),
+    _cardinalityCount: hideNumberResolver(true),
   },
 };
 

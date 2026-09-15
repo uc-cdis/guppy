@@ -43,12 +43,14 @@ if (atLeastOneIndexIsRegularAccess) {
     histogram: hideNumberResolver(false),
     asTextHistogram: hideNumberResolver(false),
     _totalCount: hideNumberResolver(true),
+    _cardinalityCount: hideNumberResolver(true),
   };
 
   perIndexTierAccessMiddleware.RegularAccessHistogramForString = {
     histogram: hideNumberResolver(false),
     asTextHistogram: hideNumberResolver(false),
     _totalCount: hideNumberResolver(true),
+    _cardinalityCount: hideNumberResolver(true),
   };
 }
 
