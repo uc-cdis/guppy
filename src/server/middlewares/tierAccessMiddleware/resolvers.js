@@ -250,13 +250,14 @@ export const hideNumberResolver = (isGettingTotalCount) => async (
       && unaccessibleResult < config.tierAccessLimit) ? ENCRYPT_COUNT : result;
   }
 
+  const keyToString = (key) => (Array.isArray(key) ? key.join(',') : String(key));
   const encryptedResult = result.map((item) => {
     // we don't encrypt whitelisted results or if result is not found in unaccessibleResult
-    if (isWhitelisted(item.key) || !(unaccessibleResult.some((e) => e.key === item.key))) {
+    if (isWhitelisted(item.key) || !(unaccessibleResult.some((e) => keyToString(e.key) === keyToString(item.key)))) {
       return item;
     }
     // we only encrypt if count from no-access item is small
-    const unaccessibleResultItem = _.find(unaccessibleResult, (e) => e.key === item.key);
+    const unaccessibleResultItem = _.find(unaccessibleResult, (e) => keyToString(e.key) === keyToString(item.key));
     if (unaccessibleResultItem.count < config.tierAccessLimit) {
       return {
         key: item.key,
