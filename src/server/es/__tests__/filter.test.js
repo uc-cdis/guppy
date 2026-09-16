@@ -64,95 +64,95 @@ describe('Transfer GraphQL filter to ES filter, filter unit', () => {
   });
 
   test('could transfer graphql filter to ES filter object, "CONTAINS_ANY" operator case insensitive', async () => {
-  await esInstance.initialize();
+    await esInstance.initialize();
 
-  const filters = [
-    { CONTAINS_ANY: { gender: ['female', 'unknown'] } },
-    { contains_any: { gender: ['female', 'unknown'] } },
-  ];
+    const filters = [
+      { CONTAINS_ANY: { gender: ['female', 'unknown'] } },
+      { contains_any: { gender: ['female', 'unknown'] } },
+    ];
 
-  const expectedESFilter = {
-    terms: {
-      gender: ['female', 'unknown'],
-    },
-  };
+    const expectedESFilter = {
+      terms: {
+        gender: ['female', 'unknown'],
+      },
+    };
 
-  filters.forEach((filter) => {
-    expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    filters.forEach((filter) => {
+      expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    });
   });
-});
 
-test('could transfer graphql filter to ES filter object, "CONTAINS_ALL" operator case insensitive', async () => {
-  await esInstance.initialize();
+  test('could transfer graphql filter to ES filter object, "CONTAINS_ALL" operator case insensitive', async () => {
+    await esInstance.initialize();
 
-  const filters = [
-    { CONTAINS_ALL: { gender: ['female', 'unknown'] } },
-    { contains_all: { gender: ['female', 'unknown'] } },
-  ];
+    const filters = [
+      { CONTAINS_ALL: { gender: ['female', 'unknown'] } },
+      { contains_all: { gender: ['female', 'unknown'] } },
+    ];
 
-  const expectedESFilter = {
-    bool: {
-      must: [
-        { term: { gender: 'female' } },
-        { term: { gender: 'unknown' } },
-      ],
-    },
-  };
+    const expectedESFilter = {
+      bool: {
+        must: [
+          { term: { gender: 'female' } },
+          { term: { gender: 'unknown' } },
+        ],
+      },
+    };
 
-  filters.forEach((filter) => {
-    expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    filters.forEach((filter) => {
+      expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    });
   });
-});
 
-test('could transfer graphql filter to ES filter object, "EXCLUDES_ANY" operator case insensitive', async () => {
-  await esInstance.initialize();
+  test('could transfer graphql filter to ES filter object, "EXCLUDES_ANY" operator case insensitive', async () => {
+    await esInstance.initialize();
 
-  const filters = [
-    { EXCLUDES_ANY: { gender: ['female', 'unknown'] } },
-    { excludes_any: { gender: ['female', 'unknown'] } },
-  ];
+    const filters = [
+      { EXCLUDES_ANY: { gender: ['female', 'unknown'] } },
+      { excludes_any: { gender: ['female', 'unknown'] } },
+    ];
 
-  const expectedESFilter = {
-    bool: {
-      must_not: [
-        { term: { gender: 'female' } },
-        { term: { gender: 'unknown' } },
-      ],
-    },
-  };
+    const expectedESFilter = {
+      bool: {
+        must_not: [
+          { term: { gender: 'female' } },
+          { term: { gender: 'unknown' } },
+        ],
+      },
+    };
 
-  filters.forEach((filter) => {
-    expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    filters.forEach((filter) => {
+      expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    });
   });
-});
 
-test('could transfer graphql filter to ES filter object, "EXCLUDES_ALL" operator case insensitive', async () => {
-  await esInstance.initialize();
+  test('could transfer graphql filter to ES filter object, "EXCLUDES_ALL" operator case insensitive', async () => {
+    await esInstance.initialize();
 
-  const filters = [
-    { EXCLUDES_ALL: { gender: ['female', 'unknown'] } },
-    { excludes_all: { gender: ['female', 'unknown'] } },
-  ];
+    const filters = [
+      { EXCLUDES_ALL: { gender: ['female', 'unknown'] } },
+      { excludes_all: { gender: ['female', 'unknown'] } },
+    ];
 
-  const expectedESFilter = {
-    bool: {
-      must_not: [
-        {
-          bool: {
-            must: [
-              { term: { gender: 'female' } },
-              { term: { gender: 'unknown' } },
-            ],
+    const expectedESFilter = {
+      bool: {
+        must_not: [
+          {
+            bool: {
+              must: [
+                { term: { gender: 'female' } },
+                { term: { gender: 'unknown' } },
+              ],
+            },
           },
-        },
-      ],
-    },
-  };
+        ],
+      },
+    };
 
-  filters.forEach((filter) => {
-    expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    filters.forEach((filter) => {
+      expect(getFilterObj(esInstance, esIndex, filter)).toEqual(expectedESFilter);
+    });
   });
-});
 
   test('could transfer graphql filter to ES filter object, "=" operator (for number)', async () => {
     await esInstance.initialize();

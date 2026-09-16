@@ -1,5 +1,5 @@
 import React from 'react';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { filterConfig, guppyConfig, fieldMapping } from './conf';
 import ConnectedFilter from '../src/components/ConnectedFilter';
 import AccessibleFilter from '../src/components/ConnectedFilter/AccessibleFilter';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import ConnectedFilter from '../src/components/ConnectedFilter';
 import GuppyWrapper from '../src/components/GuppyWrapper';
 import TableExample from './TableExample';
