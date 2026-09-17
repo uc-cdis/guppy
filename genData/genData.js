@@ -3,8 +3,6 @@ require('array.prototype.flatmap').shim();
 
 const program = require('commander');
 const { readFileSync } = require('fs');
-const { resolve } = require('json-schema-faker');
-
 const { Client } = require('@elastic/elasticsearch');
 const { chunkArray } = require('./tools');
 const { fakerType } = require('./types');
@@ -74,6 +72,7 @@ const getRandomInt = (
 const getRandomString = () => (Math.random() + 1).toString(36).substring(7);
 
 async function run() {
+  const { generate: resolve } = await import('json-schema-faker');
   const mapping = await client.indices.getMapping({ index: esIndex });
 
   const m = mapping.body[esIndex].mappings;
@@ -91,12 +90,12 @@ async function run() {
     const dCopy = { ...d };
     Object.keys(dCopy).forEach((key) => {
       if (fieldValues[key]) {
-        const index = getRandomInt(0, fieldValues[key].length);
+        const index = getRandomInt(0, fieldValues[key].length - 1);
         dCopy[key] = fieldValues[key][index];
       } else {
         switch (schema.items.properties[key].rawType) {
           case 'integer':
-            dCopy[key] = getRandomInt(MIN_INT, MAX_INT);
+            dCopy[key] = getRandomInt(-2, 2);
             break;
           case 'long':
             dCopy[key] = getRandomInt(MIN_LONG, MAX_LONG);

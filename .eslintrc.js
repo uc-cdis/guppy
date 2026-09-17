@@ -2,27 +2,27 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    node: true
+    node: true,
   },
   extends: ['airbnb', 'plugin:storybook/recommended'],
   globals: {
     Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly'
+    SharedArrayBuffer: 'readonly',
   },
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
-    ecmaVersion: 2018,
-    sourceType: 'module'
+    ecmaVersion: 2020,
+    sourceType: 'module',
   },
   plugins: ['react'],
   rules: {
     'no-underscore-dangle': 'off',
     'react/destructuring-assignment': 'off',
     'react/no-array-index-key': 'off',
-    "import/no-extraneous-dependencies": ["error", {
-      "devDependencies": true
+    'import/no-extraneous-dependencies': ['error', {
+      devDependencies: true,
     }],
     'max-len': [
       'error',
@@ -35,12 +35,12 @@ module.exports = {
         ignoreTemplateLiterals: true,
       },
     ],
-    'no-return-assign': 'warn'
+    'no-return-assign': 'warn',
   },
   overrides: [{
-    "files": ["src/**/*.test.js"],
-    "rules": {
-      "no-undef": "off"
-    }
-  }]
+    files: ['src/**/*.test.js'],
+    rules: {
+      'no-undef': 'off',
+    },
+  }],
 };
