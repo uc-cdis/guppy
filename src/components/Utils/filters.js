@@ -34,10 +34,10 @@ export const mergeFilters = (userFilter, adminAppliedPreFilter) => {
 };
 
 /**
-   * This function updates the counts in the initial set of tab options
-   * calculated from unfiltered data.
-   * It is used to retain field options in the rendering if
-   * they are still checked but their counts are zero.
+   * This function merges the current tab options with the initial set.
+   * Current options must be retained because the initial set may have been
+   * captured while filters were already applied. Initial-only options remain
+   * visible with a count of zero as the user changes filters.
    */
 export const updateCountsInInitialTabsOptions = (
   initialTabsOptions,
@@ -79,6 +79,17 @@ export const updateCountsInInitialTabsOptions = (
         console.error(`Guppy did not return histogram data for filter field ${actualFieldName}`); // eslint-disable-line no-console
         return;
       }
+      const processedHistogram = flattenProcessedTabsOptions[`${field}`] || [];
+      const processedOptionKeys = new Set();
+      processedHistogram.forEach((opt) => {
+        if (typeof opt.key === 'string') {
+          updatedTabsOptions[`${actualFieldName}`].histogram.push({
+            key: opt.key,
+            count: opt.count,
+          });
+          processedOptionKeys.add(opt.key);
+        }
+      });
       histogram.forEach((opt) => {
         const { key } = opt;
         if (typeof (key) !== 'string') { // key is a range, just copy the histogram
@@ -108,12 +119,8 @@ export const updateCountsInInitialTabsOptions = (
           }
           return;
         }
-        if (flattenProcessedTabsOptions[`${field}`]) {
-          const findOpt = flattenProcessedTabsOptions[`${field}`].find((o) => o.key === key);
-          if (findOpt) {
-            const { count } = findOpt;
-            updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count });
-          }
+        if (!processedOptionKeys.has(key)) {
+          updatedTabsOptions[`${actualFieldName}`].histogram.push({ key, count: 0 });
         }
       });
       if (filtersApplied[`${actualFieldName}`]) {
