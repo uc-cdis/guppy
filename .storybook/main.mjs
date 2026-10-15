@@ -1,3 +1,5 @@
+import AntdDayjsWebpackPlugin from 'antd-dayjs-webpack-plugin';
+
 const config = {
   framework: {
     name: '@storybook/react-webpack5',
@@ -13,6 +15,7 @@ const config = {
         loader: 'babel-loader',
       },
     });
+    webpackConfig.plugins.push(new AntdDayjsWebpackPlugin());
     return webpackConfig;
   },
 };
