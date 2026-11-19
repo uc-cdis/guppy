@@ -90,7 +90,10 @@
     "storybook": "^10.6.0"
   },
   "overrides": {
-    "moment": "npm:dayjs@^1.11.10"
+    "moment": "npm:dayjs@^1.11.10",
+    "storybook": {
+      "open": "^11.0.0"
+    }
   },
   "allowScripts": {
     "esbuild": true,
