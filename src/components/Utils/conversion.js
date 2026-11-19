@@ -1,7 +1,7 @@
+import { flatten } from 'flat';
 import { FILE_DELIMITERS } from './const';
 
 const papaparse = require('papaparse');
-const flatten = require('flat');
 
 /**
  * Flattens a deep nested JSON object skipping

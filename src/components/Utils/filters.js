@@ -1,4 +1,4 @@
-import flat from 'flat';
+import { flatten } from 'flat';
 import _ from 'lodash';
 
 /**
@@ -53,8 +53,8 @@ export const updateCountsInInitialTabsOptions = (
     //   project_id.histogram: ...
     //   visit.visit_label.histogram: ...
     // }
-    const flattenInitialTabsOptions = flat(initialTabsOptions, { safe: true });
-    const flattenProcessedTabsOptions = flat(processedTabsOptions, { safe: true });
+    const flattenInitialTabsOptions = flatten(initialTabsOptions, { safe: true });
+    const flattenProcessedTabsOptions = flatten(processedTabsOptions, { safe: true });
     Object.keys(flattenInitialTabsOptions).forEach((field) => {
       // in flattened tab options, to get actual field name, strip off the last '.histogram' or '.asTextHistogram'
       const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');

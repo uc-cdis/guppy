@@ -1,4 +1,4 @@
-import flat from 'flat';
+import { flatten } from 'flat';
 import { queryGuppyForRawDataAndTotalCounts } from '../Utils/queries';
 
 const getSingleFilterOption = (histogramResult, initHistogramRes, filterValuesToHide) => {
@@ -182,7 +182,7 @@ export const getFilterSections = (
 export const excludeSelfFilterFromAggsData = (receivedAggsData, filterResults) => {
   if (!filterResults) return receivedAggsData;
   const resultAggsData = {};
-  const flattenAggsData = flat(receivedAggsData, { safe: true });
+  const flattenAggsData = flatten(receivedAggsData, { safe: true });
   Object.keys(flattenAggsData).forEach((field) => {
     const actualFieldName = field.replace('.histogram', '').replace('.asTextHistogram', '');
     const histogram = flattenAggsData[`${field}`];
